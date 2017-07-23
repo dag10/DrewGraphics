@@ -9,13 +9,22 @@
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
       <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
     </Filter>
-    <Filter Include="Resource Files">
+    <Filter Include="Shaders">
+      <UniqueIdentifier>{5a7abf00-d471-406e-ada3-7e6f4eaa1ea7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Images">
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <None Include="hello-gl.v.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="hello-gl.f.glsl">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -24,5 +33,13 @@
     <ClCompile Include="util.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="image1.tga">
+      <Filter>Images</Filter>
+    </Image>
+    <Image Include="image2.tga">
+      <Filter>Images</Filter>
+    </Image>
   </ItemGroup>
 </Project>

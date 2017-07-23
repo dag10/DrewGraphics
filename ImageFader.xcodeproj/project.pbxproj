@@ -14,6 +14,8 @@
 		3A530AA01F246E6A007642FE /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3A530A9F1F246E6A007642FE /* OpenGL.framework */; };
 		3A530AA81F247157007642FE /* image1.tga in CopyFiles */ = {isa = PBXBuildFile; fileRef = 3A530AA61F247147007642FE /* image1.tga */; };
 		3A530AA91F247157007642FE /* image2.tga in CopyFiles */ = {isa = PBXBuildFile; fileRef = 3A530AA71F247147007642FE /* image2.tga */; };
+		3A82D3D11F24917D001E3ABF /* hello-gl.f.glsl in CopyFiles */ = {isa = PBXBuildFile; fileRef = 3A530AAF1F247564007642FE /* hello-gl.f.glsl */; };
+		3A82D3D21F24917D001E3ABF /* hello-gl.v.glsl in CopyFiles */ = {isa = PBXBuildFile; fileRef = 3A530AAE1F24748B007642FE /* hello-gl.v.glsl */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -23,6 +25,8 @@
 			dstPath = "";
 			dstSubfolderSpec = 16;
 			files = (
+				3A82D3D11F24917D001E3ABF /* hello-gl.f.glsl in CopyFiles */,
+				3A82D3D21F24917D001E3ABF /* hello-gl.v.glsl in CopyFiles */,
 				3A530AA81F247157007642FE /* image1.tga in CopyFiles */,
 				3A530AA91F247157007642FE /* image2.tga in CopyFiles */,
 			);
@@ -39,6 +43,8 @@
 		3A530AA61F247147007642FE /* image1.tga */ = {isa = PBXFileReference; lastKnownFileType = file; name = image1.tga; path = ImageFader/image1.tga; sourceTree = "<group>"; };
 		3A530AA71F247147007642FE /* image2.tga */ = {isa = PBXFileReference; lastKnownFileType = file; name = image2.tga; path = ImageFader/image2.tga; sourceTree = "<group>"; };
 		3A530AAA1F24732E007642FE /* ImageFader */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = ImageFader; sourceTree = BUILT_PRODUCTS_DIR; };
+		3A530AAE1F24748B007642FE /* hello-gl.v.glsl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = "hello-gl.v.glsl"; path = "ImageFader/hello-gl.v.glsl"; sourceTree = "<group>"; };
+		3A530AAF1F247564007642FE /* hello-gl.f.glsl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = "hello-gl.f.glsl"; path = "ImageFader/hello-gl.f.glsl"; sourceTree = "<group>"; usesTabs = 0; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -58,7 +64,8 @@
 		3A530A851F246A6C007642FE = {
 			isa = PBXGroup;
 			children = (
-				3A530A901F246A6C007642FE /* ImageFader */,
+				3A530AAD1F247479007642FE /* Shaders */,
+				3A530A901F246A6C007642FE /* Source */,
 				3A530AA51F247139007642FE /* Images */,
 				3A530A9A1F246E5A007642FE /* Frameworks */,
 				3A530AAC1F2473D6007642FE /* Products */,
@@ -66,12 +73,13 @@
 			);
 			sourceTree = "<group>";
 		};
-		3A530A901F246A6C007642FE /* ImageFader */ = {
+		3A530A901F246A6C007642FE /* Source */ = {
 			isa = PBXGroup;
 			children = (
 				3A530A981F246B10007642FE /* util.cpp */,
 				3A530A911F246A6C007642FE /* main.cpp */,
 			);
+			name = Source;
 			path = ImageFader;
 			sourceTree = "<group>";
 		};
@@ -99,6 +107,15 @@
 			children = (
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		3A530AAD1F247479007642FE /* Shaders */ = {
+			isa = PBXGroup;
+			children = (
+				3A530AAE1F24748B007642FE /* hello-gl.v.glsl */,
+				3A530AAF1F247564007642FE /* hello-gl.f.glsl */,
+			);
+			name = Shaders;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */

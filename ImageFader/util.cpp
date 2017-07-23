@@ -1,4 +1,8 @@
+#ifdef __APPLE__
+#include <OpenGL/gl3.h>
+#else
 #include <GL/glew.h>
+#endif
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -11,8 +15,7 @@
 
 void *file_contents(const char *filename, GLint *length)
 {
-    FILE *f;
-	fopen_s(&f, filename, "r");
+    FILE *f = fopen(filename, "r");
     void *buffer;
 
     if (!f) {
@@ -21,11 +24,11 @@ void *file_contents(const char *filename, GLint *length)
     }
 
     fseek(f, 0, SEEK_END);
-    *length = ftell(f);
+    *length = (GLint)ftell(f);
     fseek(f, 0, SEEK_SET);
 
     buffer = malloc(*length+1);
-    *length = fread(buffer, 1, *length, f);
+    *length = (GLint)fread(buffer, 1, *length, f);
     fclose(f);
     ((char*)buffer)[*length] = '\0';
 
@@ -58,7 +61,7 @@ void *read_tga(const char *filename, int *width, int *height)
     size_t read;
     void *pixels;
 
-	fopen_s(&f, filename, "rb");
+	f = fopen(filename, "rb");
 
     if (!f) {
         fprintf(stderr, "Unable to open %s for reading\n", filename);

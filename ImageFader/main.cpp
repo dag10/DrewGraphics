@@ -5,8 +5,12 @@
 
 #include <iostream>
 #include <cstdlib>
+#ifdef __APPLE__
+#include <GLUT/glut.h>
+#else
 #include <GL/glew.h>
 #include <GL/glut.h>
+#endif
 
 // Types
 
@@ -51,11 +55,13 @@ int main(int argc, char **argv)
     glutDisplayFunc(&render);
     glutIdleFunc(&update_fade_factor);
 
-	glewInit();
+#ifndef __APPLE__
+    glewInit();
     if (!GLEW_VERSION_2_0) {
 		std::cerr << "OpenGL 2.0 not available." << std::endl;
         return 1;
     }
+#endif
 
     if (!make_resources()) {
 		std::cerr << "Failed to load resources." << std::endl;

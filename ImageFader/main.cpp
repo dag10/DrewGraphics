@@ -1,24 +1,37 @@
 #ifdef _MSC_VER
+	// This turns on memory leak detection.
+	#define _CRTDBG_MAP_ALLOC 1
+
 	// This prevents Windows from opening the stdout command window.
-	#pragma comment(linker, "/subsystem:windows /ENTRY:mainCRTStartup")
+	//#pragma comment(linker, "/subsystem:windows /ENTRY:mainCRTStartup")
+#endif
+
+#ifdef _WIN32
+	#include <conio.h>
 #endif
 
 #include <iostream>
-#include <cstdlib>
+#include <memory>
 #include <cmath>
+#include <cstdlib>
+
+#ifdef _CRTDBG_MAP_ALLOC
+	#include <crtdbg.h>
+#endif
+
 #ifdef __APPLE__
-#include <GLUT/glut.h>
+	#include <GLUT/glut.h>
 #else
-#include <GL/glew.h>
-#include <GL/glut.h>
+	#include <GL/glew.h>
+	#include <GL/glut.h>
 #endif
 
 /* Types */
 
 // These function pointer types are defined by GLEW, which we don't use on Mac.
 #ifdef __APPLE__
-typedef std::function<void(GLuint, GLsizei, GLsizei *, GLchar *)> PFNGLGETSHADERINFOLOGPROC;
-typedef std::function<void(GLuint, GLenum, GLint *)> PFNGLGETSHADERIVPROC;
+	typedef std::function<void(GLuint, GLsizei, GLsizei *, GLchar *)> PFNGLGETSHADERINFOLOGPROC;
+	typedef std::function<void(GLuint, GLenum, GLint *)> PFNGLGETSHADERIVPROC;
 #endif 
 
 struct {
@@ -71,6 +84,11 @@ GLuint make_program(GLuint vertex_shader, GLuint fragment_shader);
 
 
 int main(int argc, char **argv) {
+#ifdef _CRTDBG_MAP_ALLOC
+	_CrtSetDbgFlag ( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );
+	_CrtSetReportMode( _CRT_ERROR, _CRTDBG_MODE_DEBUG );
+#endif
+
 	glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE);
     glutInitWindowSize(400, 300);
@@ -88,6 +106,9 @@ int main(int argc, char **argv) {
 
     if (!make_resources(argc >= 2 ? argv[1] : "frustum-rotation.v.glsl")) {
 		std::cerr << "Failed to load resources." << std::endl;
+#ifdef _WIN32
+		_getch();
+#endif
 		return 1;
     }
 
@@ -233,7 +254,8 @@ GLuint make_texture(const char *filename) {
 	int width;
 	int height;
 
-	void *pixels = read_tga(filename, &width, &height);
+	//void *pixels = read_tga(filename, &width, &height);
+	auto pixels = std::shared_ptr<void>(read_tga(filename, &width, &height));
 	if (!pixels) {
 		return 0;
 	}
@@ -262,10 +284,9 @@ GLuint make_texture(const char *filename) {
 		0, // Border
 		GL_BGR, // External format
 		GL_UNSIGNED_BYTE, // Type
-		pixels
+		pixels.get()
 	);
 
-	free(pixels);
 	return texture;
 }
 
@@ -273,13 +294,12 @@ void show_info_log(
         GLuint object, PFNGLGETSHADERIVPROC glGet__iv,
         PFNGLGETSHADERINFOLOGPROC glGet__InfoLog) {
     GLint log_length;
-    char *log;
     
     glGet__iv(object, GL_INFO_LOG_LENGTH, &log_length);
-    log = (char *)malloc(log_length);
+	char *log = new char[log_length];
     glGet__InfoLog(object, log_length, NULL, log);
     std::cerr << log << std::endl;
-    free(log);
+	delete log;
 }
 
 GLuint make_shader(GLenum type, const char *filename) {
@@ -292,7 +312,7 @@ GLuint make_shader(GLenum type, const char *filename) {
 
     shader = glCreateShader(type);
     glShaderSource(shader, 1, (const GLchar**)&source, &length);
-    free(source);
+	delete source;
     glCompileShader(shader);
     
     glGetShaderiv(shader, GL_COMPILE_STATUS, &shader_ok);

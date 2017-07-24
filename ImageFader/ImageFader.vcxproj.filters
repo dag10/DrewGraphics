@@ -25,6 +25,21 @@
     <None Include="hello-gl.f.glsl">
       <Filter>Shaders</Filter>
     </None>
+    <None Include="frustum-rotation.v.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="naive-rotation.v.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="orthographic-rotation.v.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="perspective-rotation.v.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="rotate-z.v.glsl">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">

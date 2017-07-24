@@ -7,6 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		3A106CFE1F256E88007A8385 /* rotate-z.v.glsl in CopyFiles */ = {isa = PBXBuildFile; fileRef = 3A106CFD1F256DB0007A8385 /* rotate-z.v.glsl */; };
+		3A106D021F257398007A8385 /* naive-rotation.v.glsl in CopyFiles */ = {isa = PBXBuildFile; fileRef = 3A106D011F257366007A8385 /* naive-rotation.v.glsl */; };
+		3A106D041F2573DB007A8385 /* orthographic-rotation.v.glsl in CopyFiles */ = {isa = PBXBuildFile; fileRef = 3A106D031F2573D6007A8385 /* orthographic-rotation.v.glsl */; };
+		3A106D061F2577C9007A8385 /* perspective-rotation.v.glsl in CopyFiles */ = {isa = PBXBuildFile; fileRef = 3A106D051F257789007A8385 /* perspective-rotation.v.glsl */; };
+		3A106D0A1F25C22B007A8385 /* frustum-rotation.v.glsl in CopyFiles */ = {isa = PBXBuildFile; fileRef = 3A106D091F25C1B7007A8385 /* frustum-rotation.v.glsl */; };
 		3A530A921F246A6C007642FE /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3A530A911F246A6C007642FE /* main.cpp */; settings = {COMPILER_FLAGS = "-Wno-deprecated"; }; };
 		3A530A991F246B10007642FE /* util.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3A530A981F246B10007642FE /* util.cpp */; };
 		3A530A9C1F246E5A007642FE /* GLKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3A530A9B1F246E5A007642FE /* GLKit.framework */; };
@@ -28,6 +33,11 @@
 				3A82D3D11F24917D001E3ABF /* hello-gl.f.glsl in CopyFiles */,
 				3A82D3D21F24917D001E3ABF /* hello-gl.v.glsl in CopyFiles */,
 				3A530AA81F247157007642FE /* image1.tga in CopyFiles */,
+				3A106CFE1F256E88007A8385 /* rotate-z.v.glsl in CopyFiles */,
+				3A106D041F2573DB007A8385 /* orthographic-rotation.v.glsl in CopyFiles */,
+				3A106D021F257398007A8385 /* naive-rotation.v.glsl in CopyFiles */,
+				3A106D061F2577C9007A8385 /* perspective-rotation.v.glsl in CopyFiles */,
+				3A106D0A1F25C22B007A8385 /* frustum-rotation.v.glsl in CopyFiles */,
 				3A530AA91F247157007642FE /* image2.tga in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -35,6 +45,11 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		3A106CFD1F256DB0007A8385 /* rotate-z.v.glsl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = "rotate-z.v.glsl"; path = "ImageFader/rotate-z.v.glsl"; sourceTree = "<group>"; };
+		3A106D011F257366007A8385 /* naive-rotation.v.glsl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = "naive-rotation.v.glsl"; path = "ImageFader/naive-rotation.v.glsl"; sourceTree = "<group>"; };
+		3A106D031F2573D6007A8385 /* orthographic-rotation.v.glsl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = "orthographic-rotation.v.glsl"; path = "ImageFader/orthographic-rotation.v.glsl"; sourceTree = "<group>"; };
+		3A106D051F257789007A8385 /* perspective-rotation.v.glsl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = "perspective-rotation.v.glsl"; path = "ImageFader/perspective-rotation.v.glsl"; sourceTree = "<group>"; };
+		3A106D091F25C1B7007A8385 /* frustum-rotation.v.glsl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = "frustum-rotation.v.glsl"; path = "ImageFader/frustum-rotation.v.glsl"; sourceTree = "<group>"; };
 		3A530A911F246A6C007642FE /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		3A530A981F246B10007642FE /* util.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = util.cpp; sourceTree = "<group>"; };
 		3A530A9B1F246E5A007642FE /* GLKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GLKit.framework; path = System/Library/Frameworks/GLKit.framework; sourceTree = SDKROOT; };
@@ -112,7 +127,12 @@
 		3A530AAD1F247479007642FE /* Shaders */ = {
 			isa = PBXGroup;
 			children = (
+				3A106D031F2573D6007A8385 /* orthographic-rotation.v.glsl */,
 				3A530AAE1F24748B007642FE /* hello-gl.v.glsl */,
+				3A106CFD1F256DB0007A8385 /* rotate-z.v.glsl */,
+				3A106D011F257366007A8385 /* naive-rotation.v.glsl */,
+				3A106D051F257789007A8385 /* perspective-rotation.v.glsl */,
+				3A106D091F25C1B7007A8385 /* frustum-rotation.v.glsl */,
 				3A530AAF1F247564007642FE /* hello-gl.f.glsl */,
 			);
 			name = Shaders;

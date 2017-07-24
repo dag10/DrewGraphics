@@ -31,7 +31,7 @@ struct {
     GLuint program;
     
     struct {
-        GLint fade_factor;
+        GLint elapsed_time;
         GLint textures[2];
     } uniforms;
     
@@ -39,16 +39,16 @@ struct {
         GLint position;
     } attributes;
     
-    GLfloat fade_factor;
+    GLfloat elapsed_time;
 } g_resources;
 
 /* Scene data */
 
 static const GLfloat g_vertex_buffer_data[] = { 
-    -1.0f, -1.0f,
-     1.0f, -1.0f,
-    -1.0f,  1.0f,
-     1.0f,  1.0f,
+    -1.0f, -1.0f, 0.0f, 1.0f,
+     1.0f, -1.0f, 0.0f, 1.0f,
+    -1.0f,  1.0f, 0.0f, 1.0f,
+     1.0f,  1.0f, 0.0f, 1.0f,
 };
 
 static const GLushort g_element_buffer_data[] = {
@@ -61,8 +61,8 @@ static const GLushort g_element_buffer_data[] = {
 void *read_tga(const char *filename, int *width, int *height);
 void *file_contents(const char *filename, GLint *length);
 
-bool make_resources();
-void update_fade_factor();
+bool make_resources(const char *vertex_shader_file);
+void idle();
 void render();
 GLuint make_buffer(GLenum target, const void *buffer_data, GLsizei buffer_size);
 GLuint make_texture(const char *filename);
@@ -76,7 +76,7 @@ int main(int argc, char **argv) {
     glutInitWindowSize(400, 300);
     glutCreateWindow("OpenGL Image Fader");
     glutDisplayFunc(&render);
-    glutIdleFunc(&update_fade_factor);
+    glutIdleFunc(&idle);
 
 #ifndef __APPLE__
     glewInit();
@@ -86,7 +86,7 @@ int main(int argc, char **argv) {
     }
 #endif
 
-    if (!make_resources()) {
+    if (!make_resources(argc >= 2 ? argv[1] : "frustum-rotation.v.glsl")) {
 		std::cerr << "Failed to load resources." << std::endl;
 		return 1;
     }
@@ -96,7 +96,7 @@ int main(int argc, char **argv) {
 	return 0;
 }
 
-bool make_resources() {
+bool make_resources(const char *vertex_shader_file) {
     // Make buffers
     
 	g_resources.vertex_buffer = make_buffer(
@@ -123,7 +123,7 @@ bool make_resources() {
     // Make shaders
     
     g_resources.vertex_shader = make_shader(
-        GL_VERTEX_SHADER, "hello-gl.v.glsl");
+        GL_VERTEX_SHADER, vertex_shader_file);
     
     if (g_resources.vertex_shader == 0) {
         return 0;
@@ -145,8 +145,8 @@ bool make_resources() {
     
     // Get handles to shader variables
     
-    g_resources.uniforms.fade_factor =
-        glGetUniformLocation(g_resources.program, "fade_factor");
+    g_resources.uniforms.elapsed_time =
+        glGetUniformLocation(g_resources.program, "elapsed_time");
     g_resources.uniforms.textures[0] =
         glGetUniformLocation(g_resources.program, "textures[0]");
     g_resources.uniforms.textures[1] =
@@ -158,21 +158,21 @@ bool make_resources() {
 	return true;
 }
 
-void update_fade_factor() {
+void idle() {
     int milliseconds = glutGet(GLUT_ELAPSED_TIME);
-    g_resources.fade_factor = sinf((float)milliseconds * 0.001f) * 0.5f + 0.5f;
+    g_resources.elapsed_time = (GLfloat)milliseconds * 0.001f;
     glutPostRedisplay();
 }
 
 void render() {
-    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
     
     // Specify the shader
     glUseProgram(g_resources.program);
     
     // Set the uniforms
-    glUniform1f(g_resources.uniforms.fade_factor, g_resources.fade_factor);
+    glUniform1f(g_resources.uniforms.elapsed_time, g_resources.elapsed_time);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, g_resources.textures[0]);
     glUniform1i(g_resources.uniforms.textures[0], 0);
@@ -184,10 +184,10 @@ void render() {
     glBindBuffer(GL_ARRAY_BUFFER, g_resources.vertex_buffer);
     glVertexAttribPointer(
         g_resources.attributes.position,  // attribute
-        2,                                // size
+        4,                                // size
         GL_FLOAT,                         // type
         GL_FALSE,                         // normalized?
-        sizeof(GLfloat)*2,                // stride
+        sizeof(GLfloat)*4,                // stride
         (void*)0                          // array buffer offset
     );
     glEnableVertexAttribArray(g_resources.attributes.position);

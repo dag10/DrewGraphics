@@ -40,7 +40,7 @@ static short le_short(unsigned char *bytes)
     return bytes[0] | ((char)bytes[1] << 8);
 }
 
-void *read_tga(const char *filename, int *width, int *height)
+char *read_tga(const char *filename, int *width, int *height)
 {
     struct tga_header {
        char  id_length;
@@ -59,7 +59,7 @@ void *read_tga(const char *filename, int *width, int *height)
     int i, color_map_size, pixels_size;
     FILE *f;
     size_t read;
-    void *pixels;
+    char *pixels;
 
 	f = fopen(filename, "rb");
 
@@ -103,7 +103,7 @@ void *read_tga(const char *filename, int *width, int *height)
 
     *width = le_short(header.width); *height = le_short(header.height);
     pixels_size = *width * *height * (header.bits_per_pixel/8);
-    pixels = malloc(pixels_size);
+    pixels = (char*)malloc(pixels_size);
 
     read = fread(pixels, 1, pixels_size, f);
     fclose(f);

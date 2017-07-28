@@ -14,7 +14,7 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "3A530A8D1F246A6C007642FE"
+               BlueprintIdentifier = "3A3322EF1F2AF7D200941AB4"
                BuildableName = "ImageFader"
                BlueprintName = "ImageFader"
                ReferencedContainer = "container:ImageFader.xcodeproj">
@@ -32,7 +32,7 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "3A530A8D1F246A6C007642FE"
+            BlueprintIdentifier = "3A3322EF1F2AF7D200941AB4"
             BuildableName = "ImageFader"
             BlueprintName = "ImageFader"
             ReferencedContainer = "container:ImageFader.xcodeproj">
@@ -55,34 +55,12 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "3A530A8D1F246A6C007642FE"
+            BlueprintIdentifier = "3A3322EF1F2AF7D200941AB4"
             BuildableName = "ImageFader"
             BlueprintName = "ImageFader"
             ReferencedContainer = "container:ImageFader.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
-      <CommandLineArguments>
-         <CommandLineArgument
-            argument = "rotate-z.v.glsl"
-            isEnabled = "NO">
-         </CommandLineArgument>
-         <CommandLineArgument
-            argument = "orthographic-rotation.v.glsl"
-            isEnabled = "NO">
-         </CommandLineArgument>
-         <CommandLineArgument
-            argument = "naive-rotation.v.glsl"
-            isEnabled = "NO">
-         </CommandLineArgument>
-         <CommandLineArgument
-            argument = "perspective-rotation.v.glsl"
-            isEnabled = "NO">
-         </CommandLineArgument>
-         <CommandLineArgument
-            argument = "frustum-rotation.v.glsl"
-            isEnabled = "NO">
-         </CommandLineArgument>
-      </CommandLineArguments>
       <AdditionalOptions>
       </AdditionalOptions>
    </LaunchAction>
@@ -96,7 +74,7 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "3A530A8D1F246A6C007642FE"
+            BlueprintIdentifier = "3A3322EF1F2AF7D200941AB4"
             BuildableName = "ImageFader"
             BlueprintName = "ImageFader"
             ReferencedContainer = "container:ImageFader.xcodeproj">

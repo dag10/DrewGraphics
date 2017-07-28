@@ -8,10 +8,11 @@
 
 /* Begin PBXBuildFile section */
 		3AF003861F2AFA6100516E9D /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3AF003831F2AFA6100516E9D /* main.cpp */; };
-		3AF003871F2AFA6100516E9D /* util.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3AF003841F2AFA6100516E9D /* util.cpp */; };
+		3AF003871F2AFA6100516E9D /* file_util.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3AF003841F2AFA6100516E9D /* file_util.cpp */; };
 		3AF0038C1F2AFA9B00516E9D /* GLUT.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3AF0038A1F2AFA9B00516E9D /* GLUT.framework */; };
 		3AF0038D1F2AFA9B00516E9D /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3AF0038B1F2AFA9B00516E9D /* OpenGL.framework */; };
 		3AF0038E1F2AFB7600516E9D /* assets in CopyFiles */ = {isa = PBXBuildFile; fileRef = 3AF003881F2AFA7300516E9D /* assets */; };
+		3AF003921F2B1B2400516E9D /* Texture.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3AF003911F2B1B2400516E9D /* Texture.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -29,12 +30,15 @@
 
 /* Begin PBXFileReference section */
 		3A3322F01F2AF7D200941AB4 /* ImageFader */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; name = ImageFader; path = /Users/drew/Projects/OpenGL/ImageFader/build/Debug/ImageFader; sourceTree = "<absolute>"; };
-		3AF003831F2AFA6100516E9D /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
-		3AF003841F2AFA6100516E9D /* util.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = util.cpp; sourceTree = "<group>"; };
+		3AF003831F2AFA6100516E9D /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; tabWidth = 4; };
+		3AF003841F2AFA6100516E9D /* file_util.cpp */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.cpp.cpp; path = file_util.cpp; sourceTree = "<group>"; tabWidth = 4; };
 		3AF003881F2AFA7300516E9D /* assets */ = {isa = PBXFileReference; lastKnownFileType = folder; path = assets; sourceTree = "<group>"; };
 		3AF0038A1F2AFA9B00516E9D /* GLUT.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GLUT.framework; path = System/Library/Frameworks/GLUT.framework; sourceTree = SDKROOT; };
 		3AF0038B1F2AFA9B00516E9D /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = System/Library/Frameworks/OpenGL.framework; sourceTree = SDKROOT; };
-		3AF0038F1F2AFCD900516E9D /* util.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = util.h; sourceTree = "<group>"; };
+		3AF0038F1F2AFCD900516E9D /* file_util.h */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 2; lastKnownFileType = sourcecode.c.h; path = file_util.h; sourceTree = "<group>"; tabWidth = 2; };
+		3AF003901F2B1A2600516E9D /* Texture.h */ = {isa = PBXFileReference; indentWidth = 2; lastKnownFileType = sourcecode.c.h; path = Texture.h; sourceTree = "<group>"; tabWidth = 2; };
+		3AF003911F2B1B2400516E9D /* Texture.cpp */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 2; lastKnownFileType = sourcecode.cpp.cpp; path = Texture.cpp; sourceTree = "<group>"; tabWidth = 2; };
+		3AF003931F2B221300516E9D /* Exceptions.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Exceptions.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -54,8 +58,8 @@
 			isa = PBXGroup;
 			children = (
 				3AF003881F2AFA7300516E9D /* assets */,
-				3AF003821F2AFA6100516E9D /* src */,
 				3AF003851F2AFA6100516E9D /* include */,
+				3AF003821F2AFA6100516E9D /* src */,
 				3AF003891F2AFA9A00516E9D /* Frameworks */,
 			);
 			sourceTree = "<group>";
@@ -64,7 +68,8 @@
 			isa = PBXGroup;
 			children = (
 				3AF003831F2AFA6100516E9D /* main.cpp */,
-				3AF003841F2AFA6100516E9D /* util.cpp */,
+				3AF003841F2AFA6100516E9D /* file_util.cpp */,
+				3AF003911F2B1B2400516E9D /* Texture.cpp */,
 			);
 			path = src;
 			sourceTree = "<group>";
@@ -72,7 +77,9 @@
 		3AF003851F2AFA6100516E9D /* include */ = {
 			isa = PBXGroup;
 			children = (
-				3AF0038F1F2AFCD900516E9D /* util.h */,
+				3AF0038F1F2AFCD900516E9D /* file_util.h */,
+				3AF003901F2B1A2600516E9D /* Texture.h */,
+				3AF003931F2B221300516E9D /* Exceptions.h */,
 			);
 			path = include;
 			sourceTree = "<group>";
@@ -144,7 +151,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				3AF003861F2AFA6100516E9D /* main.cpp in Sources */,
-				3AF003871F2AFA6100516E9D /* util.cpp in Sources */,
+				3AF003871F2AFA6100516E9D /* file_util.cpp in Sources */,
+				3AF003921F2B1B2400516E9D /* Texture.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

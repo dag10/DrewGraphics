@@ -2,21 +2,21 @@
 #include <memory>
 #include <cmath>
 #include <cstdlib>
-#include "util.h"
+#include "file_util.h"
+#include "Texture.h"
+#include "Exceptions.h"
 #include <GLUT/glut.h>
 
 /* Types */
 
 // These function pointer types are defined by GLEW, which we don't use on Mac.
-#ifdef __APPLE__
-	typedef std::function<void(GLuint, GLsizei, GLsizei *, GLchar *)> PFNGLGETSHADERINFOLOGPROC;
-	typedef std::function<void(GLuint, GLenum, GLint *)> PFNGLGETSHADERIVPROC;
-#endif 
+typedef std::function<void(GLuint, GLsizei, GLsizei *, GLchar *)> PFNGLGETSHADERINFOLOGPROC;
+typedef std::function<void(GLuint, GLenum, GLint *)> PFNGLGETSHADERIVPROC;
 
 struct {
 	GLuint vertex_buffer;
 	GLuint element_buffer;
-	GLuint textures[2];
+		std::shared_ptr<dg::Texture> textures[2];
     
     GLuint vertex_shader;
     GLuint fragment_shader;
@@ -53,7 +53,6 @@ bool make_resources();
 void idle();
 void render();
 GLuint make_buffer(GLenum target, const void *buffer_data, GLsizei buffer_size);
-GLuint make_texture(const char *filename);
 GLuint make_shader(GLenum type, const char *filename);
 GLuint make_program(GLuint vertex_shader, GLuint fragment_shader);
 
@@ -102,12 +101,15 @@ bool make_resources() {
     
     // Make textures
 
-	g_resources.textures[0] = make_texture("assets/textures/image1.tga");
-	g_resources.textures[1] = make_texture("assets/textures/image2.tga");
-
-	if (!g_resources.textures[0] || !g_resources.textures[1]) {
-		return false;
-	}
+  try {
+    g_resources.textures[0] = dg::Texture::FromPath(
+				"assets/textures/image1.tga");
+    g_resources.textures[1] = dg::Texture::FromPath(
+				"assets/textures/image2.tga");
+  } catch (const std::exception& e) {
+    std::cerr << e.what() << std::endl;
+    return false;
+  }
     
     // Make shaders
     
@@ -163,10 +165,10 @@ void render() {
     // Set the uniforms
     glUniform1f(g_resources.uniforms.elapsed_time, g_resources.elapsed_time);
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, g_resources.textures[0]);
+    glBindTexture(GL_TEXTURE_2D, g_resources.textures[0]->GetHandle());
     glUniform1i(g_resources.uniforms.textures[0], 0);
     glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, g_resources.textures[1]);
+    glBindTexture(GL_TEXTURE_2D, g_resources.textures[1]->GetHandle());
     glUniform1i(g_resources.uniforms.textures[1], 1);
     
     // Set vertex array
@@ -215,47 +217,6 @@ GLuint make_buffer(
 	glBufferData(target, buffer_size, buffer_data, GL_STATIC_DRAW);
 
 	return buffer;
-}
-
-GLuint make_texture(const char *filename) {
-	GLuint texture;
-	int width;
-	int height;
-
-	//void *pixels = read_tga(filename, &width, &height);
-	auto pixels = std::shared_ptr<char>(read_tga(filename, &width, &height));
-	if (!pixels) {
-		return 0;
-	}
-
-	// Generate one new texture handle.
-	glGenTextures(1, &texture);
-
-	// Reference this texture through a particular target.
-	glBindTexture(GL_TEXTURE_2D, texture);
-
-	// Set parameters for this texture.
-	// It will use linear interpolation, and clamp out-of-bound
-	// values to the nearest edge.
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
-	// Allocate the texture space and transfer the pixel data.
-	glTexImage2D(
-		GL_TEXTURE_2D,
-		0, // Level of detail
-		GL_RGB8, // Internal format
-		width,
-		height,
-		0, // Border
-		GL_BGR, // External format
-		GL_UNSIGNED_BYTE, // Type
-		pixels.get()
-	);
-
-	return texture;
 }
 
 void show_info_log(

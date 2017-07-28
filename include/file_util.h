@@ -10,5 +10,5 @@
 
 #include <GLUT/glut.h>
 
-char *read_tga(const char *filename, int *width, int *height);
 void *file_contents(const char *filename, GLint *length);
+

@@ -2,8 +2,8 @@
 //  Texture.cpp
 //
 
-#include <iostream> // TODO: TMP
 #include <string>
+#include <cassert>
 
 #include "Texture.h"
 #include "Exceptions.h"
@@ -12,67 +12,56 @@
 const GLuint DEFAULT_FILTERING = GL_LINEAR;
 const GLuint DEFAULT_WRAP = GL_CLAMP_TO_EDGE;
 
-short dg::Texture::le_short(unsigned char *bytes)
-{
-    return bytes[0] | ((char)bytes[1] << 8);
+dg::Texture dg::Texture::FromPath(const char *path) {
+  dg::Texture tex;
+  tex.LoadFromPath(path);
+  return tex;
 }
 
-std::shared_ptr<dg::Texture> dg::Texture::FromPath(const char *path) {
-  auto texture = std::make_shared<dg::Texture>();
-  texture->LoadFromPath(path);
-  return texture;
+GLuint dg::Texture::GetHandle() {
+  return texture_handle;
 }
 
-void dg::Texture::LoadFromPath(std::string path) {
-  ReadTga(path);
-
-  // Generate one new texture handle.
-  glGenTextures(1, &texture_handle);
-
-  // Reference this texture through a particular target.
-  glBindTexture(GL_TEXTURE_2D, texture_handle);
-
-  // Set parameters for this texture.
-  // It will use linear interpolation, and clamp out-of-bound
-  // values to the nearest edge.
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, DEFAULT_FILTERING);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, DEFAULT_FILTERING);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, DEFAULT_WRAP);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, DEFAULT_WRAP);
-
-  // Allocate the texture space and transfer the pixel data.
-  glTexImage2D(
-      GL_TEXTURE_2D,
-      0, // Level of detail
-      GL_RGB8, // Internal format
-      width,
-      height,
-      0, // Border
-      GL_BGR, // External format
-      GL_UNSIGNED_BYTE, // Type
-      pixels
-      );
-
-  std::cout << "Loaded texture: " << path << " (" << width << " x " <<
-               height << ")" << std::endl;
-
+dg::Texture::Texture(dg::Texture&& other) {
+  *this = std::move(other);
 }
 
-void dg::Texture::ReadTga(std::string path) {
+dg::Texture::~Texture() {
+  if (texture_handle != 0) {
+    glDeleteTextures(1, &texture_handle);
+    texture_handle = 0;
+  }
+}
+
+dg::Texture& dg::Texture::operator=(dg::Texture&& other) {
+  using std::swap;
+  swap(*this, other);
+  return *this;
+}
+
+short dg::Texture::le_short(unsigned char *bytes) {
+  return bytes[0] | ((char)bytes[1] << 8);
+}
+
+std::unique_ptr<char[]> dg::Texture::ReadTga(
+    std::string path, int *width, int *height) {
+
+  *width = 0;
+  *height = 0;
 
   struct tga_header {
-    char  id_length;
-    char  color_map_type;
-    char  data_type_code;
-    unsigned char  color_map_origin[2];
-    unsigned char  color_map_length[2];
-    char  color_map_depth;
-    unsigned char  x_origin[2];
-    unsigned char  y_origin[2];
-    unsigned char  width[2];
-    unsigned char  height[2];
-    char  bits_per_pixel;
-    char  image_descriptor;
+    char id_length;
+    char color_map_type;
+    char data_type_code;
+    unsigned char color_map_origin[2];
+    unsigned char color_map_length[2];
+    char color_map_depth;
+    unsigned char x_origin[2];
+    unsigned char y_origin[2];
+    unsigned char width[2];
+    unsigned char height[2];
+    char bits_per_pixel;
+    char image_descriptor;
   } header;
 
   int i;
@@ -105,23 +94,24 @@ void dg::Texture::ReadTga(std::string path) {
   }
 
   for (i = 0; i < header.id_length; ++i)
-  if (getc(f) == EOF) {
-    fclose(f);
-    throw dg::ResourceLoadException(path + " has incomplete ID string.");
-  }
+    if (getc(f) == EOF) {
+      fclose(f);
+      throw dg::ResourceLoadException(path + " has incomplete ID string.");
+    }
 
   color_map_size = \
       le_short(header.color_map_length) * (header.color_map_depth/8);
-  for (i = 0; i < color_map_size; ++i)
-  if (getc(f) == EOF) {
-    fclose(f);
-    throw dg::ResourceLoadException(path + " has incomplete color map.");
+  for (i = 0; i < color_map_size; ++i) {
+    if (getc(f) == EOF) {
+      fclose(f);
+      throw dg::ResourceLoadException(path + " has incomplete color map.");
+    }
   }
 
-  width = le_short(header.width);
-  height = le_short(header.height);
-  pixels_size = width * height * (header.bits_per_pixel/8);
-  pixels = new char[pixels_size];
+  int texWidth = le_short(header.width);
+  int texHeight = le_short(header.height);
+  pixels_size = texWidth * texHeight * (header.bits_per_pixel/8);
+  char *pixels = new char[pixels_size];
 
   read = fread(pixels, 1, pixels_size, f);
   fclose(f);
@@ -130,20 +120,49 @@ void dg::Texture::ReadTga(std::string path) {
     delete [] pixels;
     throw dg::ResourceLoadException(path + " has incomplete image.");
   }
+
+  *width = texWidth;
+  *height = texHeight;
+  return std::unique_ptr<char[]>(pixels);
 }
 
-dg::Texture::Texture() {
-  pixels = NULL;
+void dg::swap(Texture& first, Texture& second) {
+  using std::swap;
+  swap(first.texture_handle, second.texture_handle);
+  swap(first.width, second.width);
+  swap(first.height, second.height);
 }
 
-dg::Texture::~Texture() {
-  if (pixels != NULL) {
-    delete [] pixels;
-    pixels = NULL;
-  }
-}
+void dg::Texture::LoadFromPath(std::string path) {
+  assert(texture_handle == 0);
 
-GLuint dg::Texture::GetHandle() {
-  return texture_handle;
+  std::unique_ptr<char[]> pixels = ReadTga(path, &width, &height);
+
+  // Generate one new texture handle.
+  glGenTextures(1, &texture_handle);
+
+  // Reference this texture through a particular target.
+  glBindTexture(GL_TEXTURE_2D, texture_handle);
+
+  // Set parameters for this texture.
+  // It will use linear interpolation, and clamp out-of-bound
+  // values to the nearest edge.
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, DEFAULT_FILTERING);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, DEFAULT_FILTERING);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, DEFAULT_WRAP);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, DEFAULT_WRAP);
+
+  // Allocate the texture space and transfer the pixel data.
+  glTexImage2D(
+      GL_TEXTURE_2D,
+      0, // Level of detail
+      GL_RGB8, // Internal format
+      width,
+      height,
+      0, // Border
+      GL_BGR, // External format
+      GL_UNSIGNED_BYTE, // Type
+      pixels.get()
+      );
 }
 

@@ -7,7 +7,6 @@
 
 #include "Texture.h"
 #include "Exceptions.h"
-#include "file_util.h"
 
 const GLuint DEFAULT_FILTERING = GL_LINEAR;
 const GLuint DEFAULT_WRAP = GL_CLAMP_TO_EDGE;
@@ -18,8 +17,8 @@ dg::Texture dg::Texture::FromPath(const char *path) {
   return tex;
 }
 
-GLuint dg::Texture::GetHandle() {
-  return texture_handle;
+GLuint dg::Texture::GetHandle() const {
+  return textureHandle;
 }
 
 dg::Texture::Texture(dg::Texture&& other) {
@@ -27,14 +26,13 @@ dg::Texture::Texture(dg::Texture&& other) {
 }
 
 dg::Texture::~Texture() {
-  if (texture_handle != 0) {
-    glDeleteTextures(1, &texture_handle);
-    texture_handle = 0;
+  if (textureHandle != 0) {
+    glDeleteTextures(1, &textureHandle);
+    textureHandle = 0;
   }
 }
 
 dg::Texture& dg::Texture::operator=(dg::Texture&& other) {
-  using std::swap;
   swap(*this, other);
   return *this;
 }
@@ -128,21 +126,21 @@ std::unique_ptr<char[]> dg::Texture::ReadTga(
 
 void dg::swap(Texture& first, Texture& second) {
   using std::swap;
-  swap(first.texture_handle, second.texture_handle);
+  swap(first.textureHandle, second.textureHandle);
   swap(first.width, second.width);
   swap(first.height, second.height);
 }
 
 void dg::Texture::LoadFromPath(std::string path) {
-  assert(texture_handle == 0);
+  assert(textureHandle == 0);
 
   std::unique_ptr<char[]> pixels = ReadTga(path, &width, &height);
 
   // Generate one new texture handle.
-  glGenTextures(1, &texture_handle);
+  glGenTextures(1, &textureHandle);
 
   // Reference this texture through a particular target.
-  glBindTexture(GL_TEXTURE_2D, texture_handle);
+  glBindTexture(GL_TEXTURE_2D, textureHandle);
 
   // Set parameters for this texture.
   // It will use linear interpolation, and clamp out-of-bound

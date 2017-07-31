@@ -24,7 +24,7 @@ namespace dg {
       Texture& operator=(Texture&& other);
       friend void swap(Texture& first, Texture& second); // nothrow
 
-      GLuint GetHandle();
+      GLuint GetHandle() const;
 
     private:
       static inline short le_short(unsigned char *bytes);
@@ -33,7 +33,7 @@ namespace dg {
 
       void LoadFromPath(std::string path);
 
-      GLuint texture_handle = 0;
+      GLuint textureHandle = 0;
       int width = 0;
       int height = 0;
   }; // class Texture

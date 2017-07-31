@@ -31,7 +31,7 @@
 /* Begin PBXFileReference section */
 		3A031EFB1F2D386C00B76326 /* ImageFader */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = ImageFader; sourceTree = BUILT_PRODUCTS_DIR; };
 		3A031F011F2DF14000B76326 /* glm */ = {isa = PBXFileReference; lastKnownFileType = folder; name = glm; path = glm/glm; sourceTree = "<group>"; };
-		3AF003831F2AFA6100516E9D /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; tabWidth = 4; };
+		3AF003831F2AFA6100516E9D /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 2; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; tabWidth = 2; };
 		3AF003841F2AFA6100516E9D /* file_util.cpp */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.cpp.cpp; path = file_util.cpp; sourceTree = "<group>"; tabWidth = 4; };
 		3AF003881F2AFA7300516E9D /* assets */ = {isa = PBXFileReference; lastKnownFileType = folder; path = assets; sourceTree = "<group>"; };
 		3AF0038A1F2AFA9B00516E9D /* GLUT.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GLUT.framework; path = System/Library/Frameworks/GLUT.framework; sourceTree = SDKROOT; };
@@ -257,6 +257,7 @@
 		3A3322F81F2AF7D200941AB4 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_WARN_DOCUMENTATION_COMMENTS = NO;
 				GCC_WARN_ABOUT_DEPRECATED_FUNCTIONS = NO;
 				"HEADER_SEARCH_PATHS[arch=*]" = "include/**";
 				INCLUDED_RECURSIVE_SEARCH_PATH_SUBDIRECTORIES = glm;
@@ -267,6 +268,7 @@
 		3A3322F91F2AF7D200941AB4 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_WARN_DOCUMENTATION_COMMENTS = NO;
 				GCC_WARN_ABOUT_DEPRECATED_FUNCTIONS = NO;
 				"HEADER_SEARCH_PATHS[arch=*]" = "include/**";
 				INCLUDED_RECURSIVE_SEARCH_PATH_SUBDIRECTORIES = glm;

@@ -7,11 +7,16 @@
 #include "Texture.h"
 #include "Exceptions.h"
 #include <GLUT/glut.h>
+#include <glm/glm/mat4x4.hpp>
+#include <glm/glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include <glm/gtx/string_cast.hpp>
 
 /* Types */
 
 // These function pointer types are defined by GLEW, which we don't use on Mac.
-typedef std::function<void(GLuint, GLsizei, GLsizei *, GLchar *)> PFNGLGETSHADERINFOLOGPROC;
+typedef std::function<void(GLuint, GLsizei, GLsizei *, GLchar *)> \
+    PFNGLGETSHADERINFOLOGPROC;
 typedef std::function<void(GLuint, GLenum, GLint *)> PFNGLGETSHADERIVPROC;
 
 struct {
@@ -24,8 +29,9 @@ struct {
   GLuint program;
 
   struct {
-    GLint elapsed_time;
-    GLint textures[2];
+    GLuint elapsed_time;
+    GLuint textures[2];
+    GLuint MATRIX_MVP;
   } uniforms;
 
   struct {
@@ -59,9 +65,8 @@ GLuint make_program(GLuint vertex_shader, GLuint fragment_shader);
 
 
 int main(int argc, char **argv) {
-
   glutInit(&argc, argv);
-  glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE);
+  glutInitDisplayMode(GLUT_RGB | GLUT_DEPTH | GLUT_DOUBLE);
   glutInitWindowSize(400, 300);
   glutCreateWindow("OpenGL Image Fader");
   glutDisplayFunc(&render);
@@ -115,6 +120,8 @@ bool make_resources() {
 
   // Get handles to shader variables
 
+  g_resources.uniforms.MATRIX_MVP =
+    glGetUniformLocation(g_resources.program, "MATRIX_MVP");
   g_resources.uniforms.elapsed_time =
     glGetUniformLocation(g_resources.program, "elapsed_time");
   g_resources.uniforms.textures[0] =
@@ -134,9 +141,37 @@ void idle() {
   glutPostRedisplay();
 }
 
+glm::mat4x4 create_vp() {
+  glm::vec3 eyePos(0.0f, 5.f + 5.f * sin(glm::radians(g_resources.elapsed_time * 180)), 10.0f);
+  glm::mat4x4 view = glm::lookAt(eyePos, glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, 1.f, 0.f));
+  view = glm::rotate(view, glm::radians(g_resources.elapsed_time * 60.f), glm::vec3(0.f, 1.f, 0.f));
+
+  float aspect = 4.0f / 3.0f;
+  glm::mat4x4 projection = glm::perspective(
+      glm::radians(60.0f), 1.0f / aspect, 0.1f, 100.0f);
+
+  return projection * view;
+}
+
+void drawPlane(glm::mat4x4 pv, glm::mat4x4 m) {
+  glm::mat4x4 mvp = pv * glm::translate(
+      glm::mat4x4(), glm::vec3(0.f, 0.f, 0.f)) * m;
+  glUniformMatrix4fv(
+      g_resources.uniforms.MATRIX_MVP, 1, GL_FALSE, glm::value_ptr(mvp));
+
+  glDrawElements(
+      GL_TRIANGLE_STRIP,  /* mode */
+      4,                  /* count */
+      GL_UNSIGNED_SHORT,  /* type */
+      (void*)0            /* element array buffer offset */
+      );
+}
+
 void render() {
+  // Clear the back buffer.
   glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-  glClear(GL_COLOR_BUFFER_BIT);
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  glEnable(GL_DEPTH_TEST);
 
   // Specify the shader
   glUseProgram(g_resources.program);
@@ -165,13 +200,27 @@ void render() {
   // Set index array
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, g_resources.element_buffer);
 
-  // Draw call!
-  glDrawElements(
-      GL_TRIANGLE_STRIP,  /* mode */
-      4,                  /* count */
-      GL_UNSIGNED_SHORT,  /* type */
-      (void*)0            /* element array buffer offset */
-      );
+  // Initial transformation matrices.
+  glm::mat4x4 xfRotation = glm::rotate(
+      glm::mat4x4(),
+      glm::radians(g_resources.elapsed_time * 90),
+      glm::vec3(0.0f, 1.0f, 0.0f));
+  glm::mat4x4 pv = create_vp();
+
+  // Draw the left model.
+  drawPlane(
+      pv,
+      glm::translate(glm::mat4x4(), glm::vec3(-3.f, 0.f, 0.f)) * xfRotation);
+
+  // Draw the center model.
+  drawPlane(
+      pv,
+      glm::translate(glm::mat4x4(), glm::vec3(0.f, 0.f, 0.f)) * xfRotation);
+
+  // Draw the right model.
+  drawPlane(
+      pv,
+      glm::translate(glm::mat4x4(), glm::vec3(3.f, 0.f, 0.f)) * xfRotation);
 
   // Clean up
   glDisableVertexAttribArray(g_resources.attributes.position);

@@ -2,13 +2,11 @@
 #include "glad/glad.h"
 #include <GLFW/glfw3.h>
 
-const int WINDOW_WIDTH = 800;
-const int WINDOW_HEIGHT = 600;
-const char *WINDOW_TITLE = "Hello OpenGL";
+#include "Window.h"
 
-void processInput(GLFWwindow *window) {
-  if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
-    glfwSetWindowShouldClose(window, true);
+void processInput(dg::Window &window) {
+  if(glfwGetKey(window.GetHandle(), GLFW_KEY_ESCAPE) == GLFW_PRESS) {
+    window.SetShouldClose(true);
   }
 }
 
@@ -36,33 +34,30 @@ int main() {
 #endif
 
   // Create window.
-  GLFWwindow *window = glfwCreateWindow(
-     WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_TITLE, NULL, NULL);
-  if (window == nullptr) {
-    terminateWithError("Failed to create GLFW window.");
+  dg::Window window;
+  try {
+    window = dg::Window::Open(800, 600, "Hello OpenGL!");
+  } catch (const std::exception& e) {
+    terminateWithError(e.what());
   }
-  glfwMakeContextCurrent(window);
   
   // Load GLAD procedures.
   if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
     terminateWithError("Failed to initialize GLAD.");
   }
 
-  // Specify the rect to render to within the window.
-  // TODO: Update this when we detect a window resize event.
-  glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
-
   // Application loop.
-  while(!glfwWindowShouldClose(window)) {
+  while(!window.ShouldClose()) {
     // Process input for current frame.
     processInput(window);
+
+    window.StartRender();
 
     // Clear back buffer.
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
-    // Present back buffer.
-    glfwSwapBuffers(window);
+    window.FinishRender();
 
     // Poll events for next frame.
     glfwPollEvents();

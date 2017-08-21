@@ -22,5 +22,7 @@ set_target_properties(HelloGlfw PROPERTIES
 	CXX_STANDARD_REQUIRED ON
 )
 
+# TODO: Copy assets to build directory.
+
 install(TARGETS HelloGlfw DESTINATION bin)
 

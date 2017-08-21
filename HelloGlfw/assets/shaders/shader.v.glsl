@@ -1,12 +1,12 @@
 #version 330 core
 
-layout (location = 0) in vec3 aPos;
-layout (location = 1) in vec3 aColor;
+in vec3 in_Position;
+in vec3 in_Color;
 
-out vec3 vColor;
+out vec3 varying_Color;
 
 void main() {
-  gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);
-  vColor = aColor;
+  gl_Position = vec4(in_Position.x, in_Position.y, in_Position.z, 1.0);
+  varying_Color = in_Color;
 }
 

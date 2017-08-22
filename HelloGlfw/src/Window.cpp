@@ -46,6 +46,14 @@ dg::Window::Window(dg::Window&& other) {
   *this = std::move(other);
 }
 
+float dg::Window::GetWidth() const {
+  return width;
+}
+
+float dg::Window::GetHeight() const {
+  return height;
+}
+
 GLFWwindow *dg::Window::GetHandle() const {
   return glfwWindow;
 }

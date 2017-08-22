@@ -1,16 +1,19 @@
 #include <iostream>
 #include "glad/glad.h"
 #include <GLFW/glfw3.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 #include "Window.h"
 #include "Shader.h"
 
 float vertices[] = {
-  // positions           // colors           // texture coords
-  0.5f,   0.5f,  0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f,  // top right
-  0.5f,  -0.5f,  0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f,  // bottom right
-  -0.5f, -0.5f,  0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f,  // bottom left
-  -0.5f,  0.5f,  0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f,  // top left 
+  // positions            // colors           // texture coords
+   0.5f,  1.0f,  0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f,  // top right
+   0.5f,  0.0f,  0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f,  // bottom right
+  -0.5f,  0.0f,  0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f,  // bottom left
+  -0.5f,  1.0f,  0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f,  // top left 
 };
 
 unsigned int indices[] = {  
@@ -18,6 +21,7 @@ unsigned int indices[] = {
   1, 2, 3, // second triangle
 };
 
+dg::Window window;
 dg::Shader shader;
 dg::Texture containerTexture;
 dg::Texture awesomeFaceTexture;
@@ -75,17 +79,33 @@ void initScene() {
   glEnableVertexAttribArray(2);
 }
 
+glm::mat4x4 create_mvp() {
+  glm::mat4x4 model(1.f);
+
+  glm::vec3 eyePos(0.0f, 0.0f, 3.0f);
+  glm::mat4x4 view = glm::lookAt(eyePos, glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, 1.f, 0.f));
+
+  float fov = glm::radians(75.f);
+  float aspect = window.GetWidth() / window.GetHeight();
+  glm::mat4x4 projection = glm::perspective(
+      glm::radians(45.0f), aspect, 0.1f, 100.0f);
+
+  return projection * view * model;
+}
+
 void renderScene() {
   // Clear back buffer.
   glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT);
-
+  
   // Draw triangle.
   shader.Use();
   shader.SetFloat("ELAPSED_TIME", glfwGetTime());
+  shader.SetMat4("MATRIX_MVP", create_mvp());
   shader.SetTexture(0, "MainTex", containerTexture);
   shader.SetTexture(1, "SecondaryTex", awesomeFaceTexture);
   glBindVertexArray(VAO);
+  glCullFace(GL_FRONT_AND_BACK);
   glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 }
 
@@ -107,7 +127,6 @@ int main() {
 #endif
 
   // Create window.
-  dg::Window window;
   try {
     window = dg::Window::Open(800, 600, "Hello OpenGL!");
   } catch (const std::exception& e) {

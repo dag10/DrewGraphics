@@ -31,6 +31,9 @@ namespace dg {
       void StartRender();
       void FinishRender();
 
+      float GetWidth() const;
+      float GetHeight() const;
+
       GLFWwindow *GetHandle() const;
 
     private:

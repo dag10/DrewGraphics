@@ -9,7 +9,9 @@ file(GLOB SOURCES "src/*.cpp" "src/*.c")
 
 add_executable(HelloGlfw ${SOURCES})
 
-target_include_directories(HelloGlfw PUBLIC include)
+target_include_directories(HelloGlfw PUBLIC
+  include
+  external)
 
 if (APPLE)
 	target_link_libraries(HelloGlfw "-framework OpenGL" glfw)

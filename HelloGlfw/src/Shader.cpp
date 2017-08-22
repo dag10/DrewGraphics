@@ -10,6 +10,7 @@
 #include <cassert>
 #include <memory>
 #include <GLUT/glut.h>
+#include <glm/gtc/type_ptr.hpp>
 
 dg::Shader dg::Shader::FromFiles(
     const std::string& vertexPath, const std::string& fragmentPath) {
@@ -94,7 +95,7 @@ void dg::Shader::SetFloat(const std::string& name, float value) const {
 
 void dg::Shader::SetVec2(
     const std::string& name, const glm::vec2& value) const { 
-  glUniform2fv(GetUniformLocation(name), 1, &value[0]); 
+  glUniform2fv(GetUniformLocation(name), 1, glm::value_ptr(value));
 }
 
 void dg::Shader::SetVec2(const std::string& name, float x, float y) const { 
@@ -103,7 +104,7 @@ void dg::Shader::SetVec2(const std::string& name, float x, float y) const {
 
 void dg::Shader::SetVec3(
     const std::string& name, const glm::vec3& value) const { 
-  glUniform3fv(GetUniformLocation(name), 1, &value[0]); 
+  glUniform3fv(GetUniformLocation(name), 1, glm::value_ptr(value));
 }
 
 void dg::Shader::SetVec3(
@@ -112,7 +113,7 @@ void dg::Shader::SetVec3(
 }
 
 void dg::Shader::SetVec4(const std::string& name, const glm::vec4& value) const { 
-  glUniform4fv(GetUniformLocation(name), 1, &value[0]); 
+  glUniform4fv(GetUniformLocation(name), 1, glm::value_ptr(value));
 }
 
 void dg::Shader::SetVec4(
@@ -122,17 +123,17 @@ void dg::Shader::SetVec4(
 
 void dg::Shader::SetMat2(const std::string& name, const glm::mat2& mat) const {
   glUniformMatrix2fv(
-      GetUniformLocation(name), 1, GL_FALSE, &mat[0][0]);
+      GetUniformLocation(name), 1, GL_FALSE, glm::value_ptr(mat));
 }
 
 void dg::Shader::SetMat3(const std::string& name, const glm::mat3& mat) const {
   glUniformMatrix3fv(
-      GetUniformLocation(name), 1, GL_FALSE, &mat[0][0]);
+      GetUniformLocation(name), 1, GL_FALSE, glm::value_ptr(mat));
 }
 
 void dg::Shader::SetMat4(const std::string& name, const glm::mat4& mat) const {
   glUniformMatrix4fv(
-      GetUniformLocation(name), 1, GL_FALSE, &mat[0][0]);
+      GetUniformLocation(name), 1, GL_FALSE, glm::value_ptr(mat));
 }
 
 void dg::Shader::SetTexture(

@@ -27,10 +27,6 @@ namespace dg {
       GLuint GetHandle() const;
 
     private:
-      static inline short le_short(unsigned char *bytes);
-      static std::unique_ptr<char[]> ReadTga(
-          std::string path, int *width, int *height);
-
       void LoadFromPath(std::string path);
 
       GLuint textureHandle = 0;

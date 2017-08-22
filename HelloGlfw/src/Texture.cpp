@@ -4,6 +4,8 @@
 
 #include <string>
 #include <cassert>
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
 
 #include "Texture.h"
 #include "Exceptions.h"
@@ -37,93 +39,6 @@ dg::Texture& dg::Texture::operator=(dg::Texture&& other) {
   return *this;
 }
 
-short dg::Texture::le_short(unsigned char *bytes) {
-  return bytes[0] | ((char)bytes[1] << 8);
-}
-
-std::unique_ptr<char[]> dg::Texture::ReadTga(
-    std::string path, int *width, int *height) {
-
-  *width = 0;
-  *height = 0;
-
-  struct tga_header {
-    char id_length;
-    char color_map_type;
-    char data_type_code;
-    unsigned char color_map_origin[2];
-    unsigned char color_map_length[2];
-    char color_map_depth;
-    unsigned char x_origin[2];
-    unsigned char y_origin[2];
-    unsigned char width[2];
-    unsigned char height[2];
-    char bits_per_pixel;
-    char image_descriptor;
-  } header;
-
-  int i;
-  int color_map_size;
-  int pixels_size;
-  size_t read;
-
-  FILE *f = fopen(path.c_str(), "rb");
-  if (!f) {
-    throw dg::FileNotFoundException(path);
-  }
-
-  read = fread(&header, 1, sizeof(header), f);
-
-  if (read != sizeof(header)) {
-    fclose(f);
-    throw dg::ResourceLoadException(path + " has incomplete TGA header.");
-  }
-
-  if (header.data_type_code != 2) {
-    fclose(f);
-    throw dg::ResourceLoadException(
-        path + " is not an uncompressed RGB TGA file.");
-  }
-
-  if (header.bits_per_pixel != 24) {
-    fclose(f);
-    throw dg::ResourceLoadException(
-        path + " is not a 24-bit uncompressed RGB TGA file.");
-  }
-
-  for (i = 0; i < header.id_length; ++i)
-    if (getc(f) == EOF) {
-      fclose(f);
-      throw dg::ResourceLoadException(path + " has incomplete ID string.");
-    }
-
-  color_map_size = \
-      le_short(header.color_map_length) * (header.color_map_depth/8);
-  for (i = 0; i < color_map_size; ++i) {
-    if (getc(f) == EOF) {
-      fclose(f);
-      throw dg::ResourceLoadException(path + " has incomplete color map.");
-    }
-  }
-
-  int texWidth = le_short(header.width);
-  int texHeight = le_short(header.height);
-  pixels_size = texWidth * texHeight * (header.bits_per_pixel/8);
-  char *pixels = new char[pixels_size];
-
-  read = fread(pixels, 1, pixels_size, f);
-  fclose(f);
-
-  if (read != pixels_size) {
-    delete [] pixels;
-    throw dg::ResourceLoadException(path + " has incomplete image.");
-  }
-
-  *width = texWidth;
-  *height = texHeight;
-  return std::unique_ptr<char[]>(pixels);
-}
-
 void dg::swap(Texture& first, Texture& second) {
   using std::swap;
   swap(first.textureHandle, second.textureHandle);
@@ -134,7 +49,10 @@ void dg::swap(Texture& first, Texture& second) {
 void dg::Texture::LoadFromPath(std::string path) {
   assert(textureHandle == 0);
 
-  std::unique_ptr<char[]> pixels = ReadTga(path, &width, &height);
+  //std::unique_ptr<char[]> pixels = ReadTga(path, &width, &height);
+  int nrChannels;
+  std::unique_ptr<stbi_uc[]> pixels = std::unique_ptr<stbi_uc[]>(stbi_load(
+      path.c_str(), &width, &height, &nrChannels, 0));
 
   // Generate one new texture handle.
   glGenTextures(1, &textureHandle);
@@ -154,13 +72,15 @@ void dg::Texture::LoadFromPath(std::string path) {
   glTexImage2D(
       GL_TEXTURE_2D,
       0, // Level of detail
-      GL_RGB8, // Internal format
+      GL_RGB, // Internal format
       width,
       height,
       0, // Border
-      GL_BGR, // External format
+      GL_RGB, // External format
       GL_UNSIGNED_BYTE, // Type
       pixels.get()
       );
+
+  glGenerateMipmap(GL_TEXTURE_2D);
 }
 

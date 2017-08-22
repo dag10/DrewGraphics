@@ -22,7 +22,9 @@ set_target_properties(HelloGlfw PROPERTIES
 	CXX_STANDARD_REQUIRED ON
 )
 
-# TODO: Copy assets to build directory.
+add_custom_command(TARGET HelloGlfw PRE_BUILD
+  COMMAND ${CMAKE_COMMAND} -E copy_directory
+  ${CMAKE_SOURCE_DIR}/assets $<TARGET_FILE_DIR:HelloGlfw>/assets)
 
 install(TARGETS HelloGlfw DESTINATION bin)
 

@@ -49,7 +49,7 @@ void dg::swap(Texture& first, Texture& second) {
 void dg::Texture::LoadFromPath(std::string path) {
   assert(textureHandle == 0);
 
-  //std::unique_ptr<char[]> pixels = ReadTga(path, &width, &height);
+  stbi_set_flip_vertically_on_load(true);
   int nrChannels;
   std::unique_ptr<stbi_uc[]> pixels = std::unique_ptr<stbi_uc[]>(stbi_load(
       path.c_str(), &width, &height, &nrChannels, 0));
@@ -63,12 +63,13 @@ void dg::Texture::LoadFromPath(std::string path) {
   // Set parameters for this texture.
   // It will use linear interpolation, and clamp out-of-bound
   // values to the nearest edge.
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, DEFAULT_FILTERING);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, DEFAULT_FILTERING);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, DEFAULT_WRAP);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, DEFAULT_WRAP);
 
   // Allocate the texture space and transfer the pixel data.
+  GLenum externalFormat = (nrChannels == 3) ? GL_RGB : GL_RGBA;
   glTexImage2D(
       GL_TEXTURE_2D,
       0, // Level of detail
@@ -76,7 +77,7 @@ void dg::Texture::LoadFromPath(std::string path) {
       width,
       height,
       0, // Border
-      GL_RGB, // External format
+      externalFormat, // External format
       GL_UNSIGNED_BYTE, // Type
       pixels.get()
       );

@@ -20,6 +20,7 @@ unsigned int indices[] = {
 
 dg::Shader shader;
 dg::Texture containerTexture;
+dg::Texture awesomeFaceTexture;
 GLuint VAO;
 
 void processInput(dg::Window &window) {
@@ -39,8 +40,9 @@ void initScene() {
   shader = dg::Shader::FromFiles(
       "assets/shaders/shader.v.glsl", "assets/shaders/shader.f.glsl");
 
-  // Create texture.
+  // Create textures.
   containerTexture = dg::Texture::FromPath("assets/textures/container.jpg");
+  awesomeFaceTexture = dg::Texture::FromPath("assets/textures/awesomeface.png");
 
 	// Create quad vertices.
   GLuint VBO;
@@ -80,7 +82,9 @@ void renderScene() {
 
   // Draw triangle.
   shader.Use();
+  shader.SetFloat("ELAPSED_TIME", glfwGetTime());
   shader.SetTexture(0, "MainTex", containerTexture);
+  shader.SetTexture(1, "SecondaryTex", awesomeFaceTexture);
   glBindVertexArray(VAO);
   glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 }
@@ -135,7 +139,6 @@ int main() {
     glfwPollEvents();
   }
 
-  glfwTerminate();
   return 0;
 }
 

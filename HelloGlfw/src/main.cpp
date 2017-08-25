@@ -9,16 +9,61 @@
 #include "Shader.h"
 
 float vertices[] = {
-  // positions            // colors           // texture coords
-   0.5f,  1.0f,  0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f,  // top right
-   0.5f,  0.0f,  0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f,  // bottom right
-  -0.5f,  0.0f,  0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f,  // bottom left
-  -0.5f,  1.0f,  0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f,  // top left 
+  // positions          // tex coords
+  -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+   0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
+   0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+   0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+  -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+  -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+
+  -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+   0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+   0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+   0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+  -0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
+  -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+
+  -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+  -0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+  -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+  -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+  -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+  -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+   0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+   0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+   0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+   0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+   0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+   0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+  -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+   0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
+   0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+   0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+  -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+  -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+
+  -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+   0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+   0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+   0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+  -0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
+  -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
 };
 
-unsigned int indices[] = {  
-  0, 1, 3, // first triangle
-  1, 2, 3, // second triangle
+glm::vec3 cubePositions[] = {
+  glm::vec3( 0.0f,  0.0f,  0.0f), 
+  glm::vec3( 2.0f,  5.0f, -15.0f), 
+  glm::vec3(-1.5f, -2.2f, -2.5f),  
+  glm::vec3(-3.8f, -2.0f, -12.3f),  
+  glm::vec3( 2.4f, -0.4f, -3.5f),  
+  glm::vec3(-1.7f,  3.0f, -7.5f),  
+  glm::vec3( 1.3f, -2.0f, -2.5f),  
+  glm::vec3( 1.5f,  2.0f, -2.5f), 
+  glm::vec3( 1.5f,  0.2f, -1.5f), 
+  glm::vec3(-1.3f,  1.0f, -1.5f),
 };
 
 dg::Window window;
@@ -50,63 +95,72 @@ void initScene() {
 
 	// Create quad vertices.
   GLuint VBO;
-  GLuint EBO;
   glGenVertexArrays(1, &VAO);
   glGenBuffers(1, &VBO);
-  glGenBuffers(1, &EBO);
 
   glBindVertexArray(VAO);
 
   glBindBuffer(GL_ARRAY_BUFFER, VBO);
   glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
   glVertexAttribPointer(
       shader.GetAttributeLocation("in_Position"),
-      3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+      3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
   glEnableVertexAttribArray(0);
 
   glVertexAttribPointer(
-      shader.GetAttributeLocation("in_Color"),
-      3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
-  glEnableVertexAttribArray(1);
-
-  glVertexAttribPointer(
       shader.GetAttributeLocation("in_TexCoord"),
-      2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+      2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
   glEnableVertexAttribArray(2);
 }
 
-glm::mat4x4 create_mvp() {
-  glm::mat4x4 model(1.f);
+glm::mat4x4 create_cube_m_matrix(glm::vec3 cubePos, float angle) {
+  glm::mat4x4 model(1.0f);
+  model = glm::translate(model, cubePos);
+  model = glm::rotate(
+      model, (float)glfwGetTime() + glm::radians(angle),
+      glm::vec3(0.5f, 1.0f, 0.0f));
 
-  glm::vec3 eyePos(0.0f, 0.0f, 3.0f);
-  glm::mat4x4 view = glm::lookAt(eyePos, glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, 1.f, 0.f));
+  return model;
+}
+
+glm::mat4x4 create_pv_matrix() {
+  glm::vec3 eyePos(0.0f, 2.0f, -6.0f);
+  glm::mat4x4 view = glm::lookAt(
+      eyePos, glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, 1.f, 0.f));
 
   float fov = glm::radians(75.f);
   float aspect = window.GetWidth() / window.GetHeight();
   glm::mat4x4 projection = glm::perspective(
-      glm::radians(45.0f), aspect, 0.1f, 100.0f);
+      glm::radians(60.0f), aspect, 0.1f, 100.0f);
 
-  return projection * view * model;
+  return projection * view;
 }
 
 void renderScene() {
+  glm::mat4x4 pv = create_pv_matrix();
+
   // Clear back buffer.
   glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-  glClear(GL_COLOR_BUFFER_BIT);
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+   // Render params.
+  glBindVertexArray(VAO);
+  glEnable(GL_DEPTH_TEST);
   
-  // Draw triangle.
+  // Set up cube material.
   shader.Use();
   shader.SetFloat("ELAPSED_TIME", glfwGetTime());
-  shader.SetMat4("MATRIX_MVP", create_mvp());
   shader.SetTexture(0, "MainTex", containerTexture);
   shader.SetTexture(1, "SecondaryTex", awesomeFaceTexture);
-  glBindVertexArray(VAO);
-  glCullFace(GL_FRONT_AND_BACK);
-  glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+  // Render cubes.
+  int numCubes = sizeof(cubePositions) / sizeof(cubePositions[0]);
+  for (int i = 0; i < numCubes; i++) {
+    glm::mat4x4 m = create_cube_m_matrix(cubePositions[i], 20.f * i);
+    shader.SetMat4("MATRIX_MVP", pv * m);
+    glDrawArrays(GL_TRIANGLES, 0, 36);
+  }
 }
 
 int main() {

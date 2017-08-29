@@ -3,13 +3,14 @@
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
 
 #include "Window.h"
+#include "Camera.h"
 #include "Shader.h"
 
 float vertices[] = {
   // positions          // tex coords
+  
   -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
    0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
    0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
@@ -67,6 +68,7 @@ glm::vec3 cubePositions[] = {
 };
 
 dg::Window window;
+dg::Camera camera;
 dg::Shader shader;
 dg::Texture containerTexture;
 dg::Texture awesomeFaceTexture;
@@ -114,31 +116,17 @@ void initScene() {
   glEnableVertexAttribArray(2);
 }
 
-glm::mat4x4 create_cube_m_matrix(glm::vec3 cubePos, float angle) {
-  glm::mat4x4 model(1.0f);
-  model = glm::translate(model, cubePos);
-  model = glm::rotate(
-      model, (float)glfwGetTime() + glm::radians(angle),
-      glm::vec3(0.5f, 1.0f, 0.0f));
-
-  return model;
-}
-
-glm::mat4x4 create_pv_matrix() {
-  glm::vec3 eyePos(0.0f, 2.0f, -6.0f);
-  glm::mat4x4 view = glm::lookAt(
-      eyePos, glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, 1.f, 0.f));
-
-  float fov = glm::radians(75.f);
-  float aspect = window.GetWidth() / window.GetHeight();
-  glm::mat4x4 projection = glm::perspective(
-      glm::radians(60.0f), aspect, 0.1f, 100.0f);
-
-  return projection * view;
-}
-
 void renderScene() {
-  glm::mat4x4 pv = create_pv_matrix();
+  // Rotate camera around center, and tell it to look at origin.
+  camera.transform.translation = \
+        glm::quat(glm::radians(glm::vec3(0.f, glfwGetTime() * -40.f, 0.f))) *
+        glm::vec3(0, 2 + 1 * sin(glm::radians(glfwGetTime()) * 50), -5);
+  camera.LookAtPoint(glm::vec3(0));
+
+  // Set up view.
+  glm::mat4x4 view = camera.GetViewMatrix();
+  glm::mat4x4 projection = camera.GetProjectionMatrix(
+      window.GetWidth() / window.GetHeight());
 
   // Clear back buffer.
   glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
@@ -157,8 +145,13 @@ void renderScene() {
   // Render cubes.
   int numCubes = sizeof(cubePositions) / sizeof(cubePositions[0]);
   for (int i = 0; i < numCubes; i++) {
-    glm::mat4x4 m = create_cube_m_matrix(cubePositions[i], 20.f * i);
-    shader.SetMat4("MATRIX_MVP", pv * m);
+    glm::mat4x4 model = dg::Transform::TR(
+        cubePositions[i],
+        glm::quat(glm::radians(glm::vec3(
+              glfwGetTime() * 90 + 15 * i, 20 * i, -10 * i)))
+        ).ToMat4();
+
+    shader.SetMat4("MATRIX_MVP", projection * view * model);
     glDrawArrays(GL_TRIANGLES, 0, 36);
   }
 }

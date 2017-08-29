@@ -117,6 +117,7 @@ void initScene() {
 }
 
 void renderScene() {
+
   // Rotate camera around center, and tell it to look at origin.
   camera.transform.translation = \
         glm::quat(glm::radians(glm::vec3(0.f, glfwGetTime() * -40.f, 0.f))) *
@@ -145,10 +146,11 @@ void renderScene() {
   // Render cubes.
   int numCubes = sizeof(cubePositions) / sizeof(cubePositions[0]);
   for (int i = 0; i < numCubes; i++) {
-    glm::mat4x4 model = dg::Transform::TR(
+    glm::mat4x4 model = dg::Transform::TRS(
         cubePositions[i],
         glm::quat(glm::radians(glm::vec3(
-              glfwGetTime() * 90 + 15 * i, 20 * i, -10 * i)))
+              glfwGetTime() * 90 + 15 * i, 20 * i, -10 * i))),
+        glm::vec3(0.5f + 0.5f * ((float)i / (float)numCubes))
         ).ToMat4();
 
     shader.SetMat4("MATRIX_MVP", projection * view * model);

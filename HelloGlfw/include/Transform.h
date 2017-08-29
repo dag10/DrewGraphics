@@ -18,10 +18,18 @@ namespace dg {
 
       static Transform T(glm::vec3 translation);
       static Transform R(glm::quat rotation);
+      static Transform S(glm::vec3 scale);
+
       static Transform TR(glm::vec3 translation, glm::quat rotation);
+      static Transform RS(glm::quat rotation, glm::vec3 scale);
+      static Transform TS(glm::vec3 translation, glm::vec3 scale);
+
+      static Transform TRS(
+          glm::vec3 translation, glm::quat rotation, glm::vec3 scale);
 
       glm::vec3 translation;
       glm::quat rotation;
+      glm::vec3 scale;
 
       glm::mat4x4 ToMat4() const;
 

@@ -1,5 +1,5 @@
 //
-//  Shader
+//  Shader.h
 //
 
 #pragma once

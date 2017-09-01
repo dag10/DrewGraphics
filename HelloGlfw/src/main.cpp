@@ -7,52 +7,7 @@
 #include "Window.h"
 #include "Camera.h"
 #include "Shader.h"
-
-float vertices[] = {
-  // positions          // tex coords
-  
-  -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-   0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
-   0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-   0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-  -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-  -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-
-  -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-   0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-   0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-   0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-  -0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
-  -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-
-  -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-  -0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-  -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-  -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-  -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-  -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-
-   0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-   0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-   0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-   0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-   0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-   0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-
-  -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-   0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
-   0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-   0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-  -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-  -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-
-  -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-   0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-   0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-   0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-  -0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
-  -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-};
+#include "Mesh.h"
 
 glm::vec3 cubePositions[] = {
   glm::vec3( 0.0f,  0.0f,  0.0f), 
@@ -67,12 +22,12 @@ glm::vec3 cubePositions[] = {
   glm::vec3(-1.3f,  1.0f, -1.5f),
 };
 
+std::shared_ptr<dg::Mesh> cube;
 dg::Window window;
 dg::Camera camera;
 dg::Shader shader;
 dg::Texture containerTexture;
 dg::Texture awesomeFaceTexture;
-GLuint VAO;
 
 void processInput(dg::Window &window) {
   if(glfwGetKey(window.GetHandle(), GLFW_KEY_ESCAPE) == GLFW_PRESS) {
@@ -87,6 +42,9 @@ void terminateWithError(const char *error) {
 }
 
 void initScene() {
+  // Create cube mesh.
+  cube = dg::Mesh::Cube;
+
   // Create shader.
   shader = dg::Shader::FromFiles(
       "assets/shaders/shader.v.glsl", "assets/shaders/shader.f.glsl");
@@ -94,30 +52,9 @@ void initScene() {
   // Create textures.
   containerTexture = dg::Texture::FromPath("assets/textures/container.jpg");
   awesomeFaceTexture = dg::Texture::FromPath("assets/textures/awesomeface.png");
-
-	// Create quad vertices.
-  GLuint VBO;
-  glGenVertexArrays(1, &VAO);
-  glGenBuffers(1, &VBO);
-
-  glBindVertexArray(VAO);
-
-  glBindBuffer(GL_ARRAY_BUFFER, VBO);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-  glVertexAttribPointer(
-      shader.GetAttributeLocation("in_Position"),
-      3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
-  glEnableVertexAttribArray(0);
-
-  glVertexAttribPointer(
-      shader.GetAttributeLocation("in_TexCoord"),
-      2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
-  glEnableVertexAttribArray(2);
 }
 
 void renderScene() {
-
   // Rotate camera around center, and tell it to look at origin.
   camera.transform.translation = \
         glm::quat(glm::radians(glm::vec3(0.f, glfwGetTime() * -40.f, 0.f))) *
@@ -134,7 +71,6 @@ void renderScene() {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
    // Render params.
-  glBindVertexArray(VAO);
   glEnable(GL_DEPTH_TEST);
   
   // Set up cube material.
@@ -144,6 +80,7 @@ void renderScene() {
   shader.SetTexture(1, "SecondaryTex", awesomeFaceTexture);
 
   // Render cubes.
+  cube->Use();
   int numCubes = sizeof(cubePositions) / sizeof(cubePositions[0]);
   for (int i = 0; i < numCubes; i++) {
     glm::mat4x4 model = dg::Transform::TRS(
@@ -154,8 +91,9 @@ void renderScene() {
         ).ToMat4();
 
     shader.SetMat4("MATRIX_MVP", projection * view * model);
-    glDrawArrays(GL_TRIANGLES, 0, 36);
+    cube->Draw();
   }
+  cube->FinishUsing();
 }
 
 int main() {
@@ -186,6 +124,9 @@ int main() {
   if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
     terminateWithError("Failed to initialize GLAD.");
   }
+  
+  // Create primitive meshes.
+  dg::Mesh::CreatePrimitives();
 
   try {
     initScene();

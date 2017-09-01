@@ -9,7 +9,6 @@
 
 #include <cassert>
 #include <memory>
-#include <GLUT/glut.h>
 #include <glm/gtc/type_ptr.hpp>
 
 dg::Shader dg::Shader::FromFiles(

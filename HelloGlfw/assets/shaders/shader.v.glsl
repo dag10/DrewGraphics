@@ -2,9 +2,9 @@
 
 uniform mat4 MATRIX_MVP;
 
-in vec3 in_Position;
-in vec3 in_Color;
-in vec2 in_TexCoord;
+layout (location = 0) in vec3 in_Position;
+layout (location = 1) in vec2 in_TexCoord;
+layout (location = 2) in vec3 in_Color;
 
 out vec3 varying_Color;
 out vec2 varying_TexCoord;

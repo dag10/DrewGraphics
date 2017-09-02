@@ -14,8 +14,6 @@ namespace dg {
 
   struct Transform {
 
-      static const struct Transform Identity;
-
       static Transform T(glm::vec3 translation);
       static Transform R(glm::quat rotation);
       static Transform S(glm::vec3 scale);
@@ -27,9 +25,9 @@ namespace dg {
       static Transform TRS(
           glm::vec3 translation, glm::quat rotation, glm::vec3 scale);
 
-      glm::vec3 translation;
-      glm::quat rotation;
-      glm::vec3 scale;
+      glm::vec3 translation = glm::vec3(0, 0, 0);
+      glm::quat rotation = glm::quat(1, 0, 0, 0);
+      glm::vec3 scale = glm::vec3(1, 1, 1);
 
       glm::mat4x4 ToMat4() const;
 

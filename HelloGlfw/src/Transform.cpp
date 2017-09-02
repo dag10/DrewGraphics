@@ -8,46 +8,40 @@
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/quaternion.hpp>
 
-const dg::Transform dg::Transform::Identity = dg::Transform::TRS(
-  glm::vec3(0, 0, 0),
-  glm::quat(1, 0, 0, 0),
-  glm::vec3(1, 1, 1)
-);
-
 dg::Transform dg::Transform::T(glm::vec3 translation) {
-  Transform xf = Identity;
+  Transform xf;
   xf.translation = translation;
   return xf;
 }
 
 dg::Transform dg::Transform::R(glm::quat rotation) {
-  Transform xf = Identity;
+  Transform xf;
   xf.rotation = rotation;
   return xf;
 }
 
 dg::Transform dg::Transform::S(glm::vec3 scale) {
-  Transform xf = Identity;
+  Transform xf;
   xf.scale = scale;
   return xf;
 }
 
 dg::Transform dg::Transform::TR(glm::vec3 translation, glm::quat rotation) {
-  Transform xf = Identity;
+  Transform xf;
   xf.translation = translation;
   xf.rotation = rotation;
   return xf;
 }
 
 dg::Transform dg::Transform::RS(glm::quat rotation, glm::vec3 scale) {
-  Transform xf = Identity;
+  Transform xf;
   xf.rotation = rotation;
   xf.scale = scale;
   return xf;
 }
 
 dg::Transform dg::Transform::TS(glm::vec3 translation, glm::vec3 scale) {
-  Transform xf = Identity;
+  Transform xf;
   xf.translation = translation;
   xf.scale = scale;
   return xf;
@@ -55,7 +49,7 @@ dg::Transform dg::Transform::TS(glm::vec3 translation, glm::vec3 scale) {
 
 dg::Transform dg::Transform::TRS(
     glm::vec3 translation, glm::quat rotation, glm::vec3 scale) {
-  Transform xf = Identity;
+  Transform xf;
   xf.translation = translation;
   xf.rotation = rotation;
   xf.scale = scale;

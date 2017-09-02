@@ -13,7 +13,7 @@ namespace dg {
   class Camera {
 
     public:
-      dg::Transform transform = dg::Transform::Identity;
+      dg::Transform transform;
       float fov = 60.f;
       float nearClip = 0.1f;
       float farClip = 100.f;

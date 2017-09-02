@@ -19,6 +19,10 @@ static const glm::vec3 cubePositions[] = {
   glm::vec3(-1.3f,  1.0f, -1.5f),
 };
 
+std::unique_ptr<dg::TutorialScene> dg::TutorialScene::Make() {
+  return std::unique_ptr<dg::TutorialScene>(new dg::TutorialScene());
+}
+
 void dg::TutorialScene::Initialize() {
   // Create cube mesh.
   cube = dg::Mesh::Cube;

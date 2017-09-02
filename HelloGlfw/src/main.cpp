@@ -1,4 +1,5 @@
 #include <iostream>
+#include <map>
 #include "glad/glad.h"
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
@@ -18,13 +19,13 @@ void processInput(dg::Window &window) {
   }
 }
 
-void terminateWithError(const char *error) {
+[[noreturn]] void terminateWithError(const char *error) {
   std::cerr << error << std::endl;
   glfwTerminate();
   exit(-1);
 }
 
-int main() {
+int main(int argc, const char *argv[]) {
   // Print GLFW errors to stderr.
   glfwSetErrorCallback([](int code, const char *desc) {
     std::cerr << "GLFW Error: " << desc << std::endl;
@@ -56,10 +57,23 @@ int main() {
   // Create primitive meshes.
   dg::Mesh::CreatePrimitives();
 
+  std::map<
+    std::string,
+    std::function<std::unique_ptr<dg::Scene>()>> constructors;
+  constructors["tutorial"] = dg::TutorialScene::Make;
+
+  // Find intended scene.
+  if (argc < 2) {
+    terminateWithError("Specify a scene.");
+  }
+  if (constructors.find(argv[1]) == constructors.end()) {
+    terminateWithError("Unknown scene.");
+  }
+  std::unique_ptr<dg::Scene> scene = constructors[argv[1]]();
+
   // Create scene.
-  dg::TutorialScene scene;
   try {
-    scene.Initialize();
+    scene->Initialize();
   } catch (const std::exception& e) {
     std::cerr << "Failed to initialize scene: ";
     terminateWithError(e.what());
@@ -67,13 +81,13 @@ int main() {
 
   // Application loop.
   while(!window.ShouldClose()) {
-    scene.Update();
+    scene->Update();
 
     // Process input for current frame.
     processInput(window);
 
     window.StartRender();
-    scene.Render(window);
+    scene->Render(window);
     window.FinishRender();
 
     // Poll events for next frame.

@@ -18,6 +18,8 @@ namespace dg {
 
     public:
 
+      static std::unique_ptr<TutorialScene> Make();
+
       virtual void Initialize();
       virtual void Update();
       virtual void Render(dg::Window& window);

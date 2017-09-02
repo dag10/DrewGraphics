@@ -10,6 +10,7 @@
 #include "Shader.h"
 #include "Mesh.h"
 #include "TutorialScene.h"
+#include "PortalScene.h"
 
 dg::Window window;
 
@@ -60,6 +61,7 @@ int main(int argc, const char *argv[]) {
   std::map<
     std::string,
     std::function<std::unique_ptr<dg::Scene>()>> constructors;
+  constructors["portal"]   = dg::PortalScene::Make;
   constructors["tutorial"] = dg::TutorialScene::Make;
 
   // Find intended scene.

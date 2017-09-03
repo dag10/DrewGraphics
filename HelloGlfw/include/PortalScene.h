@@ -30,12 +30,15 @@ namespace dg {
       void RenderScene(
           dg::Window& window, bool throughPortal,
           dg::Transform inPortal, dg::Transform outPortal);
+      void RenderPortalStencil(dg::Window& window, dg::Transform xfPortal);
+      void ClearDepth(dg::Window& window);
 
       std::shared_ptr<dg::Mesh> cubeMesh;
       std::shared_ptr<dg::Mesh> quadMesh;
       dg::Camera camera;
       dg::Shader simpleTextureShader;
       dg::Shader solidColorShader;
+      dg::Shader depthResetShader;
       dg::Texture crateTexture;
 
   }; // class PortalScene

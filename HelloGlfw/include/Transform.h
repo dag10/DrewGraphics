@@ -5,6 +5,7 @@
 
 #include <glm/vec3.hpp>
 #include <glm/gtc/quaternion.hpp>
+#include <string>
 
 namespace dg {
   static const glm::vec3 X_BASIS (1.f,  0.f,  0.f);
@@ -30,6 +31,8 @@ namespace dg {
       glm::vec3 scale = glm::vec3(1, 1, 1);
 
       glm::mat4x4 ToMat4() const;
+
+      std::string ToString() const;
 
   }; // struct Transform
 

@@ -4,6 +4,7 @@
 
 #include "Transform.h"
 
+#include <sstream>
 #include <glm/gtc/matrix_transform.hpp>
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/quaternion.hpp>
@@ -62,4 +63,33 @@ glm::mat4x4 dg::Transform::ToMat4() const {
   glm::mat4x4 s = glm::scale(glm::mat4x4(1), scale);
   return t * r * s;
 }
+
+std::string dg::Transform::ToString() const {
+  std::stringstream ss;
+
+  ss << "T: ";
+  ss << translation.x << ", ";
+  ss << translation.y << ", ";
+  ss << translation.z << std::endl;
+
+  ss << "R: ";
+  ss << rotation.w << ", ";
+  ss << rotation.x << ", ";
+  ss << rotation.y << ", ";
+  ss << rotation.z << std::endl;
+
+  glm::vec3 eulerRot = glm::eulerAngles(rotation);
+  ss << "R (euler): ";
+  ss << eulerRot.x << ", ";
+  ss << eulerRot.y << ", ";
+  ss << eulerRot.z << std::endl;
+
+  ss << "S: ";
+  ss << scale.x << ", ";
+  ss << scale.y << ", ";
+  ss << scale.z << std::endl;
+
+  return ss.str();
+}
+
 

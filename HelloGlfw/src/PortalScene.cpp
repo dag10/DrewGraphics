@@ -128,23 +128,12 @@ void dg::PortalScene::Render(dg::Window& window) {
   glEnable(GL_DEPTH_TEST);
   
   // Render immediate scene.
-  //RenderScene(window, false, dg::Transform(), dg::Transform());
+  RenderScene(window, false, dg::Transform(), dg::Transform());
 
   // Render scene through first (red) portal.
-  //RenderScene(window, true, portalTransforms[0], portalTransforms[1]);
+  RenderScene(window, true, portalTransforms[0], portalTransforms[1]);
 
   // Render scene through second (blue) portal.
-  //RenderScene(window, true, portalTransforms[1], portalTransforms[0]);
-
-  // Render wither the immediate scene (no keys pressed), the scene
-  // as seen through the first (red) portal (1 pressed), or the scene
-  // as seen through the second (blue) portal (2 pressed).
-  if(glfwGetKey(window.GetHandle(), GLFW_KEY_1) == GLFW_PRESS) {
-    RenderScene(window, true, portalTransforms[0], portalTransforms[1]);
-  } else if(glfwGetKey(window.GetHandle(), GLFW_KEY_2) == GLFW_PRESS) {
-    RenderScene(window, true, portalTransforms[1], portalTransforms[0]);
-  } else {
-    RenderScene(window, false, dg::Transform(), dg::Transform());
-  }
+  RenderScene(window, true, portalTransforms[1], portalTransforms[0]);
 }
 

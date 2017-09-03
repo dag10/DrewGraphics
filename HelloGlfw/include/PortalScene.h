@@ -9,6 +9,7 @@
 #include "Camera.h"
 #include "Shader.h"
 #include "Texture.h"
+#include "Transform.h"
 #include "Mesh.h"
 #include <memory>
 
@@ -25,6 +26,10 @@ namespace dg {
       virtual void Render(dg::Window& window);
 
     private:
+
+      void RenderScene(
+          dg::Window& window, bool throughPortal,
+          dg::Transform inPortal, dg::Transform outPortal);
 
       std::shared_ptr<dg::Mesh> cubeMesh;
       std::shared_ptr<dg::Mesh> quadMesh;

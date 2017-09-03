@@ -26,7 +26,6 @@ std::unique_ptr<dg::PortalScene> dg::PortalScene::Make() {
   return std::unique_ptr<dg::PortalScene>(new dg::PortalScene());
 }
 
-#include <iostream>
 void dg::PortalScene::Initialize() {
   // Create meshes.
   cubeMesh = dg::Mesh::Cube;
@@ -42,7 +41,6 @@ void dg::PortalScene::Initialize() {
 
   // Create textures.
   crateTexture = dg::Texture::FromPath("assets/textures/container.jpg");
-  std::cout << "Scale: " << portalTransforms[0].scale.x << std::endl;
 }
 
 void dg::PortalScene::Update() {
@@ -55,19 +53,30 @@ void dg::PortalScene::Update() {
       0.05f * cos(glm::radians(glfwGetTime() * 90));
 }
 
-void dg::PortalScene::Render(dg::Window& window) {
+void dg::PortalScene::RenderScene(
+    dg::Window& window, bool throughPortal,
+    dg::Transform inPortal, dg::Transform outPortal) {
+
   // Set up view.
   glm::mat4x4 view = camera.GetViewMatrix();
   glm::mat4x4 projection = camera.GetProjectionMatrix(
       window.GetWidth() / window.GetHeight());
 
-  // Clear back buffer.
-  glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  // If through a portal, transform the view matrix.
+  if (throughPortal) {
+    glm::mat4x4 inPortalMat = inPortal.ToMat4();
+    glm::mat4x4 outPortalMat = outPortal.ToMat4();
 
-  // Render params.
-  glEnable(GL_DEPTH_TEST);
-  
+    // Flip out portal around.
+    outPortalMat = outPortalMat * dg::Transform::R(
+        glm::quat(glm::radians(glm::vec3(0, 180, 0)))).ToMat4();
+
+    // Find delta between the two portals.
+    glm::mat4x4 xfDelta = inPortalMat * glm::inverse(outPortalMat);
+
+    view = view * xfDelta;
+  }
+
   // Set up cube material.
   simpleTextureShader.Use();
   simpleTextureShader.SetTexture(0, "MainTex", crateTexture);
@@ -90,7 +99,6 @@ void dg::PortalScene::Render(dg::Window& window) {
   solidColorShader.Use();
   dg::Transform portalQuadScale = dg::Transform::S(glm::vec3(1, 1.5f, 1));
   quadMesh->Use();
-  glCullFace(GL_FRONT_AND_BACK);
 
   // Render first (red) portal.
   solidColorShader.SetVec3("Albedo", 255, 0, 0);
@@ -109,5 +117,34 @@ void dg::PortalScene::Render(dg::Window& window) {
   quadMesh->Draw();
 
   quadMesh->FinishUsing();
+}
+
+void dg::PortalScene::Render(dg::Window& window) {
+  // Clear back buffer.
+  glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+  // Render params.
+  glEnable(GL_DEPTH_TEST);
+  
+  // Render immediate scene.
+  //RenderScene(window, false, dg::Transform(), dg::Transform());
+
+  // Render scene through first (red) portal.
+  //RenderScene(window, true, portalTransforms[0], portalTransforms[1]);
+
+  // Render scene through second (blue) portal.
+  //RenderScene(window, true, portalTransforms[1], portalTransforms[0]);
+
+  // Render wither the immediate scene (no keys pressed), the scene
+  // as seen through the first (red) portal (1 pressed), or the scene
+  // as seen through the second (blue) portal (2 pressed).
+  if(glfwGetKey(window.GetHandle(), GLFW_KEY_1) == GLFW_PRESS) {
+    RenderScene(window, true, portalTransforms[0], portalTransforms[1]);
+  } else if(glfwGetKey(window.GetHandle(), GLFW_KEY_2) == GLFW_PRESS) {
+    RenderScene(window, true, portalTransforms[1], portalTransforms[0]);
+  } else {
+    RenderScene(window, false, dg::Transform(), dg::Transform());
+  }
 }
 

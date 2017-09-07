@@ -11,8 +11,6 @@ static const glm::vec3 cubePositions[] = {
   glm::vec3(  0.0f,  0.0f,  0.0f ), 
   glm::vec3( -1.0f,  0.0f,  0.0f ), 
   glm::vec3(  1.0f,  0.0f,  0.0f ), 
-
-  glm::vec3( -3.0f,  0.0f,  0.0f ), 
 };
 
 static dg::Transform portalTransforms[] = {
@@ -122,42 +120,6 @@ void dg::PortalScene::RenderScene(
       simpleTextureShader.SetMat4("InvPortal", glm::mat4x4(0));
     }
     cubeMesh->Draw();
-  }
-  cubeMesh->FinishUsing();
-
-  // Render tiny colored blocks.
-  solidColorShader.Use();
-  cubeMesh->Use();
-  const int numLittleBlocks = 9;
-  const float spacing = 0.1f;
-  for (int i = 0; i < numLittleBlocks; i++) {
-    for (int j = 0; j < numLittleBlocks; j++) {
-      dg::Transform baseModel = dg::Transform::TS(
-          glm::vec3(
-            spacing * (i - (numLittleBlocks / 2)),
-            0,
-            spacing * (j - (numLittleBlocks / 2))),
-          glm::vec3(0.05f)
-          );
-
-      const glm::vec3 yellow  (1, 1, 0);
-      const glm::vec3 green   (0, 1, 0);
-      const glm::vec3 magenta (1, 0, 1);
-      solidColorShader.SetVec3(
-          "Albedo",
-          baseModel.translation.z == 0 ? magenta :
-          baseModel.translation.z >  0 ? green   : yellow);
-
-      dg::Transform model = portalTransforms[1] * baseModel;
-      solidColorShader.SetMat4("MATRIX_MVP", projection * view * model);
-      solidColorShader.SetMat4("MATRIX_M", model);
-      if (throughPortal) {
-        solidColorShader.SetMat4("InvPortal", outPortal.Inverse());
-      } else {
-        solidColorShader.SetMat4("InvPortal", glm::mat4x4(0));
-      }
-      cubeMesh->Draw();
-    }
   }
   cubeMesh->FinishUsing();
 

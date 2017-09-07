@@ -11,6 +11,8 @@ static const glm::vec3 cubePositions[] = {
   glm::vec3(  0.0f,  0.0f,  0.0f ), 
   glm::vec3( -1.0f,  0.0f,  0.0f ), 
   glm::vec3(  1.0f,  0.0f,  0.0f ), 
+
+  glm::vec3( -3.0f,  0.0f,  0.0f ), 
 };
 
 static dg::Transform portalTransforms[] = {
@@ -44,15 +46,19 @@ void dg::PortalScene::Initialize() {
   quadMesh = dg::Mesh::Quad;
 
   // Create shaders.
+  dg::Shader::SetVertexHead("assets/shaders/includes/vertex_head.glsl");
+  dg::Shader::AddVertexSource("assets/shaders/includes/vertex_main.glsl");
+  dg::Shader::SetFragmentHead("assets/shaders/includes/fragment_head.glsl");
+  dg::Shader::AddFragmentSource("assets/shaders/includes/fragment_main.glsl");
+  depthResetShader = dg::Shader::FromFiles(
+      "assets/shaders/depthreset.v.glsl",
+      "assets/shaders/depthreset.f.glsl");
   simpleTextureShader = dg::Shader::FromFiles(
       "assets/shaders/simpletexture.v.glsl",
       "assets/shaders/simpletexture.f.glsl");
   solidColorShader = dg::Shader::FromFiles(
       "assets/shaders/solidcolor.v.glsl",
       "assets/shaders/solidcolor.f.glsl");
-  depthResetShader = dg::Shader::FromFiles(
-      "assets/shaders/depthreset.v.glsl",
-      "assets/shaders/depthreset.f.glsl");
 
   // Create textures.
   crateTexture = dg::Texture::FromPath("assets/textures/container.jpg");
@@ -113,7 +119,51 @@ void dg::PortalScene::RenderScene(
         ).ToMat4();
 
     simpleTextureShader.SetMat4("MATRIX_MVP", projection * view * model);
+    simpleTextureShader.SetMat4("MATRIX_M", model);
+    if (throughPortal) {
+      simpleTextureShader.SetMat4(
+          "InvPortal", glm::inverse(outPortal.ToMat4()));
+    } else {
+      simpleTextureShader.SetMat4("InvPortal", glm::mat4x4(0));
+    }
     cubeMesh->Draw();
+  }
+  cubeMesh->FinishUsing();
+
+  // Render tiny colored blocks.
+  solidColorShader.Use();
+  cubeMesh->Use();
+  const int numLittleBlocks = 9;
+  const float spacing = 0.1f;
+  for (int i = 0; i < numLittleBlocks; i++) {
+    for (int j = 0; j < numLittleBlocks; j++) {
+      dg::Transform xfPortal = portalTransforms[1];
+      dg::Transform baseModel = dg::Transform::TS(
+          glm::vec3(
+            spacing * (i - (numLittleBlocks / 2)),
+            0,
+            spacing * (j - (numLittleBlocks / 2))),
+          glm::vec3(0.05f)
+          );
+
+      const glm::vec3 yellow  (1, 1, 0);
+      const glm::vec3 green   (0, 1, 0);
+      const glm::vec3 magenta (1, 0, 1);
+      solidColorShader.SetVec3(
+          "Albedo",
+          baseModel.translation.z == 0 ? magenta :
+          baseModel.translation.z >  0 ? green   : yellow);
+
+      glm::mat4x4 model = xfPortal.ToMat4() * baseModel.ToMat4();
+      solidColorShader.SetMat4("MATRIX_MVP", projection * view * model);
+      solidColorShader.SetMat4("MATRIX_M", model);
+      if (throughPortal) {
+        solidColorShader.SetMat4("InvPortal", glm::inverse(outPortal.ToMat4()));
+      } else {
+        solidColorShader.SetMat4("InvPortal", glm::mat4x4(0));
+      }
+      cubeMesh->Draw();
+    }
   }
   cubeMesh->FinishUsing();
 
@@ -123,37 +173,33 @@ void dg::PortalScene::RenderScene(
 
   // Render first (red) portal back.
   solidColorShader.SetVec3("Albedo", 1, 0, 0);
-  solidColorShader.SetMat4(
-      "MATRIX_MVP",
-      projection * view * portalTransforms[0].ToMat4() *
-      portalQuadScale.ToMat4());
+  glm::mat4x4 m = portalTransforms[0].ToMat4() * portalQuadScale.ToMat4();
+  solidColorShader.SetMat4("MATRIX_MVP", projection * view * m);
+  solidColorShader.SetMat4("MATRIX_M", m);
   quadMesh->Draw();
 
   // If maximum recursion reached, render a closed red portal.
   if (throughPortal) {
     solidColorShader.SetVec3("Albedo", 0.5f, 0, 0);
-    solidColorShader.SetMat4(
-        "MATRIX_MVP",
-        projection * view * portalTransforms[0].ToMat4() *
-        portalOpeningScale.ToMat4());
+    glm::mat4x4 m = portalTransforms[0].ToMat4() * portalOpeningScale.ToMat4();
+    solidColorShader.SetMat4("MATRIX_MVP", projection * view * m);
+    solidColorShader.SetMat4("MATRIX_M", m);
     quadMesh->Draw();
   }
 
   // Render second (blue) portal back;
   solidColorShader.SetVec3("Albedo", 0, 0, 1);
-  solidColorShader.SetMat4(
-      "MATRIX_MVP",
-      projection * view * portalTransforms[1].ToMat4() *
-      portalQuadScale.ToMat4());
+  m = portalTransforms[1].ToMat4() * portalQuadScale.ToMat4();
+  solidColorShader.SetMat4("MATRIX_MVP", projection * view * m);
+  solidColorShader.SetMat4("MATRIX_M", m);
   quadMesh->Draw();
 
   // If maximum recursion reached, render a closed blue portal.
   if (throughPortal) {
     solidColorShader.SetVec3("Albedo", 0, 0, 0.5f);
-    solidColorShader.SetMat4(
-        "MATRIX_MVP",
-        projection * view * portalTransforms[1].ToMat4() *
-        portalOpeningScale.ToMat4());
+    glm::mat4x4 m = portalTransforms[1].ToMat4() * portalOpeningScale.ToMat4();
+    solidColorShader.SetMat4("MATRIX_MVP", projection * view * m);
+    solidColorShader.SetMat4("MATRIX_M", m);
     quadMesh->Draw();
   }
 
@@ -173,6 +219,7 @@ void dg::PortalScene::RenderPortalStencil(
 
   solidColorShader.Use();
   solidColorShader.SetVec3("Albedo", backgroundColor);
+  solidColorShader.SetMat4("InvPortal", glm::mat4x4(0));
   solidColorShader.SetMat4(
       "MATRIX_MVP",
       projection * view * xfPortal.ToMat4() *

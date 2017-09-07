@@ -92,4 +92,3 @@ std::string dg::Transform::ToString() const {
   return ss.str();
 }
 
-

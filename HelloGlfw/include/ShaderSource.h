@@ -16,6 +16,8 @@ namespace dg {
 
     public:
       static ShaderSource FromFile(GLenum type, const std::string& path);
+      static ShaderSource FromFileWithHead(
+          GLenum type, const std::string& path, const std::string& headCode);
 
       ShaderSource() = default;
       ShaderSource(ShaderSource& other) = delete;
@@ -31,6 +33,7 @@ namespace dg {
       void CompileShader();
       void CheckCompileErrors();
 
+      const char *headCode = nullptr;
       std::string path = std::string();
 
       GLenum shaderType = 0;

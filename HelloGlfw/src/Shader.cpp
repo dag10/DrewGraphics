@@ -11,6 +11,14 @@
 #include <memory>
 #include <glm/gtc/type_ptr.hpp>
 
+std::string dg::Shader::vertexHead = "";
+std::string dg::Shader::fragmentHead = "";
+
+std::vector<dg::ShaderSource> dg::Shader::vertexSources = \
+    std::vector<dg::ShaderSource>();
+std::vector<dg::ShaderSource> dg::Shader::fragmentSources = \
+    std::vector<dg::ShaderSource>();
+
 dg::Shader dg::Shader::FromFiles(
     const std::string& vertexPath, const std::string& fragmentPath) {
   Shader shader;
@@ -18,6 +26,28 @@ dg::Shader dg::Shader::FromFiles(
   shader.fragmentPath = fragmentPath;
   shader.CreateProgram();
   return shader;
+}
+
+void dg::Shader::SetVertexHead(const std::string& path) {
+  vertexHead = dg::FileUtils::LoadFile(path);
+}
+
+void dg::Shader::SetFragmentHead(const std::string& path) {
+  fragmentHead = dg::FileUtils::LoadFile(path);
+}
+
+void dg::Shader::AddVertexSource(const std::string& path) {
+  dg::ShaderSource shader = vertexHead.empty()
+      ? dg::ShaderSource::FromFile(GL_VERTEX_SHADER, path)
+      : dg::ShaderSource::FromFileWithHead(GL_VERTEX_SHADER, path, vertexHead);
+  vertexSources.push_back(std::move(shader));
+}
+
+void dg::Shader::AddFragmentSource(const std::string& path) {
+  dg::ShaderSource shader = fragmentHead.empty()
+      ? dg::ShaderSource::FromFile(GL_FRAGMENT_SHADER, path)
+      : dg::ShaderSource::FromFileWithHead(GL_FRAGMENT_SHADER, path, fragmentHead);
+  fragmentSources.push_back(std::move(shader));
 }
 
 dg::Shader::Shader(dg::Shader&& other) {
@@ -46,14 +76,30 @@ void dg::swap(Shader& first, Shader& second) {
 void dg::Shader::CreateProgram() {
   assert(programHandle == 0);
 
-  dg::ShaderSource vertexShader = dg::ShaderSource::FromFile(
-      GL_VERTEX_SHADER, vertexPath);
-  dg::ShaderSource fragmentShader = dg::ShaderSource::FromFile(
-      GL_FRAGMENT_SHADER, fragmentPath);
+  dg::ShaderSource vertexShader = vertexHead.empty()
+      ? dg::ShaderSource::FromFile(GL_VERTEX_SHADER, vertexPath)
+      : dg::ShaderSource::FromFileWithHead(
+          GL_VERTEX_SHADER, vertexPath, vertexHead);
+  dg::ShaderSource fragmentShader = fragmentHead.empty()
+      ? dg::ShaderSource::FromFile(GL_FRAGMENT_SHADER, fragmentPath)
+      : dg::ShaderSource::FromFileWithHead(
+          GL_FRAGMENT_SHADER, fragmentPath, fragmentHead);
 
   programHandle = glCreateProgram();
   glAttachShader(programHandle, vertexShader.GetHandle());
   glAttachShader(programHandle, fragmentShader.GetHandle());
+  for (
+      auto shader = vertexSources.begin();
+      shader != vertexSources.end();
+      shader++) {
+    glAttachShader(programHandle, shader->GetHandle());
+  }
+  for (
+      auto shader = fragmentSources.begin();
+      shader != fragmentSources.end();
+      shader++) {
+    glAttachShader(programHandle, shader->GetHandle());
+  }
   glLinkProgram(programHandle);
   CheckLinkErrors();
 }

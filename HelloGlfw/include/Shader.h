@@ -4,10 +4,12 @@
 
 #pragma once
 
+#include <vector>
 #include <string>
 #include <GLUT/glut.h>
 #include <glm/glm.hpp>
 #include "Texture.h"
+#include "ShaderSource.h"
 
 namespace dg {
 
@@ -18,6 +20,12 @@ namespace dg {
     public:
       static Shader FromFiles(
           const std::string& vertexPath, const std::string& fragmentPath);
+
+      static void SetVertexHead(const std::string& path);
+      static void SetFragmentHead(const std::string& path);
+
+      static void AddVertexSource(const std::string& path);
+      static void AddFragmentSource(const std::string& path);
 
       Shader() = default;
       Shader(Shader& other) = delete;
@@ -49,6 +57,14 @@ namespace dg {
           const dg::Texture& texture) const;
 
     private:
+      // Code to be included at top of shaders, includes global types.
+      static std::string vertexHead;
+      static std::string fragmentHead;
+
+      // Code to be linked into all shaders, includes main() and utilities.
+      static std::vector<dg::ShaderSource> vertexSources;
+      static std::vector<dg::ShaderSource> fragmentSources;
+
       void CreateProgram();
       void CheckLinkErrors();
 

@@ -6,3 +6,4 @@ in vec4 v_ScenePos;
 
 out vec4 FragColor;
 
+#line 1 1

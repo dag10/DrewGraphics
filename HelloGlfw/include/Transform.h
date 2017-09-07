@@ -4,8 +4,10 @@
 #pragma once
 
 #include <glm/vec3.hpp>
+#include <glm/mat4x4.hpp>
 #include <glm/gtc/quaternion.hpp>
 #include <string>
+#include <ostream>
 
 namespace dg {
   static const glm::vec3 X_BASIS (1.f,  0.f,  0.f);
@@ -30,9 +32,15 @@ namespace dg {
       glm::quat rotation = glm::quat(1, 0, 0, 0);
       glm::vec3 scale = glm::vec3(1, 1, 1);
 
+      Transform Inverse() const;
+      friend Transform operator*(const Transform& a, const Transform& b);
+      friend glm::mat4x4 operator*(const glm::mat4x4& a, const Transform& b);
+      friend glm::mat4x4 operator*(const Transform& a, const glm::mat4x4& b);
+
       glm::mat4x4 ToMat4() const;
 
       std::string ToString() const;
+      friend std::ostream& operator<<(std::ostream& os, const dg::Transform& xf);
 
   }; // struct Transform
 

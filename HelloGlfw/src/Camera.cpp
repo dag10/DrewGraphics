@@ -29,10 +29,7 @@ void dg::Camera::LookAtPoint(glm::vec3 target) {
 }
 
 glm::mat4x4 dg::Camera::GetViewMatrix() const {
-  glm::mat4x4 r = glm::toMat4(transform.rotation);
-  glm::mat4x4 t = glm::translate(
-      glm::mat4x4(1), transform.translation);
-  return glm::inverse(t * r);
+  return transform.Inverse().ToMat4();
 }
 
 glm::mat4x4 dg::Camera::GetProjectionMatrix(float aspectRatio) const {

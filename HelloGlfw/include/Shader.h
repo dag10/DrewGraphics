@@ -9,6 +9,7 @@
 #include <GLUT/glut.h>
 #include <glm/glm.hpp>
 #include "Texture.h"
+#include "Transform.h"
 #include "ShaderSource.h"
 
 namespace dg {
@@ -52,6 +53,7 @@ namespace dg {
       void SetMat2(const std::string& name, const glm::mat2& mat) const;
       void SetMat3(const std::string& name, const glm::mat3& mat) const;
       void SetMat4(const std::string& name, const glm::mat4& mat) const;
+      void SetMat4(const std::string& name, const Transform& xf) const;
       void SetTexture(
           unsigned int textureUnit, const std::string& name,
           const dg::Texture& texture) const;

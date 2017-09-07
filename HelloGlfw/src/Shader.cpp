@@ -181,6 +181,11 @@ void dg::Shader::SetMat4(const std::string& name, const glm::mat4& mat) const {
       GetUniformLocation(name), 1, GL_FALSE, glm::value_ptr(mat));
 }
 
+void dg::Shader::SetMat4(
+    const std::string& name, const dg::Transform& xf) const {
+  SetMat4(name, xf.ToMat4());
+}
+
 void dg::Shader::SetTexture(
     unsigned int textureUnit, const std::string& name,
     const dg::Texture& texture) const {

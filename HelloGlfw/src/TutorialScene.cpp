@@ -68,12 +68,11 @@ void dg::TutorialScene::Render(dg::Window& window) {
   cube->Use();
   int numCubes = sizeof(cubePositions) / sizeof(cubePositions[0]);
   for (int i = 0; i < numCubes; i++) {
-    glm::mat4x4 model = dg::Transform::TRS(
+    dg::Transform model = dg::Transform::TRS(
         cubePositions[i],
         glm::quat(glm::radians(glm::vec3(
               glfwGetTime() * 90 + 15 * i, 20 * i, -10 * i))),
-        glm::vec3(0.5f + 0.5f * ((float)i / (float)numCubes))
-        ).ToMat4();
+        glm::vec3(0.5f + 0.5f * ((float)i / (float)numCubes)));
 
     shader.SetMat4("MATRIX_MVP", projection * view * model);
     cube->Draw();

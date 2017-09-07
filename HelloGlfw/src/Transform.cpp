@@ -57,6 +57,30 @@ dg::Transform dg::Transform::TRS(
   return xf;
 }
 
+dg::Transform dg::Transform::Inverse() const {
+  Transform xf;
+  xf.scale = 1.f / this->scale;
+  xf.rotation = glm::inverse(this->rotation);
+  xf.translation = xf.rotation * (xf.scale * -1.f * this->translation);
+  return xf;
+}
+
+dg::Transform dg::operator*(const dg::Transform& a, const dg::Transform& b) {
+  Transform xf;
+  xf.scale = a.scale * b.scale;
+  xf.rotation = a.rotation * b.rotation;
+  xf.translation = a.translation + (a.rotation * (a.scale * b.translation));
+  return xf;
+}
+
+glm::mat4x4 dg::operator*(const glm::mat4x4& a, const dg::Transform& b) {
+  return a * b.ToMat4();
+}
+
+glm::mat4x4 dg::operator*(const dg::Transform& a, const glm::mat4x4& b) {
+  return a.ToMat4() * b;
+}
+
 glm::mat4x4 dg::Transform::ToMat4() const {
   glm::mat4x4 r = glm::toMat4(rotation);
   glm::mat4x4 t = glm::translate(glm::mat4x4(1), translation);
@@ -66,29 +90,33 @@ glm::mat4x4 dg::Transform::ToMat4() const {
 
 std::string dg::Transform::ToString() const {
   std::stringstream ss;
-
-  ss << "T: ";
-  ss << translation.x << ", ";
-  ss << translation.y << ", ";
-  ss << translation.z << std::endl;
-
-  ss << "R: ";
-  ss << rotation.w << ", ";
-  ss << rotation.x << ", ";
-  ss << rotation.y << ", ";
-  ss << rotation.z << std::endl;
-
-  glm::vec3 eulerRot = glm::eulerAngles(rotation);
-  ss << "R (euler): ";
-  ss << eulerRot.x << ", ";
-  ss << eulerRot.y << ", ";
-  ss << eulerRot.z << std::endl;
-
-  ss << "S: ";
-  ss << scale.x << ", ";
-  ss << scale.y << ", ";
-  ss << scale.z << std::endl;
-
+  ss << *this;
   return ss.str();
+}
+
+std::ostream& dg::operator<<(std::ostream& os, const dg::Transform& xf) {
+  os << "T: ";
+  os << xf.translation.x << ", ";
+  os << xf.translation.y << ", ";
+  os << xf.translation.z << std::endl;
+
+  os << "R: ";
+  os << xf.rotation.w << ", ";
+  os << xf.rotation.x << ", ";
+  os << xf.rotation.y << ", ";
+  os << xf.rotation.z << std::endl;
+
+  glm::vec3 eulerRot = glm::eulerAngles(xf.rotation);
+  os << "R (euler): ";
+  os << eulerRot.x << ", ";
+  os << eulerRot.y << ", ";
+  os << eulerRot.z << std::endl;
+
+  os << "S: ";
+  os << xf.scale.x << ", ";
+  os << xf.scale.y << ", ";
+  os << xf.scale.z << std::endl;
+
+  return os;
 }
 

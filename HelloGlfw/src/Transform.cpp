@@ -88,6 +88,18 @@ glm::mat4x4 dg::Transform::ToMat4() const {
   return t * r * s;
 }
 
+glm::vec3 dg::Transform::Right() const {
+  return rotation * RIGHT;
+}
+
+glm::vec3 dg::Transform::Up() const {
+  return rotation * UP;
+}
+
+glm::vec3 dg::Transform::Forward() const {
+  return rotation * FORWARD;
+}
+
 std::string dg::Transform::ToString() const {
   std::stringstream ss;
   ss << *this;
@@ -100,7 +112,7 @@ std::ostream& dg::operator<<(std::ostream& os, const dg::Transform& xf) {
   os << xf.translation.y << ", ";
   os << xf.translation.z << std::endl;
 
-  os << "R: ";
+  os << "R (quat): ";
   os << xf.rotation.w << ", ";
   os << xf.rotation.x << ", ";
   os << xf.rotation.y << ", ";
@@ -115,7 +127,7 @@ std::ostream& dg::operator<<(std::ostream& os, const dg::Transform& xf) {
   os << "S: ";
   os << xf.scale.x << ", ";
   os << xf.scale.y << ", ";
-  os << xf.scale.z << std::endl;
+  os << xf.scale.z;
 
   return os;
 }

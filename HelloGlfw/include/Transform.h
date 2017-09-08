@@ -10,10 +10,12 @@
 #include <ostream>
 
 namespace dg {
-  static const glm::vec3 X_BASIS (1.f,  0.f,  0.f);
-  static const glm::vec3 Y_BASIS (0.f,  1.f,  0.f);
-  static const glm::vec3 Z_BASIS (0.f,  0.f,  1.f);
-  static const glm::vec3 UP      (0.f,  1.f,  0.f);
+  static const glm::vec3 X_BASIS ( 1,  0,  0 );
+  static const glm::vec3 Y_BASIS ( 0,  1,  0 );
+  static const glm::vec3 Z_BASIS ( 0,  0,  1 );
+  static const glm::vec3 RIGHT   ( 1,  0,  0 );
+  static const glm::vec3 UP      ( 0,  1,  0 );
+  static const glm::vec3 FORWARD ( 0,  0, -1 );
 
   struct Transform {
 
@@ -38,6 +40,10 @@ namespace dg {
       friend glm::mat4x4 operator*(const Transform& a, const glm::mat4x4& b);
 
       glm::mat4x4 ToMat4() const;
+
+      glm::vec3 Right() const;
+      glm::vec3 Up() const;
+      glm::vec3 Forward() const;
 
       std::string ToString() const;
       friend std::ostream& operator<<(std::ostream& os, const dg::Transform& xf);

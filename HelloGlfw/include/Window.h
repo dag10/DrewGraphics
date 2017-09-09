@@ -28,6 +28,8 @@ namespace dg {
       bool ShouldClose() const;
       void SetShouldClose(bool shouldClose);
 
+      bool IsKeyPressed(GLenum key) const;
+
       void StartRender();
       void FinishRender();
 

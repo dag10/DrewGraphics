@@ -17,6 +17,10 @@ dg::Window dg::Window::Open(
   return window;
 }
 
+bool dg::Window::IsKeyPressed(GLenum key) const {
+  return glfwGetKey(GetHandle(), key) == GLFW_PRESS;
+}
+
 bool dg::Window::ShouldClose() const {
   return glfwWindowShouldClose(glfwWindow);
 }

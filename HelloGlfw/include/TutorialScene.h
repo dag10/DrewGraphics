@@ -22,7 +22,7 @@ namespace dg {
 
       virtual void Initialize();
       virtual void Update();
-      virtual void Render(dg::Window& window);
+      virtual void Render();
 
     private:
 

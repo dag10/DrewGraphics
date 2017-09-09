@@ -45,11 +45,11 @@ void dg::TutorialScene::Update() {
   camera.LookAtPoint(glm::vec3(0));
 }
 
-void dg::TutorialScene::Render(dg::Window& window) {
+void dg::TutorialScene::Render() {
   // Set up view.
   glm::mat4x4 view = camera.GetViewMatrix();
   glm::mat4x4 projection = camera.GetProjectionMatrix(
-      window.GetWidth() / window.GetHeight());
+      window->GetWidth() / window->GetHeight());
 
   // Clear back buffer.
   glClearColor(0.2f, 0.3f, 0.3f, 1.0f);

@@ -23,15 +23,14 @@ namespace dg {
 
       virtual void Initialize();
       virtual void Update();
-      virtual void Render(dg::Window& window);
+      virtual void Render();
 
     private:
 
       void RenderScene(
-          dg::Window& window, bool throughPortal,
-          dg::Transform inPortal, dg::Transform outPortal);
-      void RenderPortalStencil(dg::Window& window, dg::Transform xfPortal);
-      void ClearDepth(dg::Window& window);
+          bool throughPortal, dg::Transform inPortal, dg::Transform outPortal);
+      void RenderPortalStencil(dg::Transform xfPortal);
+      void ClearDepth();
 
       std::shared_ptr<dg::Mesh> cubeMesh;
       std::shared_ptr<dg::Mesh> quadMesh;

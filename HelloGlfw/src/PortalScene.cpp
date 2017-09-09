@@ -16,8 +16,8 @@ static const glm::vec3 cubePositions[] = {
 
 static dg::Transform portalTransforms[] = {
   dg::Transform::TR(
-      glm::vec3(1.5f, 0, 0),
-      glm::quat(glm::radians(glm::vec3(0, -90, 0)))),
+      glm::vec3(0, 0, -0.5f),
+      glm::quat(glm::radians(glm::vec3(0, 0, 0)))),
   dg::Transform::TR(
       glm::vec3(-1.5f, 0, 0),
       glm::quat(glm::radians(glm::vec3(0, 90, 0)))),
@@ -29,7 +29,7 @@ static const dg::Transform portalQuadScale = \
     dg::Transform::S(glm::vec3(1, 1.5f, 1));
 static const dg::Transform portalOpeningScale = \
     dg::Transform::TS(
-        glm::vec3(0, 0, 0.0001f), // Prevent z-fighting between back and stencil.
+        glm::vec3(0, 0, 0.0003f), // Prevent z-fighting between back and stencil.
         glm::vec3(
           portalQuadScale.scale.x - (0.02f * 2.f),
           portalQuadScale.scale.y - (0.02f * 2.f),
@@ -65,15 +65,47 @@ void dg::PortalScene::Initialize() {
   crateTexture = dg::Texture::FromPath("assets/textures/container.jpg");
 
   // Set initial camera position.
-  camera.transform.translation = glm::vec3(-0.5f, 0.6f, 0.2f);
-  camera.transform.rotation = glm::quat(glm::radians(glm::vec3(0, 90, 0)));
+  camera.transform.translation = glm::vec3(0.9f, 0.6f, 2);
+  camera.LookAtPoint(glm::vec3(0, 0.6f, 0));
+
+  // Temporarily shorten near clip plane to mask portal clipping
+  // while moving through a portal.
+  camera.nearClip = 0.01f;
+  camera.farClip = 10;
 }
 
 void dg::PortalScene::Update() {
-  // Calculate new position, which moves camera forward a bit.
-  const float speed = 1.8f;
-  dg::Transform xfDelta = dg::Transform::T(
-      FORWARD * speed * (float)Time::Delta);
+  dg::Transform xfDelta;
+  const float speed = 1.8f; // units per second
+  const float rotationSpeed = 90; // degrees per second
+
+  // Calculate new movement relative to camera, based on WASD keys.
+  glm::vec3 movementDir(0);
+  if (window->IsKeyPressed(GLFW_KEY_W) || window->IsKeyPressed(GLFW_KEY_UP)) {
+    movementDir += FORWARD;
+  }
+  if (window->IsKeyPressed(GLFW_KEY_S) || window->IsKeyPressed(GLFW_KEY_DOWN)) {
+    movementDir += -FORWARD;
+  }
+  if (window->IsKeyPressed(GLFW_KEY_A)) {
+    movementDir += -RIGHT;
+  }
+  if (window->IsKeyPressed(GLFW_KEY_D)) {
+    movementDir += RIGHT;
+  }
+  xfDelta = dg::Transform::T(movementDir * speed * (float)Time::Delta);
+
+  // Calculate new rotation for camera, based on Left and Right keys.
+  if (window->IsKeyPressed(GLFW_KEY_LEFT)) {
+    xfDelta = xfDelta * dg::Transform::R(
+        glm::quat(glm::radians(glm::vec3(
+              0, rotationSpeed * (float)Time::Delta, 0))));
+  }
+  if (window->IsKeyPressed(GLFW_KEY_RIGHT)) {
+    xfDelta = xfDelta * dg::Transform::R(
+        glm::quat(glm::radians(glm::vec3(
+              0, -rotationSpeed * (float)Time::Delta, 0))));
+  }
 
   // Find a test point that we check for crossing of a portal.
   // This point is the center of the frustum's near clip plane.
@@ -121,13 +153,12 @@ void dg::PortalScene::Update() {
 }
 
 void dg::PortalScene::RenderScene(
-    dg::Window& window, bool throughPortal,
-    dg::Transform inPortal, dg::Transform outPortal) {
+    bool throughPortal, dg::Transform inPortal, dg::Transform outPortal) {
 
   // Set up view.
   glm::mat4x4 view = camera.GetViewMatrix();
   glm::mat4x4 projection = camera.GetProjectionMatrix(
-      window.GetWidth() / window.GetHeight());
+      window->GetWidth() / window->GetHeight());
 
   // If through a portal, transform the view matrix.
   if (throughPortal) {
@@ -208,14 +239,14 @@ void dg::PortalScene::RenderScene(
   quadMesh->FinishUsing();
 }
 
-void dg::PortalScene::RenderPortalStencil(
-    dg::Window& window, dg::Transform xfPortal) {
+void dg::PortalScene::RenderPortalStencil(dg::Transform xfPortal) {
   glm::mat4x4 view = camera.GetViewMatrix();
   glm::mat4x4 projection = camera.GetProjectionMatrix(
-      window.GetWidth() / window.GetHeight());
+      window->GetWidth() / window->GetHeight());
 
   glEnable(GL_STENCIL_TEST);
   glStencilFunc(GL_ALWAYS, 1, 0xFF);
+  glDepthFunc(GL_LEQUAL);
   glStencilOp(GL_ZERO, GL_ZERO, GL_REPLACE);
   glClear(GL_STENCIL_BUFFER_BIT);
 
@@ -231,7 +262,7 @@ void dg::PortalScene::RenderPortalStencil(
   glDisable(GL_STENCIL_TEST);
 }
 
-void dg::PortalScene::ClearDepth(dg::Window& window) {
+void dg::PortalScene::ClearDepth() {
   glDepthFunc(GL_ALWAYS);
   glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
 
@@ -244,7 +275,7 @@ void dg::PortalScene::ClearDepth(dg::Window& window) {
   glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 }
 
-void dg::PortalScene::Render(dg::Window& window) {
+void dg::PortalScene::Render() {
   // Clear back buffer.
   glClearColor(
       backgroundColor.x, backgroundColor.y, backgroundColor.z, 1);
@@ -256,28 +287,28 @@ void dg::PortalScene::Render(dg::Window& window) {
   glCullFace(GL_BACK);
   
   // Render immediate scene.
-  RenderScene(window, false, dg::Transform(), dg::Transform());
+  RenderScene(false, dg::Transform(), dg::Transform());
 
   // Render first (red) portal stencil.
-  RenderPortalStencil(window, portalTransforms[0]);
+  RenderPortalStencil(portalTransforms[0]);
 
   // Render scene through first (red) portal.
   glEnable(GL_STENCIL_TEST);
   glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
   glStencilFunc(GL_EQUAL, 1, 0xFF);
-  ClearDepth(window); // Clear depth buffer only within stencil.
-  RenderScene(window, true, portalTransforms[0], portalTransforms[1]);
+  ClearDepth(); // Clear depth buffer only within stencil.
+  RenderScene(true, portalTransforms[0], portalTransforms[1]);
   glDisable(GL_STENCIL_TEST);
 
   // Render first (red) portal stencil.
-  RenderPortalStencil(window, portalTransforms[1]);
+  RenderPortalStencil(portalTransforms[1]);
 
   // Render scene through second (blue) portal.
   glEnable(GL_STENCIL_TEST);
   glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
   glStencilFunc(GL_EQUAL, 1, 0xFF);
-  ClearDepth(window); // Clear depth buffer only within stencil.
-  RenderScene(window, true, portalTransforms[1], portalTransforms[0]);
+  ClearDepth(); // Clear depth buffer only within stencil.
+  RenderScene(true, portalTransforms[1], portalTransforms[0]);
   glDisable(GL_STENCIL_TEST);
 }
 

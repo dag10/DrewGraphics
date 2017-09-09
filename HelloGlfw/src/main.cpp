@@ -13,13 +13,7 @@
 #include "TutorialScene.h"
 #include "PortalScene.h"
 
-dg::Window window;
-
-void processInput(dg::Window &window) {
-  if(glfwGetKey(window.GetHandle(), GLFW_KEY_ESCAPE) == GLFW_PRESS) {
-    window.SetShouldClose(true);
-  }
-}
+std::shared_ptr<dg::Window> window;
 
 [[noreturn]] void terminateWithError(const char *error) {
   std::cerr << error << std::endl;
@@ -46,7 +40,8 @@ int main(int argc, const char *argv[]) {
 
   // Create window.
   try {
-    window = dg::Window::Open(800, 600, "Drew Graphics");
+    window = std::make_shared<dg::Window>(
+        dg::Window::Open(800, 600, "Drew Graphics"));
   } catch (const std::exception& e) {
     terminateWithError(e.what());
   }
@@ -76,6 +71,7 @@ int main(int argc, const char *argv[]) {
 
   // Create scene.
   try {
+    scene->SetWindow(window);
     scene->Initialize();
   } catch (const std::exception& e) {
     std::cerr << "Failed to initialize scene: ";
@@ -85,16 +81,18 @@ int main(int argc, const char *argv[]) {
   dg::Time::Reset();
 
   // Application loop.
-  while(!window.ShouldClose()) {
+  while(!window->ShouldClose()) {
     dg::Time::Update();
     scene->Update();
 
     // Process input for current frame.
-    processInput(window);
+    if (window->IsKeyPressed(GLFW_KEY_ESCAPE)) {
+      window->SetShouldClose(true);
+    }
 
-    window.StartRender();
-    scene->Render(window);
-    window.FinishRender();
+    window->StartRender();
+    scene->Render();
+    window->FinishRender();
 
     // Poll events for next frame.
     glfwPollEvents();

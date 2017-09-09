@@ -14,7 +14,15 @@ namespace dg {
 
       virtual void Initialize() {};
       virtual void Update() {};
-      virtual void Render(dg::Window& window) = 0;
+      virtual void Render() = 0;
+
+      void SetWindow(std::shared_ptr<Window> window) {
+        this->window = window;
+      }
+
+    protected:
+
+      std::shared_ptr<Window> window = nullptr;
 
   }; // class Scene
 

@@ -5,6 +5,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
+#include "EngineTime.h"
 #include "Window.h"
 #include "Camera.h"
 #include "Shader.h"
@@ -81,8 +82,11 @@ int main(int argc, const char *argv[]) {
     terminateWithError(e.what());
   }
 
+  dg::Time::Reset();
+
   // Application loop.
   while(!window.ShouldClose()) {
+    dg::Time::Update();
     scene->Update();
 
     // Process input for current frame.

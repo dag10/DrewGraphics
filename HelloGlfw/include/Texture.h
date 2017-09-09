@@ -14,7 +14,7 @@ namespace dg {
   class Texture {
 
     public:
-      static Texture FromPath(const char *path);
+      static Texture FromPath(const std::string& path);
 
       Texture() = default;
       Texture(Texture& other) = delete;
@@ -27,7 +27,7 @@ namespace dg {
       GLuint GetHandle() const;
 
     private:
-      void LoadFromPath(std::string path);
+      void LoadFromPath(const std::string& path);
 
       GLuint textureHandle = 0;
       int width = 0;

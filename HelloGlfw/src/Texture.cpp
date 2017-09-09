@@ -13,7 +13,7 @@
 const GLuint DEFAULT_FILTERING = GL_LINEAR;
 const GLuint DEFAULT_WRAP = GL_CLAMP_TO_EDGE;
 
-dg::Texture dg::Texture::FromPath(const char *path) {
+dg::Texture dg::Texture::FromPath(const std::string& path) {
   dg::Texture tex;
   tex.LoadFromPath(path);
   return tex;
@@ -46,7 +46,7 @@ void dg::swap(Texture& first, Texture& second) {
   swap(first.height, second.height);
 }
 
-void dg::Texture::LoadFromPath(std::string path) {
+void dg::Texture::LoadFromPath(const std::string& path) {
   assert(textureHandle == 0);
 
   stbi_set_flip_vertically_on_load(true);
@@ -65,8 +65,8 @@ void dg::Texture::LoadFromPath(std::string path) {
   // values to the nearest edge.
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, DEFAULT_WRAP);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, DEFAULT_WRAP);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
   // Allocate the texture space and transfer the pixel data.
   GLenum externalFormat = (nrChannels == 3) ? GL_RGB : GL_RGBA;

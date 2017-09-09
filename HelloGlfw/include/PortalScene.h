@@ -11,6 +11,7 @@
 #include "Texture.h"
 #include "Transform.h"
 #include "Mesh.h"
+#include "Model.h"
 #include <memory>
 
 namespace dg {
@@ -32,13 +33,11 @@ namespace dg {
       void RenderPortalStencil(dg::Transform xfPortal);
       void ClearDepth();
 
-      std::shared_ptr<dg::Mesh> cubeMesh;
-      std::shared_ptr<dg::Mesh> quadMesh;
       dg::Camera camera;
-      dg::Shader simpleTextureShader;
-      dg::Shader solidColorShader;
-      dg::Shader depthResetShader;
-      dg::Texture crateTexture;
+      std::vector<Model> models;
+      std::shared_ptr<Shader> simpleTextureShader;
+      std::shared_ptr<Shader> solidColorShader;
+      std::shared_ptr<Shader> depthResetShader;
 
   }; // class PortalScene
 

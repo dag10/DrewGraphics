@@ -9,24 +9,24 @@
 #include "Transform.h"
 
 static const glm::vec3 cubePositions[] = {
-  glm::vec3(  0.0f,  0.0f,  0.0f ), 
-  glm::vec3( -1.0f,  0.0f,  0.0f ), 
-  glm::vec3(  1.0f,  0.0f,  0.0f ), 
+  glm::vec3(  0.0f,  0.25f,  0.0f ), 
+  glm::vec3( -1.0f,  0.25f,  0.0f ), 
+  glm::vec3(  1.0f,  0.25f,  0.0f ), 
 };
 
 static dg::Transform portalTransforms[] = {
   dg::Transform::TR(
-      glm::vec3(0, 0, -0.5f),
+      glm::vec3(0, 0.6f, -1.5f),
       glm::quat(glm::radians(glm::vec3(0, 0, 0)))),
   dg::Transform::TR(
-      glm::vec3(-1.5f, 0, 0),
+      glm::vec3(-1.5f, 0.6f, 0),
       glm::quat(glm::radians(glm::vec3(0, 90, 0)))),
 };
 
 static const glm::vec3 backgroundColor = glm::vec3(0.2f, 0.3f, 0.3f);
 
 static const dg::Transform portalQuadScale = \
-    dg::Transform::S(glm::vec3(1, 1.5f, 1));
+    dg::Transform::S(glm::vec3(1, 1.2f, 1));
 static const dg::Transform portalOpeningScale = \
     dg::Transform::TS(
         glm::vec3(0, 0, 0.0003f), // Prevent z-fighting between back and stencil.
@@ -40,10 +40,6 @@ std::unique_ptr<dg::PortalScene> dg::PortalScene::Make() {
 }
 
 void dg::PortalScene::Initialize() {
-  // Create meshes.
-  cubeMesh = dg::Mesh::Cube;
-  quadMesh = dg::Mesh::Quad;
-
   // Configure global includes for all shader files.
   dg::Shader::SetVertexHead("assets/shaders/includes/vertex_head.glsl");
   dg::Shader::AddVertexSource("assets/shaders/includes/vertex_main.glsl");
@@ -51,22 +47,95 @@ void dg::PortalScene::Initialize() {
   dg::Shader::AddFragmentSource("assets/shaders/includes/fragment_main.glsl");
 
   // Create shaders.
-  depthResetShader = dg::Shader::FromFiles(
+  depthResetShader = std::make_shared<Shader>(dg::Shader::FromFiles(
       "assets/shaders/depthreset.v.glsl",
-      "assets/shaders/depthreset.f.glsl");
-  simpleTextureShader = dg::Shader::FromFiles(
+      "assets/shaders/depthreset.f.glsl"));
+  simpleTextureShader = std::make_shared<Shader>(dg::Shader::FromFiles(
       "assets/shaders/simpletexture.v.glsl",
-      "assets/shaders/simpletexture.f.glsl");
-  solidColorShader = dg::Shader::FromFiles(
+      "assets/shaders/simpletexture.f.glsl"));
+  solidColorShader = std::make_shared<Shader>(dg::Shader::FromFiles(
       "assets/shaders/solidcolor.v.glsl",
-      "assets/shaders/solidcolor.f.glsl");
+      "assets/shaders/solidcolor.f.glsl"));
 
   // Create textures.
-  crateTexture = dg::Texture::FromPath("assets/textures/container.jpg");
+  std::shared_ptr<Texture> crateTexture = std::make_shared<Texture>(
+      Texture::FromPath("assets/textures/container.jpg"));
+  std::shared_ptr<Texture> brickTexture = std::make_shared<Texture>(
+      Texture::FromPath("assets/textures/brick.png"));
+  std::shared_ptr<Texture> hardwoodTexture = std::make_shared<Texture>(
+      Texture::FromPath("assets/textures/hardwood.jpg"));
+  std::shared_ptr<Texture> rustyPlateTexture = std::make_shared<Texture>(
+      Texture::FromPath("assets/textures/rustyplate.jpg"));
+
+  // Create wooden cubes.
+  int numCubes = sizeof(cubePositions) / sizeof(cubePositions[0]);
+  for (int i = 0; i < numCubes; i++) {
+    models.push_back(Model(
+          dg::Mesh::Cube,
+          simpleTextureShader,
+          crateTexture,
+          glm::vec2(1),
+          Transform::TS(cubePositions[i], glm::vec3(0.5f))));
+  }
+
+  // Create front and back walls.
+  Model backWall = Model(
+        dg::Mesh::Quad,
+        simpleTextureShader,
+        brickTexture,
+        glm::vec2(5, 2),
+        Transform::TRS(
+          glm::vec3(1 - 0.001f, 1, -1.5 - 0.001f),
+          glm::quat(glm::radians(glm::vec3(0))),
+          glm::vec3(5, 2, 1)
+          ));
+  Model frontWall = Model(backWall);
+  frontWall.transform = frontWall.transform * Transform::R(
+      glm::quat(glm::radians(glm::vec3(0, 180, 0))));
+  frontWall.transform.translation.z *= -1;
+  models.push_back(std::move(backWall));
+  models.push_back(std::move(frontWall));
+
+  // Create left and right walls.
+  Model leftWall = Model(
+        dg::Mesh::Quad,
+        simpleTextureShader,
+        brickTexture,
+        glm::vec2(3, 2),
+        Transform::TRS(
+          glm::vec3(-1.5f - 0.001f, 1, 0),
+          glm::quat(glm::radians(glm::vec3(0, 90, 0))),
+          glm::vec3(3, 2, 1)
+          ));
+  Model rightWall = Model(leftWall);
+  rightWall.transform = rightWall.transform * Transform::R(
+      glm::quat(glm::radians(glm::vec3(0, 180, 0))));
+  rightWall.transform.translation.x = 3.5f;
+  models.push_back(std::move(leftWall));
+  models.push_back(std::move(rightWall));
+
+  // Create floor and ceiling.
+  Model floor = Model(
+        dg::Mesh::Quad,
+        simpleTextureShader,
+        hardwoodTexture,
+        glm::vec2(5, 3),
+        Transform::TRS(
+          glm::vec3(1, 0, 0),
+          glm::quat(glm::radians(glm::vec3(-90, 0, 0))),
+          glm::vec3(5, 3, 1)
+          ));
+  Model ceiling = Model(floor);
+  ceiling.texture = rustyPlateTexture;
+  ceiling.transform = ceiling.transform * Transform::R(
+      glm::quat(glm::radians(glm::vec3(180, 0, 0))));
+  ceiling.transform.translation.y = 2;
+  models.push_back(std::move(floor));
+  models.push_back(std::move(ceiling));
 
   // Set initial camera position.
-  camera.transform.translation = glm::vec3(0.9f, 0.6f, 2);
-  camera.LookAtPoint(glm::vec3(0, 0.6f, 0));
+  camera.transform.translation = glm::vec3(2.2f, 0.85f, 1);
+  camera.LookAtPoint(glm::vec3(0, camera.transform.translation.y, 0));
 
   // Temporarily shorten near clip plane to mask portal clipping
   // while moving through a portal.
@@ -173,70 +242,55 @@ void dg::PortalScene::RenderScene(
     view = view * xfDelta;
   }
 
-  // Set up cube material.
-  simpleTextureShader.Use();
-  simpleTextureShader.SetTexture(0, "MainTex", crateTexture);
-
-  // Render cubes.
-  cubeMesh->Use();
-  int numCubes = sizeof(cubePositions) / sizeof(cubePositions[0]);
-  for (int i = 0; i < numCubes; i++) {
-    dg::Transform model = dg::Transform::TS(
-        cubePositions[i],
-        glm::vec3(0.5f));
-
-    simpleTextureShader.SetMat4("MATRIX_MVP", projection * view * model);
-    simpleTextureShader.SetMat4("MATRIX_M", model);
-    if (throughPortal) {
-      simpleTextureShader.SetMat4("InvPortal", outPortal.Inverse());
-    } else {
-      simpleTextureShader.SetMat4("InvPortal", glm::mat4x4(0));
-    }
-    cubeMesh->Draw();
+  // Render models.
+  glm::mat4x4 invPortal = throughPortal ? outPortal.Inverse().ToMat4()
+                                      : glm::mat4x4(0);
+  for (auto model = models.begin(); model != models.end(); model++) {
+    model->invPortal = invPortal;
+    model->Draw(view, projection);
   }
-  cubeMesh->FinishUsing();
 
   // Prepare to render portals.
-  solidColorShader.Use();
-  quadMesh->Use();
+  solidColorShader->Use();
+  Mesh::Quad->Use();
 
   // Render first (red) portal back.
-  solidColorShader.SetVec3("Albedo", 1, 0, 0);
+  solidColorShader->SetVec3("Albedo", 1, 0, 0);
   dg::Transform m = portalTransforms[0] * portalQuadScale;
-  solidColorShader.SetMat4("MATRIX_MVP", projection * view * m);
-  solidColorShader.SetMat4("MATRIX_M", m);
-  solidColorShader.SetMat4("InvPortal", glm::mat4x4(0));
-  quadMesh->Draw();
+  solidColorShader->SetMat4("MATRIX_MVP", projection * view * m);
+  solidColorShader->SetMat4("MATRIX_M", m);
+  solidColorShader->SetMat4("InvPortal", glm::mat4x4(0));
+  Mesh::Quad->Draw();
 
   // If maximum recursion reached, render a closed red portal.
   if (throughPortal) {
-    solidColorShader.SetVec3("Albedo", 0.5f, 0, 0);
+    solidColorShader->SetVec3("Albedo", 0.5f, 0, 0);
     dg::Transform m = portalTransforms[0] * portalOpeningScale;
-    solidColorShader.SetMat4("MATRIX_MVP", projection * view * m);
-    solidColorShader.SetMat4("MATRIX_M", m);
-    solidColorShader.SetMat4("InvPortal", glm::mat4x4(0));
-    quadMesh->Draw();
+    solidColorShader->SetMat4("MATRIX_MVP", projection * view * m);
+    solidColorShader->SetMat4("MATRIX_M", m);
+    solidColorShader->SetMat4("InvPortal", glm::mat4x4(0));
+    Mesh::Quad->Draw();
   }
 
   // Render second (blue) portal back;
-  solidColorShader.SetVec3("Albedo", 0, 0, 1);
+  solidColorShader->SetVec3("Albedo", 0, 0, 1);
   m = portalTransforms[1] * portalQuadScale;
-  solidColorShader.SetMat4("MATRIX_MVP", projection * view * m);
-  solidColorShader.SetMat4("MATRIX_M", m);
-  solidColorShader.SetMat4("InvPortal", glm::mat4x4(0));
-  quadMesh->Draw();
+  solidColorShader->SetMat4("MATRIX_MVP", projection * view * m);
+  solidColorShader->SetMat4("MATRIX_M", m);
+  solidColorShader->SetMat4("InvPortal", glm::mat4x4(0));
+  Mesh::Quad->Draw();
 
   // If maximum recursion reached, render a closed blue portal.
   if (throughPortal) {
-    solidColorShader.SetVec3("Albedo", 0, 0, 0.5f);
+    solidColorShader->SetVec3("Albedo", 0, 0, 0.5f);
     dg::Transform m = portalTransforms[1] * portalOpeningScale;
-    solidColorShader.SetMat4("MATRIX_MVP", projection * view * m);
-    solidColorShader.SetMat4("MATRIX_M", m);
-    solidColorShader.SetMat4("InvPortal", glm::mat4x4(0));
-    quadMesh->Draw();
+    solidColorShader->SetMat4("MATRIX_MVP", projection * view * m);
+    solidColorShader->SetMat4("MATRIX_M", m);
+    solidColorShader->SetMat4("InvPortal", glm::mat4x4(0));
+    Mesh::Quad->Draw();
   }
 
-  quadMesh->FinishUsing();
+  Mesh::Quad->FinishUsing();
 }
 
 void dg::PortalScene::RenderPortalStencil(dg::Transform xfPortal) {
@@ -250,14 +304,14 @@ void dg::PortalScene::RenderPortalStencil(dg::Transform xfPortal) {
   glStencilOp(GL_ZERO, GL_ZERO, GL_REPLACE);
   glClear(GL_STENCIL_BUFFER_BIT);
 
-  solidColorShader.Use();
-  solidColorShader.SetVec3("Albedo", backgroundColor);
-  solidColorShader.SetMat4("InvPortal", glm::mat4x4(0));
-  solidColorShader.SetMat4(
+  solidColorShader->Use();
+  solidColorShader->SetVec3("Albedo", backgroundColor);
+  solidColorShader->SetMat4("InvPortal", glm::mat4x4(0));
+  solidColorShader->SetMat4(
       "MATRIX_MVP", projection * view * xfPortal * portalOpeningScale);
-  quadMesh->Use();
-  quadMesh->Draw();
-  quadMesh->FinishUsing();
+  Mesh::Quad->Use();
+  Mesh::Quad->Draw();
+  Mesh::Quad->FinishUsing();
 
   glDisable(GL_STENCIL_TEST);
 }
@@ -266,10 +320,10 @@ void dg::PortalScene::ClearDepth() {
   glDepthFunc(GL_ALWAYS);
   glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
 
-  depthResetShader.Use();
-  quadMesh->Use();
-  quadMesh->Draw();
-  quadMesh->FinishUsing();
+  depthResetShader->Use();
+  Mesh::Quad->Use();
+  Mesh::Quad->Draw();
+  Mesh::Quad->FinishUsing();
 
   glDepthFunc(GL_LESS);
   glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);

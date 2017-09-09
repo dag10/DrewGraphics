@@ -5,6 +5,7 @@
 #include "PortalScene.h"
 
 #include <glm/glm.hpp>
+#include "EngineTime.h"
 #include "Transform.h"
 
 static const glm::vec3 cubePositions[] = {
@@ -15,8 +16,8 @@ static const glm::vec3 cubePositions[] = {
 
 static dg::Transform portalTransforms[] = {
   dg::Transform::TR(
-      glm::vec3(0, 0, -0.5f),
-      glm::quat(glm::radians(glm::vec3(0, 0, 0)))),
+      glm::vec3(1.5f, 0, 0),
+      glm::quat(glm::radians(glm::vec3(0, -90, 0)))),
   dg::Transform::TR(
       glm::vec3(-1.5f, 0, 0),
       glm::quat(glm::radians(glm::vec3(0, 90, 0)))),
@@ -43,11 +44,13 @@ void dg::PortalScene::Initialize() {
   cubeMesh = dg::Mesh::Cube;
   quadMesh = dg::Mesh::Quad;
 
-  // Create shaders.
+  // Configure global includes for all shader files.
   dg::Shader::SetVertexHead("assets/shaders/includes/vertex_head.glsl");
   dg::Shader::AddVertexSource("assets/shaders/includes/vertex_main.glsl");
   dg::Shader::SetFragmentHead("assets/shaders/includes/fragment_head.glsl");
   dg::Shader::AddFragmentSource("assets/shaders/includes/fragment_main.glsl");
+
+  // Create shaders.
   depthResetShader = dg::Shader::FromFiles(
       "assets/shaders/depthreset.v.glsl",
       "assets/shaders/depthreset.f.glsl");
@@ -60,22 +63,61 @@ void dg::PortalScene::Initialize() {
 
   // Create textures.
   crateTexture = dg::Texture::FromPath("assets/textures/container.jpg");
+
+  // Set initial camera position.
+  camera.transform.translation = glm::vec3(-0.5f, 0.6f, 0.2f);
+  camera.transform.rotation = glm::quat(glm::radians(glm::vec3(0, 90, 0)));
 }
 
 void dg::PortalScene::Update() {
-  // Set camera position.
-  camera.transform.translation = glm::vec3(0.9f, 0.6f, 2);
-  camera.LookAtPoint(glm::vec3(0, 0, 0));
+  // Calculate new position, which moves camera forward a bit.
+  const float speed = 1.8f;
+  dg::Transform xfDelta = dg::Transform::T(
+      FORWARD * speed * (float)Time::Delta);
 
-  // Wobble the camera.
-  camera.transform.translation.x += \
-      0.2f * sin(glm::radians(glfwGetTime() * 20));
-  camera.transform.translation.y += \
-      0.05f * cos(glm::radians(glfwGetTime() * 20));
+  // Find a test point that we check for crossing of a portal.
+  // This point is the center of the frustum's near clip plane.
+  dg::Transform xfTestPoint = camera.transform * dg::Transform::T(
+      FORWARD * camera.nearClip);
 
-  // Move the left portal in and out.
-  portalTransforms[1].translation.x = \
-      -1.5f - 0.15f + 0.3f * sin(glm::radians(glfwGetTime() * 90));
+  // Determine the before and after camera transforms relative to each portal.
+  dg::Transform xfRedBefore = portalTransforms[0].Inverse() * xfTestPoint;
+  dg::Transform xfRedAfter = xfRedBefore * xfDelta;
+  dg::Transform xfBlueBefore = portalTransforms[1].Inverse() * xfTestPoint;
+  dg::Transform xfBlueAfter = xfBlueBefore * xfDelta;
+
+  // Have we passed through the blue portal?
+  if (xfBlueBefore.translation.z >= 0 && xfBlueAfter.translation.z < 0 &&
+      std::abs(xfBlueBefore.translation.x) < portalOpeningScale.scale.x / 2 &&
+      std::abs(xfBlueBefore.translation.y) < portalOpeningScale.scale.y / 2 ) {
+
+    // The transform of the portal we're moving "to", but flipped by 180 degrees
+    // since we're exiting out the "back" of the portal.
+    dg::Transform xfFlippedPortal = portalTransforms[0] * dg::Transform::R(
+        glm::quat(glm::radians(glm::vec3(0, 180, 0))));
+
+    // Camera is passing through the blue portal, so move it to the
+    // red portal offset by its delta to the blue portal.
+    camera.transform = xfFlippedPortal * portalTransforms[1].Inverse() *
+                       camera.transform;
+
+  // Have we passed through the red portal?
+  } else if (xfRedBefore.translation.z >= 0 && xfRedAfter.translation.z < 0 &&
+      std::abs(xfRedBefore.translation.x) < portalOpeningScale.scale.x / 2 &&
+      std::abs(xfRedBefore.translation.y) < portalOpeningScale.scale.y / 2 ) {
+    // The transform of the portal we're moving "to", but flipped by 180 degrees
+    // since we're exiting out the "back" of the portal.
+    dg::Transform xfFlippedPortal = portalTransforms[1] * dg::Transform::R(
+        glm::quat(glm::radians(glm::vec3(0, 180, 0))));
+
+    // Camera is passing through the red portal, so move it to the
+    // blue portal offset by its delta to the red portal.
+    camera.transform = xfFlippedPortal * portalTransforms[0].Inverse() *
+                       camera.transform;
+  }
+
+  // Apply delta to camera.
+  camera.transform = camera.transform * xfDelta;
 }
 
 void dg::PortalScene::RenderScene(

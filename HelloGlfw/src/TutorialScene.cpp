@@ -3,6 +3,7 @@
 //
 
 #include "TutorialScene.h"
+#include "EngineTime.h"
 
 #include <glm/glm.hpp>
 
@@ -40,8 +41,8 @@ void dg::TutorialScene::Initialize() {
 void dg::TutorialScene::Update() {
   // Rotate camera around center, and tell it to look at origin.
   camera.transform.translation = \
-        glm::quat(glm::radians(glm::vec3(0.f, glfwGetTime() * -40.f, 0.f))) *
-        glm::vec3(0, 2 + 1 * sin(glm::radians(glfwGetTime()) * 50), -5);
+        glm::quat(glm::radians(glm::vec3(0.f, Time::Elapsed * -40.f, 0.f))) *
+        glm::vec3(0, 2 + 1 * sin(glm::radians(Time::Elapsed) * 50), -5);
   camera.LookAtPoint(glm::vec3(0));
 }
 
@@ -60,7 +61,7 @@ void dg::TutorialScene::Render() {
   
   // Set up cube material.
   shader.Use();
-  shader.SetFloat("ELAPSED_TIME", glfwGetTime());
+  shader.SetFloat("ELAPSED_TIME", Time::Elapsed);
   shader.SetTexture(0, "MainTex", containerTexture);
   shader.SetTexture(1, "SecondaryTex", awesomeFaceTexture);
 
@@ -71,7 +72,7 @@ void dg::TutorialScene::Render() {
     dg::Transform model = dg::Transform::TRS(
         cubePositions[i],
         glm::quat(glm::radians(glm::vec3(
-              glfwGetTime() * 90 + 15 * i, 20 * i, -10 * i))),
+              Time::Elapsed * 90 + 15 * i, 20 * i, -10 * i))),
         glm::vec3(0.5f + 0.5f * ((float)i / (float)numCubes)));
 
     shader.SetMat4("MATRIX_MVP", projection * view * model);

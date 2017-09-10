@@ -40,8 +40,7 @@ int main(int argc, const char *argv[]) {
 
   // Create window.
   try {
-    window = std::make_shared<dg::Window>(
-        dg::Window::Open(800, 600, "Drew Graphics"));
+    window = dg::Window::Open(800, 600, "Drew Graphics");
   } catch (const std::exception& e) {
     terminateWithError(e.what());
   }
@@ -83,19 +82,21 @@ int main(int argc, const char *argv[]) {
   // Application loop.
   while(!window->ShouldClose()) {
     dg::Time::Update();
+    window->PollEvents();
     scene->Update();
 
     // Process input for current frame.
-    if (window->IsKeyPressed(GLFW_KEY_ESCAPE)) {
-      window->SetShouldClose(true);
+    if (window->IsKeyJustPressed(GLFW_KEY_ESCAPE)) {
+      if (window->IsCursorLocked()) {
+        window->UnlockCursor();
+      } else {
+        window->SetShouldClose(true);
+      }
     }
 
     window->StartRender();
     scene->Render();
     window->FinishRender();
-
-    // Poll events for next frame.
-    glfwPollEvents();
   }
 
   return 0;

@@ -5,7 +5,10 @@
 
 #include <memory>
 #include <string>
+#include <vector>
+#include <map>
 #include <GLFW/glfw3.h>
+#include <glm/vec2.hpp>
 
 namespace dg {
 
@@ -14,7 +17,7 @@ namespace dg {
   class Window {
 
     public:
-      static Window Open(
+      static std::shared_ptr<Window> Open(
           unsigned int width, unsigned int height, std::string title);
 
       Window() = default;
@@ -25,10 +28,19 @@ namespace dg {
       Window& operator=(Window&& other);
       friend void swap(Window& first, Window& second); // nothrow
 
-      bool ShouldClose() const;
-      void SetShouldClose(bool shouldClose);
+      void PollEvents();
 
       bool IsKeyPressed(GLenum key) const;
+      bool IsKeyJustPressed(GLenum key) const;
+
+      void LockCursor();
+      void UnlockCursor();
+      bool IsCursorLocked() const;
+      glm::dvec2 GetCursorPosition() const;
+      glm::dvec2 GetCursorDelta() const;
+
+      bool ShouldClose() const;
+      void SetShouldClose(bool shouldClose);
 
       void StartRender();
       void FinishRender();
@@ -39,13 +51,28 @@ namespace dg {
       GLFWwindow *GetHandle() const;
 
     private:
+      static std::map<GLFWwindow*, std::weak_ptr<Window>> windowMap;
+
+      static void glfwKeyCallback(
+          GLFWwindow *glfwWindow, int key, int scancode, int action, int mods);
+      static void glfwCursorPositionCallback(
+          GLFWwindow *glfwWindow, double x, double y);
+
+      void HandleKey(int key, int action);
+      void HandleCursorPosition(double x, double y);
+
       void Open();
       void UseContext();
 
+      std::vector<uint8_t> lastKeyStates;
+      std::vector<uint8_t> currentKeyStates;
       GLFWwindow *glfwWindow = nullptr;
       int width = 0;
       int height = 0;
       std::string title;
+      bool hasInitialCursorPosition = false;
+      glm::dvec2 lastCursorPosition;
+      glm::dvec2 currentCursorPosition;
   }; // class Window
 
 } // namespace dg

@@ -7,18 +7,94 @@
 
 #include "Window.h"
 
-dg::Window dg::Window::Open(
+std::map<GLFWwindow*, std::weak_ptr<dg::Window>> dg::Window::windowMap;
+
+void dg::Window::glfwKeyCallback(
+    GLFWwindow *glfwWindow, int key, int scancode, int action, int mods) {
+  auto pair = windowMap.find(glfwWindow);
+  if (pair == windowMap.end()) {
+    return;
+  }
+  if (auto window = pair->second.lock()) {
+    window->HandleKey(key, action);
+  }
+}
+
+void dg::Window::glfwCursorPositionCallback(
+    GLFWwindow *glfwWindow, double x, double y) {
+  auto pair = windowMap.find(glfwWindow);
+  if (pair == windowMap.end()) {
+    return;
+  }
+  if (auto window = pair->second.lock()) {
+    window->HandleCursorPosition(x, y);
+  }
+}
+
+void dg::Window::HandleKey(int key, int action) {
+  currentKeyStates[key] = action;
+}
+
+void dg::Window::HandleCursorPosition(double x, double y) {
+  currentCursorPosition = glm::dvec2(x, y);
+}
+
+std::shared_ptr<dg::Window> dg::Window::Open(
     unsigned int width, unsigned int height, std::string title) {
-  dg::Window window;
-  window.width = width;
-  window.height = height;
-  window.title = title;
-  window.Open();
+  std::shared_ptr<Window> window = std::make_shared<Window>();
+  window->width = width;
+  window->height = height;
+  window->title = title;
+  window->lastKeyStates = std::vector<uint8_t>(GLFW_KEY_LAST, GLFW_RELEASE);
+  window->currentKeyStates = std::vector<uint8_t>(GLFW_KEY_LAST, GLFW_RELEASE);
+  window->Open();
+  windowMap[window->GetHandle()] = window;
   return window;
 }
 
+void dg::Window::PollEvents() {
+  if (!hasInitialCursorPosition) {
+    hasInitialCursorPosition = true;
+    double x, y;
+    glfwGetCursorPos(glfwWindow, &x, &y);
+    HandleCursorPosition(x, y);
+  }
+  lastCursorPosition = currentCursorPosition;
+  lastKeyStates = currentKeyStates;
+  glfwPollEvents();
+}
+
 bool dg::Window::IsKeyPressed(GLenum key) const {
-  return glfwGetKey(GetHandle(), key) == GLFW_PRESS;
+  int state = currentKeyStates[key];
+  return state == GLFW_PRESS || state == GLFW_REPEAT;
+}
+
+bool dg::Window::IsKeyJustPressed(GLenum key) const {
+  int state = currentKeyStates[key];
+  return (state == GLFW_PRESS || state == GLFW_REPEAT) &&
+    lastKeyStates[key] == GLFW_RELEASE;
+}
+
+void dg::Window::LockCursor() {
+  glfwSetInputMode(glfwWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+}
+
+void dg::Window::UnlockCursor() {
+  glfwSetInputMode(glfwWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+}
+
+bool dg::Window::IsCursorLocked() const {
+  return glfwGetInputMode(glfwWindow, GLFW_CURSOR) == GLFW_CURSOR_DISABLED;
+}
+
+glm::dvec2 dg::Window::GetCursorPosition() const {
+  double x, y;
+  glfwGetCursorPos(glfwWindow, &x, &y);
+  return glm::dvec2(x, y);
+}
+
+glm::dvec2 dg::Window::GetCursorDelta() const {
+  return currentCursorPosition - lastCursorPosition;
 }
 
 bool dg::Window::ShouldClose() const {
@@ -42,7 +118,6 @@ void dg::Window::StartRender() {
 
 void dg::Window::FinishRender() {
   assert(glfwWindow != nullptr);
-
   glfwSwapBuffers(glfwWindow);
 }
 
@@ -64,6 +139,7 @@ GLFWwindow *dg::Window::GetHandle() const {
 
 dg::Window::~Window() {
   if (glfwWindow != nullptr) {
+    windowMap.erase(glfwWindow);
     glfwDestroyWindow(glfwWindow);
     glfwWindow = nullptr;
   }
@@ -76,10 +152,15 @@ dg::Window& dg::Window::operator=(dg::Window&& other) {
 
 void dg::swap(dg::Window& first, dg::Window& second) {
   using std::swap;
+  swap(first.lastKeyStates, second.lastKeyStates);
+  swap(first.currentKeyStates, second.currentKeyStates);
   swap(first.glfwWindow, second.glfwWindow);
   swap(first.width, second.width);
   swap(first.height, second.height);
   swap(first.title, second.title);
+  swap(first.hasInitialCursorPosition, second.hasInitialCursorPosition);
+  swap(first.lastCursorPosition, second.lastCursorPosition);
+  swap(first.currentCursorPosition, second.currentCursorPosition);
 }
 
 void dg::Window::Open() {
@@ -89,6 +170,9 @@ void dg::Window::Open() {
   if (glfwWindow == nullptr) {
     throw std::runtime_error("Failed to create GLFW window.");
   }
+
+  glfwSetKeyCallback(glfwWindow, glfwKeyCallback);
+  glfwSetCursorPosCallback(glfwWindow, glfwCursorPositionCallback);
 
   UseContext();
 }

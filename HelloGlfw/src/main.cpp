@@ -80,18 +80,26 @@ int main(int argc, const char *argv[]) {
   dg::Time::Reset();
 
   // Application loop.
+  bool cursorWasLocked = false;
   while(!window->ShouldClose()) {
     dg::Time::Update();
     window->PollEvents();
     scene->Update();
 
-    // Process input for current frame.
+    // Handle escape key to release cursor or quit app.
     if (window->IsKeyJustPressed(GLFW_KEY_ESCAPE)) {
       if (window->IsCursorLocked()) {
+        cursorWasLocked = true;
         window->UnlockCursor();
       } else {
         window->SetShouldClose(true);
       }
+    }
+
+    // Handle click to regain cursor focus.
+    if (cursorWasLocked && !window->IsCursorLocked() &&
+        window->IsMouseButtonJustPressed(GLFW_MOUSE_BUTTON_1)) {
+      window->LockCursor();
     }
 
     window->StartRender();

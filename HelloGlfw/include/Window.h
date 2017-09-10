@@ -33,6 +33,9 @@ namespace dg {
       bool IsKeyPressed(GLenum key) const;
       bool IsKeyJustPressed(GLenum key) const;
 
+      bool IsMouseButtonPressed(GLenum key) const;
+      bool IsMouseButtonJustPressed(GLenum key) const;
+
       void LockCursor();
       void UnlockCursor();
       bool IsCursorLocked() const;
@@ -55,10 +58,13 @@ namespace dg {
 
       static void glfwKeyCallback(
           GLFWwindow *glfwWindow, int key, int scancode, int action, int mods);
+      static void glfwMouseButtonCallback(
+          GLFWwindow *glfwWindow, int button, int action, int mods);
       static void glfwCursorPositionCallback(
           GLFWwindow *glfwWindow, double x, double y);
 
       void HandleKey(int key, int action);
+      void HandleMouseButton(int button, int action);
       void HandleCursorPosition(double x, double y);
 
       void Open();
@@ -66,6 +72,8 @@ namespace dg {
 
       std::vector<uint8_t> lastKeyStates;
       std::vector<uint8_t> currentKeyStates;
+      std::vector<uint8_t> lastMouseButtonStates;
+      std::vector<uint8_t> currentMouseButtonStates;
       GLFWwindow *glfwWindow = nullptr;
       int width = 0;
       int height = 0;

@@ -20,6 +20,17 @@ void dg::Window::glfwKeyCallback(
   }
 }
 
+void dg::Window::glfwMouseButtonCallback(
+    GLFWwindow *glfwWindow, int button, int action, int mods) {
+  auto pair = windowMap.find(glfwWindow);
+  if (pair == windowMap.end()) {
+    return;
+  }
+  if (auto window = pair->second.lock()) {
+    window->HandleMouseButton(button, action);
+  }
+}
+
 void dg::Window::glfwCursorPositionCallback(
     GLFWwindow *glfwWindow, double x, double y) {
   auto pair = windowMap.find(glfwWindow);
@@ -35,6 +46,10 @@ void dg::Window::HandleKey(int key, int action) {
   currentKeyStates[key] = action;
 }
 
+void dg::Window::HandleMouseButton(int button, int action) {
+  currentMouseButtonStates[button] = action;
+}
+
 void dg::Window::HandleCursorPosition(double x, double y) {
   currentCursorPosition = glm::dvec2(x, y);
 }
@@ -45,8 +60,14 @@ std::shared_ptr<dg::Window> dg::Window::Open(
   window->width = width;
   window->height = height;
   window->title = title;
-  window->lastKeyStates = std::vector<uint8_t>(GLFW_KEY_LAST, GLFW_RELEASE);
-  window->currentKeyStates = std::vector<uint8_t>(GLFW_KEY_LAST, GLFW_RELEASE);
+  window->lastKeyStates = std::vector<uint8_t>(
+      GLFW_KEY_LAST + 1, GLFW_RELEASE);
+  window->currentKeyStates = std::vector<uint8_t>(
+      GLFW_KEY_LAST + 1, GLFW_RELEASE);
+  window->lastMouseButtonStates = std::vector<uint8_t>(
+      GLFW_MOUSE_BUTTON_LAST + 1, GLFW_RELEASE);
+  window->currentMouseButtonStates = std::vector<uint8_t>(
+      GLFW_MOUSE_BUTTON_LAST + 1, GLFW_RELEASE);
   window->Open();
   windowMap[window->GetHandle()] = window;
   return window;
@@ -61,6 +82,7 @@ void dg::Window::PollEvents() {
   }
   lastCursorPosition = currentCursorPosition;
   lastKeyStates = currentKeyStates;
+  lastMouseButtonStates = currentMouseButtonStates;
   glfwPollEvents();
 }
 
@@ -73,6 +95,15 @@ bool dg::Window::IsKeyJustPressed(GLenum key) const {
   int state = currentKeyStates[key];
   return (state == GLFW_PRESS || state == GLFW_REPEAT) &&
     lastKeyStates[key] == GLFW_RELEASE;
+}
+
+bool dg::Window::IsMouseButtonPressed(GLenum button) const {
+  return currentMouseButtonStates[button] == GLFW_PRESS;
+}
+
+bool dg::Window::IsMouseButtonJustPressed(GLenum button) const {
+  return currentMouseButtonStates[button] == GLFW_PRESS &&
+    lastMouseButtonStates[button] == GLFW_RELEASE;
 }
 
 void dg::Window::LockCursor() {
@@ -154,6 +185,8 @@ void dg::swap(dg::Window& first, dg::Window& second) {
   using std::swap;
   swap(first.lastKeyStates, second.lastKeyStates);
   swap(first.currentKeyStates, second.currentKeyStates);
+  swap(first.lastMouseButtonStates, second.lastMouseButtonStates);
+  swap(first.currentMouseButtonStates, second.currentMouseButtonStates);
   swap(first.glfwWindow, second.glfwWindow);
   swap(first.width, second.width);
   swap(first.height, second.height);
@@ -172,6 +205,7 @@ void dg::Window::Open() {
   }
 
   glfwSetKeyCallback(glfwWindow, glfwKeyCallback);
+  glfwSetMouseButtonCallback(glfwWindow, glfwMouseButtonCallback);
   glfwSetCursorPosCallback(glfwWindow, glfwCursorPositionCallback);
 
   UseContext();

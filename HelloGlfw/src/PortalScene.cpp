@@ -42,6 +42,9 @@ std::unique_ptr<dg::PortalScene> dg::PortalScene::Make() {
 }
 
 void dg::PortalScene::Initialize() {
+  // Lock window cursor to center.
+  window->LockCursor();
+
   // Configure global includes for all shader files.
   dg::Shader::SetVertexHead("assets/shaders/includes/vertex_head.glsl");
   dg::Shader::AddVertexSource("assets/shaders/includes/vertex_main.glsl");
@@ -204,9 +207,25 @@ void dg::PortalScene::Initialize() {
 }
 
 void dg::PortalScene::Update() {
-  dg::Transform xfDelta;
   const float speed = 1.8f; // units per second
   const float rotationSpeed = 90; // degrees per second
+  const float cursorRotationSpeed = 0.3f; // degrees per cursor pixels moved
+
+  // Calculate new rotation for camera based on mouse.
+  if (window->IsCursorLocked()) {
+    glm::vec2 cursorDelta = window->GetCursorDelta();
+    glm::quat pitch = glm::quat(glm::radians(glm::vec3(
+            -cursorDelta.y * cursorRotationSpeed,
+            0,
+            0)));
+    glm::quat yaw = glm::quat(glm::radians(glm::vec3(
+            0,
+            -cursorDelta.x * cursorRotationSpeed,
+            0)));
+    glm::quat rotation = yaw * camera.transform.rotation *
+      pitch * glm::inverse(camera.transform.rotation);
+    camera.LookAtDirection(rotation * camera.transform.Forward());
+  }
 
   // Calculate new movement relative to camera, based on WASD keys.
   glm::vec3 movementDir(0);
@@ -222,19 +241,10 @@ void dg::PortalScene::Update() {
   if (window->IsKeyPressed(GLFW_KEY_D)) {
     movementDir += RIGHT;
   }
-  xfDelta = dg::Transform::T(movementDir * speed * (float)Time::Delta);
-
-  // Calculate new rotation for camera, based on Left and Right keys.
-  if (window->IsKeyPressed(GLFW_KEY_LEFT)) {
-    xfDelta = xfDelta * dg::Transform::R(
-        glm::quat(glm::radians(glm::vec3(
-              0, rotationSpeed * (float)Time::Delta, 0))));
-  }
-  if (window->IsKeyPressed(GLFW_KEY_RIGHT)) {
-    xfDelta = xfDelta * dg::Transform::R(
-        glm::quat(glm::radians(glm::vec3(
-              0, -rotationSpeed * (float)Time::Delta, 0))));
-  }
+  float speedMultiplier =
+    (window->IsKeyPressed(GLFW_KEY_LEFT_SHIFT)) ? 2.f : 1.f;
+  dg::Transform xfDelta = dg::Transform::T(
+      movementDir * speed * speedMultiplier * (float)Time::Delta);
 
   // Find a test point that we check for crossing of a portal.
   // This point is the center of the frustum's near clip plane.

@@ -22,6 +22,7 @@ namespace dg {
 
       void LookAtDirection(glm::vec3 direction);
       void LookAtPoint(glm::vec3 target);
+      void OrientUpwards();
 
       glm::mat4x4 GetViewMatrix() const;
       glm::mat4x4 GetProjectionMatrix(float aspectRatio) const;

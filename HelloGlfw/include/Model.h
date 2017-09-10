@@ -18,6 +18,12 @@ namespace dg {
 
     public:
 
+      Model() = default;
+
+      Model(
+          std::shared_ptr<Mesh> mesh, std::shared_ptr<Shader> shader, 
+          Transform transform);
+
       Model(
           std::shared_ptr<Mesh> mesh, std::shared_ptr<Shader> shader,
           std::shared_ptr<Texture> texture, glm::vec2 uvScale,
@@ -38,6 +44,14 @@ namespace dg {
       std::shared_ptr<Texture> texture = nullptr;
       glm::vec2 uvScale = glm::vec2(1);
       glm::mat4x4 invPortal = glm::mat4x4(0);
+
+      // TODO: Refactor these out into a Material class.
+      bool lit;
+      glm::vec3 albedo;
+      glm::vec3 lightColor;
+      float ambientStrength;
+      float diffuseStrength;
+      float specularStrength;
 
       void Draw(glm::mat4x4 view, glm::mat4x4 projection) const;
 

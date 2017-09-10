@@ -4,6 +4,6 @@ uniform vec2 UVScale;
 in vec2 v_TexCoord;
 
 vec4 frag() {
-  return texture(MainTex, v_TexCoord * UVScale);
+  return vec4(CalculateLight(), 1.0) * texture(MainTex, v_TexCoord * UVScale);
 }
 

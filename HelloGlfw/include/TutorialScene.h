@@ -10,6 +10,7 @@
 #include "Shader.h"
 #include "Texture.h"
 #include "Mesh.h"
+#include "Model.h"
 #include <memory>
 
 namespace dg {
@@ -26,11 +27,10 @@ namespace dg {
 
     private:
 
-      std::shared_ptr<dg::Mesh> cube;
-      dg::Camera camera;
-      dg::Shader shader;
-      dg::Texture containerTexture;
-      dg::Texture awesomeFaceTexture;
+      std::vector<Model> models;
+      Transform xfLight;
+      Camera camera;
+      std::shared_ptr<Shader> solidColorShader;
 
   }; // class TutorialScene
 

@@ -14,70 +14,73 @@ static const char *texCoordAttributeName = "in_TexCoord";
 
 enum {
   ATTR_POSITION  = 0,
-  ATTR_TEX_COORD = 1,
+  ATTR_NORMAL    = 1,
+  ATTR_TEX_COORD = 2,
 };
 
 static float cubeVertices[] = {
-  // positions          // tex coords
+  // positions          // texture   // normals
+  //                    // coords    //
   
   // Back face
-   0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-  -0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
-   0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-  -0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-   0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-  -0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
+   0.5f, -0.5f, -0.5f,  0.0f, 0.0f,  0.0f,  0.0f, -1.0f,
+  -0.5f, -0.5f, -0.5f,  1.0f, 0.0f,  0.0f,  0.0f, -1.0f,
+   0.5f,  0.5f, -0.5f,  0.0f, 1.0f,  0.0f,  0.0f, -1.0f,
+  -0.5f,  0.5f, -0.5f,  1.0f, 1.0f,  0.0f,  0.0f, -1.0f,
+   0.5f,  0.5f, -0.5f,  0.0f, 1.0f,  0.0f,  0.0f, -1.0f,
+  -0.5f, -0.5f, -0.5f,  1.0f, 0.0f,  0.0f,  0.0f, -1.0f,
 
   // Front face
-  -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-   0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-   0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-   0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-  -0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
-  -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+  -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,  0.0f,  0.0f,  1.0f,
+   0.5f, -0.5f,  0.5f,  1.0f, 0.0f,  0.0f,  0.0f,  1.0f,
+   0.5f,  0.5f,  0.5f,  1.0f, 1.0f,  0.0f,  0.0f,  1.0f,
+   0.5f,  0.5f,  0.5f,  1.0f, 1.0f,  0.0f,  0.0f,  1.0f,
+  -0.5f,  0.5f,  0.5f,  0.0f, 1.0f,  0.0f,  0.0f,  1.0f,
+  -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,  0.0f,  0.0f,  1.0f,
 
   // Left face
-  -0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-  -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-  -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-  -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-  -0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-  -0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+  -0.5f,  0.5f,  0.5f,  1.0f, 1.0f, -1.0f,  0.0f,  0.0f,
+  -0.5f,  0.5f, -0.5f,  0.0f, 1.0f, -1.0f,  0.0f,  0.0f,
+  -0.5f, -0.5f, -0.5f,  0.0f, 0.0f, -1.0f,  0.0f,  0.0f,
+  -0.5f, -0.5f, -0.5f,  0.0f, 0.0f, -1.0f,  0.0f,  0.0f,
+  -0.5f, -0.5f,  0.5f,  1.0f, 0.0f, -1.0f,  0.0f,  0.0f,
+  -0.5f,  0.5f,  0.5f,  1.0f, 1.0f, -1.0f,  0.0f,  0.0f,
 
   // Right face
-   0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-   0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
-   0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
-   0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-   0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
-   0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
+   0.5f,  0.5f, -0.5f,  1.0f, 1.0f,  1.0f,  0.0f,  0.0f,
+   0.5f,  0.5f,  0.5f,  0.0f, 1.0f,  1.0f,  0.0f,  0.0f,
+   0.5f, -0.5f, -0.5f,  1.0f, 0.0f,  1.0f,  0.0f,  0.0f,
+   0.5f, -0.5f,  0.5f,  0.0f, 0.0f,  1.0f,  0.0f,  0.0f,
+   0.5f, -0.5f, -0.5f,  1.0f, 0.0f,  1.0f,  0.0f,  0.0f,
+   0.5f,  0.5f,  0.5f,  0.0f, 1.0f,  1.0f,  0.0f,  0.0f,
 
    // Bottom face
-  -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-   0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
-   0.5f, -0.5f,  0.5f,  1.0f, 1.0f,
-   0.5f, -0.5f,  0.5f,  1.0f, 1.0f,
-  -0.5f, -0.5f,  0.5f,  0.0f, 1.0f,
-  -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+  -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,  0.0f, -1.0f,  0.0f,
+   0.5f, -0.5f, -0.5f,  1.0f, 0.0f,  0.0f, -1.0f,  0.0f,
+   0.5f, -0.5f,  0.5f,  1.0f, 1.0f,  0.0f, -1.0f,  0.0f,
+   0.5f, -0.5f,  0.5f,  1.0f, 1.0f,  0.0f, -1.0f,  0.0f,
+  -0.5f, -0.5f,  0.5f,  0.0f, 1.0f,  0.0f, -1.0f,  0.0f,
+  -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,  0.0f, -1.0f,  0.0f,
 
   // Top face
-   0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-  -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-   0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-  -0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
-   0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-  -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+   0.5f,  0.5f, -0.5f,  1.0f, 1.0f,  0.0f,  1.0f,  0.0f,
+  -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,  0.0f,  1.0f,  0.0f,
+   0.5f,  0.5f,  0.5f,  1.0f, 0.0f,  0.0f,  1.0f,  0.0f,
+  -0.5f,  0.5f,  0.5f,  0.0f, 0.0f,  0.0f,  1.0f,  0.0f,
+   0.5f,  0.5f,  0.5f,  1.0f, 0.0f,  0.0f,  1.0f,  0.0f,
+  -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,  0.0f,  1.0f,  0.0f,
 };
 
 static float quadVertices[] = {
-  // positions          // tex coords
+  // positions          // texture   // normals
+  //                    // coords    //
 
-  -0.5f, -0.5f,  0.0f,  0.0f, 0.0f,
-   0.5f, -0.5f,  0.0f,  1.0f, 0.0f,
-   0.5f,  0.5f,  0.0f,  1.0f, 1.0f,
-   0.5f,  0.5f,  0.0f,  1.0f, 1.0f,
-  -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
-  -0.5f, -0.5f,  0.0f,  0.0f, 0.0f,
+  -0.5f, -0.5f,  0.0f,  0.0f, 0.0f,  0.0f,  0.0f,  1.0f,
+   0.5f, -0.5f,  0.0f,  1.0f, 0.0f,  0.0f,  0.0f,  1.0f,
+   0.5f,  0.5f,  0.0f,  1.0f, 1.0f,  0.0f,  0.0f,  1.0f,
+   0.5f,  0.5f,  0.0f,  1.0f, 1.0f,  0.0f,  0.0f,  1.0f,
+  -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,  0.0f,  0.0f,  1.0f,
+  -0.5f, -0.5f,  0.0f,  0.0f, 0.0f,  0.0f,  0.0f,  1.0f,
 };
 
 std::shared_ptr<dg::Mesh> dg::Mesh::Cube = nullptr;
@@ -123,6 +126,7 @@ void dg::swap(Mesh& first, Mesh& second) {
 void dg::Mesh::Use() const {
   glBindVertexArray(VAO);
   glEnableVertexAttribArray(ATTR_POSITION);
+  glEnableVertexAttribArray(ATTR_NORMAL);
   glEnableVertexAttribArray(ATTR_TEX_COORD);
 }
 
@@ -133,6 +137,7 @@ void dg::Mesh::Draw() const {
 
 void dg::Mesh::FinishUsing() const {
   glDisableVertexAttribArray(ATTR_POSITION);
+  glDisableVertexAttribArray(ATTR_NORMAL);
   glDisableVertexAttribArray(ATTR_TEX_COORD);
 }
 
@@ -148,11 +153,15 @@ std::unique_ptr<dg::Mesh> dg::Mesh::CreateCube() {
       GL_ARRAY_BUFFER, sizeof(cubeVertices), cubeVertices, GL_STATIC_DRAW);
 
   glVertexAttribPointer(
-      ATTR_POSITION, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+      ATTR_POSITION, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
 
   glVertexAttribPointer(
-      ATTR_TEX_COORD, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float),
+      ATTR_TEX_COORD, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float),
       (void*)(3 * sizeof(float)));
+
+  glVertexAttribPointer(
+      ATTR_NORMAL, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float),
+      (void*)(5 * sizeof(float)));
 
   mesh->drawMode = GL_TRIANGLES;
   mesh->drawCount = 36;
@@ -172,11 +181,15 @@ std::unique_ptr<dg::Mesh> dg::Mesh::CreateQuad() {
       GL_ARRAY_BUFFER, sizeof(quadVertices), quadVertices, GL_STATIC_DRAW);
 
   glVertexAttribPointer(
-      ATTR_POSITION, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+      ATTR_POSITION, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
 
   glVertexAttribPointer(
-      ATTR_TEX_COORD, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float),
+      ATTR_TEX_COORD, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float),
       (void*)(3 * sizeof(float)));
+
+  glVertexAttribPointer(
+      ATTR_NORMAL, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float),
+      (void*)(5 * sizeof(float)));
 
   mesh->drawMode = GL_TRIANGLES;
   mesh->drawCount = 6;

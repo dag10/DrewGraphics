@@ -14,16 +14,18 @@ static const glm::vec3 cubePositions[] = {
   glm::vec3(  1.0f,  0.25f,  0.0f ), 
 };
 
+static const glm::vec3 lightColor = glm::vec3(0.7f, 0.65f, 0.6f);
+
 static dg::Transform portalTransforms[] = {
   dg::Transform::TR(
-      glm::vec3(0, 0.6f, -1.5f),
+      glm::vec3(0, 0.6f, -1.5f + 0.001f),
       glm::quat(glm::radians(glm::vec3(0, 0, 0)))),
   dg::Transform::TR(
-      glm::vec3(-1.5f, 0.6f, 0),
+      glm::vec3(-1.5f + 0.001f, 0.6f, 0),
       glm::quat(glm::radians(glm::vec3(0, 90, 0)))),
 };
 
-static const glm::vec3 backgroundColor = glm::vec3(0.2f, 0.3f, 0.3f);
+static const glm::vec3 backgroundColor = glm::vec3(0, 0, 0);
 
 static const dg::Transform portalQuadScale = \
     dg::Transform::S(glm::vec3(1, 1.2f, 1));
@@ -67,16 +69,40 @@ void dg::PortalScene::Initialize() {
   std::shared_ptr<Texture> rustyPlateTexture = std::make_shared<Texture>(
       Texture::FromPath("assets/textures/rustyplate.jpg"));
 
+  // Set light position.
+  xfLight = Transform::T(glm::vec3(2, 1.7f, 0));
+
+  // Create light cube.
+  Model lightCube = Model(
+      dg::Mesh::Cube,
+      solidColorShader,
+      xfLight * Transform::S(glm::vec3(0.05f)));
+  lightCube.lit = false;
+  lightCube.albedo = lightColor;
+  models.push_back(std::move(lightCube));
+
   // Create wooden cubes.
   int numCubes = sizeof(cubePositions) / sizeof(cubePositions[0]);
   for (int i = 0; i < numCubes; i++) {
-    models.push_back(Model(
+    Model cube = Model(
           dg::Mesh::Cube,
           simpleTextureShader,
           crateTexture,
           glm::vec2(1),
-          Transform::TS(cubePositions[i], glm::vec3(0.5f))));
+          Transform::TS(cubePositions[i], glm::vec3(0.5f)));
+    cube.lit = true;
+    cube.albedo = glm::vec3(1.0f, 0.5f, 0.31f);
+    cube.lightColor = lightColor;
+    cube.ambientStrength = 0.9f;
+    cube.diffuseStrength = 1.0f;
+    cube.specularStrength = 0.2f;
+    models.push_back(std::move(cube));
   }
+
+  // Wall material properties.
+  const float wallAmbient = 0.4f;
+  const float wallDiffuse = 0.8f;
+  const float wallSpecular = 0.4f;
 
   // Create front and back walls.
   Model backWall = Model(
@@ -85,10 +111,15 @@ void dg::PortalScene::Initialize() {
         brickTexture,
         glm::vec2(5, 2),
         Transform::TRS(
-          glm::vec3(1 - 0.001f, 1, -1.5 - 0.001f),
+          glm::vec3(1, 1, -1.5),
           glm::quat(glm::radians(glm::vec3(0))),
           glm::vec3(5, 2, 1)
           ));
+  backWall.lit = true;
+  backWall.lightColor = lightColor;
+  backWall.ambientStrength = wallAmbient;
+  backWall.diffuseStrength = wallDiffuse;
+  backWall.specularStrength = wallSpecular;
   Model frontWall = Model(backWall);
   frontWall.transform = frontWall.transform * Transform::R(
       glm::quat(glm::radians(glm::vec3(0, 180, 0))));
@@ -103,10 +134,15 @@ void dg::PortalScene::Initialize() {
         brickTexture,
         glm::vec2(3, 2),
         Transform::TRS(
-          glm::vec3(-1.5f - 0.001f, 1, 0),
+          glm::vec3(-1.5f, 1, 0),
           glm::quat(glm::radians(glm::vec3(0, 90, 0))),
           glm::vec3(3, 2, 1)
           ));
+  leftWall.lit = true;
+  leftWall.lightColor = lightColor;
+  leftWall.ambientStrength = wallAmbient;
+  leftWall.diffuseStrength = wallDiffuse;
+  leftWall.specularStrength = wallSpecular;
   Model rightWall = Model(leftWall);
   rightWall.transform = rightWall.transform * Transform::R(
       glm::quat(glm::radians(glm::vec3(0, 180, 0))));
@@ -118,20 +154,44 @@ void dg::PortalScene::Initialize() {
   Model floor = Model(
         dg::Mesh::Quad,
         simpleTextureShader,
-        hardwoodTexture,
-        glm::vec2(5, 3),
+        rustyPlateTexture,
+        glm::vec2(5, 3) * 2.f,
         Transform::TRS(
           glm::vec3(1, 0, 0),
           glm::quat(glm::radians(glm::vec3(-90, 0, 0))),
           glm::vec3(5, 3, 1)
           ));
+  floor.lit = true;
+  floor.lightColor = lightColor;
+  floor.ambientStrength = wallAmbient;
+  floor.diffuseStrength = wallDiffuse;
+  floor.specularStrength = wallSpecular;
   Model ceiling = Model(floor);
-  ceiling.texture = rustyPlateTexture;
+  ceiling.texture = hardwoodTexture;
   ceiling.transform = ceiling.transform * Transform::R(
       glm::quat(glm::radians(glm::vec3(180, 0, 0))));
   ceiling.transform.translation.y = 2;
+  ceiling.specularStrength = 0.1f;
+  ceiling.uvScale /= 2;
   models.push_back(std::move(floor));
   models.push_back(std::move(ceiling));
+
+  // Create portal models.
+  Model redPortalModel = Model(
+      dg::Mesh::Quad,
+      solidColorShader,
+      portalTransforms[0] * portalQuadScale);
+  redPortalModel.lit = true;
+  redPortalModel.albedo = glm::vec3(1, 0, 0);
+  redPortalModel.lightColor = lightColor;
+  redPortalModel.ambientStrength = wallAmbient;
+  redPortalModel.diffuseStrength = wallDiffuse;
+  redPortalModel.specularStrength = 0;
+  Model bluePortalModel = Model(redPortalModel);
+  bluePortalModel.albedo = glm::vec3(0, 0, 1);
+  bluePortalModel.transform = portalTransforms[1] * portalQuadScale;
+  models.push_back(std::move(redPortalModel));
+  models.push_back(std::move(bluePortalModel));
 
   // Set initial camera position.
   camera.transform.translation = glm::vec3(2.2f, 0.85f, 1);
@@ -225,7 +285,7 @@ void dg::PortalScene::RenderScene(
     bool throughPortal, dg::Transform inPortal, dg::Transform outPortal) {
 
   // Set up view.
-  glm::mat4x4 view = camera.GetViewMatrix();
+  Transform view = camera.transform.Inverse();
   glm::mat4x4 projection = camera.GetProjectionMatrix(
       window->GetWidth() / window->GetHeight());
 
@@ -247,50 +307,10 @@ void dg::PortalScene::RenderScene(
                                       : glm::mat4x4(0);
   for (auto model = models.begin(); model != models.end(); model++) {
     model->invPortal = invPortal;
-    model->Draw(view, projection);
+    model->shader->SetVec3("LightPosition", xfLight.translation);
+    model->shader->SetVec3("CameraPosition", view.Inverse().translation);
+    model->Draw(view.ToMat4(), projection);
   }
-
-  // Prepare to render portals.
-  solidColorShader->Use();
-  Mesh::Quad->Use();
-
-  // Render first (red) portal back.
-  solidColorShader->SetVec3("Albedo", 1, 0, 0);
-  dg::Transform m = portalTransforms[0] * portalQuadScale;
-  solidColorShader->SetMat4("MATRIX_MVP", projection * view * m);
-  solidColorShader->SetMat4("MATRIX_M", m);
-  solidColorShader->SetMat4("InvPortal", glm::mat4x4(0));
-  Mesh::Quad->Draw();
-
-  // If maximum recursion reached, render a closed red portal.
-  if (throughPortal) {
-    solidColorShader->SetVec3("Albedo", 0.5f, 0, 0);
-    dg::Transform m = portalTransforms[0] * portalOpeningScale;
-    solidColorShader->SetMat4("MATRIX_MVP", projection * view * m);
-    solidColorShader->SetMat4("MATRIX_M", m);
-    solidColorShader->SetMat4("InvPortal", glm::mat4x4(0));
-    Mesh::Quad->Draw();
-  }
-
-  // Render second (blue) portal back;
-  solidColorShader->SetVec3("Albedo", 0, 0, 1);
-  m = portalTransforms[1] * portalQuadScale;
-  solidColorShader->SetMat4("MATRIX_MVP", projection * view * m);
-  solidColorShader->SetMat4("MATRIX_M", m);
-  solidColorShader->SetMat4("InvPortal", glm::mat4x4(0));
-  Mesh::Quad->Draw();
-
-  // If maximum recursion reached, render a closed blue portal.
-  if (throughPortal) {
-    solidColorShader->SetVec3("Albedo", 0, 0, 0.5f);
-    dg::Transform m = portalTransforms[1] * portalOpeningScale;
-    solidColorShader->SetMat4("MATRIX_MVP", projection * view * m);
-    solidColorShader->SetMat4("MATRIX_M", m);
-    solidColorShader->SetMat4("InvPortal", glm::mat4x4(0));
-    Mesh::Quad->Draw();
-  }
-
-  Mesh::Quad->FinishUsing();
 }
 
 void dg::PortalScene::RenderPortalStencil(dg::Transform xfPortal) {

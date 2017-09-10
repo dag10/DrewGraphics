@@ -34,6 +34,7 @@ namespace dg {
       void ClearDepth();
 
       dg::Camera camera;
+      Transform xfLight;
       std::vector<Model> models;
       std::shared_ptr<Shader> simpleTextureShader;
       std::shared_ptr<Shader> solidColorShader;

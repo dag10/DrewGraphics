@@ -9,41 +9,70 @@
 
 static const glm::vec3 cubePositions[] = {
   glm::vec3( 0.0f,  0.0f,  0.0f), 
-  glm::vec3( 2.0f,  5.0f, -15.0f),
-  glm::vec3(-1.5f, -2.2f, -2.5f),
-  glm::vec3(-3.8f, -2.0f, -12.3f),
-  glm::vec3( 2.4f, -0.4f, -3.5f),
-  glm::vec3(-1.7f,  3.0f, -7.5f),
-  glm::vec3( 1.3f, -2.0f, -2.5f),
-  glm::vec3( 1.5f,  2.0f, -2.5f),
-  glm::vec3( 1.5f,  0.2f, -1.5f),
-  glm::vec3(-1.3f,  1.0f, -1.5f),
 };
+
+static const dg::Transform xfLightScale = dg::Transform::S(glm::vec3(0.1f));
+static const glm::vec3 lightColor = glm::vec3(1, 1, 1);
 
 std::unique_ptr<dg::TutorialScene> dg::TutorialScene::Make() {
   return std::unique_ptr<dg::TutorialScene>(new dg::TutorialScene());
 }
 
 void dg::TutorialScene::Initialize() {
-  // Create cube mesh.
-  cube = dg::Mesh::Cube;
+  // Configure global includes for all shader files.
+  dg::Shader::SetVertexHead("assets/shaders/includes/vertex_head.glsl");
+  dg::Shader::AddVertexSource("assets/shaders/includes/vertex_main.glsl");
+  dg::Shader::SetFragmentHead("assets/shaders/includes/fragment_head.glsl");
+  dg::Shader::AddFragmentSource("assets/shaders/includes/fragment_main.glsl");
 
-  // Create shader.
-  shader = dg::Shader::FromFiles(
-      "assets/shaders/tutorialshader.v.glsl",
-      "assets/shaders/tutorialshader.f.glsl");
+  // Create shaders.
+  solidColorShader = std::make_shared<Shader>(dg::Shader::FromFiles(
+      "assets/shaders/solidcolor.v.glsl",
+      "assets/shaders/solidcolor.f.glsl"));
 
-  // Create textures.
-  containerTexture = dg::Texture::FromPath("assets/textures/container.jpg");
-  awesomeFaceTexture = dg::Texture::FromPath("assets/textures/awesomeface.png");
+  // Create cubes.
+  int numCubes = sizeof(cubePositions) / sizeof(cubePositions[0]);
+  for (int i = 0; i < numCubes; i++) {
+    Model cube = Model(
+          dg::Mesh::Cube,
+          solidColorShader,
+          Transform::T(cubePositions[i]));
+    cube.lit = true;
+    cube.albedo = glm::vec3(1.0f, 0.5f, 0.31f);
+    cube.lightColor = lightColor;
+    cube.ambientStrength = 0.2f;
+    cube.specularStrength = 0.5f;
+    cube.diffuseStrength = 1.0f;
+    models.push_back(std::move(cube));
+  }
+
+  // Set initial camera position.
+  camera.transform = Transform::T(glm::vec3(2, 0.0f, 4));
+  camera.LookAtPoint(glm::vec3(0));
 }
 
 void dg::TutorialScene::Update() {
-  // Rotate camera around center, and tell it to look at origin.
-  camera.transform.translation = \
-        glm::quat(glm::radians(glm::vec3(0.f, Time::Elapsed * -40.f, 0.f))) *
-        glm::vec3(0, 2 + 1 * sin(glm::radians(Time::Elapsed) * 50), -5);
-  camera.LookAtPoint(glm::vec3(0));
+  // Calculate new rotation for camera, based on Left and Right keys.
+  const float rotationSpeed = 180; // degrees per second
+  Transform xfRotDelta = dg::Transform::R(glm::quat(glm::radians(
+          glm::vec3(0, rotationSpeed * (float)Time::Delta, 0))));
+  if (window->IsKeyPressed(GLFW_KEY_LEFT)) {
+    camera.transform = xfRotDelta.Inverse() * camera.transform;
+  }
+  if (window->IsKeyPressed(GLFW_KEY_RIGHT)) {
+    camera.transform = xfRotDelta * camera.transform;
+  }
+
+  // Calculate rotation for the first box based on the < and > keys.
+  if (window->IsKeyPressed(GLFW_KEY_COMMA)) {
+    models[0].transform = models[0].transform * xfRotDelta.Inverse();
+  }
+  if (window->IsKeyPressed(GLFW_KEY_PERIOD)) {
+    models[0].transform = models[0].transform * xfRotDelta;
+  }
+  
+  // Update light position.
+  xfLight = Transform::T(glm::vec3(1.5f, 0.8f, 0.8f));
 }
 
 void dg::TutorialScene::Render() {
@@ -53,31 +82,31 @@ void dg::TutorialScene::Render() {
       window->GetWidth() / window->GetHeight());
 
   // Clear back buffer.
-  glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+  glClearColor(0, 0, 0, 1);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
    // Render params.
   glEnable(GL_DEPTH_TEST);
+  glEnable(GL_CULL_FACE);
+  glCullFace(GL_BACK);
   
   // Set up cube material.
-  shader.Use();
-  shader.SetFloat("ELAPSED_TIME", Time::Elapsed);
-  shader.SetTexture(0, "MainTex", containerTexture);
-  shader.SetTexture(1, "SecondaryTex", awesomeFaceTexture);
+  solidColorShader->Use();
+  solidColorShader->SetVec3("LightPosition", xfLight.translation);
+  solidColorShader->SetVec3("CameraPosition", camera.transform.translation);
 
-  // Render cubes.
-  cube->Use();
-  int numCubes = sizeof(cubePositions) / sizeof(cubePositions[0]);
-  for (int i = 0; i < numCubes; i++) {
-    dg::Transform model = dg::Transform::TRS(
-        cubePositions[i],
-        glm::quat(glm::radians(glm::vec3(
-              Time::Elapsed * 90 + 15 * i, 20 * i, -10 * i))),
-        glm::vec3(0.5f + 0.5f * ((float)i / (float)numCubes)));
-
-    shader.SetMat4("MATRIX_MVP", projection * view * model);
-    cube->Draw();
+  // Render models.
+  for (auto model = models.begin(); model != models.end(); model++) {
+    model->Draw(view, projection);
   }
-  cube->FinishUsing();
+
+  // Render light source.
+  solidColorShader->SetBool("Lit", false);
+  solidColorShader->SetVec3("Albedo", lightColor);
+  solidColorShader->SetMat4(
+      "MATRIX_MVP", projection * view * xfLight * xfLightScale);
+  Mesh::Cube->Use();
+  Mesh::Cube->Draw();
+  Mesh::Cube->FinishUsing();
 }
 

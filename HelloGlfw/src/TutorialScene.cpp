@@ -30,19 +30,23 @@ void dg::TutorialScene::Initialize() {
       "assets/shaders/solidcolor.v.glsl",
       "assets/shaders/solidcolor.f.glsl"));
 
+  // Create wooden cube material.
+  Material cubeMaterial;
+  cubeMaterial.shader = solidColorShader;
+  cubeMaterial.lit = true;
+  cubeMaterial.albedo = glm::vec3(1.0f, 0.5f, 0.31f);
+  cubeMaterial.lightColor = lightColor;
+  cubeMaterial.ambientStrength = 0.2f;
+  cubeMaterial.specularStrength = 0.5f;
+  cubeMaterial.diffuseStrength = 1.0f;
+
   // Create cubes.
   int numCubes = sizeof(cubePositions) / sizeof(cubePositions[0]);
   for (int i = 0; i < numCubes; i++) {
     Model cube = Model(
           dg::Mesh::Cube,
-          solidColorShader,
+          cubeMaterial,
           Transform::T(cubePositions[i]));
-    cube.lit = true;
-    cube.albedo = glm::vec3(1.0f, 0.5f, 0.31f);
-    cube.lightColor = lightColor;
-    cube.ambientStrength = 0.2f;
-    cube.specularStrength = 0.5f;
-    cube.diffuseStrength = 1.0f;
     models.push_back(std::move(cube));
   }
 

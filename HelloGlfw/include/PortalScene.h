@@ -8,6 +8,7 @@
 #include "Window.h"
 #include "Camera.h"
 #include "Shader.h"
+#include "Material.h"
 #include "Texture.h"
 #include "Transform.h"
 #include "Mesh.h"

@@ -76,122 +76,137 @@ void dg::PortalScene::Initialize() {
   xfLight = Transform::T(glm::vec3(2, 1.7f, 0));
 
   // Create light cube.
+  Material lightMaterial;
+  lightMaterial.shader = solidColorShader;
+  lightMaterial.albedo = lightColor;
   Model lightCube = Model(
       dg::Mesh::Cube,
-      solidColorShader,
+      lightMaterial,
       xfLight * Transform::S(glm::vec3(0.05f)));
-  lightCube.lit = false;
-  lightCube.albedo = lightColor;
   models.push_back(std::move(lightCube));
+
+  // Create wooden cube material.
+  Material cubeMaterial;
+  cubeMaterial.shader = simpleTextureShader;
+  cubeMaterial.texture = crateTexture;
+  cubeMaterial.uvScale = glm::vec2(1);
+  cubeMaterial.lit = true;
+  cubeMaterial.albedo = glm::vec3(1.0f, 0.5f, 0.31f);
+  cubeMaterial.lightColor = lightColor;
+  cubeMaterial.ambientStrength = 0.8f;
+  cubeMaterial.diffuseStrength = 1.0f;
+  cubeMaterial.specularStrength = 0.2f;
 
   // Create wooden cubes.
   int numCubes = sizeof(cubePositions) / sizeof(cubePositions[0]);
   for (int i = 0; i < numCubes; i++) {
     Model cube = Model(
           dg::Mesh::Cube,
-          simpleTextureShader,
-          crateTexture,
-          glm::vec2(1),
+          cubeMaterial,
           Transform::TS(cubePositions[i], glm::vec3(0.5f)));
-    cube.lit = true;
-    cube.albedo = glm::vec3(1.0f, 0.5f, 0.31f);
-    cube.lightColor = lightColor;
-    cube.ambientStrength = 0.9f;
-    cube.diffuseStrength = 1.0f;
-    cube.specularStrength = 0.2f;
     models.push_back(std::move(cube));
   }
 
-  // Wall material properties.
-  const float wallAmbient = 0.4f;
-  const float wallDiffuse = 0.8f;
-  const float wallSpecular = 0.4f;
+  // Create wall material.
+  Material wallMaterial;
+  wallMaterial.shader = simpleTextureShader;
+  wallMaterial.texture = brickTexture;
+  wallMaterial.lit = true;
+  wallMaterial.lightColor = lightColor;
+  wallMaterial.ambientStrength = 0.4f;
+  wallMaterial.diffuseStrength = 0.8f;
+  wallMaterial.specularStrength = 0.4f;
 
-  // Create front and back walls.
+  // Create back wall.
   Model backWall = Model(
         dg::Mesh::Quad,
-        simpleTextureShader,
-        brickTexture,
-        glm::vec2(5, 2),
+        wallMaterial,
         Transform::TRS(
           glm::vec3(1, 1, -1.5),
           glm::quat(glm::radians(glm::vec3(0))),
           glm::vec3(5, 2, 1)
           ));
-  backWall.lit = true;
-  backWall.lightColor = lightColor;
-  backWall.ambientStrength = wallAmbient;
-  backWall.diffuseStrength = wallDiffuse;
-  backWall.specularStrength = wallSpecular;
-  Model frontWall = Model(backWall);
+  backWall.material.uvScale = glm::vec2(5, 2);
+  models.push_back(Model(backWall));
+
+  // Create front wall.
+  Model frontWall = backWall;
   frontWall.transform = frontWall.transform * Transform::R(
       glm::quat(glm::radians(glm::vec3(0, 180, 0))));
   frontWall.transform.translation.z *= -1;
-  models.push_back(std::move(backWall));
-  models.push_back(std::move(frontWall));
+  models.push_back(Model(frontWall));
 
-  // Create left and right walls.
+  // Create left wall.
   Model leftWall = Model(
         dg::Mesh::Quad,
-        simpleTextureShader,
-        brickTexture,
-        glm::vec2(3, 2),
+        wallMaterial,
         Transform::TRS(
           glm::vec3(-1.5f, 1, 0),
           glm::quat(glm::radians(glm::vec3(0, 90, 0))),
           glm::vec3(3, 2, 1)
           ));
-  leftWall.lit = true;
-  leftWall.lightColor = lightColor;
-  leftWall.ambientStrength = wallAmbient;
-  leftWall.diffuseStrength = wallDiffuse;
-  leftWall.specularStrength = wallSpecular;
-  Model rightWall = Model(leftWall);
+  leftWall.material.uvScale = glm::vec2(3, 2);
+  models.push_back(Model(leftWall));
+
+  // Create right wall.
+  Model rightWall = leftWall;
   rightWall.transform = rightWall.transform * Transform::R(
       glm::quat(glm::radians(glm::vec3(0, 180, 0))));
   rightWall.transform.translation.x = 3.5f;
-  models.push_back(std::move(leftWall));
-  models.push_back(std::move(rightWall));
+  models.push_back(Model(rightWall));
 
-  // Create floor and ceiling.
+  // Create floor material.
+  Material floorMaterial;
+  floorMaterial.shader = simpleTextureShader;
+  floorMaterial.texture = rustyPlateTexture;
+  floorMaterial.uvScale = glm::vec2(5, 3) * 2.f;
+  floorMaterial.lit = true;
+  floorMaterial.lightColor = lightColor;
+  floorMaterial.ambientStrength = wallMaterial.ambientStrength;
+  floorMaterial.diffuseStrength = wallMaterial.diffuseStrength;
+
+  // Create floor.
   Model floor = Model(
         dg::Mesh::Quad,
-        simpleTextureShader,
-        rustyPlateTexture,
-        glm::vec2(5, 3) * 2.f,
+        floorMaterial,
         Transform::TRS(
           glm::vec3(1, 0, 0),
           glm::quat(glm::radians(glm::vec3(-90, 0, 0))),
           glm::vec3(5, 3, 1)
           ));
-  floor.lit = true;
-  floor.lightColor = lightColor;
-  floor.ambientStrength = wallAmbient;
-  floor.diffuseStrength = wallDiffuse;
-  floor.specularStrength = wallSpecular;
-  Model ceiling = Model(floor);
-  ceiling.texture = hardwoodTexture;
+  models.push_back(Model(floor));
+
+  // Create ceiling material.
+  Material ceilingMaterial = floorMaterial;
+  ceilingMaterial.texture = hardwoodTexture;
+  ceilingMaterial.specularStrength = 0.1f;
+  ceilingMaterial.uvScale /= 2;
+
+  // Create ceiling.
+  Model ceiling = floor;
+  ceiling.material = ceilingMaterial;
   ceiling.transform = ceiling.transform * Transform::R(
       glm::quat(glm::radians(glm::vec3(180, 0, 0))));
   ceiling.transform.translation.y = 2;
-  ceiling.specularStrength = 0.1f;
-  ceiling.uvScale /= 2;
-  models.push_back(std::move(floor));
-  models.push_back(std::move(ceiling));
+  models.push_back(Model(ceiling));
+
+  // Create portal back materials.
+  Material portalBackMaterial;
+  portalBackMaterial.shader = solidColorShader;
+  portalBackMaterial.lit = true;
+  portalBackMaterial.lightColor = lightColor;
+  portalBackMaterial.ambientStrength = wallMaterial.ambientStrength;
+  portalBackMaterial.diffuseStrength = wallMaterial.diffuseStrength;
+  portalBackMaterial.specularStrength = 0;
 
   // Create portal models.
   Model redPortalModel = Model(
       dg::Mesh::Quad,
-      solidColorShader,
+      portalBackMaterial,
       portalTransforms[0] * portalQuadScale);
-  redPortalModel.lit = true;
-  redPortalModel.albedo = glm::vec3(1, 0, 0);
-  redPortalModel.lightColor = lightColor;
-  redPortalModel.ambientStrength = wallAmbient;
-  redPortalModel.diffuseStrength = wallDiffuse;
-  redPortalModel.specularStrength = 0;
+  redPortalModel.material.albedo = glm::vec3(1, 0, 0);
   Model bluePortalModel = Model(redPortalModel);
-  bluePortalModel.albedo = glm::vec3(0, 0, 1);
+  bluePortalModel.material.albedo = glm::vec3(0, 0, 1);
   bluePortalModel.transform = portalTransforms[1] * portalQuadScale;
   models.push_back(std::move(redPortalModel));
   models.push_back(std::move(bluePortalModel));
@@ -315,11 +330,14 @@ void dg::PortalScene::RenderScene(
   // Render models.
   glm::mat4x4 invPortal = throughPortal ? outPortal.Inverse().ToMat4()
                                       : glm::mat4x4(0);
+  int i = 0;
   for (auto model = models.begin(); model != models.end(); model++) {
-    model->invPortal = invPortal;
-    model->shader->SetVec3("LightPosition", xfLight.translation);
-    model->shader->SetVec3("CameraPosition", view.Inverse().translation);
+    model->material.invPortal = invPortal;
+    model->material.shader->SetVec3("LightPosition", xfLight.translation);
+    model->material.shader->SetVec3(
+        "CameraPosition", view.Inverse().translation);
     model->Draw(view.ToMat4(), projection);
+    i++;
   }
 }
 

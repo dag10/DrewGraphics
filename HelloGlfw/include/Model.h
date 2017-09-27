@@ -4,12 +4,10 @@
 #pragma once
 
 #include <memory>
-#include <glm/vec2.hpp>
 #include <glm/mat4x4.hpp>
 
-#include "Shader.h"
-#include "Texture.h"
 #include "Transform.h"
+#include "Material.h"
 #include "Mesh.h"
 
 namespace dg {
@@ -21,13 +19,7 @@ namespace dg {
       Model() = default;
 
       Model(
-          std::shared_ptr<Mesh> mesh, std::shared_ptr<Shader> shader, 
-          Transform transform);
-
-      Model(
-          std::shared_ptr<Mesh> mesh, std::shared_ptr<Shader> shader,
-          std::shared_ptr<Texture> texture, glm::vec2 uvScale,
-          Transform transform);
+          std::shared_ptr<Mesh> mesh, Material material, Transform transform);
 
       Model(Model& other);
       Model(Model&& other);
@@ -36,22 +28,8 @@ namespace dg {
       friend void swap(Model& first, Model& second); // nothrow
 
       std::shared_ptr<Mesh> mesh = nullptr;
-      std::shared_ptr<Shader> shader = nullptr;
+      Material material;
       Transform transform = Transform();
-
-      // TODO: Don't hard-code these into the model. Use a vector of shader
-      //       properties instead.
-      std::shared_ptr<Texture> texture = nullptr;
-      glm::vec2 uvScale = glm::vec2(1);
-      glm::mat4x4 invPortal = glm::mat4x4(0);
-
-      // TODO: Refactor these out into a Material class.
-      bool lit;
-      glm::vec3 albedo;
-      glm::vec3 lightColor;
-      float ambientStrength;
-      float diffuseStrength;
-      float specularStrength;
 
       void Draw(glm::mat4x4 view, glm::mat4x4 projection) const;
 

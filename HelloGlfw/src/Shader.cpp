@@ -126,71 +126,123 @@ GLint dg::Shader::GetAttributeLocation(const std::string& name) const {
   return glGetAttribLocation(programHandle, name.c_str());
 }
 
-void dg::Shader::SetBool(const std::string& name, bool value) const {         
+void dg::Shader::SetBool(const std::string& name, bool value) {         
   glUniform1i(GetUniformLocation(name), (int)value); 
+  propertyTypes[name] = PROPERTY_BOOL;
 }
 
-void dg::Shader::SetInt(const std::string& name, int value) const { 
+void dg::Shader::SetInt(const std::string& name, int value) { 
   glUniform1i(GetUniformLocation(name), (int)value); 
+  propertyTypes[name] = PROPERTY_INT;
 }
 
-void dg::Shader::SetFloat(const std::string& name, float value) const { 
+void dg::Shader::SetFloat(const std::string& name, float value) { 
   glUniform1f(GetUniformLocation(name), value); 
+  propertyTypes[name] = PROPERTY_FLOAT;
 }
 
 void dg::Shader::SetVec2(
-    const std::string& name, const glm::vec2& value) const { 
+    const std::string& name, const glm::vec2& value) { 
   glUniform2fv(GetUniformLocation(name), 1, glm::value_ptr(value));
+  propertyTypes[name] = PROPERTY_VEC2;
 }
 
-void dg::Shader::SetVec2(const std::string& name, float x, float y) const { 
+void dg::Shader::SetVec2(const std::string& name, float x, float y) { 
   glUniform2f(GetUniformLocation(name), x, y); 
+  propertyTypes[name] = PROPERTY_VEC2;
 }
 
 void dg::Shader::SetVec3(
-    const std::string& name, const glm::vec3& value) const { 
+    const std::string& name, const glm::vec3& value) { 
   glUniform3fv(GetUniformLocation(name), 1, glm::value_ptr(value));
+  propertyTypes[name] = PROPERTY_VEC3;
 }
 
 void dg::Shader::SetVec3(
-    const std::string& name, float x, float y, float z) const { 
+    const std::string& name, float x, float y, float z) { 
   glUniform3f(GetUniformLocation(name), x, y, z); 
+  propertyTypes[name] = PROPERTY_VEC3;
 }
 
-void dg::Shader::SetVec4(const std::string& name, const glm::vec4& value) const { 
+void dg::Shader::SetVec4(const std::string& name, const glm::vec4& value) { 
   glUniform4fv(GetUniformLocation(name), 1, glm::value_ptr(value));
+  propertyTypes[name] = PROPERTY_VEC4;
 }
 
 void dg::Shader::SetVec4(
     const std::string& name, float x, float y, float z, float w) { 
   glUniform4f(GetUniformLocation(name), x, y, z, w); 
+  propertyTypes[name] = PROPERTY_VEC4;
 }
 
-void dg::Shader::SetMat2(const std::string& name, const glm::mat2& mat) const {
+void dg::Shader::SetMat2(const std::string& name, const glm::mat2& mat) {
   glUniformMatrix2fv(
       GetUniformLocation(name), 1, GL_FALSE, glm::value_ptr(mat));
+  propertyTypes[name] = PROPERTY_MAT2X2;
 }
 
-void dg::Shader::SetMat3(const std::string& name, const glm::mat3& mat) const {
+void dg::Shader::SetMat3(const std::string& name, const glm::mat3& mat) {
   glUniformMatrix3fv(
       GetUniformLocation(name), 1, GL_FALSE, glm::value_ptr(mat));
+  propertyTypes[name] = PROPERTY_MAT3X3;
 }
 
-void dg::Shader::SetMat4(const std::string& name, const glm::mat4& mat) const {
+void dg::Shader::SetMat4(const std::string& name, const glm::mat4& mat) {
   glUniformMatrix4fv(
       GetUniformLocation(name), 1, GL_FALSE, glm::value_ptr(mat));
+  propertyTypes[name] = PROPERTY_MAT4X4;
 }
 
 void dg::Shader::SetMat4(
-    const std::string& name, const dg::Transform& xf) const {
+    const std::string& name, const dg::Transform& xf) {
   SetMat4(name, xf.ToMat4());
+  propertyTypes[name] = PROPERTY_MAT4X4;
 }
 
 void dg::Shader::SetTexture(
     unsigned int textureUnit, const std::string& name,
-    const dg::Texture& texture) const {
+    const dg::Texture& texture) {
   glActiveTexture(GL_TEXTURE0 + textureUnit);
   glBindTexture(GL_TEXTURE_2D, texture.GetHandle());
   SetInt(name, textureUnit);
+  propertyTypes[name] = PROPERTY_TEXTURE;
+}
+
+void dg::Shader::ResetProperties() {
+  for (auto it = propertyTypes.begin(); it != propertyTypes.end(); it++) {
+    switch (it->second) {
+      case PROPERTY_BOOL:
+        SetBool(it->first, false);
+        break;
+      case PROPERTY_INT:
+        SetInt(it->first, 0);
+        break;
+      case PROPERTY_FLOAT:
+        SetFloat(it->first, 0);
+        break;
+      case PROPERTY_VEC2:
+        SetVec2(it->first, glm::vec2(0));
+        break;
+      case PROPERTY_VEC3:
+        SetVec3(it->first, glm::vec3(0));
+        break;
+      case PROPERTY_VEC4:
+        SetVec4(it->first, glm::vec4(0));
+        break;
+      case PROPERTY_MAT2X2:
+        SetMat2(it->first, glm::mat2x2(0));
+        break;
+      case PROPERTY_MAT3X3:
+        SetMat3(it->first, glm::mat3x3(0));
+        break;
+      case PROPERTY_MAT4X4:
+        SetMat4(it->first, glm::mat4x4(0));
+        break;
+      case PROPERTY_TEXTURE:
+        break;
+      default:
+        break;
+    }
+  }
 }
 

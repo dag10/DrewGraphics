@@ -78,7 +78,7 @@ void dg::PortalScene::Initialize() {
   // Create light cube.
   Material lightMaterial;
   lightMaterial.shader = solidColorShader;
-  lightMaterial.albedo = lightColor;
+  lightMaterial.SetProperty("Albedo", lightColor);
   Model lightCube = Model(
       dg::Mesh::Cube,
       lightMaterial,
@@ -88,14 +88,12 @@ void dg::PortalScene::Initialize() {
   // Create wooden cube material.
   Material cubeMaterial;
   cubeMaterial.shader = simpleTextureShader;
-  cubeMaterial.texture = crateTexture;
-  cubeMaterial.uvScale = glm::vec2(1);
-  cubeMaterial.lit = true;
-  cubeMaterial.albedo = glm::vec3(1.0f, 0.5f, 0.31f);
-  cubeMaterial.lightColor = lightColor;
-  cubeMaterial.ambientStrength = 0.8f;
-  cubeMaterial.diffuseStrength = 1.0f;
-  cubeMaterial.specularStrength = 0.2f;
+  cubeMaterial.SetProperty("MainTex", crateTexture);
+  cubeMaterial.SetProperty("UVScale", glm::vec2(1));
+  cubeMaterial.SetProperty("Lit", true);
+  cubeMaterial.SetProperty("AmbientStrength", 0.8f);
+  cubeMaterial.SetProperty("DiffuseStrength", 1.0f);
+  cubeMaterial.SetProperty("SpecularStrength", 0.2f);
 
   // Create wooden cubes.
   int numCubes = sizeof(cubePositions) / sizeof(cubePositions[0]);
@@ -110,12 +108,11 @@ void dg::PortalScene::Initialize() {
   // Create wall material.
   Material wallMaterial;
   wallMaterial.shader = simpleTextureShader;
-  wallMaterial.texture = brickTexture;
-  wallMaterial.lit = true;
-  wallMaterial.lightColor = lightColor;
-  wallMaterial.ambientStrength = 0.4f;
-  wallMaterial.diffuseStrength = 0.8f;
-  wallMaterial.specularStrength = 0.4f;
+  wallMaterial.SetProperty("MainTex", brickTexture);
+  wallMaterial.SetProperty("Lit", true);
+  wallMaterial.SetProperty("AmbientStrength", 0.4f);
+  wallMaterial.SetProperty("DiffuseStrength", 0.8f);
+  wallMaterial.SetProperty("SpecularStrength", 0.4f);
 
   // Create back wall.
   Model backWall = Model(
@@ -126,7 +123,7 @@ void dg::PortalScene::Initialize() {
           glm::quat(glm::radians(glm::vec3(0))),
           glm::vec3(5, 2, 1)
           ));
-  backWall.material.uvScale = glm::vec2(5, 2);
+  backWall.material.SetProperty("UVScale", glm::vec2(5, 2));
   models.push_back(Model(backWall));
 
   // Create front wall.
@@ -145,7 +142,7 @@ void dg::PortalScene::Initialize() {
           glm::quat(glm::radians(glm::vec3(0, 90, 0))),
           glm::vec3(3, 2, 1)
           ));
-  leftWall.material.uvScale = glm::vec2(3, 2);
+  leftWall.material.SetProperty("UVScale", glm::vec2(3, 2));
   models.push_back(Model(leftWall));
 
   // Create right wall.
@@ -158,12 +155,12 @@ void dg::PortalScene::Initialize() {
   // Create floor material.
   Material floorMaterial;
   floorMaterial.shader = simpleTextureShader;
-  floorMaterial.texture = rustyPlateTexture;
-  floorMaterial.uvScale = glm::vec2(5, 3) * 2.f;
-  floorMaterial.lit = true;
-  floorMaterial.lightColor = lightColor;
-  floorMaterial.ambientStrength = wallMaterial.ambientStrength;
-  floorMaterial.diffuseStrength = wallMaterial.diffuseStrength;
+  floorMaterial.SetProperty("MainTex", rustyPlateTexture);
+  floorMaterial.SetProperty("UVScale", glm::vec2(5, 3) * 2.f);
+  floorMaterial.SetProperty("Lit", true);
+  floorMaterial.SetProperty("AmbientStrength", 0.4f);
+  floorMaterial.SetProperty("DiffuseStrength", 0.8f);
+  floorMaterial.SetProperty("SpecularStrength", 0.4f);
 
   // Create floor.
   Model floor = Model(
@@ -178,9 +175,9 @@ void dg::PortalScene::Initialize() {
 
   // Create ceiling material.
   Material ceilingMaterial = floorMaterial;
-  ceilingMaterial.texture = hardwoodTexture;
-  ceilingMaterial.specularStrength = 0.1f;
-  ceilingMaterial.uvScale /= 2;
+  ceilingMaterial.SetProperty("MainTex", hardwoodTexture);
+  ceilingMaterial.SetProperty("SpecularStrength", 0.1f);
+  ceilingMaterial.SetProperty("UVScale", glm::vec2(5, 3));
 
   // Create ceiling.
   Model ceiling = floor;
@@ -193,20 +190,19 @@ void dg::PortalScene::Initialize() {
   // Create portal back materials.
   Material portalBackMaterial;
   portalBackMaterial.shader = solidColorShader;
-  portalBackMaterial.lit = true;
-  portalBackMaterial.lightColor = lightColor;
-  portalBackMaterial.ambientStrength = wallMaterial.ambientStrength;
-  portalBackMaterial.diffuseStrength = wallMaterial.diffuseStrength;
-  portalBackMaterial.specularStrength = 0;
+  portalBackMaterial.SetProperty("Lit", true);
+  portalBackMaterial.SetProperty("AmbientStrength", 0.4f);
+  portalBackMaterial.SetProperty("DiffuseStrength", 0.8f);
+  portalBackMaterial.SetProperty("SpecularStrength", 0.0f);
 
   // Create portal models.
   Model redPortalModel = Model(
       dg::Mesh::Quad,
       portalBackMaterial,
       portalTransforms[0] * portalQuadScale);
-  redPortalModel.material.albedo = glm::vec3(1, 0, 0);
+  redPortalModel.material.SetProperty("Albedo", glm::vec3(1, 0, 0));
   Model bluePortalModel = Model(redPortalModel);
-  bluePortalModel.material.albedo = glm::vec3(0, 0, 1);
+  bluePortalModel.material.SetProperty("Albedo", glm::vec3(0, 0, 1));
   bluePortalModel.transform = portalTransforms[1] * portalQuadScale;
   models.push_back(std::move(redPortalModel));
   models.push_back(std::move(bluePortalModel));
@@ -332,10 +328,10 @@ void dg::PortalScene::RenderScene(
                                       : glm::mat4x4(0);
   int i = 0;
   for (auto model = models.begin(); model != models.end(); model++) {
-    model->material.invPortal = invPortal;
-    model->material.shader->SetVec3("LightPosition", xfLight.translation);
-    model->material.shader->SetVec3(
-        "CameraPosition", view.Inverse().translation);
+    model->material.SetProperty("CameraPosition", view.Inverse().translation);
+    model->material.SetProperty("InvPortal", invPortal);
+    model->material.SetProperty("LightPosition", xfLight.translation);
+    model->material.SetProperty("LightColor", lightColor);
     model->Draw(view.ToMat4(), projection);
     i++;
   }

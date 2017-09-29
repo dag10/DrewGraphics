@@ -5,6 +5,7 @@
 #pragma once
 
 #include <vector>
+#include <map>
 #include <string>
 #include <GLUT/glut.h>
 #include <glm/glm.hpp>
@@ -13,6 +14,41 @@
 #include "ShaderSource.h"
 
 namespace dg {
+
+  enum ShaderPropertyType {
+    PROPERTY_NULL,
+
+    PROPERTY_BOOL,
+    PROPERTY_INT,
+    PROPERTY_FLOAT,
+    PROPERTY_VEC2,
+    PROPERTY_VEC3,
+    PROPERTY_VEC4,
+    PROPERTY_MAT2X2,
+    PROPERTY_MAT3X3,
+    PROPERTY_MAT4X4,
+    PROPERTY_TEXTURE,
+
+    PROPERTY_MAX,
+  };
+
+  union ShaderPropertyValue {
+    bool _bool;
+    int _int;
+    float _float;
+    glm::vec2 _vec2;
+    glm::vec3 _vec3;
+    glm::vec4 _vec4;
+    glm::mat2x2 _mat2x2;
+    glm::mat3x3 _mat3x3;
+    glm::mat4x4 _mat4x4;
+  };
+
+  struct ShaderProperty {
+    ShaderPropertyType type = PROPERTY_NULL;
+    ShaderPropertyValue value;
+    std::shared_ptr<Texture> texture = nullptr;
+  };
 
   // Copy is disabled, only moves are allowed. This prevents us
   // from leaking or redeleting the openGL shader program resource.
@@ -41,22 +77,24 @@ namespace dg {
       GLint GetUniformLocation(const std::string& name) const;
       GLint GetAttributeLocation(const std::string& name) const;
 
-      void SetBool(const std::string& name, bool value) const;
-      void SetInt(const std::string& name, int value) const;
-      void SetFloat(const std::string& name, float value) const;
-      void SetVec2(const std::string& name, const glm::vec2& value) const;
-      void SetVec2(const std::string& name, float x, float y) const;
-      void SetVec3(const std::string& name, const glm::vec3& value) const;
-      void SetVec3(const std::string& name, float x, float y, float z) const;
-      void SetVec4(const std::string& name, const glm::vec4& value) const;
+      void SetBool(const std::string& name, bool value);
+      void SetInt(const std::string& name, int value);
+      void SetFloat(const std::string& name, float value);
+      void SetVec2(const std::string& name, const glm::vec2& value);
+      void SetVec2(const std::string& name, float x, float y);
+      void SetVec3(const std::string& name, const glm::vec3& value);
+      void SetVec3(const std::string& name, float x, float y, float z);
+      void SetVec4(const std::string& name, const glm::vec4& value);
       void SetVec4(const std::string& name, float x, float y, float z, float w) ;
-      void SetMat2(const std::string& name, const glm::mat2& mat) const;
-      void SetMat3(const std::string& name, const glm::mat3& mat) const;
-      void SetMat4(const std::string& name, const glm::mat4& mat) const;
-      void SetMat4(const std::string& name, const Transform& xf) const;
+      void SetMat2(const std::string& name, const glm::mat2& mat);
+      void SetMat3(const std::string& name, const glm::mat3& mat);
+      void SetMat4(const std::string& name, const glm::mat4& mat);
+      void SetMat4(const std::string& name, const Transform& xf);
       void SetTexture(
           unsigned int textureUnit, const std::string& name,
-          const dg::Texture& texture) const;
+          const dg::Texture& texture);
+
+      void ResetProperties();
 
     private:
       // Code to be included at top of shaders, includes global types.
@@ -72,6 +110,8 @@ namespace dg {
 
       std::string vertexPath = std::string();
       std::string fragmentPath = std::string();
+
+      std::map<std::string, ShaderPropertyType> propertyTypes;
 
       GLuint programHandle = 0;
 

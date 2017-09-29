@@ -33,12 +33,12 @@ void dg::TutorialScene::Initialize() {
   // Create wooden cube material.
   Material cubeMaterial;
   cubeMaterial.shader = solidColorShader;
-  cubeMaterial.lit = true;
-  cubeMaterial.albedo = glm::vec3(1.0f, 0.5f, 0.31f);
-  cubeMaterial.lightColor = lightColor;
-  cubeMaterial.ambientStrength = 0.2f;
-  cubeMaterial.specularStrength = 0.5f;
-  cubeMaterial.diffuseStrength = 1.0f;
+  cubeMaterial.SetProperty("Lit", true);
+  cubeMaterial.SetProperty("Albedo", glm::vec3(1.0f, 0.5f, 0.31f));
+  cubeMaterial.SetProperty("LightColor", lightColor);
+  cubeMaterial.SetProperty("AmbientStrength", 0.2f);
+  cubeMaterial.SetProperty("SpecularStrength", 0.5f);
+  cubeMaterial.SetProperty("DiffuseStrength", 1.0f);
 
   // Create cubes.
   int numCubes = sizeof(cubePositions) / sizeof(cubePositions[0]);

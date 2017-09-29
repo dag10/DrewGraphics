@@ -4,6 +4,7 @@
 #pragma once
 
 #include <memory>
+#include <map>
 #include "Shader.h"
 #include "Texture.h"
 
@@ -23,20 +24,23 @@ namespace dg {
 
       std::shared_ptr<Shader> shader = nullptr;
 
-      // TODO: Don't hard-code these into the model. Use a vector of shader
-      //       properties instead.
-      std::shared_ptr<Texture> texture = nullptr;
-      glm::vec2 uvScale = glm::vec2(1);
-      glm::mat4x4 invPortal = glm::mat4x4(0);
-
-      bool lit = false;
-      glm::vec3 albedo = glm::vec3(1);
-      glm::vec3 lightColor = glm::vec3(0);
-      float ambientStrength = 0;
-      float diffuseStrength = 0;
-      float specularStrength = 0;
+      void SetProperty(const std::string& name, bool value);
+      void SetProperty(const std::string& name, int value);
+      void SetProperty(const std::string& name, float value);
+      void SetProperty(const std::string& name, glm::vec2 value);
+      void SetProperty(const std::string& name, glm::vec3 value);
+      void SetProperty(const std::string& name, glm::vec4 value);
+      void SetProperty(const std::string& name, glm::mat2x2 value);
+      void SetProperty(const std::string& name, glm::mat3x3 value);
+      void SetProperty(const std::string& name, glm::mat4x4 value);
+      void SetProperty(
+          const std::string& name, std::shared_ptr<Texture>  value);
 
       void Use() const;
+
+    private:
+
+      std::map<std::string, ShaderProperty> properties;
 
   }; // class Material
 

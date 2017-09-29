@@ -6,17 +6,7 @@
 
 dg::Material::Material(Material& other) {
   this->shader = other.shader;
-
-  this->texture = other.texture;
-  this->uvScale = other.uvScale;
-  this->invPortal = other.invPortal;
-
-  this->lit = other.lit;
-  this->albedo = other.albedo;
-  this->lightColor = other.lightColor;
-  this->ambientStrength = other.ambientStrength;
-  this->diffuseStrength = other.diffuseStrength;
-  this->specularStrength = other.specularStrength;
+  this->properties = other.properties;
 }
 
 dg::Material::Material(Material&& other) {
@@ -36,31 +26,122 @@ dg::Material& dg::Material::operator=(Material&& other) {
 void dg::swap(Material& first, Material& second) {
   using std::swap;
   swap(first.shader, second.shader);
+  swap(first.properties, second.properties);
 
-  swap(first.texture, second.texture);
-  swap(first.uvScale, second.uvScale);
-  swap(first.invPortal, second.invPortal);
+}
 
-  swap(first.lit, second.lit);
-  swap(first.albedo, second.albedo);
-  swap(first.lightColor, second.lightColor);
-  swap(first.ambientStrength, second.ambientStrength);
-  swap(first.diffuseStrength, second.diffuseStrength);
-  swap(first.specularStrength, second.specularStrength);
+void dg::Material::SetProperty(const std::string& name, bool value) {
+  ShaderProperty prop;
+  prop.type = PROPERTY_BOOL;
+  prop.value._bool = value;
+  properties[name] = prop;
+}
+
+void dg::Material::SetProperty(const std::string& name, int value) {
+  ShaderProperty prop;
+  prop.type = PROPERTY_INT;
+  prop.value._int = value;
+  properties[name] = prop;
+}
+
+void dg::Material::SetProperty(const std::string& name, float value) {
+  ShaderProperty prop;
+  prop.type = PROPERTY_FLOAT;
+  prop.value._float = value;
+  properties[name] = prop;
+}
+
+void dg::Material::SetProperty(const std::string& name, glm::vec2 value) {
+  ShaderProperty prop;
+  prop.type = PROPERTY_VEC2;
+  prop.value._vec2 = value;
+  properties[name] = prop;
+}
+
+void dg::Material::SetProperty(const std::string& name, glm::vec3 value) {
+  ShaderProperty prop;
+  prop.type = PROPERTY_VEC3;
+  prop.value._vec3 = value;
+  properties[name] = prop;
+}
+
+void dg::Material::SetProperty(const std::string& name, glm::vec4 value) {
+  ShaderProperty prop;
+  prop.type = PROPERTY_VEC4;
+  prop.value._vec4 = value;
+  properties[name] = prop;
+}
+
+void dg::Material::SetProperty(const std::string& name, glm::mat2x2 value) {
+  ShaderProperty prop;
+  prop.type = PROPERTY_MAT2X2;
+  prop.value._mat2x2 = value;
+  properties[name] = prop;
+}
+
+void dg::Material::SetProperty(const std::string& name, glm::mat3x3 value) {
+  ShaderProperty prop;
+  prop.type = PROPERTY_MAT3X3;
+  prop.value._mat3x3 = value;
+  properties[name] = prop;
+}
+
+void dg::Material::SetProperty(const std::string& name, glm::mat4x4 value) {
+  ShaderProperty prop;
+  prop.type = PROPERTY_MAT4X4;
+  prop.value._mat4x4 = value;
+  properties[name] = prop;
+}
+
+void dg::Material::SetProperty(
+    const std::string& name, std::shared_ptr<Texture> value) {
+  ShaderProperty prop;
+  prop.type = PROPERTY_TEXTURE;
+  prop.texture = value;
+  properties[name] = prop;
 }
 
 void dg::Material::Use() const {
   shader->Use();
-  shader->SetVec2("UVScale", uvScale);
-  shader->SetMat4("InvPortal", invPortal);
-  shader->SetBool("Lit", lit);
-  shader->SetVec3("Albedo", albedo);
-  shader->SetVec3("LightColor", lightColor);
-  shader->SetFloat("AmbientStrength", ambientStrength);
-  shader->SetFloat("DiffuseStrength", diffuseStrength);
-  shader->SetFloat("SpecularStrength", specularStrength);
-  if (texture != nullptr) {
-    shader->SetTexture(0, "MainTex", *texture);
+  shader->ResetProperties();
+
+  unsigned int textureUnit = 0;
+  for (auto it = properties.begin(); it != properties.end(); it++) {
+    switch (it->second.type) {
+      case PROPERTY_BOOL:
+        shader->SetBool(it->first, it->second.value._bool);
+        break;
+      case PROPERTY_INT:
+        shader->SetInt(it->first, it->second.value._int);
+        break;
+      case PROPERTY_FLOAT:
+        shader->SetFloat(it->first, it->second.value._float);
+        break;
+      case PROPERTY_VEC2:
+        shader->SetVec2(it->first, it->second.value._vec2);
+        break;
+      case PROPERTY_VEC3:
+        shader->SetVec3(it->first, it->second.value._vec3);
+        break;
+      case PROPERTY_VEC4:
+        shader->SetVec4(it->first, it->second.value._vec4);
+        break;
+      case PROPERTY_MAT2X2:
+        shader->SetMat2(it->first, it->second.value._mat2x2);
+        break;
+      case PROPERTY_MAT3X3:
+        shader->SetMat3(it->first, it->second.value._mat3x3);
+        break;
+      case PROPERTY_MAT4X4:
+        shader->SetMat4(it->first, it->second.value._mat4x4);
+        break;
+      case PROPERTY_TEXTURE:
+        shader->SetTexture(textureUnit, it->first, *it->second.texture);
+        textureUnit++;
+        break;
+      default:
+        break;
+    }
   }
 }
 

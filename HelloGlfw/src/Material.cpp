@@ -101,6 +101,34 @@ void dg::Material::SetProperty(
   properties[name] = prop;
 }
 
+void dg::Material::SetCameraPosition(glm::vec3 position) {
+  SetProperty("CameraPosition", position);
+}
+
+void dg::Material::SetMatrixMVP(glm::mat4x4 mvp) {
+  SetProperty("MATRIX_MVP", mvp);
+}
+
+void dg::Material::SetMatrixM(glm::mat4x4 m) {
+  SetProperty("MATRIX_M", m);
+}
+
+void dg::Material::SetMatrixNormal(glm::mat3x3 normal) {
+  SetProperty("MATRIX_NORMAL", normal);
+}
+
+void dg::Material::SetLightPosition(glm::vec3 position) {
+  SetProperty("LightPosition", position);
+}
+
+void dg::Material::SetLightColor(glm::vec3 lightColor) {
+  SetProperty("LightColor", lightColor);
+}
+
+void dg::Material::SetInvPortal(glm::mat4x4 invPortal) {
+  SetProperty("InvPortal", invPortal);
+}
+
 void dg::Material::Use() const {
   shader->Use();
   shader->ResetProperties();

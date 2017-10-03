@@ -323,10 +323,10 @@ void dg::PortalScene::RenderScene(
                                       : glm::mat4x4(0);
   int i = 0;
   for (auto model = models.begin(); model != models.end(); model++) {
-    model->material->SetProperty("CameraPosition", view.Inverse().translation);
-    model->material->SetProperty("InvPortal", invPortal);
-    model->material->SetProperty("LightPosition", xfLight.translation);
-    model->material->SetProperty("LightColor", lightColor);
+    model->material->SetCameraPosition(view.Inverse().translation);
+    model->material->SetInvPortal(invPortal);
+    model->material->SetLightPosition(xfLight.translation);
+    model->material->SetLightColor(lightColor);
     model->Draw(view.ToMat4(), projection);
     i++;
   }

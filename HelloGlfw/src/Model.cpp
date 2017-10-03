@@ -40,13 +40,12 @@ void dg::swap(Model& first, Model& second) {
 }
 
 void dg::Model::Draw(glm::mat4x4 view, glm::mat4x4 projection) const {
-  material->Use();
-
-  material->shader->SetMat3(
-      "MATRIX_NORMAL",
+  material->SetMatrixNormal(
       glm::mat3x3(glm::transpose(transform.Inverse().ToMat4())));
-  material->shader->SetMat4("MATRIX_M", transform);
-  material->shader->SetMat4("MATRIX_MVP", projection * view * transform);
+  material->SetMatrixM(transform.ToMat4());
+  material->SetMatrixMVP(projection * view * transform);
+
+  material->Use();
 
   mesh->Use();
   mesh->Draw();

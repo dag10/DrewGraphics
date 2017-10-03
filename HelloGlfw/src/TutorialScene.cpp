@@ -32,7 +32,7 @@ void dg::TutorialScene::Initialize() {
   cubeMaterial.SetAmbient(0.2f);
   cubeMaterial.SetDiffuse(1.0f);
   cubeMaterial.SetSpecular(0.5f);
-  cubeMaterial.SetProperty("LightColor", lightColor);
+  cubeMaterial.SetLightColor(lightColor);
 
   // Create cubes.
   int numCubes = sizeof(cubePositions) / sizeof(cubePositions[0]);
@@ -92,8 +92,8 @@ void dg::TutorialScene::Render() {
 
   // Render models.
   for (auto model = models.begin(); model != models.end(); model++) {
-    model->material->SetProperty("LightPosition", xfLight.translation);
-    model->material->SetProperty("CameraPosition", camera.transform.translation);
+    model->material->SetLightPosition(xfLight.translation);
+    model->material->SetCameraPosition(camera.transform.translation);
     model->Draw(view, projection);
   }
 

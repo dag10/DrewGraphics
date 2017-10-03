@@ -5,8 +5,8 @@
 
 #include <memory>
 #include <map>
-#include "Shader.h"
-#include "Texture.h"
+#include <Shader.h>
+#include <Texture.h>
 
 namespace dg {
 

@@ -5,7 +5,7 @@ project(HELLO_GLFW_PROJECT)
 find_package(glfw3 REQUIRED)
 find_package(OpenGL REQUIRED)
 
-file(GLOB SOURCES "src/*.cpp" "src/*.c")
+file(GLOB_RECURSE SOURCES "src/*.cpp" "src/*.c")
 
 add_executable(HelloGlfw ${SOURCES})
 

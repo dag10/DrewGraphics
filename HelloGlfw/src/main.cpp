@@ -1,17 +1,17 @@
 #include <iostream>
 #include <map>
-#include "glad/glad.h"
+#include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-#include "EngineTime.h"
-#include "Window.h"
-#include "Camera.h"
-#include "Shader.h"
-#include "Mesh.h"
-#include "TutorialScene.h"
-#include "PortalScene.h"
+#include <EngineTime.h>
+#include <Window.h>
+#include <Camera.h>
+#include <Shader.h>
+#include <Mesh.h>
+#include <scenes/TutorialScene.h>
+#include <scenes/PortalScene.h>
 
 std::shared_ptr<dg::Window> window;
 

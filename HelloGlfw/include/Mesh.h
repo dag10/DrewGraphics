@@ -7,7 +7,7 @@
 #include <GLUT/glut.h>
 #include <glm/glm.hpp>
 #include <memory>
-#include "Shader.h"
+#include <Shader.h>
 
 namespace dg {
 

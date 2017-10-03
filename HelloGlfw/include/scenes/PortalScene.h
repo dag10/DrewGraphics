@@ -1,16 +1,16 @@
 //
-//  PortalScene.h
+//  scenes/PortalScene.h
 //
 
 #pragma once
 
 #include <memory>
-#include "Scene.h"
-#include "Camera.h"
-#include "Shader.h"
-#include "Transform.h"
-#include "Model.h"
-#include "StandardMaterial.h"
+#include <Scene.h>
+#include <Camera.h>
+#include <Shader.h>
+#include <Transform.h>
+#include <Model.h>
+#include <materials/StandardMaterial.h>
 
 namespace dg {
 

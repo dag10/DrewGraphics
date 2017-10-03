@@ -1,8 +1,8 @@
 //
-//  StandardMaterial.cpp
+//  materials/StandardMaterial.cpp
 //
 
-#include "StandardMaterial.h"
+#include <materials/StandardMaterial.h>
 
 std::shared_ptr<dg::Shader> dg::StandardMaterial::standardShader = nullptr;
 

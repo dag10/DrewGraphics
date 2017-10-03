@@ -2,9 +2,9 @@
 //  EngineTime.cpp
 //
 
-#include "EngineTime.h"
+#include <EngineTime.h>
 
-#include "glad/glad.h"
+#include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
 double dg::Time::Elapsed = 0;

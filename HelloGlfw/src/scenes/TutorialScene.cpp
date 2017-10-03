@@ -1,12 +1,12 @@
 //
-//  TutorialScene.h
+//  scenes/TutorialScene.h
 //
 
-#include "TutorialScene.h"
-#include "EngineTime.h"
-#include "StandardMaterial.h"
+#include <scenes/TutorialScene.h>
 
 #include <glm/glm.hpp>
+#include <EngineTime.h>
+#include <materials/StandardMaterial.h>
 
 static const glm::vec3 cubePositions[] = {
   glm::vec3( 0.0f,  0.0f,  0.0f), 

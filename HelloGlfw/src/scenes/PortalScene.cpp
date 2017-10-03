@@ -1,14 +1,14 @@
 //
-//  PortalScene.h
+//  scenes/PortalScene.h
 //
 
-#include "PortalScene.h"
+#include <scenes/PortalScene.h>
 
 #include <glm/glm.hpp>
-#include "EngineTime.h"
-#include "Texture.h"
-#include "Mesh.h"
-#include "Transform.h"
+#include <EngineTime.h>
+#include <Texture.h>
+#include <Mesh.h>
+#include <Transform.h>
 
 static const glm::vec3 cubePositions[] = {
   glm::vec3(  0.0f,  0.25f,  0.0f ), 
@@ -178,18 +178,22 @@ void dg::PortalScene::Initialize() {
   portalBackMaterial.SetDiffuse(0.8f);
   portalBackMaterial.SetSpecular(0.0f);
 
-  // Create portal models.
+  // Create red portal model.
   Model redPortalModel = Model(
       dg::Mesh::Quad,
         std::make_shared<StandardMaterial>(portalBackMaterial),
       portalTransforms[0] * portalQuadScale);
   std::static_pointer_cast<StandardMaterial>(redPortalModel.material)->
       SetAlbedo(glm::vec3(1, 0, 0));
-  Model bluePortalModel = Model(redPortalModel);
-  std::static_pointer_cast<StandardMaterial>(bluePortalModel.material)->
-      SetAlbedo(glm::vec3(1, 0, 0));
-  bluePortalModel.transform = portalTransforms[1] * portalQuadScale;
   models.push_back(std::move(redPortalModel));
+
+  // Create blue portal model.
+  Model bluePortalModel = Model(
+      dg::Mesh::Quad,
+        std::make_shared<StandardMaterial>(portalBackMaterial),
+      portalTransforms[1] * portalQuadScale);
+  std::static_pointer_cast<StandardMaterial>(bluePortalModel.material)->
+      SetAlbedo(glm::vec3(0, 0, 1));
   models.push_back(std::move(bluePortalModel));
 
   // Create portal stencil material.

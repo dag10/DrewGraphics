@@ -5,7 +5,7 @@
 #include <string>
 #include <cassert>
 
-#include "Window.h"
+#include <Window.h>
 
 std::map<GLFWwindow*, std::weak_ptr<dg::Window>> dg::Window::windowMap;
 

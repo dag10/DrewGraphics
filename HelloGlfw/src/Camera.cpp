@@ -2,8 +2,8 @@
 //  Camera.cpp
 //
 
-#include "Camera.h"
-#include "Transform.h"
+#include <Camera.h>
+#include <Transform.h>
 
 #include <glm/gtc/matrix_transform.hpp>
 #define GLM_ENABLE_EXPERIMENTAL

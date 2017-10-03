@@ -2,8 +2,8 @@
 //  Mesh.cpp
 //
 
-#include "glad/glad.h"
-#include "Mesh.h"
+#include <glad/glad.h>
+#include <Mesh.h>
 
 #include <cassert>
 #include <memory>

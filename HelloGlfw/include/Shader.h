@@ -9,9 +9,9 @@
 #include <string>
 #include <GLUT/glut.h>
 #include <glm/glm.hpp>
-#include "Texture.h"
-#include "Transform.h"
-#include "ShaderSource.h"
+#include <Texture.h>
+#include <Transform.h>
+#include <ShaderSource.h>
 
 namespace dg {
 

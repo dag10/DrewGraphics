@@ -6,9 +6,9 @@
 #include <memory>
 #include <glm/mat4x4.hpp>
 
-#include "Transform.h"
-#include "Material.h"
-#include "Mesh.h"
+#include <Transform.h>
+#include <Material.h>
+#include <Mesh.h>
 
 namespace dg {
 

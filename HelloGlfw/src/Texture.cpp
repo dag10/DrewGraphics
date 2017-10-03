@@ -5,10 +5,10 @@
 #include <string>
 #include <cassert>
 #define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
+#include <stb_image.h>
 
-#include "Texture.h"
-#include "Exceptions.h"
+#include <Texture.h>
+#include <Exceptions.h>
 
 const GLuint DEFAULT_FILTERING = GL_LINEAR;
 const GLuint DEFAULT_WRAP = GL_CLAMP_TO_EDGE;

@@ -1,17 +1,17 @@
 //
-//  TutorialScene.h
+//  scenes/TutorialScene.h
 //
 
 #pragma once
 
-#include "Scene.h"
-#include "Window.h"
-#include "Camera.h"
-#include "Shader.h"
-#include "Texture.h"
-#include "Mesh.h"
-#include "Model.h"
 #include <memory>
+#include <Scene.h>
+#include <Window.h>
+#include <Camera.h>
+#include <Shader.h>
+#include <Texture.h>
+#include <Mesh.h>
+#include <Model.h>
 
 namespace dg {
 

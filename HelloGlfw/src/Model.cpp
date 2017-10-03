@@ -2,7 +2,7 @@
 //  Model.cpp
 //
 
-#include "Model.h"
+#include <Model.h>
 
 dg::Model::Model(
     std::shared_ptr<Mesh> mesh, std::shared_ptr<Material> material,

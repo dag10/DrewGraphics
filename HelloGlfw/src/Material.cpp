@@ -2,7 +2,7 @@
 //  Material.cpp
 //
 
-#include "Material.h"
+#include <Material.h>
 
 dg::Material::Material(Material& other) {
   this->shader = other.shader;

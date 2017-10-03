@@ -13,10 +13,11 @@ I've ended up taking several steps to abstract large chunks of it. The largest
 abstraction is the aformentioned scene system. There are currently two named
 scenes:
 
-- **"tutorial"** - Following along with the tutorial, implemented in [src/scenes/TutorialScene.cpp](./src/scenes/TutorialScene.cpp).
-- **"portal"** - First-person camera in a room with portals you can fly through, implemented in
-                 [src/scenes/PortalScene.cpp](./src/scenes/PortalScene.cpp).
-                 
+| Scene | Description |
+| :-- | :-- |
+| **"tutorial"** | Following along with the tutorial, implemented in [src/scenes/TutorialScene.cpp](./src/scenes/TutorialScene.cpp).|
+| **"portal"** | First-person camera in a room with portals you can fly through, implemented in [src/scenes/PortalScene.cpp](./src/scenes/PortalScene.cpp).<br><br>Here's a video of the portal project: https://fb.com/1925626090797272 |
+
 The scene is chosen as the first command-line argument. So to launch the app with a portal renderer, the command would be:
 
 ```

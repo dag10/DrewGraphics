@@ -1,32 +1,32 @@
 cmake_minimum_required(VERSION 3.9.0)
 
-project(HELLO_GLFW_PROJECT)
+project(DREW_GRAPHICS_PROJECT)
 
 find_package(glfw3 REQUIRED)
 find_package(OpenGL REQUIRED)
 
 file(GLOB_RECURSE SOURCES "src/*.cpp" "src/*.c")
 
-add_executable(HelloGlfw ${SOURCES})
+add_executable(DrewGraphics ${SOURCES})
 
-target_include_directories(HelloGlfw PUBLIC
+target_include_directories(DrewGraphics PUBLIC
   include
   external)
 
 if (APPLE)
-	target_link_libraries(HelloGlfw "-framework OpenGL" glfw)
+  target_link_libraries(DrewGraphics "-framework OpenGL" glfw)
 else()
-	target_link_libraries(HelloGlfw ${GL_LIBRARY} glfw)
+  target_link_libraries(DrewGraphics ${GL_LIBRARY} glfw)
 endif()
 
-set_target_properties(HelloGlfw PROPERTIES
+set_target_properties(DrewGraphics PROPERTIES
 	CXX_STANDARD 11
 	CXX_STANDARD_REQUIRED ON
 )
 
-add_custom_command(TARGET HelloGlfw PRE_BUILD
+add_custom_command(TARGET DrewGraphics PRE_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy_directory
-  ${CMAKE_SOURCE_DIR}/assets $<TARGET_FILE_DIR:HelloGlfw>/assets)
+  ${CMAKE_SOURCE_DIR}/assets $<TARGET_FILE_DIR:DrewGraphics>/assets)
 
-install(TARGETS HelloGlfw DESTINATION bin)
+install(TARGETS DrewGraphics DESTINATION bin)
 

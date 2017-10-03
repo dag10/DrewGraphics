@@ -10,6 +10,7 @@
 #include "Shader.h"
 #include "Transform.h"
 #include "Model.h"
+#include "StandardMaterial.h"
 
 namespace dg {
 
@@ -33,7 +34,7 @@ namespace dg {
       dg::Camera camera;
       Transform xfLight;
       std::vector<Model> models;
-      std::shared_ptr<Shader> solidColorShader;
+      StandardMaterial portalStencilMaterial;
       std::shared_ptr<Shader> depthResetShader;
 
   }; // class PortalScene

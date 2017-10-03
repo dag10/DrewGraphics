@@ -53,6 +53,12 @@ int main(int argc, const char *argv[]) {
   // Create primitive meshes.
   dg::Mesh::CreatePrimitives();
 
+  // Configure global includes for all shader files.
+  dg::Shader::SetVertexHead("assets/shaders/includes/vertex_head.glsl");
+  dg::Shader::AddVertexSource("assets/shaders/includes/vertex_main.glsl");
+  dg::Shader::SetFragmentHead("assets/shaders/includes/fragment_head.glsl");
+  dg::Shader::AddFragmentSource("assets/shaders/includes/fragment_main.glsl");
+
   std::map<
     std::string,
     std::function<std::unique_ptr<dg::Scene>()>> constructors;

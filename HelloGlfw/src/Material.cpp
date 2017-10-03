@@ -102,31 +102,31 @@ void dg::Material::SetProperty(
 }
 
 void dg::Material::SetCameraPosition(glm::vec3 position) {
-  SetProperty("CameraPosition", position);
+  SetProperty("_CameraPosition", position);
 }
 
 void dg::Material::SetMatrixMVP(glm::mat4x4 mvp) {
-  SetProperty("MATRIX_MVP", mvp);
+  SetProperty("_Matrix_MVP", mvp);
 }
 
 void dg::Material::SetMatrixM(glm::mat4x4 m) {
-  SetProperty("MATRIX_M", m);
+  SetProperty("_Matrix_M", m);
 }
 
 void dg::Material::SetMatrixNormal(glm::mat3x3 normal) {
-  SetProperty("MATRIX_NORMAL", normal);
+  SetProperty("_Matrix_Normal", normal);
 }
 
 void dg::Material::SetLightPosition(glm::vec3 position) {
-  SetProperty("LightPosition", position);
+  SetProperty("_LightPosition", position);
 }
 
 void dg::Material::SetLightColor(glm::vec3 lightColor) {
-  SetProperty("LightColor", lightColor);
+  SetProperty("_LightColor", lightColor);
 }
 
 void dg::Material::SetInvPortal(glm::mat4x4 invPortal) {
-  SetProperty("InvPortal", invPortal);
+  SetProperty("_InvPortal", invPortal);
 }
 
 void dg::Material::Use() const {

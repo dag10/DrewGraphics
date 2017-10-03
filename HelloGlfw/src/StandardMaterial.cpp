@@ -71,16 +71,16 @@ void dg::StandardMaterial::Use() const {
 }
 
 void dg::StandardMaterial::SetUVScale(glm::vec2 scale) {
-  SetProperty("UVScale", scale);
+  SetProperty("_UVScale", scale);
 }
 
 void dg::StandardMaterial::SetLit(bool lit) {
-  SetProperty("Lit", lit);
+  SetProperty("_Lit", lit);
 }
 
 void dg::StandardMaterial::SetAlbedo(std::shared_ptr<Texture> value) {
-  SetProperty("AlbedoSampler", true);
-  SetProperty("MainTex", value);
+  SetProperty("_AlbedoSampler", true);
+  SetProperty("_MainTex", value);
 }
 
 void dg::StandardMaterial::SetAlbedo(glm::vec3 value) {
@@ -88,19 +88,19 @@ void dg::StandardMaterial::SetAlbedo(glm::vec3 value) {
 }
 
 void dg::StandardMaterial::SetAlbedo(glm::vec4 value) {
-  SetProperty("AlbedoSampler", false);
-  SetProperty("Albedo", value);
+  SetProperty("_AlbedoSampler", false);
+  SetProperty("_Albedo", value);
 }
 
 void dg::StandardMaterial::SetAmbient(float ambient) {
-  SetProperty("AmbientStrength", ambient);
+  SetProperty("_AmbientStrength", ambient);
 }
 
 void dg::StandardMaterial::SetDiffuse(float diffuse) {
-  SetProperty("DiffuseStrength", diffuse);
+  SetProperty("_DiffuseStrength", diffuse);
 }
 
 void dg::StandardMaterial::SetSpecular(float specular) {
-  SetProperty("SpecularStrength", specular);
+  SetProperty("_SpecularStrength", specular);
 }
 

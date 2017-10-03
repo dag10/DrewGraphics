@@ -6,7 +6,6 @@
 
 #include <glm/glm.hpp>
 #include "EngineTime.h"
-#include "StandardMaterial.h"
 #include "Texture.h"
 #include "Mesh.h"
 #include "Transform.h"
@@ -48,19 +47,10 @@ void dg::PortalScene::Initialize() {
   // Lock window cursor to center.
   window->LockCursor();
 
-  // Configure global includes for all shader files.
-  dg::Shader::SetVertexHead("assets/shaders/includes/vertex_head.glsl");
-  dg::Shader::AddVertexSource("assets/shaders/includes/vertex_main.glsl");
-  dg::Shader::SetFragmentHead("assets/shaders/includes/fragment_head.glsl");
-  dg::Shader::AddFragmentSource("assets/shaders/includes/fragment_main.glsl");
-
   // Create shaders.
   depthResetShader = std::make_shared<Shader>(dg::Shader::FromFiles(
       "assets/shaders/depthreset.v.glsl",
       "assets/shaders/depthreset.f.glsl"));
-  solidColorShader = std::make_shared<Shader>(dg::Shader::FromFiles(
-      "assets/shaders/solidcolor.v.glsl",
-      "assets/shaders/solidcolor.f.glsl"));
 
   // Create textures.
   std::shared_ptr<Texture> crateTexture = std::make_shared<Texture>(
@@ -201,6 +191,11 @@ void dg::PortalScene::Initialize() {
   bluePortalModel.transform = portalTransforms[1] * portalQuadScale;
   models.push_back(std::move(redPortalModel));
   models.push_back(std::move(bluePortalModel));
+
+  // Create portal stencil material.
+  portalStencilMaterial.SetLit(false);
+  portalStencilMaterial.SetAlbedo(backgroundColor);
+  portalStencilMaterial.SetInvPortal(glm::mat4x4(0));
 
   // Set initial camera position.
   camera.transform.translation = glm::vec3(2.2f, 0.85f, 1);
@@ -343,11 +338,10 @@ void dg::PortalScene::RenderPortalStencil(dg::Transform xfPortal) {
   glStencilOp(GL_ZERO, GL_ZERO, GL_REPLACE);
   glClear(GL_STENCIL_BUFFER_BIT);
 
-  solidColorShader->Use();
-  solidColorShader->SetVec3("Albedo", backgroundColor);
-  solidColorShader->SetMat4("InvPortal", glm::mat4x4(0));
-  solidColorShader->SetMat4(
-      "MATRIX_MVP", projection * view * xfPortal * portalOpeningScale);
+  portalStencilMaterial.SetMatrixMVP(
+      projection * view * xfPortal * portalOpeningScale);
+  portalStencilMaterial.Use();
+
   Mesh::Quad->Use();
   Mesh::Quad->Draw();
   Mesh::Quad->FinishUsing();

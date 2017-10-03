@@ -20,12 +20,6 @@ std::unique_ptr<dg::TutorialScene> dg::TutorialScene::Make() {
 }
 
 void dg::TutorialScene::Initialize() {
-  // Configure global includes for all shader files.
-  dg::Shader::SetVertexHead("assets/shaders/includes/vertex_head.glsl");
-  dg::Shader::AddVertexSource("assets/shaders/includes/vertex_main.glsl");
-  dg::Shader::SetFragmentHead("assets/shaders/includes/fragment_head.glsl");
-  dg::Shader::AddFragmentSource("assets/shaders/includes/fragment_main.glsl");
-
   // Create wooden cube material.
   StandardMaterial cubeMaterial = StandardMaterial::WithColor(
       glm::vec3(1.0, 0.5f, 0.31f));

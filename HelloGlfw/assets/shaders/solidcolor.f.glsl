@@ -1,6 +1,6 @@
-uniform vec3 Albedo;
+uniform vec3 _Albedo;
 
 vec4 frag() {
-  return vec4(Albedo * CalculateLight(), 1.0);
+  return vec4(_Albedo * CalculateLight(), 1.0);
 }
 

@@ -30,7 +30,6 @@ namespace dg {
       std::vector<Model> models;
       Transform xfLight;
       Camera camera;
-      std::shared_ptr<Shader> solidColorShader;
 
   }; // class TutorialScene
 

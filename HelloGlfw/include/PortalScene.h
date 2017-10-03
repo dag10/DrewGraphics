@@ -4,16 +4,12 @@
 
 #pragma once
 
+#include <memory>
 #include "Scene.h"
-#include "Window.h"
 #include "Camera.h"
 #include "Shader.h"
-#include "Material.h"
-#include "Texture.h"
 #include "Transform.h"
-#include "Mesh.h"
 #include "Model.h"
-#include <memory>
 
 namespace dg {
 
@@ -37,7 +33,6 @@ namespace dg {
       dg::Camera camera;
       Transform xfLight;
       std::vector<Model> models;
-      std::shared_ptr<Shader> simpleTextureShader;
       std::shared_ptr<Shader> solidColorShader;
       std::shared_ptr<Shader> depthResetShader;
 

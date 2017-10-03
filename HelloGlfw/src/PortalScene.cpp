@@ -6,6 +6,9 @@
 
 #include <glm/glm.hpp>
 #include "EngineTime.h"
+#include "StandardMaterial.h"
+#include "Texture.h"
+#include "Mesh.h"
 #include "Transform.h"
 
 static const glm::vec3 cubePositions[] = {
@@ -55,9 +58,6 @@ void dg::PortalScene::Initialize() {
   depthResetShader = std::make_shared<Shader>(dg::Shader::FromFiles(
       "assets/shaders/depthreset.v.glsl",
       "assets/shaders/depthreset.f.glsl"));
-  simpleTextureShader = std::make_shared<Shader>(dg::Shader::FromFiles(
-      "assets/shaders/simpletexture.v.glsl",
-      "assets/shaders/simpletexture.f.glsl"));
   solidColorShader = std::make_shared<Shader>(dg::Shader::FromFiles(
       "assets/shaders/solidcolor.v.glsl",
       "assets/shaders/solidcolor.f.glsl"));
@@ -76,54 +76,49 @@ void dg::PortalScene::Initialize() {
   xfLight = Transform::T(glm::vec3(2, 1.7f, 0));
 
   // Create light cube.
-  Material lightMaterial;
-  lightMaterial.shader = solidColorShader;
-  lightMaterial.SetProperty("Albedo", lightColor);
+  StandardMaterial lightMaterial = StandardMaterial::WithColor(lightColor);
+  lightMaterial.SetLit(false);
   Model lightCube = Model(
       dg::Mesh::Cube,
-      lightMaterial,
+      std::make_shared<StandardMaterial>(lightMaterial),
       xfLight * Transform::S(glm::vec3(0.05f)));
   models.push_back(std::move(lightCube));
 
   // Create wooden cube material.
-  Material cubeMaterial;
-  cubeMaterial.shader = simpleTextureShader;
-  cubeMaterial.SetProperty("MainTex", crateTexture);
-  cubeMaterial.SetProperty("UVScale", glm::vec2(1));
-  cubeMaterial.SetProperty("Lit", true);
-  cubeMaterial.SetProperty("AmbientStrength", 0.8f);
-  cubeMaterial.SetProperty("DiffuseStrength", 1.0f);
-  cubeMaterial.SetProperty("SpecularStrength", 0.2f);
+  StandardMaterial cubeMaterial = StandardMaterial::WithTexture(crateTexture);
+  cubeMaterial.SetAmbient(0.8f);
+  cubeMaterial.SetDiffuse(1.0f);
+  cubeMaterial.SetSpecular(0.2f);
 
   // Create wooden cubes.
   int numCubes = sizeof(cubePositions) / sizeof(cubePositions[0]);
+  Model cubeModel = Model(
+      dg::Mesh::Cube,
+      std::make_shared<StandardMaterial>(cubeMaterial),
+      Transform::S(glm::vec3(0.5f)));
   for (int i = 0; i < numCubes; i++) {
-    Model cube = Model(
-          dg::Mesh::Cube,
-          cubeMaterial,
-          Transform::TS(cubePositions[i], glm::vec3(0.5f)));
+    Model cube = Model(cubeModel);
+    cube.transform.translation = cubePositions[i];
     models.push_back(std::move(cube));
   }
 
   // Create wall material.
-  Material wallMaterial;
-  wallMaterial.shader = simpleTextureShader;
-  wallMaterial.SetProperty("MainTex", brickTexture);
-  wallMaterial.SetProperty("Lit", true);
-  wallMaterial.SetProperty("AmbientStrength", 0.4f);
-  wallMaterial.SetProperty("DiffuseStrength", 0.8f);
-  wallMaterial.SetProperty("SpecularStrength", 0.4f);
+  StandardMaterial wallMaterial = StandardMaterial::WithTexture(brickTexture);
+  wallMaterial.SetAmbient(0.4f);
+  wallMaterial.SetDiffuse(0.8f);
+  wallMaterial.SetSpecular(0.4f);
 
   // Create back wall.
   Model backWall = Model(
         dg::Mesh::Quad,
-        wallMaterial,
+        std::make_shared<StandardMaterial>(wallMaterial),
         Transform::TRS(
           glm::vec3(1, 1, -1.5),
           glm::quat(glm::radians(glm::vec3(0))),
           glm::vec3(5, 2, 1)
           ));
-  backWall.material.SetProperty("UVScale", glm::vec2(5, 2));
+  std::static_pointer_cast<StandardMaterial>(backWall.material)->SetUVScale(
+      glm::vec2(5, 2));
   models.push_back(Model(backWall));
 
   // Create front wall.
@@ -136,13 +131,14 @@ void dg::PortalScene::Initialize() {
   // Create left wall.
   Model leftWall = Model(
         dg::Mesh::Quad,
-        wallMaterial,
+        std::make_shared<StandardMaterial>(wallMaterial),
         Transform::TRS(
           glm::vec3(-1.5f, 1, 0),
           glm::quat(glm::radians(glm::vec3(0, 90, 0))),
           glm::vec3(3, 2, 1)
           ));
-  leftWall.material.SetProperty("UVScale", glm::vec2(3, 2));
+  std::static_pointer_cast<StandardMaterial>(leftWall.material)->SetUVScale(
+      glm::vec2(3, 2));
   models.push_back(Model(leftWall));
 
   // Create right wall.
@@ -153,19 +149,18 @@ void dg::PortalScene::Initialize() {
   models.push_back(Model(rightWall));
 
   // Create floor material.
-  Material floorMaterial;
-  floorMaterial.shader = simpleTextureShader;
-  floorMaterial.SetProperty("MainTex", rustyPlateTexture);
-  floorMaterial.SetProperty("UVScale", glm::vec2(5, 3) * 2.f);
-  floorMaterial.SetProperty("Lit", true);
-  floorMaterial.SetProperty("AmbientStrength", 0.4f);
-  floorMaterial.SetProperty("DiffuseStrength", 0.8f);
-  floorMaterial.SetProperty("SpecularStrength", 0.4f);
+  StandardMaterial floorMaterial = StandardMaterial::WithTexture(
+      rustyPlateTexture);
+  floorMaterial.SetUVScale(glm::vec2(5, 3) * 2.f);
+  floorMaterial.SetLit(true);
+  floorMaterial.SetAmbient(0.4f);
+  floorMaterial.SetDiffuse(0.8f);
+  floorMaterial.SetSpecular(0.4f);
 
   // Create floor.
   Model floor = Model(
         dg::Mesh::Quad,
-        floorMaterial,
+        std::make_shared<StandardMaterial>(floorMaterial),
         Transform::TRS(
           glm::vec3(1, 0, 0),
           glm::quat(glm::radians(glm::vec3(-90, 0, 0))),
@@ -174,35 +169,35 @@ void dg::PortalScene::Initialize() {
   models.push_back(Model(floor));
 
   // Create ceiling material.
-  Material ceilingMaterial = floorMaterial;
-  ceilingMaterial.SetProperty("MainTex", hardwoodTexture);
-  ceilingMaterial.SetProperty("SpecularStrength", 0.1f);
-  ceilingMaterial.SetProperty("UVScale", glm::vec2(5, 3));
+  StandardMaterial ceilingMaterial = floorMaterial;
+  ceilingMaterial.SetAlbedo(hardwoodTexture);
+  ceilingMaterial.SetSpecular(0.1f);
+  ceilingMaterial.SetUVScale(glm::vec2(5, 3));
 
   // Create ceiling.
   Model ceiling = floor;
-  ceiling.material = ceilingMaterial;
+  ceiling.material = std::make_shared<StandardMaterial>(ceilingMaterial);
   ceiling.transform = ceiling.transform * Transform::R(
       glm::quat(glm::radians(glm::vec3(180, 0, 0))));
   ceiling.transform.translation.y = 2;
   models.push_back(Model(ceiling));
 
   // Create portal back materials.
-  Material portalBackMaterial;
-  portalBackMaterial.shader = solidColorShader;
-  portalBackMaterial.SetProperty("Lit", true);
-  portalBackMaterial.SetProperty("AmbientStrength", 0.4f);
-  portalBackMaterial.SetProperty("DiffuseStrength", 0.8f);
-  portalBackMaterial.SetProperty("SpecularStrength", 0.0f);
+  StandardMaterial portalBackMaterial;
+  portalBackMaterial.SetAmbient(0.4f);
+  portalBackMaterial.SetDiffuse(0.8f);
+  portalBackMaterial.SetSpecular(0.0f);
 
   // Create portal models.
   Model redPortalModel = Model(
       dg::Mesh::Quad,
-      portalBackMaterial,
+        std::make_shared<StandardMaterial>(portalBackMaterial),
       portalTransforms[0] * portalQuadScale);
-  redPortalModel.material.SetProperty("Albedo", glm::vec3(1, 0, 0));
+  std::static_pointer_cast<StandardMaterial>(redPortalModel.material)->
+      SetAlbedo(glm::vec3(1, 0, 0));
   Model bluePortalModel = Model(redPortalModel);
-  bluePortalModel.material.SetProperty("Albedo", glm::vec3(0, 0, 1));
+  std::static_pointer_cast<StandardMaterial>(bluePortalModel.material)->
+      SetAlbedo(glm::vec3(1, 0, 0));
   bluePortalModel.transform = portalTransforms[1] * portalQuadScale;
   models.push_back(std::move(redPortalModel));
   models.push_back(std::move(bluePortalModel));
@@ -328,10 +323,10 @@ void dg::PortalScene::RenderScene(
                                       : glm::mat4x4(0);
   int i = 0;
   for (auto model = models.begin(); model != models.end(); model++) {
-    model->material.SetProperty("CameraPosition", view.Inverse().translation);
-    model->material.SetProperty("InvPortal", invPortal);
-    model->material.SetProperty("LightPosition", xfLight.translation);
-    model->material.SetProperty("LightColor", lightColor);
+    model->material->SetProperty("CameraPosition", view.Inverse().translation);
+    model->material->SetProperty("InvPortal", invPortal);
+    model->material->SetProperty("LightPosition", xfLight.translation);
+    model->material->SetProperty("LightColor", lightColor);
     model->Draw(view.ToMat4(), projection);
     i++;
   }

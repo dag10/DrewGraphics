@@ -4,6 +4,7 @@
 
 #include "TutorialScene.h"
 #include "EngineTime.h"
+#include "StandardMaterial.h"
 
 #include <glm/glm.hpp>
 
@@ -25,28 +26,23 @@ void dg::TutorialScene::Initialize() {
   dg::Shader::SetFragmentHead("assets/shaders/includes/fragment_head.glsl");
   dg::Shader::AddFragmentSource("assets/shaders/includes/fragment_main.glsl");
 
-  // Create shaders.
-  solidColorShader = std::make_shared<Shader>(dg::Shader::FromFiles(
-      "assets/shaders/solidcolor.v.glsl",
-      "assets/shaders/solidcolor.f.glsl"));
-
   // Create wooden cube material.
-  Material cubeMaterial;
-  cubeMaterial.shader = solidColorShader;
-  cubeMaterial.SetProperty("Lit", true);
-  cubeMaterial.SetProperty("Albedo", glm::vec3(1.0f, 0.5f, 0.31f));
+  StandardMaterial cubeMaterial = StandardMaterial::WithColor(
+      glm::vec3(1.0, 0.5f, 0.31f));
+  cubeMaterial.SetAmbient(0.2f);
+  cubeMaterial.SetDiffuse(1.0f);
+  cubeMaterial.SetSpecular(0.5f);
   cubeMaterial.SetProperty("LightColor", lightColor);
-  cubeMaterial.SetProperty("AmbientStrength", 0.2f);
-  cubeMaterial.SetProperty("SpecularStrength", 0.5f);
-  cubeMaterial.SetProperty("DiffuseStrength", 1.0f);
 
   // Create cubes.
   int numCubes = sizeof(cubePositions) / sizeof(cubePositions[0]);
+  Model cubeModel = Model(
+      dg::Mesh::Cube,
+      std::make_shared<StandardMaterial>(cubeMaterial),
+      Transform());
   for (int i = 0; i < numCubes; i++) {
-    Model cube = Model(
-          dg::Mesh::Cube,
-          cubeMaterial,
-          Transform::T(cubePositions[i]));
+    Model cube = Model(cubeModel);
+    cube.transform.translation = cubePositions[i];
     models.push_back(std::move(cube));
   }
 
@@ -93,24 +89,22 @@ void dg::TutorialScene::Render() {
   glEnable(GL_DEPTH_TEST);
   glEnable(GL_CULL_FACE);
   glCullFace(GL_BACK);
-  
-  // Set up cube material.
-  solidColorShader->Use();
-  solidColorShader->SetVec3("LightPosition", xfLight.translation);
-  solidColorShader->SetVec3("CameraPosition", camera.transform.translation);
 
   // Render models.
   for (auto model = models.begin(); model != models.end(); model++) {
+    model->material->SetProperty("LightPosition", xfLight.translation);
+    model->material->SetProperty("CameraPosition", camera.transform.translation);
     model->Draw(view, projection);
   }
 
   // Render light source.
-  solidColorShader->SetBool("Lit", false);
-  solidColorShader->SetVec3("Albedo", lightColor);
-  solidColorShader->SetMat4(
-      "MATRIX_MVP", projection * view * xfLight * xfLightScale);
-  Mesh::Cube->Use();
-  Mesh::Cube->Draw();
-  Mesh::Cube->FinishUsing();
+  // TODO: Create lightModel member.
+  //solidColorShader->SetBool("Lit", false);
+  //solidColorShader->SetVec3("Albedo", lightColor);
+  //solidColorShader->SetMat4(
+      //"MATRIX_MVP", projection * view * xfLight * xfLightScale);
+  //Mesh::Cube->Use();
+  //Mesh::Cube->Draw();
+  //Mesh::Cube->FinishUsing();
 }
 

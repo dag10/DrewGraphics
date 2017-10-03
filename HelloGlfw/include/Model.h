@@ -19,7 +19,8 @@ namespace dg {
       Model() = default;
 
       Model(
-          std::shared_ptr<Mesh> mesh, Material material, Transform transform);
+          std::shared_ptr<Mesh> mesh, std::shared_ptr<Material> material,
+          Transform transform);
 
       Model(Model& other);
       Model(Model&& other);
@@ -28,7 +29,7 @@ namespace dg {
       friend void swap(Model& first, Model& second); // nothrow
 
       std::shared_ptr<Mesh> mesh = nullptr;
-      Material material;
+      std::shared_ptr<Material>  material = nullptr;
       Transform transform = Transform();
 
       void Draw(glm::mat4x4 view, glm::mat4x4 projection) const;

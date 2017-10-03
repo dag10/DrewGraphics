@@ -5,7 +5,8 @@
 #include "Model.h"
 
 dg::Model::Model(
-    std::shared_ptr<Mesh> mesh, Material material, Transform transform) {
+    std::shared_ptr<Mesh> mesh, std::shared_ptr<Material> material,
+    Transform transform) {
   this->mesh = mesh;
   this->material = material;
   this->transform = transform;
@@ -39,13 +40,13 @@ void dg::swap(Model& first, Model& second) {
 }
 
 void dg::Model::Draw(glm::mat4x4 view, glm::mat4x4 projection) const {
-  material.Use();
+  material->Use();
 
-  material.shader->SetMat3(
+  material->shader->SetMat3(
       "MATRIX_NORMAL",
       glm::mat3x3(glm::transpose(transform.Inverse().ToMat4())));
-  material.shader->SetMat4("MATRIX_M", transform);
-  material.shader->SetMat4("MATRIX_MVP", projection * view * transform);
+  material->shader->SetMat4("MATRIX_M", transform);
+  material->shader->SetMat4("MATRIX_MVP", projection * view * transform);
 
   mesh->Use();
   mesh->Draw();

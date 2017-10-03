@@ -5,3 +5,7 @@
 # macOS
 .DS_Store
 
+# Common CMake build directories.
+build
+xcode
+

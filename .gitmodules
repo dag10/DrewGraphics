@@ -1,6 +1,3 @@
-[submodule "ImageFader/include/glm"]
-	path = ImageFader/include/glm
-	url = https://github.com/g-truc/glm
-[submodule "HelloGlfw/external/glm"]
-	path = HelloGlfw/external/glm
+[submodule "external/glm"]
+	path = external/glm
 	url = https://github.com/g-truc/glm

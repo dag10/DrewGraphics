@@ -6,13 +6,13 @@
 #include <memory>
 #include <glm/mat4x4.hpp>
 
-#include <Transform.h>
+#include <SceneObject.h>
 #include <Material.h>
 #include <Mesh.h>
 
 namespace dg {
 
-  class Model {
+  class Model : public SceneObject {
 
     public:
 
@@ -30,7 +30,6 @@ namespace dg {
 
       std::shared_ptr<Mesh> mesh = nullptr;
       std::shared_ptr<Material>  material = nullptr;
-      Transform transform = Transform();
 
       void Draw(glm::mat4x4 view, glm::mat4x4 projection) const;
 

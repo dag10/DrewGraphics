@@ -7,15 +7,6 @@
 // portal-space to determine which side of the portal we're on for culling.
 uniform mat4 _InvPortal;
 
-// Uniforms for phong lighting.
-uniform bool _Lit;
-uniform vec3 _LightColor;
-uniform vec3 _LightPosition;
-uniform vec3 _CameraPosition;
-uniform float _AmbientStrength;
-uniform float _DiffuseStrength;
-uniform float _SpecularStrength;
-
 vec4 frag();
 
 void main() {
@@ -24,25 +15,5 @@ void main() {
   }
 
   FragColor = frag();
-}
-
-vec3 CalculateLight() {
-  if (!_Lit) {
-    return vec3(1);
-  }
-
-  vec3 ambient = _AmbientStrength * _LightColor;
-
-  vec3 normal = normalize(v_Normal);
-  vec3 lightDir = normalize(_LightPosition - v_ScenePos.xyz); 
-  float diff = max(dot(normal, lightDir), 0.0);
-  vec3 diffuse = _DiffuseStrength * diff * _LightColor;
-
-  vec3 viewDir = normalize(_CameraPosition - v_ScenePos.xyz);
-  vec3 reflectDir = reflect(-lightDir, normal);
-  float specularAmount = pow(max(dot(viewDir, reflectDir), 0.0), 32);
-  vec3 specular = _SpecularStrength * specularAmount * _LightColor;
-
-  return (specular + diffuse + ambient);
 }
 

@@ -7,6 +7,9 @@ in vec3 v_Normal;
 
 out vec4 FragColor;
 
-vec3 CalculateLight();
+uniform vec3 _LightColor;
+uniform vec3 _LightPosition;
+
+uniform vec3 _CameraPosition;
 
 #line 1 1

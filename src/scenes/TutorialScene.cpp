@@ -23,8 +23,6 @@ void dg::TutorialScene::Initialize() {
   // Create wooden cube material.
   StandardMaterial cubeMaterial = StandardMaterial::WithColor(
       glm::vec3(1.0, 0.5f, 0.31f));
-  cubeMaterial.SetAmbient(0.2f);
-  cubeMaterial.SetDiffuse(1.0f);
   cubeMaterial.SetSpecular(0.5f);
   //cubeMaterial.SetLightColor(lightColor);
 

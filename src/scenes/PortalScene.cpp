@@ -10,15 +10,13 @@
 #include <Mesh.h>
 #include <Transform.h>
 #include <PointLight.h>
+#include <iostream>
 
 static const glm::vec3 cubePositions[] = {
   glm::vec3(  0.0f,  0.25f,  0.0f ), 
   glm::vec3( -1.0f,  0.25f,  0.0f ), 
   glm::vec3(  1.0f,  0.25f,  0.0f ), 
 };
-
-static dg::PointLight ceilingLight(
-    glm::normalize(glm::vec3(0.7f, 0.65f, 0.6f)), 0.4f, 0.7f, 1.0f);
 
 static dg::Transform portalTransforms[] = {
   dg::Transform::TR(
@@ -66,24 +64,26 @@ void dg::PortalScene::Initialize() {
   std::shared_ptr<Texture> rustyPlateTexture = std::make_shared<Texture>(
       Texture::FromPath("assets/textures/rustyplate.jpg"));
 
-  // Set light position.
+  // Create ceiling light source.
+  ceilingLight = PointLight(
+      glm::vec3(1.0f, 0.93f, 0.86f),
+      0.325f, 0.521f, 0.821f);
   ceilingLight.transform.translation = glm::vec3(2, 1.7f, 0);
 
   // Create light cube.
   StandardMaterial lightMaterial = StandardMaterial::WithColor(
       ceilingLight.specular);
   lightMaterial.SetLit(false);
-  Model lightCube = Model(
+  lightModel = std::make_shared<Model>(
       dg::Mesh::Cube,
       std::make_shared<StandardMaterial>(lightMaterial),
       ceilingLight.transform * Transform::S(glm::vec3(0.05f)));
-  models.push_back(std::move(lightCube));
+  models.push_back(lightModel);
 
   // Create wooden cube material.
   StandardMaterial cubeMaterial = StandardMaterial::WithTexture(crateTexture);
-  cubeMaterial.SetAmbient(0.5f);
-  cubeMaterial.SetDiffuse(1.0f);
   cubeMaterial.SetSpecular(crateSpecularTexture);
+  cubeMaterial.SetShininess(64);
 
   // Create wooden cubes.
   int numCubes = sizeof(cubePositions) / sizeof(cubePositions[0]);
@@ -94,14 +94,13 @@ void dg::PortalScene::Initialize() {
   for (int i = 0; i < numCubes; i++) {
     Model cube = Model(cubeModel);
     cube.transform.translation = cubePositions[i];
-    models.push_back(std::move(cube));
+    models.push_back(std::make_shared<Model>(std::move(cube)));
   }
 
   // Create wall material.
   StandardMaterial wallMaterial = StandardMaterial::WithTexture(brickTexture);
-  wallMaterial.SetAmbient(0.4f);
-  wallMaterial.SetDiffuse(0.8f);
-  wallMaterial.SetSpecular(0.4f);
+  wallMaterial.SetSpecular(0.2f);
+  wallMaterial.SetShininess(64);
 
   // Create back wall.
   Model backWall = Model(
@@ -114,14 +113,14 @@ void dg::PortalScene::Initialize() {
           ));
   std::static_pointer_cast<StandardMaterial>(backWall.material)->SetUVScale(
       glm::vec2(5, 2));
-  models.push_back(Model(backWall));
+  models.push_back(std::make_shared<Model>(backWall));
 
   // Create front wall.
   Model frontWall = backWall;
   frontWall.transform = frontWall.transform * Transform::R(
       glm::quat(glm::radians(glm::vec3(0, 180, 0))));
   frontWall.transform.translation.z *= -1;
-  models.push_back(Model(frontWall));
+  models.push_back(std::make_shared<Model>(frontWall));
 
   // Create left wall.
   Model leftWall = Model(
@@ -134,23 +133,22 @@ void dg::PortalScene::Initialize() {
           ));
   std::static_pointer_cast<StandardMaterial>(leftWall.material)->SetUVScale(
       glm::vec2(3, 2));
-  models.push_back(Model(leftWall));
+  models.push_back(std::make_shared<Model>(leftWall));
 
   // Create right wall.
   Model rightWall = leftWall;
   rightWall.transform = rightWall.transform * Transform::R(
       glm::quat(glm::radians(glm::vec3(0, 180, 0))));
   rightWall.transform.translation.x = 3.5f;
-  models.push_back(Model(rightWall));
+  models.push_back(std::make_shared<Model>(rightWall));
 
   // Create floor material.
   StandardMaterial floorMaterial = StandardMaterial::WithTexture(
       rustyPlateTexture);
   floorMaterial.SetUVScale(glm::vec2(5, 3) * 2.f);
   floorMaterial.SetLit(true);
-  floorMaterial.SetAmbient(0.4f);
-  floorMaterial.SetDiffuse(0.8f);
-  floorMaterial.SetSpecular(0.4f);
+  floorMaterial.SetSpecular(0.1f);
+  floorMaterial.SetShininess(32);
 
   // Create floor.
   Model floor = Model(
@@ -161,11 +159,11 @@ void dg::PortalScene::Initialize() {
           glm::quat(glm::radians(glm::vec3(-90, 0, 0))),
           glm::vec3(5, 3, 1)
           ));
-  models.push_back(Model(floor));
+  models.push_back(std::make_shared<Model>(floor));
 
   // Create ceiling material.
   StandardMaterial ceilingMaterial = floorMaterial;
-  ceilingMaterial.SetAlbedo(hardwoodTexture);
+  ceilingMaterial.SetDiffuse(hardwoodTexture);
   ceilingMaterial.SetSpecular(0.1f);
   ceilingMaterial.SetUVScale(glm::vec2(5, 3));
 
@@ -175,12 +173,10 @@ void dg::PortalScene::Initialize() {
   ceiling.transform = ceiling.transform * Transform::R(
       glm::quat(glm::radians(glm::vec3(180, 0, 0))));
   ceiling.transform.translation.y = 2;
-  models.push_back(Model(ceiling));
+  models.push_back(std::make_shared<Model>(ceiling));
 
   // Create portal back materials.
   StandardMaterial portalBackMaterial;
-  portalBackMaterial.SetAmbient(0.4f);
-  portalBackMaterial.SetDiffuse(0.8f);
   portalBackMaterial.SetSpecular(0.0f);
 
   // Create red portal model.
@@ -189,8 +185,8 @@ void dg::PortalScene::Initialize() {
         std::make_shared<StandardMaterial>(portalBackMaterial),
       portalTransforms[0] * portalQuadScale);
   std::static_pointer_cast<StandardMaterial>(redPortalModel.material)->
-      SetAlbedo(glm::vec3(1, 0, 0));
-  models.push_back(std::move(redPortalModel));
+      SetDiffuse(glm::vec3(1, 0, 0));
+  models.push_back(std::make_shared<Model>(std::move(redPortalModel)));
 
   // Create blue portal model.
   Model bluePortalModel = Model(
@@ -198,12 +194,12 @@ void dg::PortalScene::Initialize() {
         std::make_shared<StandardMaterial>(portalBackMaterial),
       portalTransforms[1] * portalQuadScale);
   std::static_pointer_cast<StandardMaterial>(bluePortalModel.material)->
-      SetAlbedo(glm::vec3(0, 0, 1));
-  models.push_back(std::move(bluePortalModel));
+      SetDiffuse(glm::vec3(0, 0, 1));
+  models.push_back(std::make_shared<Model>(std::move(bluePortalModel)));
 
   // Create portal stencil material.
   portalStencilMaterial.SetLit(false);
-  portalStencilMaterial.SetAlbedo(backgroundColor);
+  portalStencilMaterial.SetDiffuse(backgroundColor);
   portalStencilMaterial.SetInvPortal(glm::mat4x4(0));
 
   // Set initial camera position.
@@ -239,10 +235,10 @@ void dg::PortalScene::Update() {
 
   // Calculate new movement relative to camera, based on WASD keys.
   glm::vec3 movementDir(0);
-  if (window->IsKeyPressed(GLFW_KEY_W) || window->IsKeyPressed(GLFW_KEY_UP)) {
+  if (window->IsKeyPressed(GLFW_KEY_W)) {
     movementDir += FORWARD;
   }
-  if (window->IsKeyPressed(GLFW_KEY_S) || window->IsKeyPressed(GLFW_KEY_DOWN)) {
+  if (window->IsKeyPressed(GLFW_KEY_S)) {
     movementDir += -FORWARD;
   }
   if (window->IsKeyPressed(GLFW_KEY_A)) {
@@ -299,10 +295,49 @@ void dg::PortalScene::Update() {
 
   // Apply delta to camera.
   camera.transform = camera.transform * xfDelta;
+
+  // Adjust light ambient power with keyboard.
+  const float lightDelta = 0.05f;
+  if (window->IsKeyPressed(GLFW_KEY_1) &&
+      window->IsKeyJustPressed(GLFW_KEY_UP)) {
+    ceilingLight.ambient += ceilingLight.ambient * lightDelta;
+    std::cout << "Ambient R: " << ceilingLight.ambient.r << std::endl;
+  } else if (window->IsKeyPressed(GLFW_KEY_1) &&
+      window->IsKeyJustPressed(GLFW_KEY_DOWN)) {
+    ceilingLight.ambient -= ceilingLight.ambient * lightDelta;
+    std::cout << "Ambient R: " << ceilingLight.ambient.r << std::endl;
+  }
+
+  // Adjust light diffuse power with keyboard.
+  if (window->IsKeyPressed(GLFW_KEY_2) &&
+      window->IsKeyJustPressed(GLFW_KEY_UP)) {
+    ceilingLight.diffuse += ceilingLight.diffuse * lightDelta;
+    std::cout << "Diffuse R: " << ceilingLight.diffuse.r << std::endl;
+  } else if (window->IsKeyPressed(GLFW_KEY_2) &&
+      window->IsKeyJustPressed(GLFW_KEY_DOWN)) {
+    ceilingLight.diffuse -= ceilingLight.diffuse * lightDelta;
+    std::cout << "Diffuse R: " << ceilingLight.diffuse.r << std::endl;
+  }
+
+  // Adjust light specular power with keyboard.
+  if (window->IsKeyPressed(GLFW_KEY_3) &&
+      window->IsKeyJustPressed(GLFW_KEY_UP)) {
+    ceilingLight.specular += ceilingLight.specular * lightDelta;
+    std::cout << "Specular R: " << ceilingLight.specular.r << std::endl;
+  } else if (window->IsKeyPressed(GLFW_KEY_3) &&
+      window->IsKeyJustPressed(GLFW_KEY_DOWN)) {
+    ceilingLight.specular -= ceilingLight.specular * lightDelta;
+    std::cout << "Specular R: " << ceilingLight.specular.r << std::endl;
+  }
+
+  // Update light cube model to be consistent with point light.
+  lightModel->transform.translation = ceilingLight.transform.translation;
+  std::static_pointer_cast<StandardMaterial>(lightModel->material)
+    ->SetDiffuse(ceilingLight.specular);
 }
 
 void dg::PortalScene::RenderScene(
-    bool throughPortal, dg::Transform inPortal, dg::Transform outPortal) {
+    bool throughPortal, Transform inPortal, Transform outPortal) {
 
   // Set up view.
   Transform view = camera.transform.Inverse();
@@ -327,10 +362,10 @@ void dg::PortalScene::RenderScene(
                                       : glm::mat4x4(0);
   int i = 0;
   for (auto model = models.begin(); model != models.end(); model++) {
-    model->material->SetCameraPosition(view.Inverse().translation);
-    model->material->SetInvPortal(invPortal);
-    model->material->SetLight(ceilingLight);
-    model->Draw(view.ToMat4(), projection);
+    (*model)->material->SetCameraPosition(view.Inverse().translation);
+    (*model)->material->SetInvPortal(invPortal);
+    (*model)->material->SetLight(ceilingLight);
+    (*model)->Draw(view.ToMat4(), projection);
     i++;
   }
 }

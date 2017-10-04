@@ -1,52 +1,52 @@
-// Uniforms for phong lighting.
-uniform bool _Lit;
+struct Material {
+  bool lit;
 
-uniform bool _UseAlbedoSampler;
-uniform vec4 _Albedo;
-uniform sampler2D _MainTex;
+  bool useDiffuseMap;
+  sampler2D diffuseMap;
+  vec3 diffuse;
 
-uniform float _AmbientStrength;
+  bool useSpecularMap;
+  sampler2D specularMap;
+  vec3 specular;
 
-uniform float _DiffuseStrength;
+  float shininess;
+};
 
-uniform bool _UseSpecularSampler;
-uniform float _SpecularStrength;
-uniform sampler2D _SpecularMap;
-
+uniform Material _Material;
 uniform vec2 _UVScale;
 
 in vec2 v_TexCoord;
 
-vec3 CalculateLight(vec2 texCoord) {
-  if (!_Lit) {
-    return vec3(1);
-  }
-
-  vec3 ambient = _AmbientStrength * _Light.ambient;
-
-  vec3 normal = normalize(v_Normal);
-  vec3 lightDir = normalize(_Light.position - v_ScenePos.xyz); 
-  float diff = max(dot(normal, lightDir), 0.0);
-  vec3 diffuse = _DiffuseStrength * diff * _Light.diffuse;
-
-  vec3 viewDir = normalize(_CameraPosition - v_ScenePos.xyz);
-  vec3 reflectDir = reflect(-lightDir, normal);
-  float specularAmount = pow(max(dot(viewDir, reflectDir), 0.0), 32);
-  vec3 specularStrength = _UseSpecularSampler
-                        ? texture(_SpecularMap, texCoord).rgb
-                        : vec3(_SpecularStrength);
-
-  vec3 specular = specularStrength * specularAmount * _Light.specular;
-
-  return (specular + diffuse + ambient);
-}
-
 vec4 frag() {
   vec2 texCoord = v_TexCoord * _UVScale;
-  vec4 light = vec4(CalculateLight(texCoord), 1.0);
-  vec4 albedo = _UseAlbedoSampler
-              ? texture(_MainTex, texCoord)
-              : _Albedo;
-  return albedo * light;
+
+  vec3 diffuseColor = _Material.useDiffuseMap
+                    ? texture(_Material.diffuseMap, texCoord).rgb
+                    : vec3(_Material.diffuse);
+
+  if (!_Material.lit) {
+    return vec4(diffuseColor, 1.0);
+  }
+
+  vec3 specularColor = _Material.useSpecularMap
+                     ? texture(_Material.specularMap, texCoord).rgb
+                     : vec3(_Material.specular);
+
+  // Ambient
+  vec3 ambient = _Light.ambient * diffuseColor;
+
+  // Diffuse
+  vec3 norm = normalize(v_Normal);
+  vec3 lightDir = normalize(_Light.position - v_ScenePos.xyz); 
+  float diff = max(dot(norm, lightDir), 0.0);
+  vec3 diffuse = _Light.diffuse * diff * diffuseColor;
+
+  // Specular
+  vec3 viewDir = normalize(_CameraPosition - v_ScenePos.xyz);
+  vec3 reflectDir = reflect(-lightDir, norm);
+  float spec = pow(max(dot(viewDir, reflectDir), 0.0), _Material.shininess);
+  vec3 specular = _Light.specular * spec * specularColor;
+
+  return vec4(specular + diffuse + ambient, 1.0);
 }
 

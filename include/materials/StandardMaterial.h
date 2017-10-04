@@ -30,13 +30,13 @@ namespace dg {
 
       void SetUVScale(glm::vec2 scale);
       void SetLit(bool lit);
-      void SetAlbedo(std::shared_ptr<Texture> value);
-      void SetAlbedo(glm::vec3 value);
-      void SetAlbedo(glm::vec4 value);
-      void SetAmbient(float ambient);
       void SetDiffuse(float diffuse);
+      void SetDiffuse(glm::vec3 diffuse);
+      void SetDiffuse(std::shared_ptr<Texture> diffuseMap);
       void SetSpecular(float specular);
+      void SetSpecular(glm::vec3 specular);
       void SetSpecular(std::shared_ptr<Texture> specularMap);
+      void SetShininess(float shininess);
 
     private:
 

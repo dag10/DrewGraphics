@@ -11,6 +11,7 @@
 #include <Transform.h>
 #include <Model.h>
 #include <materials/StandardMaterial.h>
+#include <PointLight.h>
 
 namespace dg {
 
@@ -27,12 +28,14 @@ namespace dg {
     private:
 
       void RenderScene(
-          bool throughPortal, dg::Transform inPortal, dg::Transform outPortal);
-      void RenderPortalStencil(dg::Transform xfPortal);
+          bool throughPortal, Transform inPortal, Transform outPortal);
+      void RenderPortalStencil(Transform xfPortal);
       void ClearDepth();
 
-      dg::Camera camera;
-      std::vector<Model> models;
+      Camera camera;
+      PointLight ceilingLight;
+      std::vector<std::shared_ptr<Model>> models;
+      std::shared_ptr<Model> lightModel;
       StandardMaterial portalStencilMaterial;
       std::shared_ptr<Shader> depthResetShader;
 

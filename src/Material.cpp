@@ -117,12 +117,11 @@ void dg::Material::SetMatrixNormal(glm::mat3x3 normal) {
   SetProperty("_Matrix_Normal", normal);
 }
 
-void dg::Material::SetLightPosition(glm::vec3 position) {
-  SetProperty("_LightPosition", position);
-}
-
-void dg::Material::SetLightColor(glm::vec3 lightColor) {
-  SetProperty("_LightColor", lightColor);
+void dg::Material::SetLight(const PointLight& light) {
+  SetProperty("_Light.position", light.transform.translation);
+  SetProperty("_Light.ambient", light.ambient);
+  SetProperty("_Light.diffuse", light.diffuse);
+  SetProperty("_Light.specular", light.specular);
 }
 
 void dg::Material::SetInvPortal(glm::mat4x4 invPortal) {

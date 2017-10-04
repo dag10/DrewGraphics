@@ -9,6 +9,7 @@
 #include <Texture.h>
 #include <Mesh.h>
 #include <Transform.h>
+#include <PointLight.h>
 
 static const glm::vec3 cubePositions[] = {
   glm::vec3(  0.0f,  0.25f,  0.0f ), 
@@ -16,7 +17,8 @@ static const glm::vec3 cubePositions[] = {
   glm::vec3(  1.0f,  0.25f,  0.0f ), 
 };
 
-static const glm::vec3 lightColor = glm::vec3(0.7f, 0.65f, 0.6f);
+static dg::PointLight ceilingLight(
+    glm::normalize(glm::vec3(0.7f, 0.65f, 0.6f)), 0.4f, 0.7f, 1.0f);
 
 static dg::Transform portalTransforms[] = {
   dg::Transform::TR(
@@ -65,15 +67,16 @@ void dg::PortalScene::Initialize() {
       Texture::FromPath("assets/textures/rustyplate.jpg"));
 
   // Set light position.
-  xfLight = Transform::T(glm::vec3(2, 1.7f, 0));
+  ceilingLight.transform.translation = glm::vec3(2, 1.7f, 0);
 
   // Create light cube.
-  StandardMaterial lightMaterial = StandardMaterial::WithColor(lightColor);
+  StandardMaterial lightMaterial = StandardMaterial::WithColor(
+      ceilingLight.specular);
   lightMaterial.SetLit(false);
   Model lightCube = Model(
       dg::Mesh::Cube,
       std::make_shared<StandardMaterial>(lightMaterial),
-      xfLight * Transform::S(glm::vec3(0.05f)));
+      ceilingLight.transform * Transform::S(glm::vec3(0.05f)));
   models.push_back(std::move(lightCube));
 
   // Create wooden cube material.
@@ -326,8 +329,7 @@ void dg::PortalScene::RenderScene(
   for (auto model = models.begin(); model != models.end(); model++) {
     model->material->SetCameraPosition(view.Inverse().translation);
     model->material->SetInvPortal(invPortal);
-    model->material->SetLightPosition(xfLight.translation);
-    model->material->SetLightColor(lightColor);
+    model->material->SetLight(ceilingLight);
     model->Draw(view.ToMat4(), projection);
     i++;
   }

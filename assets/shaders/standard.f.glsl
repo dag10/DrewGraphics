@@ -22,21 +22,21 @@ vec3 CalculateLight(vec2 texCoord) {
     return vec3(1);
   }
 
-  vec3 ambient = _AmbientStrength * _LightColor;
+  vec3 ambient = _AmbientStrength * _Light.ambient;
 
   vec3 normal = normalize(v_Normal);
-  vec3 lightDir = normalize(_LightPosition - v_ScenePos.xyz); 
+  vec3 lightDir = normalize(_Light.position - v_ScenePos.xyz); 
   float diff = max(dot(normal, lightDir), 0.0);
-  vec3 diffuse = _DiffuseStrength * diff * _LightColor;
+  vec3 diffuse = _DiffuseStrength * diff * _Light.diffuse;
 
   vec3 viewDir = normalize(_CameraPosition - v_ScenePos.xyz);
   vec3 reflectDir = reflect(-lightDir, normal);
   float specularAmount = pow(max(dot(viewDir, reflectDir), 0.0), 32);
-
   vec3 specularStrength = _UseSpecularSampler
                         ? texture(_SpecularMap, texCoord).rgb
                         : vec3(_SpecularStrength);
-  vec3 specular = specularStrength * specularAmount * _LightColor;
+
+  vec3 specular = specularStrength * specularAmount * _Light.specular;
 
   return (specular + diffuse + ambient);
 }

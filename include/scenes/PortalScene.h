@@ -32,7 +32,6 @@ namespace dg {
       void ClearDepth();
 
       dg::Camera camera;
-      Transform xfLight;
       std::vector<Model> models;
       StandardMaterial portalStencilMaterial;
       std::shared_ptr<Shader> depthResetShader;

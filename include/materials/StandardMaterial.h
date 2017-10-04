@@ -36,6 +36,7 @@ namespace dg {
       void SetAmbient(float ambient);
       void SetDiffuse(float diffuse);
       void SetSpecular(float specular);
+      void SetSpecular(std::shared_ptr<Texture> specularMap);
 
     private:
 

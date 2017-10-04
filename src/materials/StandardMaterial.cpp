@@ -79,7 +79,7 @@ void dg::StandardMaterial::SetLit(bool lit) {
 }
 
 void dg::StandardMaterial::SetAlbedo(std::shared_ptr<Texture> value) {
-  SetProperty("_AlbedoSampler", true);
+  SetProperty("_UseAlbedoSampler", true);
   SetProperty("_MainTex", value);
 }
 
@@ -88,7 +88,7 @@ void dg::StandardMaterial::SetAlbedo(glm::vec3 value) {
 }
 
 void dg::StandardMaterial::SetAlbedo(glm::vec4 value) {
-  SetProperty("_AlbedoSampler", false);
+  SetProperty("_UseAlbedoSampler", false);
   SetProperty("_Albedo", value);
 }
 
@@ -102,5 +102,11 @@ void dg::StandardMaterial::SetDiffuse(float diffuse) {
 
 void dg::StandardMaterial::SetSpecular(float specular) {
   SetProperty("_SpecularStrength", specular);
+  SetProperty("_UseSpecularSampler", false);
+}
+
+void dg::StandardMaterial::SetSpecular(std::shared_ptr<Texture> specularMap) {
+  SetProperty("_SpecularMap", specularMap);
+  SetProperty("_UseSpecularSampler", true);
 }
 

@@ -9,7 +9,9 @@ uniform float _AmbientStrength;
 
 uniform float _DiffuseStrength;
 
+uniform bool _UseSpecularSampler;
 uniform float _SpecularStrength;
+uniform sampler2D _SpecularMap;
 
 uniform vec2 _UVScale;
 
@@ -31,7 +33,10 @@ vec3 CalculateLight(vec2 texCoord) {
   vec3 reflectDir = reflect(-lightDir, normal);
   float specularAmount = pow(max(dot(viewDir, reflectDir), 0.0), 32);
 
-  vec3 specular = _SpecularStrength * specularAmount * _LightColor;
+  vec3 specularStrength = _UseSpecularSampler
+                        ? texture(_SpecularMap, texCoord).rgb
+                        : vec3(_SpecularStrength);
+  vec3 specular = specularStrength * specularAmount * _LightColor;
 
   return (specular + diffuse + ambient);
 }

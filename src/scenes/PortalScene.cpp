@@ -54,7 +54,9 @@ void dg::PortalScene::Initialize() {
 
   // Create textures.
   std::shared_ptr<Texture> crateTexture = std::make_shared<Texture>(
-      Texture::FromPath("assets/textures/container.jpg"));
+      Texture::FromPath("assets/textures/container2.png"));
+  std::shared_ptr<Texture> crateSpecularTexture = std::make_shared<Texture>(
+      Texture::FromPath("assets/textures/container2_specular.png"));
   std::shared_ptr<Texture> brickTexture = std::make_shared<Texture>(
       Texture::FromPath("assets/textures/brick.png"));
   std::shared_ptr<Texture> hardwoodTexture = std::make_shared<Texture>(
@@ -76,9 +78,9 @@ void dg::PortalScene::Initialize() {
 
   // Create wooden cube material.
   StandardMaterial cubeMaterial = StandardMaterial::WithTexture(crateTexture);
-  cubeMaterial.SetAmbient(0.8f);
+  cubeMaterial.SetAmbient(0.5f);
   cubeMaterial.SetDiffuse(1.0f);
-  cubeMaterial.SetSpecular(0.2f);
+  cubeMaterial.SetSpecular(crateSpecularTexture);
 
   // Create wooden cubes.
   int numCubes = sizeof(cubePositions) / sizeof(cubePositions[0]);

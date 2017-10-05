@@ -12,6 +12,8 @@ std::unique_ptr<dg::TutorialScene> dg::TutorialScene::Make() {
   return std::unique_ptr<dg::TutorialScene>(new dg::TutorialScene());
 }
 
+dg::TutorialScene::TutorialScene() : Scene() {}
+
 void dg::TutorialScene::Initialize() {
 }
 

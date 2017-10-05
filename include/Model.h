@@ -23,10 +23,6 @@ namespace dg {
           Transform transform);
 
       Model(Model& other);
-      Model(Model&& other);
-      Model& operator=(Model& other);
-      Model& operator=(Model&& other);
-      friend void swap(Model& first, Model& second); // nothrow
 
       std::shared_ptr<Mesh> mesh = nullptr;
       std::shared_ptr<Material>  material = nullptr;

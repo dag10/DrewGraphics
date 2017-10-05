@@ -21,6 +21,8 @@ namespace dg {
 
       static std::unique_ptr<TutorialScene> Make();
 
+      TutorialScene();
+
       virtual void Initialize();
       virtual void Update();
       virtual void Render();

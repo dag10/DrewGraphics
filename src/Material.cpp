@@ -118,7 +118,7 @@ void dg::Material::SetMatrixNormal(glm::mat3x3 normal) {
 }
 
 void dg::Material::SetLight(const PointLight& light) {
-  SetProperty("_Light.position", light.transform.translation);
+  SetProperty("_Light.position", light.SceneSpace().translation);
   SetProperty("_Light.ambient", light.ambient);
   SetProperty("_Light.diffuse", light.diffuse);
   SetProperty("_Light.specular", light.specular);

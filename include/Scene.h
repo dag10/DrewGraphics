@@ -5,12 +5,15 @@
 #pragma once
 
 #include <Window.h>
+#include <SceneObject.h>
 
 namespace dg {
 
-  class Scene {
+  class Scene : public SceneObject {
 
     public:
+
+      Scene();
 
       virtual void Initialize() {};
       virtual void Update() {};

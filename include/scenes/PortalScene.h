@@ -21,6 +21,8 @@ namespace dg {
 
       static std::unique_ptr<PortalScene> Make();
 
+      PortalScene();
+
       virtual void Initialize();
       virtual void Update();
       virtual void Render();
@@ -33,10 +35,9 @@ namespace dg {
       void ClearDepth();
 
       std::shared_ptr<Camera> camera;
-      std::shared_ptr<PointLight> ceilingLight;
       bool animatingLight;
-      std::vector<std::shared_ptr<Model>> models;
       std::shared_ptr<Model> lightModel;
+      std::shared_ptr<PointLight> ceilingLight;
       StandardMaterial portalStencilMaterial;
       std::shared_ptr<Shader> depthResetShader;
 

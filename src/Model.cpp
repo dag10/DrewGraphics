@@ -13,38 +13,18 @@ dg::Model::Model(
   this->material = material;
 }
 
-dg::Model::Model(Model& other) {
-  (SceneObject&)*this = SceneObject(other);
+dg::Model::Model(Model& other) : SceneObject(other) {
   this->mesh = other.mesh;
   this->material = other.material;
 }
 
-dg::Model::Model(Model&& other) {
-  *this = std::move(other);
-}
-
-dg::Model& dg::Model::operator=(Model& other) {
-  *this = Model(other);
-  return *this;
-}
-
-dg::Model& dg::Model::operator=(Model&& other) {
-  swap(*this, other);
-  return *this;
-}
-
-void dg::swap(Model& first, Model& second) {
-  using std::swap;
-  swap((SceneObject&)first, (SceneObject&)second);
-  swap(first.mesh, second.mesh);
-  swap(first.material, second.material);
-}
-
 void dg::Model::Draw(glm::mat4x4 view, glm::mat4x4 projection) const {
+  Transform xf = SceneSpace();
+
   material->SetMatrixNormal(
-      glm::mat3x3(glm::transpose(transform.Inverse().ToMat4())));
-  material->SetMatrixM(transform.ToMat4());
-  material->SetMatrixMVP(projection * view * transform);
+      glm::mat3x3(glm::transpose(xf.Inverse().ToMat4())));
+  material->SetMatrixM(xf.ToMat4());
+  material->SetMatrixMVP(projection * view * xf);
 
   material->Use();
 

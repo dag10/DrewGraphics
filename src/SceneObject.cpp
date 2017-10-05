@@ -11,6 +11,56 @@
 
 dg::SceneObject::SceneObject(Transform transform) : transform(transform) {}
 
+// Creates a copy of the object without copying its children, and without
+// a parent.
+dg::SceneObject::SceneObject(SceneObject& other) {
+  this->transform = other.transform;
+}
+
+dg::Transform dg::SceneObject::SceneSpace() const {
+  if (parent == nullptr) {
+    return transform;
+  }
+
+  return parent->SceneSpace() * transform;
+}
+
+void dg::SceneObject::SetSceneSpace(Transform transform) {
+  if (parent == nullptr) {
+    this->transform = transform;
+  }
+
+  this->transform = parent->SceneSpace().Inverse() * transform;
+}
+
+void dg::SceneObject::AddChild(std::shared_ptr<SceneObject> child) {
+  AddChild(child, true);
+}
+
+void dg::SceneObject::AddChild(
+    std::shared_ptr<SceneObject> child, bool preserveSceneSpace) {
+  if (child->parent == this) return;
+  if (child->parent != nullptr) {
+    child->parent->children.erase(child);
+  }
+  children.insert(child);
+  child->SetParent(this, preserveSceneSpace);
+}
+
+void dg::SceneObject::RemoveChild(std::shared_ptr<SceneObject> child) {
+  if (child->parent != this) return;
+  children.erase(child);
+  child->SetParent(nullptr, true);
+}
+
+dg::SceneObject *dg::SceneObject::Parent() const {
+  return parent;
+}
+
+std::set<std::shared_ptr<dg::SceneObject>> &dg::SceneObject::Children() {
+  return children;
+}
+
 void dg::SceneObject::LookAtDirection(glm::vec3 direction) {
   direction = glm::normalize(direction);
 
@@ -40,5 +90,19 @@ void dg::SceneObject::LookAtPoint(glm::vec3 target) {
 
 void dg::SceneObject::OrientUpwards() {
   LookAtDirection(transform.Forward());
+}
+
+// Assumes it was already added as a child to the new parent, and removed
+// as a child from its old parent. This only sets the current parent field and
+// updates the local transform.
+void dg::SceneObject::SetParent(
+    SceneObject *parent, bool preserveSceneSpace) {
+  if (preserveSceneSpace) {
+    Transform xf_SS = SceneSpace(); 
+    this->parent = parent;
+    SetSceneSpace(xf_SS);
+  } else {
+    this->parent = parent;
+  }
 }
 

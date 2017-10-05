@@ -10,6 +10,7 @@
 #include <Mesh.h>
 #include <Transform.h>
 #include <PointLight.h>
+#include <forward_list>
 #include <iostream>
 
 static const glm::vec3 cubePositions[] = {
@@ -43,6 +44,8 @@ std::unique_ptr<dg::PortalScene> dg::PortalScene::Make() {
   return std::unique_ptr<dg::PortalScene>(new dg::PortalScene());
 }
 
+dg::PortalScene::PortalScene() : Scene() {}
+
 void dg::PortalScene::Initialize() {
   // Lock window cursor to center.
   window->LockCursor();
@@ -70,6 +73,7 @@ void dg::PortalScene::Initialize() {
       glm::vec3(1.0f, 0.93f, 0.86f),
       0.732f, 0.399f, 0.968f);
   ceilingLight->transform.translation = glm::vec3(1, 1.7f, 0);
+  AddChild(ceilingLight);
 
   // Create light cube material.
   StandardMaterial lightMaterial = StandardMaterial::WithColor(
@@ -80,8 +84,8 @@ void dg::PortalScene::Initialize() {
   lightModel = std::make_shared<Model>(
       dg::Mesh::Cube,
       std::make_shared<StandardMaterial>(lightMaterial),
-      ceilingLight->transform * Transform::S(glm::vec3(0.05f)));
-  models.push_back(lightModel);
+      Transform::S(glm::vec3(0.05f)));
+  ceilingLight->AddChild(lightModel, false);
 
   // Create wooden cube material.
   StandardMaterial cubeMaterial = StandardMaterial::WithTexture(crateTexture);
@@ -89,15 +93,17 @@ void dg::PortalScene::Initialize() {
   cubeMaterial.SetShininess(64);
 
   // Create wooden cubes.
+  auto cubes = std::make_shared<SceneObject>();
+  AddChild(cubes);
   int numCubes = sizeof(cubePositions) / sizeof(cubePositions[0]);
-  Model baseCubeModel = Model(
+  Model baseCubeModel(
       dg::Mesh::Cube,
       std::make_shared<StandardMaterial>(cubeMaterial),
       Transform::S(glm::vec3(0.5f)));
   for (int i = 0; i < numCubes; i++) {
     auto cube = std::make_shared<Model>(baseCubeModel);
     cube->transform.translation = cubePositions[i];
-    models.push_back(cube);
+    cubes->AddChild(cube);
   }
 
   // Create wall material.
@@ -116,14 +122,14 @@ void dg::PortalScene::Initialize() {
           ));
   std::static_pointer_cast<StandardMaterial>(backWall->material)->SetUVScale(
       glm::vec2(5, 2));
-  models.push_back(backWall);
+  AddChild(backWall);
 
   // Create front wall, which is a copy of the back wall.
   auto frontWall = std::make_shared<Model>(*backWall);
   frontWall->transform = frontWall->transform * Transform::R(
       glm::quat(glm::radians(glm::vec3(0, 180, 0))));
   frontWall->transform.translation.z *= -1;
-  models.push_back(frontWall);
+  AddChild(frontWall);
 
   // Create left wall.
   auto leftWall = std::make_shared<Model>(
@@ -136,14 +142,14 @@ void dg::PortalScene::Initialize() {
           ));
   std::static_pointer_cast<StandardMaterial>(leftWall->material)->SetUVScale(
       glm::vec2(3, 2));
-  models.push_back(leftWall);
+  AddChild(leftWall);
 
   // Create right wall, which is a copy of the left wall.
   auto rightWall = std::make_shared<Model>(*leftWall);
   rightWall->transform = rightWall->transform * Transform::R(
       glm::quat(glm::radians(glm::vec3(0, 180, 0))));
   rightWall->transform.translation.x = 3.5f;
-  models.push_back(rightWall);
+  AddChild(rightWall);
 
   // Create floor material.
   StandardMaterial floorMaterial = StandardMaterial::WithTexture(
@@ -162,7 +168,7 @@ void dg::PortalScene::Initialize() {
           glm::quat(glm::radians(glm::vec3(-90, 0, 0))),
           glm::vec3(5, 3, 1)
           ));
-  models.push_back(floor);
+  AddChild(floor);
 
   // Create ceiling material.
   StandardMaterial ceilingMaterial = floorMaterial;
@@ -176,7 +182,7 @@ void dg::PortalScene::Initialize() {
   ceiling->transform = ceiling->transform * Transform::R(
       glm::quat(glm::radians(glm::vec3(180, 0, 0))));
   ceiling->transform.translation.y = 2;
-  models.push_back(ceiling);
+  AddChild(ceiling);
 
   // Create portal back materials.
   StandardMaterial portalBackMaterial;
@@ -189,7 +195,7 @@ void dg::PortalScene::Initialize() {
       portalTransforms[0] * portalQuadScale);
   std::static_pointer_cast<StandardMaterial>(redPortalModel->material)->
       SetDiffuse(glm::vec3(1, 0, 0));
-  models.push_back(redPortalModel);
+  AddChild(redPortalModel);
 
   // Create blue portal model.
   auto bluePortalModel = std::make_shared<Model>(
@@ -198,7 +204,7 @@ void dg::PortalScene::Initialize() {
       portalTransforms[1] * portalQuadScale);
   std::static_pointer_cast<StandardMaterial>(bluePortalModel->material)->
       SetDiffuse(glm::vec3(0, 0, 1));
-  models.push_back(bluePortalModel);
+  AddChild(bluePortalModel);
 
   // Create portal stencil material.
   portalStencilMaterial.SetLit(false);
@@ -211,6 +217,7 @@ void dg::PortalScene::Initialize() {
   camera->LookAtPoint(glm::vec3(0, camera->transform.translation.y, 0));
   camera->nearClip = 0.01f;
   camera->farClip = 10;
+  AddChild(camera);
 }
 
 void dg::PortalScene::Update() {
@@ -344,13 +351,39 @@ void dg::PortalScene::Update() {
   }
 
   // Update light cube model to be consistent with point light.
-  lightModel->transform.translation = ceilingLight->transform.translation;
   std::static_pointer_cast<StandardMaterial>(lightModel->material)
     ->SetDiffuse(ceilingLight->specular);
 }
 
 void dg::PortalScene::RenderScene(
     bool throughPortal, Transform inPortal, Transform outPortal) {
+
+  // Traverse scene tree and sort out different types of objects
+  // into their own lists.
+  std::forward_list<SceneObject*> remainingObjects;
+  std::forward_list<Model*> models;
+  std::forward_list<PointLight*> lights;
+  std::forward_list<Camera*> cameras;
+  remainingObjects.push_front(this);
+  while (!remainingObjects.empty()) {
+    SceneObject *obj = remainingObjects.front();
+    remainingObjects.pop_front();
+    for (auto child = obj->Children().begin();
+         child != obj->Children().end();
+         child++) {
+      remainingObjects.push_front(child->get());
+      if (auto model = std::dynamic_pointer_cast<Model>(*child)) {
+        models.push_front(model.get());
+      } else if (auto model = std::dynamic_pointer_cast<PointLight>(*child)) {
+        lights.push_front(model.get());
+      } else if (auto model = std::dynamic_pointer_cast<Camera>(*child)) {
+        cameras.push_front(model.get());
+      }
+    }
+  }
+
+  if (cameras.empty()) return;
+  Camera *camera = cameras.front();
 
   // Set up view.
   Transform view = camera->transform.Inverse();
@@ -377,7 +410,10 @@ void dg::PortalScene::RenderScene(
   for (auto model = models.begin(); model != models.end(); model++) {
     (*model)->material->SetCameraPosition(view.Inverse().translation);
     (*model)->material->SetInvPortal(invPortal);
-    (*model)->material->SetLight(*ceilingLight);
+    // TODO: Support more than just the first light.
+    if (!lights.empty()) {
+      (*model)->material->SetLight(*lights.front());
+    }
     (*model)->Draw(view.ToMat4(), projection);
     i++;
   }

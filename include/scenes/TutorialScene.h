@@ -27,10 +27,6 @@ namespace dg {
 
     private:
 
-      std::vector<Model> models;
-      Transform xfLight;
-      Camera camera;
-
   }; // class TutorialScene
 
 } // namespace dg

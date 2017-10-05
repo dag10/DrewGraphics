@@ -4,18 +4,19 @@
 
 #include <Model.h>
 
+dg::Model::Model() : SceneObject() {}
+
 dg::Model::Model(
     std::shared_ptr<Mesh> mesh, std::shared_ptr<Material> material,
-    Transform transform) {
+    Transform transform) : SceneObject(transform) {
   this->mesh = mesh;
   this->material = material;
-  this->transform = transform;
 }
 
 dg::Model::Model(Model& other) {
+  (SceneObject&)*this = SceneObject(other);
   this->mesh = other.mesh;
   this->material = other.material;
-  this->transform = other.transform;
 }
 
 dg::Model::Model(Model&& other) {
@@ -34,9 +35,9 @@ dg::Model& dg::Model::operator=(Model&& other) {
 
 void dg::swap(Model& first, Model& second) {
   using std::swap;
+  swap((SceneObject&)first, (SceneObject&)second);
   swap(first.mesh, second.mesh);
   swap(first.material, second.material);
-  swap(first.transform, second.transform);
 }
 
 void dg::Model::Draw(glm::mat4x4 view, glm::mat4x4 projection) const {

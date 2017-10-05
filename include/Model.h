@@ -16,7 +16,7 @@ namespace dg {
 
     public:
 
-      Model() = default;
+      Model();
 
       Model(
           std::shared_ptr<Mesh> mesh, std::shared_ptr<Material> material,

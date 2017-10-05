@@ -17,7 +17,7 @@ namespace dg {
       float nearClip = 0.1f;
       float farClip = 100.f;
 
-      Camera() = default;
+      Camera();
 
       glm::mat4x4 GetViewMatrix() const;
       glm::mat4x4 GetProjectionMatrix(float aspectRatio) const;

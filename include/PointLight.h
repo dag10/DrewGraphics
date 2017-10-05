@@ -23,7 +23,7 @@ namespace dg {
       float linear = 0.14f;
       float quadratic = 0.07f;
 
-      PointLight() = default;
+      PointLight();
       PointLight(glm::vec3 color, float ambient, float diffuse, float specular);
       PointLight(glm::vec3 ambient, glm::vec3 diffuse, glm::vec3 specular);
 

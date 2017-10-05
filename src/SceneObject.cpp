@@ -9,6 +9,8 @@
 #include <glm/gtx/quaternion.hpp>
 #include <glm/gtc/constants.hpp>
 
+dg::SceneObject::SceneObject(Transform transform) : transform(transform) {}
+
 void dg::SceneObject::LookAtDirection(glm::vec3 direction) {
   direction = glm::normalize(direction);
 

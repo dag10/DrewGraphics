@@ -9,6 +9,8 @@
 #include <glm/gtx/quaternion.hpp>
 #include <glm/gtc/constants.hpp>
 
+dg::Camera::Camera() : SceneObject() {}
+
 glm::mat4x4 dg::Camera::GetViewMatrix() const {
   return transform.Inverse().ToMat4();
 }

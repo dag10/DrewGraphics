@@ -71,10 +71,12 @@ void dg::PortalScene::Initialize() {
       0.732f, 0.399f, 0.968f);
   ceilingLight->transform.translation = glm::vec3(1, 1.7f, 0);
 
-  // Create light cube.
+  // Create light cube material.
   StandardMaterial lightMaterial = StandardMaterial::WithColor(
       ceilingLight->specular);
   lightMaterial.SetLit(false);
+
+  // Create light cube.
   lightModel = std::make_shared<Model>(
       dg::Mesh::Cube,
       std::make_shared<StandardMaterial>(lightMaterial),
@@ -88,14 +90,14 @@ void dg::PortalScene::Initialize() {
 
   // Create wooden cubes.
   int numCubes = sizeof(cubePositions) / sizeof(cubePositions[0]);
-  Model cubeModel = Model(
+  Model baseCubeModel = Model(
       dg::Mesh::Cube,
       std::make_shared<StandardMaterial>(cubeMaterial),
       Transform::S(glm::vec3(0.5f)));
   for (int i = 0; i < numCubes; i++) {
-    Model cube = Model(cubeModel);
-    cube.transform.translation = cubePositions[i];
-    models.push_back(std::make_shared<Model>(std::move(cube)));
+    auto cube = std::make_shared<Model>(baseCubeModel);
+    cube->transform.translation = cubePositions[i];
+    models.push_back(cube);
   }
 
   // Create wall material.
@@ -104,7 +106,7 @@ void dg::PortalScene::Initialize() {
   wallMaterial.SetShininess(64);
 
   // Create back wall.
-  Model backWall = Model(
+  auto backWall = std::make_shared<Model>(
         dg::Mesh::Quad,
         std::make_shared<StandardMaterial>(wallMaterial),
         Transform::TRS(
@@ -112,19 +114,19 @@ void dg::PortalScene::Initialize() {
           glm::quat(glm::radians(glm::vec3(0))),
           glm::vec3(5, 2, 1)
           ));
-  std::static_pointer_cast<StandardMaterial>(backWall.material)->SetUVScale(
+  std::static_pointer_cast<StandardMaterial>(backWall->material)->SetUVScale(
       glm::vec2(5, 2));
-  models.push_back(std::make_shared<Model>(backWall));
+  models.push_back(backWall);
 
-  // Create front wall.
-  Model frontWall = backWall;
-  frontWall.transform = frontWall.transform * Transform::R(
+  // Create front wall, which is a copy of the back wall.
+  auto frontWall = std::make_shared<Model>(*backWall);
+  frontWall->transform = frontWall->transform * Transform::R(
       glm::quat(glm::radians(glm::vec3(0, 180, 0))));
-  frontWall.transform.translation.z *= -1;
-  models.push_back(std::make_shared<Model>(frontWall));
+  frontWall->transform.translation.z *= -1;
+  models.push_back(frontWall);
 
   // Create left wall.
-  Model leftWall = Model(
+  auto leftWall = std::make_shared<Model>(
         dg::Mesh::Quad,
         std::make_shared<StandardMaterial>(wallMaterial),
         Transform::TRS(
@@ -132,16 +134,16 @@ void dg::PortalScene::Initialize() {
           glm::quat(glm::radians(glm::vec3(0, 90, 0))),
           glm::vec3(3, 2, 1)
           ));
-  std::static_pointer_cast<StandardMaterial>(leftWall.material)->SetUVScale(
+  std::static_pointer_cast<StandardMaterial>(leftWall->material)->SetUVScale(
       glm::vec2(3, 2));
-  models.push_back(std::make_shared<Model>(leftWall));
+  models.push_back(leftWall);
 
-  // Create right wall.
-  Model rightWall = leftWall;
-  rightWall.transform = rightWall.transform * Transform::R(
+  // Create right wall, which is a copy of the left wall.
+  auto rightWall = std::make_shared<Model>(*leftWall);
+  rightWall->transform = rightWall->transform * Transform::R(
       glm::quat(glm::radians(glm::vec3(0, 180, 0))));
-  rightWall.transform.translation.x = 3.5f;
-  models.push_back(std::make_shared<Model>(rightWall));
+  rightWall->transform.translation.x = 3.5f;
+  models.push_back(rightWall);
 
   // Create floor material.
   StandardMaterial floorMaterial = StandardMaterial::WithTexture(
@@ -152,7 +154,7 @@ void dg::PortalScene::Initialize() {
   floorMaterial.SetShininess(32);
 
   // Create floor.
-  Model floor = Model(
+  auto floor = std::make_shared<Model>(
         dg::Mesh::Quad,
         std::make_shared<StandardMaterial>(floorMaterial),
         Transform::TRS(
@@ -160,7 +162,7 @@ void dg::PortalScene::Initialize() {
           glm::quat(glm::radians(glm::vec3(-90, 0, 0))),
           glm::vec3(5, 3, 1)
           ));
-  models.push_back(std::make_shared<Model>(floor));
+  models.push_back(floor);
 
   // Create ceiling material.
   StandardMaterial ceilingMaterial = floorMaterial;
@@ -168,35 +170,35 @@ void dg::PortalScene::Initialize() {
   ceilingMaterial.SetSpecular(0.1f);
   ceilingMaterial.SetUVScale(glm::vec2(5, 3));
 
-  // Create ceiling.
-  Model ceiling = floor;
-  ceiling.material = std::make_shared<StandardMaterial>(ceilingMaterial);
-  ceiling.transform = ceiling.transform * Transform::R(
+  // Create ceiling, which is a copy of the floor.
+  auto ceiling = std::make_shared<Model>(*floor);
+  ceiling->material = std::make_shared<StandardMaterial>(ceilingMaterial);
+  ceiling->transform = ceiling->transform * Transform::R(
       glm::quat(glm::radians(glm::vec3(180, 0, 0))));
-  ceiling.transform.translation.y = 2;
-  models.push_back(std::make_shared<Model>(ceiling));
+  ceiling->transform.translation.y = 2;
+  models.push_back(ceiling);
 
   // Create portal back materials.
   StandardMaterial portalBackMaterial;
   portalBackMaterial.SetSpecular(0.0f);
 
   // Create red portal model.
-  Model redPortalModel = Model(
+  auto redPortalModel = std::make_shared<Model>(
       dg::Mesh::Quad,
         std::make_shared<StandardMaterial>(portalBackMaterial),
       portalTransforms[0] * portalQuadScale);
-  std::static_pointer_cast<StandardMaterial>(redPortalModel.material)->
+  std::static_pointer_cast<StandardMaterial>(redPortalModel->material)->
       SetDiffuse(glm::vec3(1, 0, 0));
-  models.push_back(std::make_shared<Model>(std::move(redPortalModel)));
+  models.push_back(redPortalModel);
 
   // Create blue portal model.
-  Model bluePortalModel = Model(
+  auto bluePortalModel = std::make_shared<Model>(
       dg::Mesh::Quad,
         std::make_shared<StandardMaterial>(portalBackMaterial),
       portalTransforms[1] * portalQuadScale);
-  std::static_pointer_cast<StandardMaterial>(bluePortalModel.material)->
+  std::static_pointer_cast<StandardMaterial>(bluePortalModel->material)->
       SetDiffuse(glm::vec3(0, 0, 1));
-  models.push_back(std::make_shared<Model>(std::move(bluePortalModel)));
+  models.push_back(bluePortalModel);
 
   // Create portal stencil material.
   portalStencilMaterial.SetLit(false);

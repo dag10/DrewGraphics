@@ -68,7 +68,7 @@ void dg::PortalScene::Initialize() {
   animatingLight = false;
   ceilingLight = PointLight(
       glm::vec3(1.0f, 0.93f, 0.86f),
-      0.325f, 0.521f, 0.821f);
+      0.732f, 0.399f, 0.968f);
   ceilingLight.transform.translation = glm::vec3(1, 1.7f, 0);
 
   // Create light cube.

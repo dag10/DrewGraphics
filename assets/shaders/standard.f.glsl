@@ -46,6 +46,14 @@ vec4 frag() {
   vec3 reflectDir = reflect(-lightDir, norm);
   float spec = pow(max(dot(viewDir, reflectDir), 0.0), _Material.shininess);
   vec3 specular = _Light.specular * spec * specularColor;
+  
+  // Attenuation
+  float distance = length(_Light.position - v_ScenePos.xyz);
+  float attenuation = 1.0 / (_Light.constant + _Light.linear * distance +
+                      _Light.quadratic * (distance * distance));
+  diffuse *= attenuation;
+  ambient *= attenuation;
+  specular *= attenuation;
 
   return vec4(specular + diffuse + ambient, 1.0);
 }

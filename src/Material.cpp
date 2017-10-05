@@ -122,6 +122,9 @@ void dg::Material::SetLight(const PointLight& light) {
   SetProperty("_Light.ambient", light.ambient);
   SetProperty("_Light.diffuse", light.diffuse);
   SetProperty("_Light.specular", light.specular);
+  SetProperty("_Light.constant", light.constant);
+  SetProperty("_Light.linear", light.linear);
+  SetProperty("_Light.quadratic", light.quadratic);
 }
 
 void dg::Material::SetInvPortal(glm::mat4x4 invPortal) {

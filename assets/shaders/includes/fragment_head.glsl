@@ -4,9 +4,16 @@
 
 struct Light {
   vec3 position;
+
+  // Illumination properties.
   vec3 diffuse;
   vec3 ambient;
   vec3 specular;
+
+  // Attenuation properties.
+  float constant;
+  float linear;
+  float quadratic;
 };
 
 in vec4 v_ScenePos;

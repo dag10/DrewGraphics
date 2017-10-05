@@ -21,6 +21,7 @@ namespace dg {
 
     public:
       Transform transform = Transform();
+      bool enabled = true;
 
       SceneObject() = default;
       SceneObject(Transform transform);

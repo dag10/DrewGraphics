@@ -371,6 +371,7 @@ void dg::PortalScene::RenderScene(
     for (auto child = obj->Children().begin();
          child != obj->Children().end();
          child++) {
+      if (!(*child)->enabled) continue;
       remainingObjects.push_front(child->get());
       if (auto model = std::dynamic_pointer_cast<Model>(*child)) {
         models.push_front(model.get());

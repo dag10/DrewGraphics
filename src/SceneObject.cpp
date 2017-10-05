@@ -15,6 +15,7 @@ dg::SceneObject::SceneObject(Transform transform) : transform(transform) {}
 // a parent.
 dg::SceneObject::SceneObject(SceneObject& other) {
   this->transform = other.transform;
+  this->enabled = other.enabled;
 }
 
 dg::Transform dg::SceneObject::SceneSpace() const {

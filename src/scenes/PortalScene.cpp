@@ -66,19 +66,19 @@ void dg::PortalScene::Initialize() {
 
   // Create ceiling light source.
   animatingLight = false;
-  ceilingLight = PointLight(
+  ceilingLight = std::make_shared<PointLight>(
       glm::vec3(1.0f, 0.93f, 0.86f),
       0.732f, 0.399f, 0.968f);
-  ceilingLight.transform.translation = glm::vec3(1, 1.7f, 0);
+  ceilingLight->transform.translation = glm::vec3(1, 1.7f, 0);
 
   // Create light cube.
   StandardMaterial lightMaterial = StandardMaterial::WithColor(
-      ceilingLight.specular);
+      ceilingLight->specular);
   lightMaterial.SetLit(false);
   lightModel = std::make_shared<Model>(
       dg::Mesh::Cube,
       std::make_shared<StandardMaterial>(lightMaterial),
-      ceilingLight.transform * Transform::S(glm::vec3(0.05f)));
+      ceilingLight->transform * Transform::S(glm::vec3(0.05f)));
   models.push_back(lightModel);
 
   // Create wooden cube material.
@@ -203,14 +203,12 @@ void dg::PortalScene::Initialize() {
   portalStencilMaterial.SetDiffuse(backgroundColor);
   portalStencilMaterial.SetInvPortal(glm::mat4x4(0));
 
-  // Set initial camera position.
-  camera.transform.translation = glm::vec3(2.2f, 0.85f, 1);
-  camera.LookAtPoint(glm::vec3(0, camera.transform.translation.y, 0));
-
-  // Temporarily shorten near clip plane to mask portal clipping
-  // while moving through a portal.
-  camera.nearClip = 0.01f;
-  camera.farClip = 10;
+  // Create camera.
+  camera = std::make_shared<Camera>();
+  camera->transform.translation = glm::vec3(2.2f, 0.85f, 1);
+  camera->LookAtPoint(glm::vec3(0, camera->transform.translation.y, 0));
+  camera->nearClip = 0.01f;
+  camera->farClip = 10;
 }
 
 void dg::PortalScene::Update() {
@@ -229,9 +227,9 @@ void dg::PortalScene::Update() {
             0,
             -cursorDelta.x * cursorRotationSpeed,
             0)));
-    glm::quat rotation = yaw * camera.transform.rotation *
-      pitch * glm::inverse(camera.transform.rotation);
-    camera.LookAtDirection(rotation * camera.transform.Forward());
+    glm::quat rotation = yaw * camera->transform.rotation *
+      pitch * glm::inverse(camera->transform.rotation);
+    camera->LookAtDirection(rotation * camera->transform.Forward());
   }
 
   // Calculate new movement relative to camera, based on WASD keys.
@@ -255,8 +253,8 @@ void dg::PortalScene::Update() {
 
   // Find a test point that we check for crossing of a portal.
   // This point is the center of the frustum's near clip plane.
-  dg::Transform xfTestPoint = camera.transform * dg::Transform::T(
-      FORWARD * camera.nearClip);
+  dg::Transform xfTestPoint = camera->transform * dg::Transform::T(
+      FORWARD * camera->nearClip);
 
   // Determine the before and after camera transforms relative to each portal.
   dg::Transform xfRedBefore = portalTransforms[0].Inverse() * xfTestPoint;
@@ -276,8 +274,8 @@ void dg::PortalScene::Update() {
 
     // Camera is passing through the blue portal, so move it to the
     // red portal offset by its delta to the blue portal.
-    camera.transform = xfFlippedPortal * portalTransforms[1].Inverse() *
-                       camera.transform;
+    camera->transform = xfFlippedPortal * portalTransforms[1].Inverse() *
+                        camera->transform;
 
   // Have we passed through the red portal?
   } else if (xfRedBefore.translation.z >= 0 && xfRedAfter.translation.z < 0 &&
@@ -290,45 +288,45 @@ void dg::PortalScene::Update() {
 
     // Camera is passing through the red portal, so move it to the
     // blue portal offset by its delta to the red portal.
-    camera.transform = xfFlippedPortal * portalTransforms[0].Inverse() *
-                       camera.transform;
+    camera->transform = xfFlippedPortal * portalTransforms[0].Inverse() *
+                        camera->transform;
   }
 
   // Apply delta to camera.
-  camera.transform = camera.transform * xfDelta;
+  camera->transform = camera->transform * xfDelta;
 
   // Adjust light ambient power with keyboard.
   const float lightDelta = 0.05f;
   if (window->IsKeyPressed(GLFW_KEY_1) &&
       window->IsKeyJustPressed(GLFW_KEY_UP)) {
-    ceilingLight.ambient += ceilingLight.ambient * lightDelta;
-    std::cout << "Ambient R: " << ceilingLight.ambient.r << std::endl;
+    ceilingLight->ambient += ceilingLight->ambient * lightDelta;
+    std::cout << "Ambient R: " << ceilingLight->ambient.r << std::endl;
   } else if (window->IsKeyPressed(GLFW_KEY_1) &&
       window->IsKeyJustPressed(GLFW_KEY_DOWN)) {
-    ceilingLight.ambient -= ceilingLight.ambient * lightDelta;
-    std::cout << "Ambient R: " << ceilingLight.ambient.r << std::endl;
+    ceilingLight->ambient -= ceilingLight->ambient * lightDelta;
+    std::cout << "Ambient R: " << ceilingLight->ambient.r << std::endl;
   }
 
   // Adjust light diffuse power with keyboard.
   if (window->IsKeyPressed(GLFW_KEY_2) &&
       window->IsKeyJustPressed(GLFW_KEY_UP)) {
-    ceilingLight.diffuse += ceilingLight.diffuse * lightDelta;
-    std::cout << "Diffuse R: " << ceilingLight.diffuse.r << std::endl;
+    ceilingLight->diffuse += ceilingLight->diffuse * lightDelta;
+    std::cout << "Diffuse R: " << ceilingLight->diffuse.r << std::endl;
   } else if (window->IsKeyPressed(GLFW_KEY_2) &&
       window->IsKeyJustPressed(GLFW_KEY_DOWN)) {
-    ceilingLight.diffuse -= ceilingLight.diffuse * lightDelta;
-    std::cout << "Diffuse R: " << ceilingLight.diffuse.r << std::endl;
+    ceilingLight->diffuse -= ceilingLight->diffuse * lightDelta;
+    std::cout << "Diffuse R: " << ceilingLight->diffuse.r << std::endl;
   }
 
   // Adjust light specular power with keyboard.
   if (window->IsKeyPressed(GLFW_KEY_3) &&
       window->IsKeyJustPressed(GLFW_KEY_UP)) {
-    ceilingLight.specular += ceilingLight.specular * lightDelta;
-    std::cout << "Specular R: " << ceilingLight.specular.r << std::endl;
+    ceilingLight->specular += ceilingLight->specular * lightDelta;
+    std::cout << "Specular R: " << ceilingLight->specular.r << std::endl;
   } else if (window->IsKeyPressed(GLFW_KEY_3) &&
       window->IsKeyJustPressed(GLFW_KEY_DOWN)) {
-    ceilingLight.specular -= ceilingLight.specular * lightDelta;
-    std::cout << "Specular R: " << ceilingLight.specular.r << std::endl;
+    ceilingLight->specular -= ceilingLight->specular * lightDelta;
+    std::cout << "Specular R: " << ceilingLight->specular.r << std::endl;
   }
 
   // Toggle animating light with keyboard tap of L.
@@ -338,23 +336,23 @@ void dg::PortalScene::Update() {
 
   // Animate light position.
   if (animatingLight) {
-    ceilingLight.transform.translation.x = 1.f + 1.f * sin(5.f * Time::Elapsed);
+    ceilingLight->transform.translation.x = 1.f + 1.f * sin(5.f * Time::Elapsed);
   } else {
-    ceilingLight.transform.translation.x = 1.5f;
+    ceilingLight->transform.translation.x = 1.5f;
   }
 
   // Update light cube model to be consistent with point light.
-  lightModel->transform.translation = ceilingLight.transform.translation;
+  lightModel->transform.translation = ceilingLight->transform.translation;
   std::static_pointer_cast<StandardMaterial>(lightModel->material)
-    ->SetDiffuse(ceilingLight.specular);
+    ->SetDiffuse(ceilingLight->specular);
 }
 
 void dg::PortalScene::RenderScene(
     bool throughPortal, Transform inPortal, Transform outPortal) {
 
   // Set up view.
-  Transform view = camera.transform.Inverse();
-  glm::mat4x4 projection = camera.GetProjectionMatrix(
+  Transform view = camera->transform.Inverse();
+  glm::mat4x4 projection = camera->GetProjectionMatrix(
       window->GetWidth() / window->GetHeight());
 
   // If through a portal, transform the view matrix.
@@ -377,15 +375,15 @@ void dg::PortalScene::RenderScene(
   for (auto model = models.begin(); model != models.end(); model++) {
     (*model)->material->SetCameraPosition(view.Inverse().translation);
     (*model)->material->SetInvPortal(invPortal);
-    (*model)->material->SetLight(ceilingLight);
+    (*model)->material->SetLight(*ceilingLight);
     (*model)->Draw(view.ToMat4(), projection);
     i++;
   }
 }
 
 void dg::PortalScene::RenderPortalStencil(dg::Transform xfPortal) {
-  glm::mat4x4 view = camera.GetViewMatrix();
-  glm::mat4x4 projection = camera.GetProjectionMatrix(
+  glm::mat4x4 view = camera->GetViewMatrix();
+  glm::mat4x4 projection = camera->GetProjectionMatrix(
       window->GetWidth() / window->GetHeight());
 
   glEnable(GL_STENCIL_TEST);

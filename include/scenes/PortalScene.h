@@ -32,8 +32,8 @@ namespace dg {
       void RenderPortalStencil(Transform xfPortal);
       void ClearDepth();
 
-      Camera camera;
-      PointLight ceilingLight;
+      std::shared_ptr<Camera> camera;
+      std::shared_ptr<PointLight> ceilingLight;
       bool animatingLight;
       std::vector<std::shared_ptr<Model>> models;
       std::shared_ptr<Model> lightModel;

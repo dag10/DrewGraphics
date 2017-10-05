@@ -218,6 +218,13 @@ void dg::PortalScene::Initialize() {
   camera->nearClip = 0.01f;
   camera->farClip = 10;
   AddChild(camera);
+
+  // Create box that represents the camera's position.
+  camera->AddChild(std::make_shared<Model>(
+      dg::Mesh::Cube,
+      std::make_shared<Material>(
+        StandardMaterial::WithColor(glm::vec3(0.8f, 1.0f, 0.8f))),
+      Transform::S(glm::vec3(0.2f, 0.1f, 0.1f))), false);
 }
 
 void dg::PortalScene::Update() {

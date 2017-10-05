@@ -65,10 +65,11 @@ void dg::PortalScene::Initialize() {
       Texture::FromPath("assets/textures/rustyplate.jpg"));
 
   // Create ceiling light source.
+  animatingLight = false;
   ceilingLight = PointLight(
       glm::vec3(1.0f, 0.93f, 0.86f),
       0.325f, 0.521f, 0.821f);
-  ceilingLight.transform.translation = glm::vec3(2, 1.7f, 0);
+  ceilingLight.transform.translation = glm::vec3(1, 1.7f, 0);
 
   // Create light cube.
   StandardMaterial lightMaterial = StandardMaterial::WithColor(
@@ -328,6 +329,18 @@ void dg::PortalScene::Update() {
       window->IsKeyJustPressed(GLFW_KEY_DOWN)) {
     ceilingLight.specular -= ceilingLight.specular * lightDelta;
     std::cout << "Specular R: " << ceilingLight.specular.r << std::endl;
+  }
+
+  // Toggle animating light with keyboard tap of L.
+  if (window->IsKeyJustPressed(GLFW_KEY_L)) {
+    animatingLight = !animatingLight;
+  }
+
+  // Animate light position.
+  if (animatingLight) {
+    ceilingLight.transform.translation.x = 1.f + 1.f * sin(5.f * Time::Elapsed);
+  } else {
+    ceilingLight.transform.translation.x = 1.5f;
   }
 
   // Update light cube model to be consistent with point light.

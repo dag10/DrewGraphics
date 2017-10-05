@@ -34,6 +34,7 @@ namespace dg {
 
       Camera camera;
       PointLight ceilingLight;
+      bool animatingLight;
       std::vector<std::shared_ptr<Model>> models;
       std::shared_ptr<Model> lightModel;
       StandardMaterial portalStencilMaterial;

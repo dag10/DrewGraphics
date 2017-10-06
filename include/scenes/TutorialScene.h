@@ -29,6 +29,8 @@ namespace dg {
 
     private:
 
+      std::shared_ptr<Camera> camera;
+
   }; // class TutorialScene
 
 } // namespace dg

@@ -12,6 +12,7 @@
 #include <PointLight.h>
 #include <forward_list>
 #include <iostream>
+#include <behaviors/KeyboardCameraController.h>
 
 static const glm::vec3 cubePositions[] = {
   glm::vec3(  0.0f,  0.25f,  0.0f ), 
@@ -225,51 +226,23 @@ void dg::PortalScene::Initialize() {
       std::make_shared<Material>(
         StandardMaterial::WithColor(glm::vec3(0.8f, 1.0f, 0.8f))),
       Transform::S(glm::vec3(0.2f, 0.1f, 0.1f))), false);
+
+  // Allow camera to be controller by the keyboard and mouse.
+  behaviors.push_back(
+      std::unique_ptr<Behavior>(new KeyboardCameraController(camera, window)));
 }
 
 void dg::PortalScene::Update() {
-  const float speed = 1.8f; // units per second
-  const float rotationSpeed = 90; // degrees per second
-  const float cursorRotationSpeed = 0.3f; // degrees per cursor pixels moved
+  Transform xfCameraBefore = camera->SceneSpace();
 
-  // Calculate new rotation for camera based on mouse.
-  if (window->IsCursorLocked()) {
-    glm::vec2 cursorDelta = window->GetCursorDelta();
-    glm::quat pitch = glm::quat(glm::radians(glm::vec3(
-            -cursorDelta.y * cursorRotationSpeed,
-            0,
-            0)));
-    glm::quat yaw = glm::quat(glm::radians(glm::vec3(
-            0,
-            -cursorDelta.x * cursorRotationSpeed,
-            0)));
-    glm::quat rotation = yaw * camera->transform.rotation *
-      pitch * glm::inverse(camera->transform.rotation);
-    camera->LookAtDirection(rotation * camera->transform.Forward());
-  }
+  Scene::Update();
 
-  // Calculate new movement relative to camera, based on WASD keys.
-  glm::vec3 movementDir(0);
-  if (window->IsKeyPressed(GLFW_KEY_W)) {
-    movementDir += FORWARD;
-  }
-  if (window->IsKeyPressed(GLFW_KEY_S)) {
-    movementDir += -FORWARD;
-  }
-  if (window->IsKeyPressed(GLFW_KEY_A)) {
-    movementDir += -RIGHT;
-  }
-  if (window->IsKeyPressed(GLFW_KEY_D)) {
-    movementDir += RIGHT;
-  }
-  float speedMultiplier =
-    (window->IsKeyPressed(GLFW_KEY_LEFT_SHIFT)) ? 2.f : 1.f;
-  dg::Transform xfDelta = dg::Transform::T(
-      movementDir * speed * speedMultiplier * (float)Time::Delta);
+  Transform xfCameraAfter = camera->SceneSpace();
+  Transform xfDelta = xfCameraBefore.Inverse() * xfCameraAfter;
 
   // Find a test point that we check for crossing of a portal.
   // This point is the center of the frustum's near clip plane.
-  dg::Transform xfTestPoint = camera->transform * dg::Transform::T(
+  dg::Transform xfTestPoint = xfCameraBefore * dg::Transform::T(
       FORWARD * camera->nearClip);
 
   // Determine the before and after camera transforms relative to each portal.
@@ -291,7 +264,7 @@ void dg::PortalScene::Update() {
     // Camera is passing through the blue portal, so move it to the
     // red portal offset by its delta to the blue portal.
     camera->transform = xfFlippedPortal * portalTransforms[1].Inverse() *
-                        camera->transform;
+                        xfCameraAfter;
 
   // Have we passed through the red portal?
   } else if (xfRedBefore.translation.z >= 0 && xfRedAfter.translation.z < 0 &&
@@ -305,11 +278,8 @@ void dg::PortalScene::Update() {
     // Camera is passing through the red portal, so move it to the
     // blue portal offset by its delta to the red portal.
     camera->transform = xfFlippedPortal * portalTransforms[0].Inverse() *
-                        camera->transform;
+                        xfCameraAfter;
   }
-
-  // Apply delta to camera.
-  camera->transform = camera->transform * xfDelta;
 
   // Adjust light ambient power with keyboard.
   const float lightDelta = 0.05f;

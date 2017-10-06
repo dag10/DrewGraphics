@@ -4,7 +4,9 @@
 
 #pragma once
 
+#include <memory>
 #include <Window.h>
+#include <Behavior.h>
 #include <SceneObject.h>
 
 namespace dg {
@@ -16,7 +18,7 @@ namespace dg {
       Scene();
 
       virtual void Initialize() {};
-      virtual void Update() {};
+      virtual void Update();
       virtual void Render() = 0;
 
       void SetWindow(std::shared_ptr<Window> window) {
@@ -25,6 +27,7 @@ namespace dg {
 
     protected:
 
+      std::vector<std::unique_ptr<Behavior>> behaviors;
       std::shared_ptr<Window> window = nullptr;
 
   }; // class Scene

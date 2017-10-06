@@ -19,7 +19,7 @@ namespace dg {
 
       virtual void Initialize() {};
       virtual void Update();
-      virtual void Render() = 0;
+      virtual void Render();
 
       void SetWindow(std::shared_ptr<Window> window) {
         this->window = window;

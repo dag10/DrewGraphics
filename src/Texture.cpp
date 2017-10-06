@@ -53,6 +53,9 @@ void dg::Texture::LoadFromPath(const std::string& path) {
   int nrChannels;
   std::unique_ptr<stbi_uc[]> pixels = std::unique_ptr<stbi_uc[]>(stbi_load(
       path.c_str(), &width, &height, &nrChannels, 0));
+  if (pixels == nullptr) {
+    throw dg::STBLoadError(path, stbi_failure_reason());
+  }
 
   // Generate one new texture handle.
   glGenTextures(1, &textureHandle);

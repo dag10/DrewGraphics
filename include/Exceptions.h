@@ -33,5 +33,17 @@ class ResourceLoadException : public std::runtime_error {
     ResourceLoadException(const std::string& str) : std::runtime_error(str) {}
 };
 
+class STBLoadError : public std::exception {
+  public:
+    STBLoadError(const std::string& path, const std::string& str) {
+      reason = "Failed to load \"" + path + "\": " + str;
+    }
+    virtual const char* what() const noexcept {
+      return reason.c_str();
+    }
+  private:
+    std::string reason;
+};
+
 } // namespace dg
 

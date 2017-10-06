@@ -27,10 +27,6 @@ namespace dg {
       virtual void Update();
       virtual void Render();
 
-    private:
-
-      std::shared_ptr<Camera> camera;
-
   }; // class TutorialScene
 
 } // namespace dg

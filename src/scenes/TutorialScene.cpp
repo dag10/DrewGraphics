@@ -74,7 +74,7 @@ void dg::TutorialScene::Initialize() {
           glm::vec3(floorSize, floorSize, 1))));
 
   // Create camera.
-  camera = std::make_shared<Camera>();
+  auto camera = std::make_shared<Camera>();
   camera->transform.translation = glm::vec3(-1.25f, 2, 1.1f);
   camera->LookAtPoint(
       (cube->transform.translation +

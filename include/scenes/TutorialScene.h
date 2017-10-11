@@ -12,6 +12,7 @@
 #include <Texture.h>
 #include <Mesh.h>
 #include <Model.h>
+#include <Skybox.h>
 
 namespace dg {
 

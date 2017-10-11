@@ -17,6 +17,7 @@ namespace dg {
 
     public:
       static std::shared_ptr<Mesh> Cube;
+      static std::shared_ptr<Mesh> MappedCube;
       static std::shared_ptr<Mesh> Quad;
 
       static void CreatePrimitives();
@@ -35,6 +36,7 @@ namespace dg {
 
     private:
       static std::unique_ptr<Mesh> CreateCube();
+      static std::unique_ptr<Mesh> CreateMappedCube();
       static std::unique_ptr<Mesh> CreateQuad();
 
       GLenum drawMode = 0;

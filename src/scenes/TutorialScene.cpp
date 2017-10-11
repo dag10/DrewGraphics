@@ -27,6 +27,11 @@ void dg::TutorialScene::Initialize() {
       Texture::FromPath("assets/textures/container2_specular.png"));
   std::shared_ptr<Texture> hardwoodTexture = std::make_shared<Texture>(
       Texture::FromPath("assets/textures/hardwood.jpg"));
+  std::shared_ptr<Texture> skyboxTexture = std::make_shared<Texture>(
+      Texture::FromPath("assets/textures/skybox_daylight.png"));
+
+  // Create skybox.
+  skybox = std::unique_ptr<Skybox>(new Skybox(skyboxTexture));
 
   // Create ceiling light source.
   auto ceilingLight = std::make_shared<PointLight>(
@@ -49,6 +54,7 @@ void dg::TutorialScene::Initialize() {
 
   // Create wooden cube material.
   StandardMaterial cubeMaterial = StandardMaterial::WithTexture(crateTexture);
+  cubeMaterial.SetLit(false);
   cubeMaterial.SetSpecular(crateSpecularTexture);
   cubeMaterial.SetShininess(64);
 
@@ -60,7 +66,7 @@ void dg::TutorialScene::Initialize() {
   AddChild(cube);
 
   // Create floor material.
-  const int floorSize = 100;
+  const int floorSize = 10;
   StandardMaterial floorMaterial = StandardMaterial::WithTexture(
       hardwoodTexture);
   floorMaterial.SetUVScale(glm::vec2(floorSize));

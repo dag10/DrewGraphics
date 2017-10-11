@@ -8,6 +8,7 @@
 #include <Window.h>
 #include <Behavior.h>
 #include <SceneObject.h>
+#include <Skybox.h>
 
 namespace dg {
 
@@ -29,6 +30,7 @@ namespace dg {
 
       std::vector<std::unique_ptr<Behavior>> behaviors;
       std::shared_ptr<Window> window = nullptr;
+      std::unique_ptr<Skybox> skybox = nullptr;
 
   }; // class Scene
 

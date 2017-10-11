@@ -64,6 +64,11 @@ void dg::Scene::Render() {
   glm::mat4x4 projection = camera->GetProjectionMatrix(
       window->GetWidth() / window->GetHeight());
 
+  // Render skybox.
+  if (skybox != nullptr) {
+    skybox->Draw(*camera, *window);
+  }
+
   // Render models.
   int i = 0;
   for (auto model = models.begin(); model != models.end(); model++) {

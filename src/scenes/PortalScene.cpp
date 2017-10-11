@@ -368,6 +368,9 @@ void dg::PortalScene::RenderScene(
   glm::mat4x4 projection = camera->GetProjectionMatrix(
       window->GetWidth() / window->GetHeight());
 
+  // TODO: Refactor to use an additional camera for each portal to
+  //       add skybox support.
+
   // If through a portal, transform the view matrix.
   if (throughPortal) {
     // Flip out portal around.
@@ -383,7 +386,7 @@ void dg::PortalScene::RenderScene(
 
   // Render models.
   glm::mat4x4 invPortal = throughPortal ? outPortal.Inverse().ToMat4()
-                                      : glm::mat4x4(0);
+                                        : glm::mat4x4(0);
   int i = 0;
   for (auto model = models.begin(); model != models.end(); model++) {
     (*model)->material->SetCameraPosition(view.Inverse().translation);

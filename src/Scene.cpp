@@ -68,11 +68,13 @@ void dg::Scene::RenderScene(const Camera& camera) const {
 
   // Render models.
   for (auto model = models.begin(); model != models.end(); model++) {
-    DrawModel(**model, camera_SS.translation, view, projection, lights);
+    PrepareModelForDraw(
+        **model, camera_SS.translation, view, projection, lights);
+    (*model)->Draw(view, projection);
   }
 }
 
-void dg::Scene::DrawModel(
+void dg::Scene::PrepareModelForDraw(
     const Model& model,
     glm::vec3 cameraPosition,
     glm::mat4x4 view,
@@ -83,6 +85,5 @@ void dg::Scene::DrawModel(
   if (!lights.empty()) {
     model.material->SetLight(*lights.front());
   }
-  model.Draw(view, projection);
 }
 

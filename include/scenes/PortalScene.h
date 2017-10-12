@@ -34,7 +34,7 @@ namespace dg {
       Camera CameraForPortal(Transform inPortal, Transform outPortal);
 
       // Pipeline functions for overriding in special cases.
-      virtual void DrawModel(
+      virtual void PrepareModelForDraw(
           const Model& model,
           glm::vec3 cameraPosition,
           glm::mat4x4 view,

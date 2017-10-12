@@ -337,19 +337,14 @@ void dg::PortalScene::Update() {
     ->SetDiffuse(ceilingLight->specular);
 }
 
-void dg::PortalScene::DrawModel(
+void dg::PortalScene::PrepareModelForDraw(
     const Model& model,
     glm::vec3 cameraPosition,
     glm::mat4x4 view,
     glm::mat4x4 projection,
     const std::forward_list<PointLight*>& lights) const {
-  model.material->SetCameraPosition(cameraPosition);
+  Scene::PrepareModelForDraw(model, cameraPosition, view, projection, lights);
   model.material->SetInvPortal(invPortal);
-  // TODO: Support more than just the first light.
-  if (!lights.empty()) {
-    model.material->SetLight(*lights.front());
-  }
-  model.Draw(view, projection);
 }
 
 void dg::PortalScene::RenderPortalStencil(dg::Transform xfPortal) {

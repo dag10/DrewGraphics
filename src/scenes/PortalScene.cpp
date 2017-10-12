@@ -67,6 +67,11 @@ void dg::PortalScene::Initialize() {
       Texture::FromPath("assets/textures/hardwood.jpg"));
   std::shared_ptr<Texture> rustyPlateTexture = std::make_shared<Texture>(
       Texture::FromPath("assets/textures/rustyplate.jpg"));
+  std::shared_ptr<Texture> skyboxTexture = std::make_shared<Texture>(
+      Texture::FromPath("assets/textures/skybox_daylight.png"));
+
+  // Create skybox.
+  skybox = std::unique_ptr<Skybox>(new Skybox(skyboxTexture));
 
   // Create ceiling light source.
   animatingLight = false;
@@ -213,37 +218,37 @@ void dg::PortalScene::Initialize() {
   portalStencilMaterial.SetInvPortal(glm::mat4x4(0));
 
   // Create camera.
-  camera = std::make_shared<Camera>();
-  camera->transform.translation = glm::vec3(2.2f, 0.85f, 1);
-  camera->LookAtPoint(glm::vec3(0, camera->transform.translation.y, 0));
-  camera->nearClip = 0.01f;
-  camera->farClip = 10;
-  AddChild(camera);
+  mainCamera = std::make_shared<Camera>();
+  mainCamera->transform.translation = glm::vec3(2.2f, 0.85f, 1);
+  mainCamera->LookAtPoint(glm::vec3(0, mainCamera->transform.translation.y, 0));
+  mainCamera->nearClip = 0.01f;
+  mainCamera->farClip = 10;
+  AddChild(mainCamera);
 
   // Create box that represents the camera's position.
-  camera->AddChild(std::make_shared<Model>(
+  mainCamera->AddChild(std::make_shared<Model>(
       dg::Mesh::Cube,
       std::make_shared<Material>(
         StandardMaterial::WithColor(glm::vec3(0.8f, 1.0f, 0.8f))),
       Transform::S(glm::vec3(0.2f, 0.1f, 0.1f))), false);
 
   // Allow camera to be controller by the keyboard and mouse.
-  behaviors.push_back(
-      std::unique_ptr<Behavior>(new KeyboardCameraController(camera, window)));
+  behaviors.push_back(std::unique_ptr<Behavior>(
+        new KeyboardCameraController(mainCamera, window)));
 }
 
 void dg::PortalScene::Update() {
-  Transform xfCameraBefore = camera->SceneSpace();
+  Transform xfCameraBefore = mainCamera->SceneSpace();
 
   Scene::Update();
 
-  Transform xfCameraAfter = camera->SceneSpace();
+  Transform xfCameraAfter = mainCamera->SceneSpace();
   Transform xfDelta = xfCameraBefore.Inverse() * xfCameraAfter;
 
   // Find a test point that we check for crossing of a portal.
   // This point is the center of the frustum's near clip plane.
   dg::Transform xfTestPoint = xfCameraBefore * dg::Transform::T(
-      FORWARD * camera->nearClip);
+      FORWARD * mainCamera->nearClip);
 
   // Determine the before and after camera transforms relative to each portal.
   dg::Transform xfRedBefore = portalTransforms[0].Inverse() * xfTestPoint;
@@ -263,7 +268,7 @@ void dg::PortalScene::Update() {
 
     // Camera is passing through the blue portal, so move it to the
     // red portal offset by its delta to the blue portal.
-    camera->transform = xfFlippedPortal * portalTransforms[1].Inverse() *
+    mainCamera->transform = xfFlippedPortal * portalTransforms[1].Inverse() *
                         xfCameraAfter;
 
   // Have we passed through the red portal?
@@ -277,7 +282,7 @@ void dg::PortalScene::Update() {
 
     // Camera is passing through the red portal, so move it to the
     // blue portal offset by its delta to the red portal.
-    camera->transform = xfFlippedPortal * portalTransforms[0].Inverse() *
+    mainCamera->transform = xfFlippedPortal * portalTransforms[0].Inverse() *
                         xfCameraAfter;
   }
 
@@ -332,77 +337,24 @@ void dg::PortalScene::Update() {
     ->SetDiffuse(ceilingLight->specular);
 }
 
-void dg::PortalScene::RenderScene(
-    bool throughPortal, Transform inPortal, Transform outPortal) {
-
-  // Traverse scene tree and sort out different types of objects
-  // into their own lists.
-  std::forward_list<SceneObject*> remainingObjects;
-  std::forward_list<Model*> models;
-  std::forward_list<PointLight*> lights;
-  std::forward_list<Camera*> cameras;
-  remainingObjects.push_front(this);
-  while (!remainingObjects.empty()) {
-    SceneObject *obj = remainingObjects.front();
-    remainingObjects.pop_front();
-    for (auto child = obj->Children().begin();
-         child != obj->Children().end();
-         child++) {
-      if (!(*child)->enabled) continue;
-      remainingObjects.push_front(child->get());
-      if (auto model = std::dynamic_pointer_cast<Model>(*child)) {
-        models.push_front(model.get());
-      } else if (auto model = std::dynamic_pointer_cast<PointLight>(*child)) {
-        lights.push_front(model.get());
-      } else if (auto model = std::dynamic_pointer_cast<Camera>(*child)) {
-        cameras.push_front(model.get());
-      }
-    }
+void dg::PortalScene::DrawModel(
+    const Model& model,
+    glm::vec3 cameraPosition,
+    glm::mat4x4 view,
+    glm::mat4x4 projection,
+    const std::forward_list<PointLight*>& lights) const {
+  model.material->SetCameraPosition(cameraPosition);
+  model.material->SetInvPortal(invPortal);
+  // TODO: Support more than just the first light.
+  if (!lights.empty()) {
+    model.material->SetLight(*lights.front());
   }
-
-  if (cameras.empty()) return;
-  Camera *camera = cameras.front();
-
-  // Set up view.
-  Transform view = camera->transform.Inverse();
-  glm::mat4x4 projection = camera->GetProjectionMatrix(
-      window->GetWidth() / window->GetHeight());
-
-  // TODO: Refactor to use an additional camera for each portal to
-  //       add skybox support.
-
-  // If through a portal, transform the view matrix.
-  if (throughPortal) {
-    // Flip out portal around.
-    dg::Transform flippedOutPortal = outPortal * dg::Transform::R(
-        glm::quat(glm::radians(glm::vec3(0, 180, 0))));
-
-    // Find delta between the two portals.
-    dg::Transform xfDelta = inPortal * flippedOutPortal.Inverse();
-
-    // Apply view transform to the portal delta instead of the origin.
-    view = view * xfDelta;
-  }
-
-  // Render models.
-  glm::mat4x4 invPortal = throughPortal ? outPortal.Inverse().ToMat4()
-                                        : glm::mat4x4(0);
-  int i = 0;
-  for (auto model = models.begin(); model != models.end(); model++) {
-    (*model)->material->SetCameraPosition(view.Inverse().translation);
-    (*model)->material->SetInvPortal(invPortal);
-    // TODO: Support more than just the first light.
-    if (!lights.empty()) {
-      (*model)->material->SetLight(*lights.front());
-    }
-    (*model)->Draw(view.ToMat4(), projection);
-    i++;
-  }
+  model.Draw(view, projection);
 }
 
 void dg::PortalScene::RenderPortalStencil(dg::Transform xfPortal) {
-  glm::mat4x4 view = camera->GetViewMatrix();
-  glm::mat4x4 projection = camera->GetProjectionMatrix(
+  glm::mat4x4 view = mainCamera->GetViewMatrix();
+  glm::mat4x4 projection = mainCamera->GetProjectionMatrix(
       window->GetWidth() / window->GetHeight());
 
   glEnable(GL_STENCIL_TEST);
@@ -435,7 +387,23 @@ void dg::PortalScene::ClearDepth() {
   glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 }
 
-void dg::PortalScene::Render() {
+dg::Camera dg::PortalScene::CameraForPortal(
+    Transform inPortal, Transform outPortal) {
+  // Copy scene camera.
+  Camera camera(*mainCamera);
+
+  // Flip out portal around.
+  dg::Transform flippedOutPortal = outPortal * dg::Transform::R(
+      glm::quat(glm::radians(glm::vec3(0, 180, 0))));
+
+  // Calculate the this portal camera's transform by applying the delta of the
+  // two portals to the main camera's transform.
+  camera.transform = flippedOutPortal * inPortal.Inverse() * camera.transform;
+
+  return camera;
+}
+
+void dg::PortalScene::RenderFrame() {
   // Clear back buffer.
   glClearColor(
       backgroundColor.x, backgroundColor.y, backgroundColor.z, 1);
@@ -447,7 +415,8 @@ void dg::PortalScene::Render() {
   glCullFace(GL_BACK);
   
   // Render immediate scene.
-  RenderScene(false, dg::Transform(), dg::Transform());
+  invPortal = glm::mat4x4(0);
+  RenderScene(*mainCamera);
 
   // Render first (red) portal stencil.
   RenderPortalStencil(portalTransforms[0]);
@@ -457,7 +426,8 @@ void dg::PortalScene::Render() {
   glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
   glStencilFunc(GL_EQUAL, 1, 0xFF);
   ClearDepth(); // Clear depth buffer only within stencil.
-  RenderScene(true, portalTransforms[0], portalTransforms[1]);
+  invPortal = portalTransforms[1].Inverse().ToMat4();
+  RenderScene(CameraForPortal(portalTransforms[0], portalTransforms[1]));
   glDisable(GL_STENCIL_TEST);
 
   // Render first (red) portal stencil.
@@ -468,7 +438,8 @@ void dg::PortalScene::Render() {
   glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
   glStencilFunc(GL_EQUAL, 1, 0xFF);
   ClearDepth(); // Clear depth buffer only within stencil.
-  RenderScene(true, portalTransforms[1], portalTransforms[0]);
+  invPortal = portalTransforms[0].Inverse().ToMat4();
+  RenderScene(CameraForPortal(portalTransforms[1], portalTransforms[0]));
   glDisable(GL_STENCIL_TEST);
 }
 

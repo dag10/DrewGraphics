@@ -80,23 +80,15 @@ void dg::TutorialScene::Initialize() {
           glm::vec3(floorSize, floorSize, 1))));
 
   // Create camera.
-  auto camera = std::make_shared<Camera>();
-  camera->transform.translation = glm::vec3(-1.25f, 2, 1.1f);
-  camera->LookAtPoint(
+  mainCamera = std::make_shared<Camera>();
+  mainCamera->transform.translation = glm::vec3(-1.25f, 2, 1.1f);
+  mainCamera->LookAtPoint(
       (cube->transform.translation +
        ceilingLight->transform.translation) / 2.f);
-  AddChild(camera);
+  AddChild(mainCamera);
 
   // Allow camera to be controller by the keyboard and mouse.
-  behaviors.push_back(
-      std::unique_ptr<Behavior>(new KeyboardCameraController(camera, window)));
-}
-
-void dg::TutorialScene::Update() {
-  Scene::Update();
-}
-
-void dg::TutorialScene::Render() {
-  Scene::Render();
+  behaviors.push_back(std::unique_ptr<Behavior>(
+        new KeyboardCameraController(mainCamera, window)));
 }
 

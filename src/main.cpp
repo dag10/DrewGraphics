@@ -109,7 +109,7 @@ int main(int argc, const char *argv[]) {
     }
 
     window->StartRender();
-    scene->Render();
+    scene->RenderFrame();
     window->FinishRender();
   }
 

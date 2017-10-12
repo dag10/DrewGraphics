@@ -2,7 +2,6 @@
 //  Scene.cpp
 //
 
-#include <forward_list>
 #include <Scene.h>
 #include <Model.h>
 #include <PointLight.h>
@@ -20,7 +19,7 @@ void dg::Scene::Update() {
   }
 }
 
-void dg::Scene::Render() {
+void dg::Scene::RenderFrame() {
   // Clear back buffer.
   glClearColor(0, 0, 0, 1);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
@@ -30,13 +29,21 @@ void dg::Scene::Render() {
   glEnable(GL_CULL_FACE);
   glCullFace(GL_BACK);
 
+  RenderScene(*mainCamera);
+}
+
+void dg::Scene::RenderScene(const Camera& camera) const {
+  // Render skybox.
+  if (skybox != nullptr) {
+    skybox->Draw(camera, *window);
+  }
+
   // Traverse scene tree and sort out different types of objects
   // into their own lists.
   std::forward_list<SceneObject*> remainingObjects;
   std::forward_list<Model*> models;
   std::forward_list<PointLight*> lights;
-  std::forward_list<Camera*> cameras;
-  remainingObjects.push_front(this);
+  remainingObjects.push_front((SceneObject*)this);
   while (!remainingObjects.empty()) {
     SceneObject *obj = remainingObjects.front();
     remainingObjects.pop_front();
@@ -49,36 +56,33 @@ void dg::Scene::Render() {
         models.push_front(model.get());
       } else if (auto model = std::dynamic_pointer_cast<PointLight>(*child)) {
         lights.push_front(model.get());
-      } else if (auto model = std::dynamic_pointer_cast<Camera>(*child)) {
-        cameras.push_front(model.get());
       }
     }
   }
 
-  // Render out of the first camera.
-  if (cameras.empty()) return;
-  Camera *camera = cameras.front();
-
   // Set up view.
-  Transform view = camera->transform.Inverse();
-  glm::mat4x4 projection = camera->GetProjectionMatrix(
+  Transform camera_SS = camera.SceneSpace();
+  glm::mat4x4 view = camera_SS.Inverse().ToMat4();
+  glm::mat4x4 projection = camera.GetProjectionMatrix(
       window->GetWidth() / window->GetHeight());
 
-  // Render skybox.
-  if (skybox != nullptr) {
-    skybox->Draw(*camera, *window);
-  }
-
   // Render models.
-  int i = 0;
   for (auto model = models.begin(); model != models.end(); model++) {
-    (*model)->material->SetCameraPosition(view.Inverse().translation);
-    // TODO: Support more than just the first light.
-    if (!lights.empty()) {
-      (*model)->material->SetLight(*lights.front());
-    }
-    (*model)->Draw(view.ToMat4(), projection);
-    i++;
+    DrawModel(**model, camera_SS.translation, view, projection, lights);
   }
+}
+
+void dg::Scene::DrawModel(
+    const Model& model,
+    glm::vec3 cameraPosition,
+    glm::mat4x4 view,
+    glm::mat4x4 projection,
+    const std::forward_list<PointLight*>& lights) const {
+  model.material->SetCameraPosition(cameraPosition);
+  // TODO: Support more than just the first light.
+  if (!lights.empty()) {
+    model.material->SetLight(*lights.front());
+  }
+  model.Draw(view, projection);
 }
 

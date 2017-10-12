@@ -25,17 +25,25 @@ namespace dg {
 
       virtual void Initialize();
       virtual void Update();
-      virtual void Render();
+      virtual void RenderFrame();
 
     private:
 
-      void RenderScene(
-          bool throughPortal, Transform inPortal, Transform outPortal);
       void RenderPortalStencil(Transform xfPortal);
       void ClearDepth();
+      Camera CameraForPortal(Transform inPortal, Transform outPortal);
 
-      std::shared_ptr<Camera> camera;
+      // Pipeline functions for overriding in special cases.
+      virtual void DrawModel(
+          const Model& model,
+          glm::vec3 cameraPosition,
+          glm::mat4x4 view,
+          glm::mat4x4 projection,
+          const std::forward_list<PointLight*>& lights) const;
+
+
       bool animatingLight;
+      glm::mat4x4 invPortal;
       std::shared_ptr<Model> lightModel;
       std::shared_ptr<PointLight> ceilingLight;
       StandardMaterial portalStencilMaterial;

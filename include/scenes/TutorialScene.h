@@ -25,8 +25,6 @@ namespace dg {
       TutorialScene();
 
       virtual void Initialize();
-      virtual void Update();
-      virtual void Render();
 
   }; // class TutorialScene
 

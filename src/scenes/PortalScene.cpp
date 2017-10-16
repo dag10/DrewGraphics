@@ -4,12 +4,12 @@
 
 #include <scenes/PortalScene.h>
 
+#include <memory>
 #include <glm/glm.hpp>
 #include <EngineTime.h>
 #include <Texture.h>
 #include <Mesh.h>
 #include <Transform.h>
-#include <PointLight.h>
 #include <forward_list>
 #include <iostream>
 #include <behaviors/KeyboardCameraController.h>
@@ -75,6 +75,9 @@ void dg::PortalScene::Initialize() {
 
   // Create ceiling light source.
   animatingLight = false;
+  PointLight test(
+      glm::vec3(1.0f, 0.93f, 0.86f),
+      0.732f, 0.399f, 0.968f);
   ceilingLight = std::make_shared<PointLight>(
       glm::vec3(1.0f, 0.93f, 0.86f),
       0.732f, 0.399f, 0.968f);
@@ -342,7 +345,7 @@ void dg::PortalScene::PrepareModelForDraw(
     glm::vec3 cameraPosition,
     glm::mat4x4 view,
     glm::mat4x4 projection,
-    const std::forward_list<PointLight*>& lights) const {
+    const std::forward_list<Light*>& lights) const {
   Scene::PrepareModelForDraw(model, cameraPosition, view, projection, lights);
   model.material->SetInvPortal(invPortal);
 }

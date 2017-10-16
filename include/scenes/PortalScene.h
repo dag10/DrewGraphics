@@ -11,7 +11,8 @@
 #include <Transform.h>
 #include <Model.h>
 #include <materials/StandardMaterial.h>
-#include <PointLight.h>
+#include <Light.h>
+#include <lights/PointLight.h>
 
 namespace dg {
 
@@ -39,7 +40,7 @@ namespace dg {
           glm::vec3 cameraPosition,
           glm::mat4x4 view,
           glm::mat4x4 projection,
-          const std::forward_list<PointLight*>& lights) const;
+          const std::forward_list<Light*>& lights) const;
 
 
       bool animatingLight;

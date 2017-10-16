@@ -9,6 +9,7 @@
 #include <forward_list>
 #include <materials/StandardMaterial.h>
 #include <behaviors/KeyboardCameraController.h>
+#include <lights/PointLight.h>
 
 std::unique_ptr<dg::TutorialScene> dg::TutorialScene::Make() {
   return std::unique_ptr<dg::TutorialScene>(new dg::TutorialScene());
@@ -54,7 +55,6 @@ void dg::TutorialScene::Initialize() {
 
   // Create wooden cube material.
   StandardMaterial cubeMaterial = StandardMaterial::WithTexture(crateTexture);
-  cubeMaterial.SetLit(false);
   cubeMaterial.SetSpecular(crateSpecularTexture);
   cubeMaterial.SetShininess(64);
 

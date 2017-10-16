@@ -4,7 +4,6 @@
 
 #include <Scene.h>
 #include <Model.h>
-#include <PointLight.h>
 #include <Camera.h>
 
 dg::Scene::Scene() : SceneObject() {}
@@ -42,7 +41,7 @@ void dg::Scene::RenderScene(const Camera& camera) const {
   // into their own lists.
   std::forward_list<SceneObject*> remainingObjects;
   std::forward_list<Model*> models;
-  std::forward_list<PointLight*> lights;
+  std::forward_list<Light*> lights;
   remainingObjects.push_front((SceneObject*)this);
   while (!remainingObjects.empty()) {
     SceneObject *obj = remainingObjects.front();
@@ -54,7 +53,7 @@ void dg::Scene::RenderScene(const Camera& camera) const {
       remainingObjects.push_front(child->get());
       if (auto model = std::dynamic_pointer_cast<Model>(*child)) {
         models.push_front(model.get());
-      } else if (auto model = std::dynamic_pointer_cast<PointLight>(*child)) {
+      } else if (auto model = std::dynamic_pointer_cast<Light>(*child)) {
         lights.push_front(model.get());
       }
     }
@@ -79,7 +78,7 @@ void dg::Scene::PrepareModelForDraw(
     glm::vec3 cameraPosition,
     glm::mat4x4 view,
     glm::mat4x4 projection,
-    const std::forward_list<PointLight*>& lights) const {
+    const std::forward_list<Light*>& lights) const {
   model.material->SetCameraPosition(cameraPosition);
   // TODO: Support more than just the first light.
   if (!lights.empty()) {

@@ -2,15 +2,22 @@
 
 #version 330 core
 
-struct Light {
-  vec3 position;
+#define LIGHT_TYPE_UNKNOWN 0
+#define LIGHT_TYPE_POINT   1
 
-  // Illumination properties.
+struct Light {
+  // Type of light. Allowed values are those defined above.
+	int type;
+
+  // Light color properties.
   vec3 diffuse;
   vec3 ambient;
   vec3 specular;
 
-  // Attenuation properties.
+  // Point light position.
+  vec3 position;
+
+  // Point light attenuation properties.
   float constant;
   float linear;
   float quadratic;

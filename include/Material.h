@@ -7,7 +7,7 @@
 #include <map>
 #include <Shader.h>
 #include <Texture.h>
-#include <PointLight.h>
+#include <Light.h>
 
 namespace dg {
 
@@ -41,7 +41,7 @@ namespace dg {
       void SetMatrixMVP(glm::mat4x4 mvp);
       void SetMatrixM(glm::mat4x4 m);
       void SetMatrixNormal(glm::mat3x3 normal);
-      void SetLight(const PointLight& light);
+      void SetLight(const Light& light);
 
       // Portal world-to-local transform, for back-of-portal fragment culling.
       // Set this if we're currently rendering "through" a portal, and set

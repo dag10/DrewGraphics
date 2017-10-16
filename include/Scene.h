@@ -11,6 +11,7 @@
 #include <SceneObject.h>
 #include <Skybox.h>
 #include <Model.h>
+#include <Light.h>
 
 namespace dg {
 
@@ -37,7 +38,7 @@ namespace dg {
           glm::vec3 cameraPosition,
           glm::mat4x4 view,
           glm::mat4x4 projection,
-          const std::forward_list<PointLight*>& lights) const;
+          const std::forward_list<Light*>& lights) const;
 
       std::shared_ptr<Camera> mainCamera;
       std::vector<std::unique_ptr<Behavior>> behaviors;

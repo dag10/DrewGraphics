@@ -10,14 +10,14 @@ dg::PointLight::PointLight() : Light() {};
 dg::PointLight::PointLight(
     glm::vec3 color, float ambient, float diffuse, float specular)
   : Light(color * ambient, color * diffuse, color * specular) {
-    type = PointLightType;
-  }
+  type = PointLightType;
+}
 
 dg::PointLight::PointLight(
     glm::vec3 ambient, glm::vec3 diffuse, glm::vec3 specular)
   : Light(ambient, diffuse, specular) {
-    type = PointLightType;
-  }
+  type = PointLightType;
+}
 
 void dg::PointLight::SetMaterialProperties(Material& material) const {
   Light::SetMaterialProperties(material);

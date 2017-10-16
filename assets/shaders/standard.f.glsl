@@ -18,7 +18,8 @@ uniform vec2 _UVScale;
 in vec2 v_TexCoord;
 
 vec3 calculateLight(Light light, vec3 diffuseColor, vec3 specularColor) {
-  if (light.type != LIGHT_TYPE_POINT) {
+  if (light.type != LIGHT_TYPE_POINT &&
+      light.type != LIGHT_TYPE_DIRECTIONAL) {
     return vec3(0);
   }
 
@@ -27,7 +28,12 @@ vec3 calculateLight(Light light, vec3 diffuseColor, vec3 specularColor) {
 
   // Diffuse
   vec3 norm = normalize(v_Normal);
-  vec3 lightDir = normalize(light.position - v_ScenePos.xyz); 
+  vec3 lightDir; 
+  if (light.type == LIGHT_TYPE_POINT) {
+    lightDir = normalize(light.position - v_ScenePos.xyz); 
+  } else if (light.type == LIGHT_TYPE_DIRECTIONAL) {
+    lightDir = -light.direction;
+  }
   float diff = max(dot(norm, lightDir), 0.0);
   vec3 diffuse = light.diffuse * diff * diffuseColor;
 
@@ -38,12 +44,14 @@ vec3 calculateLight(Light light, vec3 diffuseColor, vec3 specularColor) {
   vec3 specular = light.specular * spec * specularColor;
   
   // Attenuation
-  float distance = length(light.position - v_ScenePos.xyz);
-  float attenuation = 1.0 / (light.constant + light.linear * distance +
-                      light.quadratic * (distance * distance));
-  diffuse *= attenuation;
-  ambient *= attenuation;
-  specular *= attenuation;
+  if (light.type == LIGHT_TYPE_POINT) {
+    float distance = length(light.position - v_ScenePos.xyz);
+    float attenuation = 1.0 / (light.constant + light.linear * distance +
+                        light.quadratic * (distance * distance));
+    diffuse *= attenuation;
+    ambient *= attenuation;
+    specular *= attenuation;
+  }
 
 	return specular + diffuse + ambient;
 }

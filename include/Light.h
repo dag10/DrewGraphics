@@ -10,8 +10,9 @@
 namespace dg {
 
   enum LightType {
-    UnknownLightType = 0,
-    PointLightType = 1,
+    UnknownLightType     = 0,
+    PointLightType       = 1,
+    DirectionalLightType = 2,
   };
 
   class Material;

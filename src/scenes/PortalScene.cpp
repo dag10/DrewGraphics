@@ -75,12 +75,10 @@ void dg::PortalScene::Initialize() {
 
   // Create ceiling light source.
   animatingLight = false;
-  PointLight test(
+  ceilingLight = std::make_shared<DirectionalLight>(
+      glm::vec3(0, -1, 0),
       glm::vec3(1.0f, 0.93f, 0.86f),
-      0.732f, 0.399f, 0.968f);
-  ceilingLight = std::make_shared<PointLight>(
-      glm::vec3(1.0f, 0.93f, 0.86f),
-      0.732f, 0.399f, 0.968f);
+      0.966f, 0.973f, 0.1f);
   ceilingLight->transform.translation = glm::vec3(1, 1.7f, 0);
   AddChild(ceilingLight);
 
@@ -191,7 +189,7 @@ void dg::PortalScene::Initialize() {
   ceiling->transform = ceiling->transform * Transform::R(
       glm::quat(glm::radians(glm::vec3(180, 0, 0))));
   ceiling->transform.translation.y = 2;
-  AddChild(ceiling);
+  //AddChild(ceiling);
 
   // Create portal back materials.
   StandardMaterial portalBackMaterial;

@@ -12,7 +12,7 @@
 #include <Model.h>
 #include <materials/StandardMaterial.h>
 #include <Light.h>
-#include <lights/PointLight.h>
+#include <lights/DirectionalLight.h>
 
 namespace dg {
 
@@ -46,7 +46,7 @@ namespace dg {
       bool animatingLight;
       glm::mat4x4 invPortal;
       std::shared_ptr<Model> lightModel;
-      std::shared_ptr<PointLight> ceilingLight;
+      std::shared_ptr<DirectionalLight> ceilingLight;
       StandardMaterial portalStencilMaterial;
       std::shared_ptr<Shader> depthResetShader;
 

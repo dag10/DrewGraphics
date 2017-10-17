@@ -18,8 +18,7 @@ uniform vec2 _UVScale;
 in vec2 v_TexCoord;
 
 vec3 calculateLight(Light light, vec3 diffuseColor, vec3 specularColor) {
-  if (light.type != LIGHT_TYPE_POINT &&
-      light.type != LIGHT_TYPE_DIRECTIONAL) {
+  if (light.type == LIGHT_TYPE_NULL) {
     return vec3(0);
   }
 

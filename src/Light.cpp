@@ -41,7 +41,7 @@ void dg::Light::SetMaterialProperties(int index, Material& material) const {
 }
 
 void dg::Light::ClearMaterialProperties(int index, Material& material) {
-  material.SetProperty(LightProperty(index, "type"), (int)UnknownLightType);
+  material.SetProperty(LightProperty(index, "type"), (int)NullLightType);
 }
 
 const std::string dg::Light::LightProperty(

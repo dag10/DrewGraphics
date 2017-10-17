@@ -2,7 +2,7 @@
 
 #version 330 core
 
-#define LIGHT_TYPE_UNKNOWN     0
+#define LIGHT_TYPE_NULL        0
 #define LIGHT_TYPE_POINT       1
 #define LIGHT_TYPE_DIRECTIONAL 2
 

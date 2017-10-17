@@ -10,7 +10,7 @@
 namespace dg {
 
   enum LightType {
-    UnknownLightType     = 0,
+    NullLightType        = 0,
     PointLightType       = 1,
     DirectionalLightType = 2,
   };
@@ -40,7 +40,7 @@ namespace dg {
       static const std::string LightProperty(
           int index, const std::string& property);
 
-      LightType type = UnknownLightType;
+      LightType type = NullLightType;
 
   }; // class Light
 

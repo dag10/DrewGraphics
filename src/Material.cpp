@@ -27,7 +27,6 @@ void dg::swap(Material& first, Material& second) {
   using std::swap;
   swap(first.shader, second.shader);
   swap(first.properties, second.properties);
-
 }
 
 void dg::Material::SetProperty(const std::string& name, bool value) {
@@ -101,6 +100,10 @@ void dg::Material::SetProperty(
   properties[name] = prop;
 }
 
+void dg::Material::ClearProperty(const std::string& name) {
+  properties.erase(name);
+}
+
 void dg::Material::SetCameraPosition(glm::vec3 position) {
   SetProperty("_CameraPosition", position);
 }
@@ -117,8 +120,18 @@ void dg::Material::SetMatrixNormal(glm::mat3x3 normal) {
   SetProperty("_Matrix_Normal", normal);
 }
 
-void dg::Material::SetLight(const Light& light) {
-  light.SetMaterialProperties(*this);
+void dg::Material::SetLight(int index, const Light& light) {
+  light.SetMaterialProperties(index, *this);
+}
+
+void dg::Material::ClearLights() {
+  for (int i = 0; i < Light::MAX_LIGHTS; i++) {
+    ClearLight(i);
+  }
+}
+
+void dg::Material::ClearLight(int index) {
+  Light::ClearMaterialProperties(index, *this);
 }
 
 void dg::Material::SetInvPortal(glm::mat4x4 invPortal) {

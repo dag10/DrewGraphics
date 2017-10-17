@@ -19,11 +19,13 @@ dg::PointLight::PointLight(
   type = PointLightType;
 }
 
-void dg::PointLight::SetMaterialProperties(Material& material) const {
-  Light::SetMaterialProperties(material);
-  material.SetProperty("_Light.position", SceneSpace().translation);
-  material.SetProperty("_Light.constant", constant);
-  material.SetProperty("_Light.linear", linear);
-  material.SetProperty("_Light.quadratic", quadratic);
+void dg::PointLight::SetMaterialProperties(
+    int index, Material& material) const {
+  Light::SetMaterialProperties(index, material);
+  material.SetProperty(
+      LightProperty(index, "position"), SceneSpace().translation);
+  material.SetProperty(LightProperty(index, "constant"), constant);
+  material.SetProperty(LightProperty(index, "linear"), linear);
+  material.SetProperty(LightProperty(index, "quadratic"), quadratic);
 }
 

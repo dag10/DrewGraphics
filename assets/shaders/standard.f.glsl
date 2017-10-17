@@ -71,9 +71,11 @@ vec4 frag() {
                      ? texture(_Material.specularMap, texCoord).rgb
                      : vec3(_Material.specular);
 
-	vec3 light = calculateLight(_Light, diffuseColor, specularColor);
+  vec3 cumulative = vec3(0);
+  for (int i = 0; i < MAX_LIGHTS; i++) {
+    cumulative += calculateLight(_Lights[i], diffuseColor, specularColor);
+  }
 
-  //return vec4(specular + diffuse + ambient, 1.0);
-  return vec4(light, 1.0);
+  return vec4(cumulative, 1.0);
 }
 

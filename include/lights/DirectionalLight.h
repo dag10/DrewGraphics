@@ -15,7 +15,7 @@ namespace dg {
 
       glm::vec3 direction = glm::vec3(0, -1, 0);
 
-      virtual void SetMaterialProperties(Material& material) const;
+      virtual void SetMaterialProperties(int index, Material& material) const;
 
       DirectionalLight();
       DirectionalLight(

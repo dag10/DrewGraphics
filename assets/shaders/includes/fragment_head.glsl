@@ -32,7 +32,8 @@ in vec3 v_Normal;
 
 out vec4 FragColor;
 
-uniform Light _Light;
+const int MAX_LIGHTS = 2;
+uniform Light _Lights[MAX_LIGHTS];
 
 uniform vec3 _CameraPosition;
 

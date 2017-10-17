@@ -34,8 +34,9 @@ dg::DirectionalLight::DirectionalLight(
   type = DirectionalLightType;
 }
 
-void dg::DirectionalLight::SetMaterialProperties(Material& material) const {
-  Light::SetMaterialProperties(material);
-  material.SetProperty("_Light.direction", direction);
+void dg::DirectionalLight::SetMaterialProperties(
+    int index, Material& material) const {
+  Light::SetMaterialProperties(index, material);
+  material.SetProperty(LightProperty(index, "direction"), direction);
 }
 

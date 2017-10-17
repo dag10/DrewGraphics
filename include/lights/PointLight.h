@@ -18,7 +18,7 @@ namespace dg {
       float linear = 0.14f;
       float quadratic = 0.07f;
 
-      virtual void SetMaterialProperties(Material& material) const;
+      virtual void SetMaterialProperties(int index, Material& material) const;
 
       PointLight();
       PointLight(glm::vec3 color, float ambient, float diffuse, float specular);

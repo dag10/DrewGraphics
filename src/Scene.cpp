@@ -80,9 +80,14 @@ void dg::Scene::PrepareModelForDraw(
     glm::mat4x4 projection,
     const std::forward_list<Light*>& lights) const {
   model.material->SetCameraPosition(cameraPosition);
-  // TODO: Support more than just the first light.
-  if (!lights.empty()) {
-    model.material->SetLight(*lights.front());
+  model.material->ClearLights();
+  int lightIndex = 0;
+  for (auto light = lights.begin(); light != lights.end(); light++) {
+    if (lightIndex >= Light::MAX_LIGHTS) {
+      break;
+    }
+    model.material->SetLight(lightIndex, **light);
+    lightIndex++;
   }
 }
 

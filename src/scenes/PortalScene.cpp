@@ -13,6 +13,8 @@
 #include <forward_list>
 #include <iostream>
 #include <behaviors/KeyboardCameraController.h>
+#include <lights/DirectionalLight.h>
+#include <lights/PointLight.h>
 
 static const glm::vec3 cubePositions[] = {
   glm::vec3(  0.0f,  0.25f,  0.0f ), 
@@ -73,26 +75,32 @@ void dg::PortalScene::Initialize() {
   // Create skybox.
   skybox = std::unique_ptr<Skybox>(new Skybox(skyboxTexture));
 
-  // Create ceiling light source.
-  animatingLight = false;
-  ceilingLight = std::make_shared<DirectionalLight>(
-      glm::vec3(0, -1, 0),
+  // Create sky light.
+  skyLight = std::make_shared<DirectionalLight>(
+      glm::normalize(glm::vec3(-0.3f, -1, -0.2f)),
       glm::vec3(1.0f, 0.93f, 0.86f),
-      0.966f, 0.973f, 0.1f);
-  ceilingLight->transform.translation = glm::vec3(1, 1.7f, 0);
-  AddChild(ceilingLight);
+      0.34f, 1.45f, 0.07f);
+  AddChild(skyLight);
 
   // Create light cube material.
-  StandardMaterial lightMaterial = StandardMaterial::WithColor(
-      ceilingLight->specular);
+  StandardMaterial lightMaterial;
   lightMaterial.SetLit(false);
 
   // Create light cube.
   lightModel = std::make_shared<Model>(
       dg::Mesh::Cube,
       std::make_shared<StandardMaterial>(lightMaterial),
-      Transform::S(glm::vec3(0.05f)));
-  ceilingLight->AddChild(lightModel, false);
+      Transform::TS(glm::vec3(1, 1.7f, 0), glm::vec3(0.05f)));
+  AddChild(lightModel);
+
+  // Create indoor and outdoor ceiling light source.
+  glm::vec3 ceilingLightColor = glm::vec3(1.0f, 0.93f, 0.86f);
+  indoorCeilingLight = std::make_shared<PointLight>(
+      ceilingLightColor, 0.732f, 0.399f, 0.968f);
+  outdoorCeilingLight = std::make_shared<PointLight>(
+      ceilingLightColor, 0.134f, 0.518f, 0.803f);
+  lightModel->AddChild(indoorCeilingLight, false);
+  lightModel->AddChild(outdoorCeilingLight, false);
 
   // Create wooden cube material.
   StandardMaterial cubeMaterial = StandardMaterial::WithTexture(crateTexture);
@@ -184,12 +192,12 @@ void dg::PortalScene::Initialize() {
   ceilingMaterial.SetUVScale(glm::vec2(5, 3));
 
   // Create ceiling, which is a copy of the floor.
-  auto ceiling = std::make_shared<Model>(*floor);
+  ceiling= std::make_shared<Model>(*floor);
   ceiling->material = std::make_shared<StandardMaterial>(ceilingMaterial);
   ceiling->transform = ceiling->transform * Transform::R(
       glm::quat(glm::radians(glm::vec3(180, 0, 0))));
   ceiling->transform.translation.y = 2;
-  //AddChild(ceiling);
+  AddChild(ceiling);
 
   // Create portal back materials.
   StandardMaterial portalBackMaterial;
@@ -236,6 +244,16 @@ void dg::PortalScene::Initialize() {
   // Allow camera to be controller by the keyboard and mouse.
   behaviors.push_back(std::unique_ptr<Behavior>(
         new KeyboardCameraController(mainCamera, window)));
+
+  // Configure the scene to initially be indoors (ceiling exists).
+  outdoors = false;
+  ceiling->enabled = true;
+  indoorCeilingLight->enabled = true;
+  outdoorCeilingLight->enabled = false;
+  skyLight->enabled = false;
+
+  // Ceiling light is initially not moving.
+  animatingLight = false;
 }
 
 void dg::PortalScene::Update() {
@@ -289,6 +307,7 @@ void dg::PortalScene::Update() {
 
   // Adjust light ambient power with keyboard.
   const float lightDelta = 0.05f;
+  auto ceilingLight = outdoors ? outdoorCeilingLight : indoorCeilingLight;
   if (window->IsKeyPressed(GLFW_KEY_1) &&
       window->IsKeyJustPressed(GLFW_KEY_UP)) {
     ceilingLight->ambient += ceilingLight->ambient * lightDelta;
@@ -321,6 +340,15 @@ void dg::PortalScene::Update() {
     std::cout << "Specular R: " << ceilingLight->specular.r << std::endl;
   }
 
+  // Toggle ceiling (outdoors or indoors) with the keyboard tap of C.
+  if (window->IsKeyJustPressed(GLFW_KEY_C)) {
+    outdoors = !outdoors;
+    ceiling->enabled = !outdoors;
+    skyLight->enabled = outdoors;
+    indoorCeilingLight->enabled = !outdoors;
+    outdoorCeilingLight->enabled = outdoors;
+  }
+
   // Toggle animating light with keyboard tap of L.
   if (window->IsKeyJustPressed(GLFW_KEY_L)) {
     animatingLight = !animatingLight;
@@ -328,9 +356,9 @@ void dg::PortalScene::Update() {
 
   // Animate light position.
   if (animatingLight) {
-    ceilingLight->transform.translation.x = 1.f + 1.f * sin(5.f * Time::Elapsed);
+    lightModel->transform.translation.x = 1.f + 1.f * sin(5.f * Time::Elapsed);
   } else {
-    ceilingLight->transform.translation.x = 1.5f;
+    lightModel->transform.translation.x = 1.5f;
   }
 
   // Update light cube model to be consistent with point light.

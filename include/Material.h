@@ -37,11 +37,15 @@ namespace dg {
       void SetProperty(
           const std::string& name, std::shared_ptr<Texture>  value);
 
+      void ClearProperty(const std::string& name);
+
       void SetCameraPosition(glm::vec3 position);
       void SetMatrixMVP(glm::mat4x4 mvp);
       void SetMatrixM(glm::mat4x4 m);
       void SetMatrixNormal(glm::mat3x3 normal);
-      void SetLight(const Light& light);
+      void SetLight(int index, const Light& light);
+      void ClearLights();
+      void ClearLight(int index);
 
       // Portal world-to-local transform, for back-of-portal fragment culling.
       // Set this if we're currently rendering "through" a portal, and set

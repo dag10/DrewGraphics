@@ -32,6 +32,7 @@ in vec3 v_Normal;
 
 out vec4 FragColor;
 
+// NOTE: Keep this consistent with MAX_LIGHTS in src/Light.cpp.
 const int MAX_LIGHTS = 2;
 uniform Light _Lights[MAX_LIGHTS];
 

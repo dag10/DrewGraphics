@@ -33,6 +33,8 @@ namespace dg {
 
     protected:
 
+      static const char *LIGHTS_ARRAY_NAME;
+
       Light() = default;
       Light(glm::vec3 color, float ambient, float diffuse, float specular);
       Light(glm::vec3 ambient, glm::vec3 diffuse, glm::vec3 specular);

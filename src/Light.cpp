@@ -5,24 +5,9 @@
 #include <Light.h>
 #include <Material.h>
 
-// These are the names of all members of the Light struct
-// as defined in assets/shaders/includes/fragment_head.glsl.
-// This list excludes "type" because we want to explicitly set that
-// every time we render.
-static const auto allLightProperties = std::vector<std::string> {
-  "diffuse",
-  "ambient",
-  "specular",
-  "position",
-  "direction",
-  "constant",
-  "linear",
-  "quadratic",
-};
-
-// The name and size of the lights array as defined in
-// assets/shaders/includes/fragment_head.glsl.
-static const std::string lightsArrayName = "_Lights";
+// NOTE: Keep these consistent with MAX_LIGHTS in
+//       assets/shaders/includes/fragment_head.glsl.
+const char *dg::Light::LIGHTS_ARRAY_NAME = "_Lights";
 const int dg::Light::MAX_LIGHTS = 2;
 
 dg::Light::Light(
@@ -50,7 +35,7 @@ const std::string dg::Light::LightProperty(
   assert(index >= 0 && index < MAX_LIGHTS);
   assert(snprintf(
         buffer, sizeof(buffer), "%s[%d].%s",
-        lightsArrayName.c_str(), index, property.c_str()) >= 0);
+        LIGHTS_ARRAY_NAME, index, property.c_str()) >= 0);
   return std::string(buffer);
 }
 

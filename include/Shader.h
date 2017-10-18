@@ -85,7 +85,7 @@ namespace dg {
       void SetVec3(const std::string& name, const glm::vec3& value);
       void SetVec3(const std::string& name, float x, float y, float z);
       void SetVec4(const std::string& name, const glm::vec4& value);
-      void SetVec4(const std::string& name, float x, float y, float z, float w) ;
+      void SetVec4(const std::string& name, float x, float y, float z, float w);
       void SetMat2(const std::string& name, const glm::mat2& mat);
       void SetMat3(const std::string& name, const glm::mat3& mat);
       void SetMat4(const std::string& name, const glm::mat4& mat);

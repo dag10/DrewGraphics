@@ -12,6 +12,7 @@
 #include <Model.h>
 #include <materials/StandardMaterial.h>
 #include <Light.h>
+#include <lights/SpotLight.h>
 
 namespace dg {
 
@@ -44,12 +45,14 @@ namespace dg {
 
       bool animatingLight;
       bool outdoors;
+      bool useSpotlight;
       glm::mat4x4 invPortal;
       std::shared_ptr<Model> ceiling;
       std::shared_ptr<Light> skyLight;
       std::shared_ptr<Model> lightModel;
       std::shared_ptr<Light> indoorCeilingLight;
       std::shared_ptr<Light> outdoorCeilingLight;
+      std::shared_ptr<SpotLight> spotLight;
       StandardMaterial portalStencilMaterial;
       std::shared_ptr<Shader> depthResetShader;
 

@@ -95,10 +95,15 @@ void dg::PortalScene::Initialize() {
 
   // Create indoor and outdoor ceiling light source.
   glm::vec3 ceilingLightColor = glm::vec3(1.0f, 0.93f, 0.86f);
+  spotLight = std::make_shared<SpotLight>(
+      glm::vec3(0, -1, 0), glm::radians(35.f),
+      ceilingLightColor, 0.286f, 1.344f, 2.21f);
+  spotLight->feather = glm::radians(3.f);
   indoorCeilingLight = std::make_shared<PointLight>(
       ceilingLightColor, 0.732f, 0.399f, 0.968f);
   outdoorCeilingLight = std::make_shared<PointLight>(
       ceilingLightColor, 0.134f, 0.518f, 0.803f);
+  lightModel->AddChild(spotLight, false);
   lightModel->AddChild(indoorCeilingLight, false);
   lightModel->AddChild(outdoorCeilingLight, false);
 
@@ -245,6 +250,10 @@ void dg::PortalScene::Initialize() {
   behaviors.push_back(std::unique_ptr<Behavior>(
         new KeyboardCameraController(mainCamera, window)));
 
+  // Initially using the point light, not spotlight.
+  useSpotlight = false;
+  spotLight->enabled = false;
+
   // Configure the scene to initially be indoors (ceiling exists).
   outdoors = false;
   ceiling->enabled = true;
@@ -307,7 +316,8 @@ void dg::PortalScene::Update() {
 
   // Adjust light ambient power with keyboard.
   const float lightDelta = 0.05f;
-  auto ceilingLight = outdoors ? outdoorCeilingLight : indoorCeilingLight;
+  auto ceilingLight = outdoors ?
+      outdoorCeilingLight : useSpotlight ? spotLight : indoorCeilingLight;
   if (window->IsKeyPressed(GLFW_KEY_1) &&
       window->IsKeyJustPressed(GLFW_KEY_UP)) {
     ceilingLight->ambient += ceilingLight->ambient * lightDelta;
@@ -340,12 +350,20 @@ void dg::PortalScene::Update() {
     std::cout << "Specular R: " << ceilingLight->specular.r << std::endl;
   }
 
+  // Toggle using the spot light or point light with a keyboard tap of T.
+  if (window->IsKeyJustPressed(GLFW_KEY_T)) {
+    useSpotlight = !useSpotlight;
+    indoorCeilingLight->enabled = !outdoors && !useSpotlight;
+    spotLight->enabled = !outdoors && useSpotlight;
+  }
+
   // Toggle ceiling (outdoors or indoors) with the keyboard tap of C.
   if (window->IsKeyJustPressed(GLFW_KEY_C)) {
     outdoors = !outdoors;
     ceiling->enabled = !outdoors;
     skyLight->enabled = outdoors;
-    indoorCeilingLight->enabled = !outdoors;
+    indoorCeilingLight->enabled = !outdoors && !useSpotlight;
+    spotLight->enabled = !outdoors && useSpotlight;
     outdoorCeilingLight->enabled = outdoors;
   }
 

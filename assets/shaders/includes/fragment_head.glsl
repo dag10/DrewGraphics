@@ -4,7 +4,8 @@
 
 #define LIGHT_TYPE_NULL        0
 #define LIGHT_TYPE_POINT       1
-#define LIGHT_TYPE_DIRECTIONAL 2
+#define LIGHT_TYPE_SPOT        2
+#define LIGHT_TYPE_DIRECTIONAL 3
 
 struct Light {
   // Type of light. Allowed values are those defined above.
@@ -18,8 +19,12 @@ struct Light {
   // Point light position.
   vec3 position;
 
-  // Directional light direction.
+  // Directional and spot light direction.
   vec3 direction;
+
+  // Spot light cutoff angle.
+  float innerCutoff;
+  float outerCutoff;
 
   // Point light attenuation properties.
   float constant;

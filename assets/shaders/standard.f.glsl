@@ -28,7 +28,7 @@ vec3 calculateLight(Light light, vec3 diffuseColor, vec3 specularColor) {
   // Diffuse
   vec3 norm = normalize(v_Normal);
   vec3 lightDir; 
-  if (light.type == LIGHT_TYPE_POINT) {
+  if (light.type == LIGHT_TYPE_POINT || light.type == LIGHT_TYPE_SPOT) {
     lightDir = normalize(light.position - v_ScenePos.xyz); 
   } else if (light.type == LIGHT_TYPE_DIRECTIONAL) {
     lightDir = -light.direction;
@@ -43,13 +43,22 @@ vec3 calculateLight(Light light, vec3 diffuseColor, vec3 specularColor) {
   vec3 specular = light.specular * spec * specularColor;
   
   // Attenuation
-  if (light.type == LIGHT_TYPE_POINT) {
+  if (light.type == LIGHT_TYPE_POINT || light.type == LIGHT_TYPE_SPOT) {
     float distance = length(light.position - v_ScenePos.xyz);
     float attenuation = 1.0 / (light.constant + light.linear * distance +
                         light.quadratic * (distance * distance));
     diffuse *= attenuation;
     ambient *= attenuation;
     specular *= attenuation;
+  }
+
+  // Spot light cutoff
+  if (light.type == LIGHT_TYPE_SPOT) {
+    float theta = dot(lightDir, normalize(-light.direction));
+    float epsilon = light.outerCutoff - light.innerCutoff;
+    float intensity = clamp((theta - cos(light.innerCutoff)) / epsilon, 0.0, 1.0);
+    diffuse *= intensity;
+    specular *= intensity;
   }
 
 	return specular + diffuse + ambient;

@@ -239,6 +239,13 @@ void dg::PortalScene::Initialize() {
   mainCamera->farClip = 10;
   AddChild(mainCamera);
 
+  // Create a flashlight attached to the camera.
+  flashlight = std::make_shared<SpotLight>(
+      glm::vec3(0, 0, -1), glm::radians(25.f),
+      ceilingLightColor, 0.314f, 2.16f, 2.11f);
+  flashlight->transform = Transform::T(glm::vec3(0, -0.1f, 0));
+  mainCamera->AddChild(flashlight, false);
+
   // Create box that represents the camera's position.
   mainCamera->AddChild(std::make_shared<Model>(
       dg::Mesh::Cube,
@@ -250,16 +257,9 @@ void dg::PortalScene::Initialize() {
   behaviors.push_back(std::unique_ptr<Behavior>(
         new KeyboardCameraController(mainCamera, window)));
 
-  // Initially using the point light, not spotlight.
-  useSpotlight = false;
-  spotLight->enabled = false;
-
-  // Configure the scene to initially be indoors (ceiling exists).
-  outdoors = false;
-  ceiling->enabled = true;
-  indoorCeilingLight->enabled = true;
-  outdoorCeilingLight->enabled = false;
-  skyLight->enabled = false;
+  // Initial lighting configuration is the indoor point light.
+  lightingType = PointLighting;
+  UpdateLightingConfiguration();
 
   // Ceiling light is initially not moving.
   animatingLight = false;
@@ -316,55 +316,75 @@ void dg::PortalScene::Update() {
 
   // Adjust light ambient power with keyboard.
   const float lightDelta = 0.05f;
-  auto ceilingLight = outdoors ?
-      outdoorCeilingLight : useSpotlight ? spotLight : indoorCeilingLight;
+  std::shared_ptr<Light> activeLight = nullptr;
+  switch (lightingType) {
+    case OutdoorLighting:
+      activeLight = outdoorCeilingLight;
+      break;
+    case PointLighting:
+      activeLight = indoorCeilingLight;
+      break;
+    case SpotLighting:
+      activeLight = spotLight;
+      break;
+    case FlashlightLighting:
+      activeLight = flashlight;
+      break;
+  }
   if (window->IsKeyPressed(GLFW_KEY_1) &&
       window->IsKeyJustPressed(GLFW_KEY_UP)) {
-    ceilingLight->ambient += ceilingLight->ambient * lightDelta;
-    std::cout << "Ambient R: " << ceilingLight->ambient.r << std::endl;
+    activeLight->ambient += activeLight->ambient * lightDelta;
+    std::cout << "Ambient R: " << activeLight->ambient.r << std::endl;
   } else if (window->IsKeyPressed(GLFW_KEY_1) &&
       window->IsKeyJustPressed(GLFW_KEY_DOWN)) {
-    ceilingLight->ambient -= ceilingLight->ambient * lightDelta;
-    std::cout << "Ambient R: " << ceilingLight->ambient.r << std::endl;
+    activeLight->ambient -= activeLight->ambient * lightDelta;
+    std::cout << "Ambient R: " << activeLight->ambient.r << std::endl;
   }
 
   // Adjust light diffuse power with keyboard.
   if (window->IsKeyPressed(GLFW_KEY_2) &&
       window->IsKeyJustPressed(GLFW_KEY_UP)) {
-    ceilingLight->diffuse += ceilingLight->diffuse * lightDelta;
-    std::cout << "Diffuse R: " << ceilingLight->diffuse.r << std::endl;
+    activeLight->diffuse += activeLight->diffuse * lightDelta;
+    std::cout << "Diffuse R: " << activeLight->diffuse.r << std::endl;
   } else if (window->IsKeyPressed(GLFW_KEY_2) &&
       window->IsKeyJustPressed(GLFW_KEY_DOWN)) {
-    ceilingLight->diffuse -= ceilingLight->diffuse * lightDelta;
-    std::cout << "Diffuse R: " << ceilingLight->diffuse.r << std::endl;
+    activeLight->diffuse -= activeLight->diffuse * lightDelta;
+    std::cout << "Diffuse R: " << activeLight->diffuse.r << std::endl;
   }
 
   // Adjust light specular power with keyboard.
   if (window->IsKeyPressed(GLFW_KEY_3) &&
       window->IsKeyJustPressed(GLFW_KEY_UP)) {
-    ceilingLight->specular += ceilingLight->specular * lightDelta;
-    std::cout << "Specular R: " << ceilingLight->specular.r << std::endl;
+    activeLight->specular += activeLight->specular * lightDelta;
+    std::cout << "Specular R: " << activeLight->specular.r << std::endl;
   } else if (window->IsKeyPressed(GLFW_KEY_3) &&
       window->IsKeyJustPressed(GLFW_KEY_DOWN)) {
-    ceilingLight->specular -= ceilingLight->specular * lightDelta;
-    std::cout << "Specular R: " << ceilingLight->specular.r << std::endl;
+    activeLight->specular -= activeLight->specular * lightDelta;
+    std::cout << "Specular R: " << activeLight->specular.r << std::endl;
   }
 
-  // Toggle using the spot light or point light with a keyboard tap of T.
+  // If F was tapped, switch to the flashlight configuration.
+  if (window->IsKeyJustPressed(GLFW_KEY_F)) {
+    lightingType = FlashlightLighting;
+    UpdateLightingConfiguration();
+  }
+
+  // If T was tapped, switch to the spotlight configuration.
   if (window->IsKeyJustPressed(GLFW_KEY_T)) {
-    useSpotlight = !useSpotlight;
-    indoorCeilingLight->enabled = !outdoors && !useSpotlight;
-    spotLight->enabled = !outdoors && useSpotlight;
+    lightingType = SpotLighting;
+    UpdateLightingConfiguration();
   }
 
-  // Toggle ceiling (outdoors or indoors) with the keyboard tap of C.
-  if (window->IsKeyJustPressed(GLFW_KEY_C)) {
-    outdoors = !outdoors;
-    ceiling->enabled = !outdoors;
-    skyLight->enabled = outdoors;
-    indoorCeilingLight->enabled = !outdoors && !useSpotlight;
-    spotLight->enabled = !outdoors && useSpotlight;
-    outdoorCeilingLight->enabled = outdoors;
+  // If I was tapped, switch to the indoor point light configuration.
+  if (window->IsKeyJustPressed(GLFW_KEY_I)) {
+    lightingType = PointLighting;
+    UpdateLightingConfiguration();
+  }
+
+  // If O was tapped, switch to the outdoor configuration.
+  if (window->IsKeyJustPressed(GLFW_KEY_O)) {
+    lightingType = OutdoorLighting;
+    UpdateLightingConfiguration();
   }
 
   // Toggle animating light with keyboard tap of L.
@@ -381,7 +401,7 @@ void dg::PortalScene::Update() {
 
   // Update light cube model to be consistent with point light.
   std::static_pointer_cast<StandardMaterial>(lightModel->material)
-    ->SetDiffuse(ceilingLight->specular);
+    ->SetDiffuse(activeLight->specular);
 }
 
 void dg::PortalScene::PrepareModelForDraw(
@@ -392,6 +412,17 @@ void dg::PortalScene::PrepareModelForDraw(
     const std::forward_list<Light*>& lights) const {
   Scene::PrepareModelForDraw(model, cameraPosition, view, projection, lights);
   model.material->SetInvPortal(invPortal);
+}
+
+void dg::PortalScene::UpdateLightingConfiguration() {
+  skybox->enabled = (lightingType == OutdoorLighting);
+  ceiling->enabled = (lightingType != OutdoorLighting);
+  skyLight->enabled = (lightingType == OutdoorLighting);
+  lightModel->enabled = (lightingType != FlashlightLighting);
+  indoorCeilingLight->enabled = (lightingType == PointLighting);
+  outdoorCeilingLight->enabled = (lightingType == OutdoorLighting);
+  spotLight->enabled = (lightingType == SpotLighting);
+  flashlight->enabled = (lightingType == FlashlightLighting);
 }
 
 void dg::PortalScene::RenderPortalStencil(dg::Transform xfPortal) {
@@ -483,5 +514,19 @@ void dg::PortalScene::RenderFrame() {
   invPortal = portalTransforms[0].Inverse().ToMat4();
   RenderScene(CameraForPortal(portalTransforms[1], portalTransforms[0]));
   glDisable(GL_STENCIL_TEST);
+}
+
+void dg::PortalScene::RenderScene(const Camera& camera) const {
+  // Move the flash light to the camera we're rendering from.
+  // TODO: Don't do this, it feels very computationally heavy.
+  Transform xfFlashlightOriginal = flashlight->transform;
+  flashlight->SetSceneSpace(
+    camera.SceneSpace() * mainCamera->SceneSpace().Inverse() *
+    flashlight->SceneSpace());
+
+  Scene::RenderScene(camera);
+
+  // Attach the flashlight back to the original camera.
+  flashlight->transform = xfFlashlightOriginal;
 }
 

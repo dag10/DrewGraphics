@@ -15,6 +15,8 @@ namespace dg {
 
     public:
 
+      bool enabled = true;
+
       Skybox() = default;
       Skybox(Skybox& other);
       Skybox(Skybox&& other);

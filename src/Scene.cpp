@@ -33,7 +33,7 @@ void dg::Scene::RenderFrame() {
 
 void dg::Scene::RenderScene(const Camera& camera) const {
   // Render skybox.
-  if (skybox != nullptr) {
+  if (skybox != nullptr && skybox->enabled) {
     skybox->Draw(camera, *window);
   }
 

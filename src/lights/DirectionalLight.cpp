@@ -37,6 +37,8 @@ dg::DirectionalLight::DirectionalLight(
 void dg::DirectionalLight::SetMaterialProperties(
     int index, Material& material) const {
   Light::SetMaterialProperties(index, material);
-  material.SetProperty(LightProperty(index, "direction"), direction);
+  Transform xf = SceneSpace();
+  material.SetProperty(
+      LightProperty(index, "direction"), xf.rotation * direction);
 }
 

@@ -37,12 +37,15 @@ dg::SpotLight::SpotLight(
 void dg::SpotLight::SetMaterialProperties(
     int index, Material& material) const {
   Light::SetMaterialProperties(index, material);
+
+  Transform xf = SceneSpace();
   material.SetProperty(
       LightProperty(index, "position"), SceneSpace().translation);
   material.SetProperty(LightProperty(index, "constant"), constant);
   material.SetProperty(LightProperty(index, "linear"), linear);
   material.SetProperty(LightProperty(index, "quadratic"), quadratic);
-  material.SetProperty(LightProperty(index, "direction"), direction);
+  material.SetProperty(
+      LightProperty(index, "direction"), xf.rotation * direction);
   material.SetProperty(
       LightProperty(index, "innerCutoff"), cutoff - (feather / 2.f));
   material.SetProperty(

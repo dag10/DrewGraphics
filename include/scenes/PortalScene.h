@@ -28,7 +28,19 @@ namespace dg {
       virtual void Update();
       virtual void RenderFrame();
 
+    protected:
+      virtual void RenderScene(const Camera& camera) const;
+
     private:
+
+      enum LightingType {
+        OutdoorLighting,
+        PointLighting,
+        SpotLighting,
+        FlashlightLighting,
+      };
+
+      void UpdateLightingConfiguration();
 
       void RenderPortalStencil(Transform xfPortal);
       void ClearDepth();
@@ -42,10 +54,8 @@ namespace dg {
           glm::mat4x4 projection,
           const std::forward_list<Light*>& lights) const;
 
-
       bool animatingLight;
-      bool outdoors;
-      bool useSpotlight;
+      LightingType lightingType;
       glm::mat4x4 invPortal;
       std::shared_ptr<Model> ceiling;
       std::shared_ptr<Light> skyLight;
@@ -53,6 +63,7 @@ namespace dg {
       std::shared_ptr<Light> indoorCeilingLight;
       std::shared_ptr<Light> outdoorCeilingLight;
       std::shared_ptr<SpotLight> spotLight;
+      std::shared_ptr<SpotLight> flashlight;
       StandardMaterial portalStencilMaterial;
       std::shared_ptr<Shader> depthResetShader;
 

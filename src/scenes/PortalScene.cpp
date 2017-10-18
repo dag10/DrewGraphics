@@ -243,7 +243,7 @@ void dg::PortalScene::Initialize() {
   flashlight = std::make_shared<SpotLight>(
       glm::vec3(0, 0, -1), glm::radians(25.f),
       ceilingLightColor, 0.314f, 2.16f, 2.11f);
-  flashlight->transform = Transform::T(glm::vec3(0, -0.1f, 0));
+  flashlight->transform = Transform::T(glm::vec3(0.1f, -0.1f, 0));
   mainCamera->AddChild(flashlight, false);
 
   // Create box that represents the camera's position.

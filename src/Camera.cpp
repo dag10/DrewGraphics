@@ -12,7 +12,7 @@
 dg::Camera::Camera() : SceneObject() {}
 
 glm::mat4x4 dg::Camera::GetViewMatrix() const {
-  return transform.Inverse().ToMat4();
+  return SceneSpace().Inverse().ToMat4();
 }
 
 glm::mat4x4 dg::Camera::GetProjectionMatrix(float aspectRatio) const {

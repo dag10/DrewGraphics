@@ -53,8 +53,8 @@ void dg::Scene::RenderScene(const Camera& camera) const {
       remainingObjects.push_front(child->get());
       if (auto model = std::dynamic_pointer_cast<Model>(*child)) {
         models.push_front(model.get());
-      } else if (auto model = std::dynamic_pointer_cast<Light>(*child)) {
-        lights.push_front(model.get());
+      } else if (auto light = std::dynamic_pointer_cast<Light>(*child)) {
+        lights.push_front(light.get());
       }
     }
   }

@@ -17,9 +17,9 @@
 #include <lights/PointLight.h>
 
 static const glm::vec3 cubePositions[] = {
-  glm::vec3(  0.0f,  0.25f,  0.0f ), 
-  glm::vec3( -1.0f,  0.25f,  0.0f ), 
-  glm::vec3(  1.0f,  0.25f,  0.0f ), 
+  glm::vec3(  0.0f,  0.25f,  0.0f ),
+  glm::vec3( -1.0f,  0.25f,  0.0f ),
+  glm::vec3(  1.0f,  0.25f,  0.0f ),
 };
 
 static dg::Transform portalTransforms[] = {
@@ -486,7 +486,7 @@ void dg::PortalScene::RenderFrame() {
   glEnable(GL_DEPTH_TEST);
   glEnable(GL_CULL_FACE);
   glCullFace(GL_BACK);
-  
+
   // Render immediate scene.
   invPortal = glm::mat4x4(0);
   RenderScene(*mainCamera);

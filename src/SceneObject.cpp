@@ -62,6 +62,10 @@ std::set<std::shared_ptr<dg::SceneObject>> &dg::SceneObject::Children() {
   return children;
 }
 
+void dg::SceneObject::LookAt(const SceneObject& object) {
+  LookAtPoint(object.SceneSpace().translation);
+}
+
 void dg::SceneObject::LookAtDirection(glm::vec3 direction) {
   direction = glm::normalize(direction);
 

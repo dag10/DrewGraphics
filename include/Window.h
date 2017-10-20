@@ -39,8 +39,8 @@ namespace dg {
       void LockCursor();
       void UnlockCursor();
       bool IsCursorLocked() const;
-      glm::dvec2 GetCursorPosition() const;
-      glm::dvec2 GetCursorDelta() const;
+      glm::vec2 GetCursorPosition() const;
+      glm::vec2 GetCursorDelta() const;
 
       bool ShouldClose() const;
       void SetShouldClose(bool shouldClose);
@@ -79,8 +79,8 @@ namespace dg {
       int height = 0;
       std::string title;
       bool hasInitialCursorPosition = false;
-      glm::dvec2 lastCursorPosition;
-      glm::dvec2 currentCursorPosition;
+      glm::vec2 lastCursorPosition;
+      glm::vec2 currentCursorPosition;
   }; // class Window
 
 } // namespace dg

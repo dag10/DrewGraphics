@@ -51,7 +51,7 @@ void dg::Window::HandleMouseButton(int button, int action) {
 }
 
 void dg::Window::HandleCursorPosition(double x, double y) {
-  currentCursorPosition = glm::dvec2(x, y);
+  currentCursorPosition = glm::vec2((float)x, (float)y);
 }
 
 std::shared_ptr<dg::Window> dg::Window::Open(
@@ -118,13 +118,13 @@ bool dg::Window::IsCursorLocked() const {
   return glfwGetInputMode(glfwWindow, GLFW_CURSOR) == GLFW_CURSOR_DISABLED;
 }
 
-glm::dvec2 dg::Window::GetCursorPosition() const {
+glm::vec2 dg::Window::GetCursorPosition() const {
   double x, y;
   glfwGetCursorPos(glfwWindow, &x, &y);
-  return glm::dvec2(x, y);
+  return glm::vec2(x, y);
 }
 
-glm::dvec2 dg::Window::GetCursorDelta() const {
+glm::vec2 dg::Window::GetCursorDelta() const {
   return currentCursorPosition - lastCursorPosition;
 }
 

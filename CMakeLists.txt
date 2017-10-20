@@ -24,7 +24,9 @@ set_target_properties(DrewGraphics PROPERTIES
 	CXX_STANDARD_REQUIRED ON
 )
 
-file(COPY ${CMAKE_SOURCE_DIR}/assets DESTINATION .)
+add_custom_command(TARGET DrewGraphics PRE_BUILD
+  COMMAND ${CMAKE_COMMAND} -E copy_directory
+  ${CMAKE_SOURCE_DIR}/assets $<TARGET_FILE_DIR:DrewGraphics>/assets)
 
 install(TARGETS DrewGraphics DESTINATION bin)
 

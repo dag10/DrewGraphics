@@ -12,6 +12,7 @@
 #include <Mesh.h>
 #include <scenes/TutorialScene.h>
 #include <scenes/PortalScene.h>
+#include <scenes/QuadScene.h>
 
 std::shared_ptr<dg::Window> window;
 
@@ -44,12 +45,12 @@ int main(int argc, const char *argv[]) {
   } catch (const std::exception& e) {
     terminateWithError(e.what());
   }
-  
+
   // Load GLAD procedures.
   if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
     terminateWithError("Failed to initialize GLAD.");
   }
-  
+
   // Create primitive meshes.
   dg::Mesh::CreatePrimitives();
 
@@ -64,6 +65,7 @@ int main(int argc, const char *argv[]) {
     std::function<std::unique_ptr<dg::Scene>()>> constructors;
   constructors["portal"]   = dg::PortalScene::Make;
   constructors["tutorial"] = dg::TutorialScene::Make;
+  constructors["quad"]     = dg::QuadScene::Make;
 
   // Find intended scene.
   if (argc < 2) {

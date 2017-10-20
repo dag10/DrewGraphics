@@ -17,6 +17,7 @@ scenes:
 | :-- | :-- |
 | **"tutorial"** | Following along with the tutorial, implemented in [src/scenes/TutorialScene.cpp](./src/scenes/TutorialScene.cpp).|
 | **"portal"** | First-person camera in a room with portals you can fly through, implemented in [src/scenes/PortalScene.cpp](./src/scenes/PortalScene.cpp).<br><br>Here's a video of the portal project: https://fb.com/1925626090797272 |
+| **"quad"** | A scene with just a single quad in front of the period, rotating to look at the cursor. I use it to test out new materials as I create them. Implemented in [src/scenes/QuadScene.cpp](./src/scenes/QuadScene.cpp). |
 
 The scene is chosen as the first command-line argument. So to launch the app with a portal renderer, the command would be:
 

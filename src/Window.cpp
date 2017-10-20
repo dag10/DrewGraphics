@@ -164,6 +164,10 @@ float dg::Window::GetHeight() const {
   return height;
 }
 
+glm::vec2 dg::Window::GetSize() const {
+  return glm::vec2(width, height);
+}
+
 GLFWwindow *dg::Window::GetHandle() const {
   return glfwWindow;
 }

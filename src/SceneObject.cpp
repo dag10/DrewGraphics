@@ -29,9 +29,9 @@ dg::Transform dg::SceneObject::SceneSpace() const {
 void dg::SceneObject::SetSceneSpace(Transform transform) {
   if (parent == nullptr) {
     this->transform = transform;
+  } else {
+    this->transform = parent->SceneSpace().Inverse() * transform;
   }
-
-  this->transform = parent->SceneSpace().Inverse() * transform;
 }
 
 void dg::SceneObject::AddChild(std::shared_ptr<SceneObject> child) {
@@ -82,15 +82,17 @@ void dg::SceneObject::LookAtDirection(glm::vec3 direction) {
     eulerOrientation.y += glm::pi<float>();
   }
 
-  transform.rotation = glm::quat(eulerOrientation);
+  Transform xf_SS = SceneSpace();
+  xf_SS.rotation = glm::quat(eulerOrientation);
+  SetSceneSpace(xf_SS);
 }
 
 void dg::SceneObject::LookAtPoint(glm::vec3 target) {
-  LookAtDirection(target - transform.translation);
+  LookAtDirection(target - SceneSpace().translation);
 }
 
 void dg::SceneObject::OrientUpwards() {
-  LookAtDirection(transform.Forward());
+  LookAtDirection(SceneSpace().Forward());
 }
 
 // Assumes it was already added as a child to the new parent, and removed
@@ -99,7 +101,7 @@ void dg::SceneObject::OrientUpwards() {
 void dg::SceneObject::SetParent(
     SceneObject *parent, bool preserveSceneSpace) {
   if (preserveSceneSpace) {
-    Transform xf_SS = SceneSpace(); 
+    Transform xf_SS = SceneSpace();
     this->parent = parent;
     SetSceneSpace(xf_SS);
   } else {

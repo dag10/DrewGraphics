@@ -24,9 +24,10 @@ void dg::QuadScene::Initialize() {
 
   // Create quad material.
   auto quadMaterial = StandardMaterial::WithTexture(std::make_shared<Texture>(
-        Texture::FromPath("assets/textures/container2.png")));
-  quadMaterial.SetSpecular(std::make_shared<Texture>(
-        Texture::FromPath("assets/textures/container2_specular.png")));
+        Texture::FromPath("assets/textures/brickwall.jpg")));
+  quadMaterial.SetNormalMap(std::make_shared<Texture>(
+        Texture::FromPath("assets/textures/brickwall_normal.jpg")));
+  quadMaterial.SetSpecular(glm::vec3(1));
   quadMaterial.SetShininess(64);
 
   // Create quad.

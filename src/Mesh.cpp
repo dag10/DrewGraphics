@@ -152,15 +152,15 @@ static const float mappedCubeVertices[] = {
 };
 
 static const float quadVertices[] = {
-  // positions          // texture   // normals
-  //                    // coords    //
+  // positions         // texture // normals // tangents // bitangents
+  //                   // coords  //
 
-  -0.5f, -0.5f,  0.0f,  0.0f, 0.0f,  0.0f,  0.0f,  1.0f,
-   0.5f, -0.5f,  0.0f,  1.0f, 0.0f,  0.0f,  0.0f,  1.0f,
-   0.5f,  0.5f,  0.0f,  1.0f, 1.0f,  0.0f,  0.0f,  1.0f,
-   0.5f,  0.5f,  0.0f,  1.0f, 1.0f,  0.0f,  0.0f,  1.0f,
-  -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,  0.0f,  0.0f,  1.0f,
-  -0.5f, -0.5f,  0.0f,  0.0f, 0.0f,  0.0f,  0.0f,  1.0f,
+  -0.5f, -0.5f,  0.0f, 0, 0,      0, 0, 1,    1, 0, 0,   0, 1, 0,
+   0.5f, -0.5f,  0.0f, 1, 0,      0, 0, 1,    1, 0, 0,   0, 1, 0,
+   0.5f,  0.5f,  0.0f, 1, 1,      0, 0, 1,    1, 0, 0,   0, 1, 0,
+   0.5f,  0.5f,  0.0f, 1, 1,      0, 0, 1,    1, 0, 0,   0, 1, 0,
+  -0.5f,  0.5f,  0.0f, 0, 1,      0, 0, 1,    1, 0, 0,   0, 1, 0,
+  -0.5f, -0.5f,  0.0f, 0, 0,      0, 0, 1,    1, 0, 0,   0, 1, 0,
 };
 
 std::shared_ptr<dg::Mesh> dg::Mesh::Cube = nullptr;
@@ -314,6 +314,8 @@ std::unique_ptr<dg::Mesh> dg::Mesh::CreateQuad() {
   stride += 3 * sizeof(float); // position
   stride += 2 * sizeof(float); // texture coords
   stride += 3 * sizeof(float); // normals
+  stride += 3 * sizeof(float); // tangents
+  stride += 3 * sizeof(float); // bitangents
 
   long offset = 0;
 
@@ -331,6 +333,16 @@ std::unique_ptr<dg::Mesh> dg::Mesh::CreateQuad() {
       ATTR_NORMAL, 3, GL_FLOAT, GL_FALSE, stride, (void*)offset);
   offset += 3 * sizeof(float);
   mesh->useAttribute[ATTR_NORMAL] = true;
+
+  glVertexAttribPointer(
+      ATTR_TANGENT, 3, GL_FLOAT, GL_FALSE, stride, (void*)offset);
+  offset += 3 * sizeof(float);
+  mesh->useAttribute[ATTR_TANGENT] = true;
+
+  glVertexAttribPointer(
+      ATTR_BITANGENT, 3, GL_FLOAT, GL_FALSE, stride, (void*)offset);
+  offset += 3 * sizeof(float);
+  mesh->useAttribute[ATTR_BITANGENT] = true;
 
   mesh->drawMode = GL_TRIANGLES;
   mesh->drawCount = 6;

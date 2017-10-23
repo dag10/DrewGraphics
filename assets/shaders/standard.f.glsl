@@ -9,6 +9,9 @@ struct Material {
   sampler2D specularMap;
   vec3 specular;
 
+  bool useNormalMap;
+  sampler2D normalMap;
+
   float shininess;
 };
 
@@ -16,8 +19,10 @@ uniform Material _Material;
 uniform vec2 _UVScale;
 
 in vec2 v_TexCoord;
+flat in mat3 v_TBN;
 
-vec3 calculateLight(Light light, vec3 diffuseColor, vec3 specularColor) {
+vec3 calculateLight(
+    Light light, vec3 normal, vec3 diffuseColor, vec3 specularColor) {
   if (light.type == LIGHT_TYPE_NULL) {
     return vec3(0);
   }
@@ -26,10 +31,10 @@ vec3 calculateLight(Light light, vec3 diffuseColor, vec3 specularColor) {
   vec3 ambient = light.ambient * diffuseColor;
 
   // Diffuse
-  vec3 norm = normalize(v_Normal);
-  vec3 lightDir; 
+  vec3 norm = normalize(normal);
+  vec3 lightDir;
   if (light.type == LIGHT_TYPE_POINT || light.type == LIGHT_TYPE_SPOT) {
-    lightDir = normalize(light.position - v_ScenePos.xyz); 
+    lightDir = normalize(light.position - v_ScenePos.xyz);
   } else if (light.type == LIGHT_TYPE_DIRECTIONAL) {
     lightDir = -light.direction;
   }
@@ -41,7 +46,7 @@ vec3 calculateLight(Light light, vec3 diffuseColor, vec3 specularColor) {
   vec3 reflectDir = reflect(-lightDir, norm);
   float spec = pow(max(dot(viewDir, reflectDir), 0.0), _Material.shininess);
   vec3 specular = light.specular * spec * specularColor;
-  
+
   // Attenuation
   if (light.type == LIGHT_TYPE_POINT || light.type == LIGHT_TYPE_SPOT) {
     float distance = length(light.position - v_ScenePos.xyz);
@@ -79,9 +84,20 @@ vec4 frag() {
                      ? texture(_Material.specularMap, texCoord).rgb
                      : vec3(_Material.specular);
 
+  vec3 normal = v_Normal;
+  if (_Material.useNormalMap) {
+    normal = texture(_Material.normalMap, texCoord).rgb * 2.0 - 1.0;
+
+    // Transform normal from tangent space (which is what the normal map is)
+    // to world space by left-multiplying the world-space basis vectors of
+    // this fragment's tangent space.
+    normal = v_TBN * normal;
+  }
+
   vec3 cumulative = vec3(0);
   for (int i = 0; i < MAX_LIGHTS; i++) {
-    cumulative += calculateLight(_Lights[i], diffuseColor, specularColor);
+    cumulative += calculateLight(
+        _Lights[i], normal, diffuseColor, specularColor);
   }
 
   return vec4(cumulative, 1.0);

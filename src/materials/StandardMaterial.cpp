@@ -86,8 +86,12 @@ void dg::StandardMaterial::SetDiffuse(glm::vec3 diffuse) {
 }
 
 void dg::StandardMaterial::SetDiffuse(std::shared_ptr<Texture> diffuseMap) {
-  SetProperty("_Material.useDiffuseMap", true);
-  SetProperty("_Material.diffuseMap", diffuseMap);
+  if (diffuseMap == nullptr) {
+    SetProperty("_Material.useDiffuseMap", false);
+  } else {
+    SetProperty("_Material.useDiffuseMap", true);
+    SetProperty("_Material.diffuseMap", diffuseMap);
+  }
 }
 
 void dg::StandardMaterial::SetSpecular(float specular) {
@@ -100,8 +104,21 @@ void dg::StandardMaterial::SetSpecular(glm::vec3 specular) {
 }
 
 void dg::StandardMaterial::SetSpecular(std::shared_ptr<Texture> specularMap) {
-  SetProperty("_Material.useSpecularMap", true);
-  SetProperty("_Material.specularMap", specularMap);
+  if (specularMap == nullptr) {
+    SetProperty("_Material.useSpecularMap", false);
+  } else {
+    SetProperty("_Material.useSpecularMap", true);
+    SetProperty("_Material.specularMap", specularMap);
+  }
+}
+
+void dg::StandardMaterial::SetNormalMap(std::shared_ptr<Texture> normalMap) {
+  if (normalMap == nullptr) {
+    SetProperty("_Material.useNormalMap", false);
+  } else {
+    SetProperty("_Material.useNormalMap", true);
+    SetProperty("_Material.normalMap", normalMap);
+  }
 }
 
 void dg::StandardMaterial::SetShininess(float shininess) {

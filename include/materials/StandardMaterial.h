@@ -36,6 +36,7 @@ namespace dg {
       void SetSpecular(float specular);
       void SetSpecular(glm::vec3 specular);
       void SetSpecular(std::shared_ptr<Texture> specularMap);
+      void SetNormalMap(std::shared_ptr<Texture> normalMap);
       void SetShininess(float shininess);
 
     private:

@@ -12,16 +12,10 @@
 static const char *positionAttributeName = "in_Position";
 static const char *texCoordAttributeName = "in_TexCoord";
 
-enum {
-  ATTR_POSITION  = 0,
-  ATTR_NORMAL    = 1,
-  ATTR_TEX_COORD = 2,
-};
-
 static const float cubeVertices[] = {
   // positions          // texture   // normals
   //                    // coords    //
-  
+
   // Back face
    0.5f, -0.5f, -0.5f,  0.0f, 0.0f,  0.0f,  0.0f, -1.0f,
   -0.5f, -0.5f, -0.5f,  1.0f, 0.0f,  0.0f,  0.0f, -1.0f,
@@ -107,7 +101,7 @@ static const glm::vec2 TOP_BR    (Q*2-E, T*2+E);
 
 static const float mappedCubeVertices[] = {
   // positions          // texture coords          // normals
-  
+
   // Back face
    0.5f, -0.5f, -0.5f,  BACK_BL.x,   BACK_BL.y,    0.0f,  0.0f, -1.0f, // BL
   -0.5f, -0.5f, -0.5f,  BACK_BR.x,   BACK_BR.y,    0.0f,  0.0f, -1.0f, // BR
@@ -184,6 +178,12 @@ void dg::Mesh::CreatePrimitives() {
   dg::Mesh::Quad = std::shared_ptr<Mesh>(CreateQuad());
 }
 
+dg::Mesh::Mesh() {
+  for (int attr = 0; attr < ATTR_MAX; attr++) {
+    useAttribute[attr] = false;
+  }
+}
+
 dg::Mesh::Mesh(dg::Mesh&& other) {
   *this = std::move(other);
 }
@@ -211,13 +211,16 @@ void dg::swap(Mesh& first, Mesh& second) {
   swap(first.drawCount, second.drawCount);
   swap(first.VAO, second.VAO);
   swap(first.VBO, second.VBO);
+  swap(first.useAttribute, second.useAttribute);
 }
 
 void dg::Mesh::Use() const {
   glBindVertexArray(VAO);
-  glEnableVertexAttribArray(ATTR_POSITION);
-  glEnableVertexAttribArray(ATTR_NORMAL);
-  glEnableVertexAttribArray(ATTR_TEX_COORD);
+  for (int attr = 0; attr < ATTR_MAX; attr++) {
+    if (useAttribute[attr]) {
+      glEnableVertexAttribArray(attr);
+    }
+  }
 }
 
 void dg::Mesh::Draw() const {
@@ -226,9 +229,11 @@ void dg::Mesh::Draw() const {
 }
 
 void dg::Mesh::FinishUsing() const {
-  glDisableVertexAttribArray(ATTR_POSITION);
-  glDisableVertexAttribArray(ATTR_NORMAL);
-  glDisableVertexAttribArray(ATTR_TEX_COORD);
+  for (int attr = 0; attr < ATTR_MAX; attr++) {
+    if (useAttribute[attr]) {
+      glDisableVertexAttribArray(attr);
+    }
+  }
 }
 
 std::unique_ptr<dg::Mesh> dg::Mesh::CreateCube() {
@@ -244,14 +249,17 @@ std::unique_ptr<dg::Mesh> dg::Mesh::CreateCube() {
 
   glVertexAttribPointer(
       ATTR_POSITION, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+  mesh->useAttribute[ATTR_POSITION] = true;
 
   glVertexAttribPointer(
       ATTR_TEX_COORD, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float),
       (void*)(3 * sizeof(float)));
+  mesh->useAttribute[ATTR_TEX_COORD] = true;
 
   glVertexAttribPointer(
       ATTR_NORMAL, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float),
       (void*)(5 * sizeof(float)));
+  mesh->useAttribute[ATTR_NORMAL] = true;
 
   mesh->drawMode = GL_TRIANGLES;
   mesh->drawCount = 36;
@@ -273,14 +281,17 @@ std::unique_ptr<dg::Mesh> dg::Mesh::CreateMappedCube() {
 
   glVertexAttribPointer(
       ATTR_POSITION, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+  mesh->useAttribute[ATTR_POSITION] = true;
 
   glVertexAttribPointer(
       ATTR_TEX_COORD, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float),
       (void*)(3 * sizeof(float)));
+  mesh->useAttribute[ATTR_TEX_COORD] = true;
 
   glVertexAttribPointer(
       ATTR_NORMAL, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float),
       (void*)(5 * sizeof(float)));
+  mesh->useAttribute[ATTR_NORMAL] = true;
 
   mesh->drawMode = GL_TRIANGLES;
   mesh->drawCount = 36;
@@ -299,16 +310,27 @@ std::unique_ptr<dg::Mesh> dg::Mesh::CreateQuad() {
   glBufferData(
       GL_ARRAY_BUFFER, sizeof(quadVertices), quadVertices, GL_STATIC_DRAW);
 
-  glVertexAttribPointer(
-      ATTR_POSITION, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+  GLsizei stride = 0;
+  stride += 3 * sizeof(float); // position
+  stride += 2 * sizeof(float); // texture coords
+  stride += 3 * sizeof(float); // normals
+
+  long offset = 0;
 
   glVertexAttribPointer(
-      ATTR_TEX_COORD, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float),
-      (void*)(3 * sizeof(float)));
+      ATTR_POSITION, 3, GL_FLOAT, GL_FALSE, stride, (void*)offset);
+  offset += 3 * sizeof(float);
+  mesh->useAttribute[ATTR_POSITION] = true;
 
   glVertexAttribPointer(
-      ATTR_NORMAL, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float),
-      (void*)(5 * sizeof(float)));
+      ATTR_TEX_COORD, 2, GL_FLOAT, GL_FALSE, stride, (void*)offset);
+  offset += 2 * sizeof(float);
+  mesh->useAttribute[ATTR_TEX_COORD] = true;
+
+  glVertexAttribPointer(
+      ATTR_NORMAL, 3, GL_FLOAT, GL_FALSE, stride, (void*)offset);
+  offset += 3 * sizeof(float);
+  mesh->useAttribute[ATTR_NORMAL] = true;
 
   mesh->drawMode = GL_TRIANGLES;
   mesh->drawCount = 6;

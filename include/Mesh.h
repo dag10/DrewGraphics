@@ -22,7 +22,7 @@ namespace dg {
 
       static void CreatePrimitives();
 
-      Mesh() = default;
+      Mesh();
       Mesh(Mesh& other) = delete;
       Mesh(Mesh&& other);
       ~Mesh();
@@ -34,6 +34,13 @@ namespace dg {
       void Draw() const;
       void FinishUsing() const;
 
+      enum {
+        ATTR_POSITION  = 0,
+        ATTR_NORMAL    = 1,
+        ATTR_TEX_COORD = 2,
+        ATTR_MAX, // Bookend
+      };
+
     private:
       static std::unique_ptr<Mesh> CreateCube();
       static std::unique_ptr<Mesh> CreateMappedCube();
@@ -43,6 +50,7 @@ namespace dg {
       GLsizei drawCount = 0;
       GLuint VAO = 0;
       GLuint VBO = 0;
+      bool useAttribute[ATTR_MAX];
 
   }; // class Mesh
 

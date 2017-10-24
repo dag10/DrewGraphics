@@ -23,12 +23,16 @@ void dg::QuadScene::Initialize() {
   skybox->enabled = false;
 
   // Create quad material.
-  auto quadMaterial = StandardMaterial::WithTexture(std::make_shared<Texture>(
-        Texture::FromPath("assets/textures/brickwall.jpg")));
-  quadMaterial.SetNormalMap(std::make_shared<Texture>(
-        Texture::FromPath("assets/textures/brickwall_normal.jpg")));
-  quadMaterial.SetSpecular(glm::vec3(1));
-  quadMaterial.SetShininess(64);
+  auto quadMaterial = StandardMaterial::WithTexture(
+      std::make_shared<Texture>(Texture::FromPath(
+          "assets/textures/Flooring_Stone_001/Flooring_Stone_001_COLOR.png")));
+  quadMaterial.SetNormalMap(
+      std::make_shared<Texture>(Texture::FromPath(
+          "assets/textures/Flooring_Stone_001/Flooring_Stone_001_NRM.png")));
+  quadMaterial.SetSpecular(
+      std::make_shared<Texture>(Texture::FromPath(
+          "assets/textures/Flooring_Stone_001/Flooring_Stone_001_SPEC.png")));
+  quadMaterial.SetShininess(9);
 
   // Create quad.
   quad = std::make_shared<Model>(

@@ -64,7 +64,9 @@ void dg::PortalScene::Initialize() {
   std::shared_ptr<Texture> crateSpecularTexture = std::make_shared<Texture>(
       Texture::FromPath("assets/textures/container2_specular.png"));
   std::shared_ptr<Texture> brickTexture = std::make_shared<Texture>(
-      Texture::FromPath("assets/textures/brick.png"));
+      Texture::FromPath("assets/textures/brickwall.jpg"));
+  std::shared_ptr<Texture> brickNormalTexture = std::make_shared<Texture>(
+      Texture::FromPath("assets/textures/brickwall_normal.jpg"));
   std::shared_ptr<Texture> hardwoodTexture = std::make_shared<Texture>(
       Texture::FromPath("assets/textures/hardwood.jpg"));
   std::shared_ptr<Texture> rustyPlateTexture = std::make_shared<Texture>(
@@ -100,7 +102,7 @@ void dg::PortalScene::Initialize() {
       ceilingLightColor, 0.286f, 1.344f, 2.21f);
   spotLight->feather = glm::radians(3.f);
   indoorCeilingLight = std::make_shared<PointLight>(
-      ceilingLightColor, 0.732f, 0.399f, 0.968f);
+      ceilingLightColor, 0.927f, 0.903f, 1.063f);
   outdoorCeilingLight = std::make_shared<PointLight>(
       ceilingLightColor, 0.134f, 0.518f, 0.803f);
   lightModel->AddChild(spotLight, false);
@@ -128,6 +130,7 @@ void dg::PortalScene::Initialize() {
 
   // Create wall material.
   StandardMaterial wallMaterial = StandardMaterial::WithTexture(brickTexture);
+  wallMaterial.SetNormalMap(brickNormalTexture);
   wallMaterial.SetSpecular(0.2f);
   wallMaterial.SetShininess(64);
 
@@ -173,11 +176,21 @@ void dg::PortalScene::Initialize() {
 
   // Create floor material.
   StandardMaterial floorMaterial = StandardMaterial::WithTexture(
-      rustyPlateTexture);
+      std::make_shared<Texture>(Texture::FromPath(
+          "assets/textures/Flooring_Stone_001/Flooring_Stone_001_COLOR.png")));
+  floorMaterial.SetNormalMap(
+      std::make_shared<Texture>(Texture::FromPath(
+          "assets/textures/Flooring_Stone_001/Flooring_Stone_001_NRM.png")));
+  floorMaterial.SetSpecular(0.1f);
+  // TODO: Framerate plummets if both normal map and specular map are set.
+  //       The reason for this is unknown. I need to investigate why having
+  //       3+ textures on a material destroys the framerate.
+  //floorMaterial.SetSpecular(
+      //std::make_shared<Texture>(Texture::FromPath(
+          //"assets/textures/Flooring_Stone_001/Flooring_Stone_001_SPEC.png")));
+  floorMaterial.SetShininess(9);
   floorMaterial.SetUVScale(glm::vec2(5, 3) * 2.f);
   floorMaterial.SetLit(true);
-  floorMaterial.SetSpecular(0.1f);
-  floorMaterial.SetShininess(32);
 
   // Create floor.
   auto floor = std::make_shared<Model>(
@@ -191,10 +204,12 @@ void dg::PortalScene::Initialize() {
   AddChild(floor);
 
   // Create ceiling material.
-  StandardMaterial ceilingMaterial = floorMaterial;
-  ceilingMaterial.SetDiffuse(hardwoodTexture);
-  ceilingMaterial.SetSpecular(0.1f);
+  StandardMaterial ceilingMaterial = StandardMaterial::WithTexture(
+      hardwoodTexture);
   ceilingMaterial.SetUVScale(glm::vec2(5, 3));
+  ceilingMaterial.SetLit(true);
+  ceilingMaterial.SetSpecular(0.1f);
+  ceilingMaterial.SetShininess(32);
 
   // Create ceiling, which is a copy of the floor.
   ceiling= std::make_shared<Model>(*floor);

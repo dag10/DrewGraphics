@@ -19,7 +19,7 @@ uniform Material _Material;
 uniform vec2 _UVScale;
 
 in vec2 v_TexCoord;
-flat in mat3 v_TBN;
+in mat3 v_TBN;
 
 vec3 calculateLight(
     Light light, vec3 normal, vec3 diffuseColor, vec3 specularColor) {
@@ -86,12 +86,12 @@ vec4 frag() {
 
   vec3 normal = v_Normal;
   if (_Material.useNormalMap) {
-    normal = texture(_Material.normalMap, texCoord).rgb * 2.0 - 1.0;
+    normal = normalize(texture(_Material.normalMap, texCoord).rgb * 2.0 - 1.0);
 
     // Transform normal from tangent space (which is what the normal map is)
     // to world space by left-multiplying the world-space basis vectors of
     // this fragment's tangent space.
-    normal = v_TBN * normal;
+    normal = normalize(v_TBN * normal);
   }
 
   vec3 cumulative = vec3(0);

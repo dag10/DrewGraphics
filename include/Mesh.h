@@ -39,7 +39,6 @@ namespace dg {
         ATTR_NORMAL    = 1,
         ATTR_TEX_COORD = 2,
         ATTR_TANGENT   = 3,
-        ATTR_BITANGENT = 4,
 
         ATTR_MAX, // Bookend
       };

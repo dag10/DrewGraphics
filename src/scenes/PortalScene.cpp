@@ -27,8 +27,8 @@ static dg::Transform portalTransforms[] = {
       glm::vec3(0, 0.6f, -1.5f + 0.001f),
       glm::quat(glm::radians(glm::vec3(0, 0, 0)))),
   dg::Transform::TR(
-      glm::vec3(-1.5f + 0.001f, 0.6f, 0),
-      glm::quat(glm::radians(glm::vec3(0, 90, 0)))),
+      glm::vec3(-1.0f, 0.6f, 0.8f),
+      glm::quat(glm::radians(glm::vec3(0, 135, 0)))),
 };
 
 static const glm::vec3 backgroundColor = glm::vec3(0, 0, 0);

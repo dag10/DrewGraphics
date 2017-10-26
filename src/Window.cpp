@@ -136,6 +136,15 @@ void dg::Window::SetShouldClose(bool shouldClose) {
   glfwSetWindowShouldClose(glfwWindow, shouldClose);
 }
 
+const std::string dg::Window::GetTitle() const {
+  return title;
+}
+
+void dg::Window::SetTitle(const std::string& title) {
+  this->title = title;
+  glfwSetWindowTitle(glfwWindow, title.c_str());
+}
+
 void dg::Window::StartRender() {
   assert(glfwWindow != nullptr);
 

@@ -11,6 +11,8 @@ namespace dg {
 
       static double Elapsed;
       static double Delta;
+      static double AverageFrameRate;
+      static double FrameNumber;
 
       static void Reset();
       static void Update();

@@ -1,4 +1,5 @@
 #include <iostream>
+#include <sstream>
 #include <map>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -60,21 +61,21 @@ int main(int argc, const char *argv[]) {
   dg::Shader::SetFragmentHead("assets/shaders/includes/fragment_head.glsl");
   dg::Shader::AddFragmentSource("assets/shaders/includes/fragment_main.glsl");
 
+  // Find intended scene.
   std::map<
     std::string,
     std::function<std::unique_ptr<dg::Scene>()>> constructors;
   constructors["portal"]   = dg::PortalScene::Make;
   constructors["tutorial"] = dg::TutorialScene::Make;
   constructors["quad"]     = dg::QuadScene::Make;
-
-  // Find intended scene.
   if (argc < 2) {
     terminateWithError("Specify a scene.");
   }
-  if (constructors.find(argv[1]) == constructors.end()) {
+  std::string sceneName(argv[1]);
+  if (constructors.find(sceneName) == constructors.end()) {
     terminateWithError("Unknown scene.");
   }
-  std::unique_ptr<dg::Scene> scene = constructors[argv[1]]();
+  std::unique_ptr<dg::Scene> scene = constructors[sceneName]();
 
   // Create scene.
   try {
@@ -86,6 +87,7 @@ int main(int argc, const char *argv[]) {
   }
 
   dg::Time::Reset();
+  double lastWindowUpdateTime = 0;
 
   // Application loop.
   bool cursorWasLocked = false;
@@ -108,6 +110,16 @@ int main(int argc, const char *argv[]) {
     if (cursorWasLocked && !window->IsCursorLocked() &&
         window->IsMouseButtonJustPressed(GLFW_MOUSE_BUTTON_1)) {
       window->LockCursor();
+    }
+
+    // Update window title every 0.1 seconds.
+    const float titleUpdateFreq = 0.1f;
+    if (dg::Time::Elapsed > lastWindowUpdateTime + titleUpdateFreq) {
+      window->SetTitle((std::ostringstream()
+            << "Drew Graphics | " << sceneName << " | "
+            << (int)(1.0 / dg::Time::Delta) << " FPS | "
+            << dg::Time::AverageFrameRate << " average FPS").str());
+      lastWindowUpdateTime = dg::Time::Elapsed;
     }
 
     window->StartRender();

@@ -45,6 +45,9 @@ namespace dg {
       bool ShouldClose() const;
       void SetShouldClose(bool shouldClose);
 
+      const std::string GetTitle() const;
+      void SetTitle(const std::string& title);
+
       void StartRender();
       void FinishRender();
 

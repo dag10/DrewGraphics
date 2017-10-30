@@ -47,7 +47,7 @@ namespace dg {
   struct ShaderProperty {
     ShaderPropertyType type = PROPERTY_NULL;
     ShaderPropertyValue value;
-    std::shared_ptr<Texture> texture = nullptr;
+    Texture *texture; // Weak non-owning pointer.
   };
 
   // Copy is disabled, only moves are allowed. This prevents us
@@ -81,20 +81,14 @@ namespace dg {
       void SetInt(const std::string& name, int value);
       void SetFloat(const std::string& name, float value);
       void SetVec2(const std::string& name, const glm::vec2& value);
-      void SetVec2(const std::string& name, float x, float y);
       void SetVec3(const std::string& name, const glm::vec3& value);
-      void SetVec3(const std::string& name, float x, float y, float z);
       void SetVec4(const std::string& name, const glm::vec4& value);
-      void SetVec4(const std::string& name, float x, float y, float z, float w);
       void SetMat2(const std::string& name, const glm::mat2& mat);
       void SetMat3(const std::string& name, const glm::mat3& mat);
       void SetMat4(const std::string& name, const glm::mat4& mat);
       void SetMat4(const std::string& name, const Transform& xf);
       void SetTexture(
-          unsigned int textureUnit, const std::string& name,
-          const dg::Texture& texture);
-
-      void ResetProperties();
+          unsigned int textureUnit, const std::string& name, Texture *texture);
 
     private:
       // Code to be included at top of shaders, includes global types.
@@ -111,7 +105,7 @@ namespace dg {
       std::string vertexPath = std::string();
       std::string fragmentPath = std::string();
 
-      std::map<std::string, ShaderPropertyType> propertyTypes;
+      std::map<std::string, ShaderProperty> properties;
 
       GLuint programHandle = 0;
 

@@ -11,6 +11,13 @@
 
 namespace dg {
 
+  // Same as ShaderProperty, except it can own the texture.
+  struct MaterialProperty {
+    ShaderPropertyType type = PROPERTY_NULL;
+    ShaderPropertyValue value;
+    std::shared_ptr<Texture> texture = nullptr;
+  };
+
   class Material {
 
     public:
@@ -56,7 +63,7 @@ namespace dg {
 
     private:
 
-      std::map<std::string, ShaderProperty> properties;
+      std::map<std::string, MaterialProperty> properties;
 
   }; // class Material
 

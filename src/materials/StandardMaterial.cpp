@@ -34,11 +34,12 @@ dg::StandardMaterial::StandardMaterial() : Material() {
 
   shader = StandardMaterial::standardShader;
 
-  SetUVScale(glm::vec2(1));
-  SetLit(true);
+  SetUVScale   (glm::vec2(1));
+  SetLit       (true);
   SetDiffuse   (1.0f);
   SetSpecular  (0.0f);
   SetShininess (32.0f);
+  SetNormalMap (nullptr);
 }
 
 dg::StandardMaterial::StandardMaterial(StandardMaterial& other)

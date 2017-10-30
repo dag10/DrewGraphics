@@ -30,63 +30,63 @@ void dg::swap(Material& first, Material& second) {
 }
 
 void dg::Material::SetProperty(const std::string& name, bool value) {
-  ShaderProperty prop;
+  MaterialProperty prop;
   prop.type = PROPERTY_BOOL;
   prop.value._bool = value;
   properties[name] = prop;
 }
 
 void dg::Material::SetProperty(const std::string& name, int value) {
-  ShaderProperty prop;
+  MaterialProperty prop;
   prop.type = PROPERTY_INT;
   prop.value._int = value;
   properties[name] = prop;
 }
 
 void dg::Material::SetProperty(const std::string& name, float value) {
-  ShaderProperty prop;
+  MaterialProperty prop;
   prop.type = PROPERTY_FLOAT;
   prop.value._float = value;
   properties[name] = prop;
 }
 
 void dg::Material::SetProperty(const std::string& name, glm::vec2 value) {
-  ShaderProperty prop;
+  MaterialProperty prop;
   prop.type = PROPERTY_VEC2;
   prop.value._vec2 = value;
   properties[name] = prop;
 }
 
 void dg::Material::SetProperty(const std::string& name, glm::vec3 value) {
-  ShaderProperty prop;
+  MaterialProperty prop;
   prop.type = PROPERTY_VEC3;
   prop.value._vec3 = value;
   properties[name] = prop;
 }
 
 void dg::Material::SetProperty(const std::string& name, glm::vec4 value) {
-  ShaderProperty prop;
+  MaterialProperty prop;
   prop.type = PROPERTY_VEC4;
   prop.value._vec4 = value;
   properties[name] = prop;
 }
 
 void dg::Material::SetProperty(const std::string& name, glm::mat2x2 value) {
-  ShaderProperty prop;
+  MaterialProperty prop;
   prop.type = PROPERTY_MAT2X2;
   prop.value._mat2x2 = value;
   properties[name] = prop;
 }
 
 void dg::Material::SetProperty(const std::string& name, glm::mat3x3 value) {
-  ShaderProperty prop;
+  MaterialProperty prop;
   prop.type = PROPERTY_MAT3X3;
   prop.value._mat3x3 = value;
   properties[name] = prop;
 }
 
 void dg::Material::SetProperty(const std::string& name, glm::mat4x4 value) {
-  ShaderProperty prop;
+  MaterialProperty prop;
   prop.type = PROPERTY_MAT4X4;
   prop.value._mat4x4 = value;
   properties[name] = prop;
@@ -94,7 +94,7 @@ void dg::Material::SetProperty(const std::string& name, glm::mat4x4 value) {
 
 void dg::Material::SetProperty(
     const std::string& name, std::shared_ptr<Texture> value) {
-  ShaderProperty prop;
+  MaterialProperty prop;
   prop.type = PROPERTY_TEXTURE;
   prop.texture = value;
   properties[name] = prop;
@@ -140,7 +140,6 @@ void dg::Material::SetInvPortal(glm::mat4x4 invPortal) {
 
 void dg::Material::Use() const {
   shader->Use();
-  shader->ResetProperties();
 
   unsigned int textureUnit = 0;
   for (auto it = properties.begin(); it != properties.end(); it++) {
@@ -173,7 +172,7 @@ void dg::Material::Use() const {
         shader->SetMat4(it->first, it->second.value._mat4x4);
         break;
       case PROPERTY_TEXTURE:
-        shader->SetTexture(textureUnit, it->first, *it->second.texture);
+        shader->SetTexture(textureUnit, it->first, it->second.texture.get());
         textureUnit++;
         break;
       default:

@@ -76,6 +76,7 @@ void dg::PortalScene::Initialize() {
 
   // Create skybox.
   skybox = std::unique_ptr<Skybox>(new Skybox(skyboxTexture));
+  skybox->material.SetInvPortal(glm::mat4x4(0));
 
   // Create sky light.
   skyLight = std::make_shared<DirectionalLight>(

@@ -16,6 +16,7 @@ namespace dg {
     public:
 
       bool enabled = true;
+      StandardMaterial material;
 
       Skybox() = default;
       Skybox(Skybox& other);
@@ -26,10 +27,6 @@ namespace dg {
       friend void swap(Skybox& first, Skybox& second); // nothrow
 
       void Draw(const Camera& camera, const Window& window);
-
-    private:
-
-      StandardMaterial material;
 
   }; // class Skybox
 

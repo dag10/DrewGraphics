@@ -16,6 +16,7 @@ namespace dg {
     ShaderPropertyType type = PROPERTY_NULL;
     ShaderPropertyValue value;
     std::shared_ptr<Texture> texture = nullptr;
+    int texUnitHint = -1;
   };
 
   class Material {
@@ -42,7 +43,10 @@ namespace dg {
       void SetProperty(const std::string& name, glm::mat3x3 value);
       void SetProperty(const std::string& name, glm::mat4x4 value);
       void SetProperty(
-          const std::string& name, std::shared_ptr<Texture>  value);
+          const std::string& name, std::shared_ptr<Texture> value);
+      void SetProperty(
+          const std::string& name, std::shared_ptr<Texture> value,
+          int texUnitHint);
 
       void ClearProperty(const std::string& name);
 
@@ -64,6 +68,7 @@ namespace dg {
     private:
 
       std::map<std::string, MaterialProperty> properties;
+      unsigned int highestTexUnitHint = 0;
 
   }; // class Material
 

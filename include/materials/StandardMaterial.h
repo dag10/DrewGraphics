@@ -41,6 +41,12 @@ namespace dg {
 
     private:
 
+      enum STANDARD_TEX_UNIT_HINTS {
+        TEX_UNIT_HINT_DIFFUSE = 0,
+        TEX_UNIT_HINT_SPECULAR,
+        TEX_UNIT_HINT_NORMAL,
+      };
+
       static std::shared_ptr<Shader> standardShader;
 
   }; // class Material

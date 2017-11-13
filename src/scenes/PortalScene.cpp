@@ -182,13 +182,9 @@ void dg::PortalScene::Initialize() {
   floorMaterial.SetNormalMap(
       std::make_shared<Texture>(Texture::FromPath(
           "assets/textures/Flooring_Stone_001/Flooring_Stone_001_NRM.png")));
-  floorMaterial.SetSpecular(0.1f);
-  // TODO: Framerate plummets if both normal map and specular map are set.
-  //       The reason for this is unknown. I need to investigate why having
-  //       3+ textures on a material destroys the framerate.
-  //floorMaterial.SetSpecular(
-      //std::make_shared<Texture>(Texture::FromPath(
-          //"assets/textures/Flooring_Stone_001/Flooring_Stone_001_SPEC.png")));
+  floorMaterial.SetSpecular(
+      std::make_shared<Texture>(Texture::FromPath(
+          "assets/textures/Flooring_Stone_001/Flooring_Stone_001_SPEC.png")));
   floorMaterial.SetShininess(9);
   floorMaterial.SetUVScale(glm::vec2(5, 3) * 2.f);
   floorMaterial.SetLit(true);

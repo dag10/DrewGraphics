@@ -7,6 +7,7 @@
 dg::Material::Material(Material& other) {
   this->shader = other.shader;
   this->properties = other.properties;
+  this->highestTexUnitHint = other.highestTexUnitHint;
 }
 
 dg::Material::Material(Material&& other) {
@@ -27,6 +28,7 @@ void dg::swap(Material& first, Material& second) {
   using std::swap;
   swap(first.shader, second.shader);
   swap(first.properties, second.properties);
+  swap(first.highestTexUnitHint, second.highestTexUnitHint);
 }
 
 void dg::Material::SetProperty(const std::string& name, bool value) {
@@ -94,9 +96,19 @@ void dg::Material::SetProperty(const std::string& name, glm::mat4x4 value) {
 
 void dg::Material::SetProperty(
     const std::string& name, std::shared_ptr<Texture> value) {
+  SetProperty(name, value, -1);
+}
+
+void dg::Material::SetProperty(
+    const std::string& name, std::shared_ptr<Texture> value,
+    int texUnitHint) {
   MaterialProperty prop;
   prop.type = PROPERTY_TEXTURE;
   prop.texture = value;
+  prop.texUnitHint = texUnitHint;
+  if (texUnitHint > highestTexUnitHint) {
+    highestTexUnitHint = texUnitHint;
+  }
   properties[name] = prop;
 }
 
@@ -141,7 +153,7 @@ void dg::Material::SetInvPortal(glm::mat4x4 invPortal) {
 void dg::Material::Use() const {
   shader->Use();
 
-  unsigned int textureUnit = 0;
+  unsigned int textureUnit = highestTexUnitHint + 1;
   for (auto it = properties.begin(); it != properties.end(); it++) {
     switch (it->second.type) {
       case PROPERTY_BOOL:
@@ -172,8 +184,13 @@ void dg::Material::Use() const {
         shader->SetMat4(it->first, it->second.value._mat4x4);
         break;
       case PROPERTY_TEXTURE:
-        shader->SetTexture(textureUnit, it->first, it->second.texture.get());
-        textureUnit++;
+        if (it->second.texUnitHint >= 0) {
+          shader->SetTexture(
+              it->second.texUnitHint, it->first, it->second.texture.get());
+        } else {
+          shader->SetTexture(textureUnit, it->first, it->second.texture.get());
+          textureUnit++;
+        }
         break;
       default:
         break;

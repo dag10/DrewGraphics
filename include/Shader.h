@@ -55,6 +55,13 @@ namespace dg {
   class Shader {
 
     public:
+      static int MAX_VERTEX_TEXTURE_UNITS;
+      static int MAX_GEOMETRY_TEXTURE_UNITS;
+      static int MAX_FRAGMENT_TEXTURE_UNITS;
+      static int MAX_COMBINED_TEXTURE_UNITS;
+
+      static void Initialize();
+
       static Shader FromFiles(
           const std::string& vertexPath, const std::string& fragmentPath);
 

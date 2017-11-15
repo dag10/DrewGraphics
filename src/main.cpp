@@ -55,6 +55,9 @@ int main(int argc, const char *argv[]) {
   // Create primitive meshes.
   dg::Mesh::CreatePrimitives();
 
+  // Staticially initialize shader class.
+  dg::Shader::Initialize();
+
   // Configure global includes for all shader files.
   dg::Shader::SetVertexHead("assets/shaders/includes/vertex_head.glsl");
   dg::Shader::AddVertexSource("assets/shaders/includes/vertex_main.glsl");

@@ -2,6 +2,7 @@
 //  Shader.cpp
 //
 
+#include <glad/glad.h>
 #include <Shader.h>
 #include <Exceptions.h>
 #include <FileUtils.h>
@@ -10,6 +11,21 @@
 #include <cassert>
 #include <memory>
 #include <glm/gtc/type_ptr.hpp>
+
+int dg::Shader::MAX_VERTEX_TEXTURE_UNITS = 0;
+int dg::Shader::MAX_GEOMETRY_TEXTURE_UNITS = 0;
+int dg::Shader::MAX_FRAGMENT_TEXTURE_UNITS = 0;
+int dg::Shader::MAX_COMBINED_TEXTURE_UNITS = 0;
+
+void dg::Shader::Initialize() {
+  int vertex, geometry, fragment, combined;
+  glGetIntegerv(GL_MAX_VERTEX_TEXTURE_IMAGE_UNITS, &MAX_VERTEX_TEXTURE_UNITS);
+  glGetIntegerv(
+      GL_MAX_GEOMETRY_TEXTURE_IMAGE_UNITS, &MAX_GEOMETRY_TEXTURE_UNITS);
+  glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &MAX_FRAGMENT_TEXTURE_UNITS);
+  glGetIntegerv(
+      GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, &MAX_COMBINED_TEXTURE_UNITS);
+}
 
 std::string dg::Shader::vertexHead = "";
 std::string dg::Shader::fragmentHead = "";

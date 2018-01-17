@@ -5,6 +5,8 @@ project(DREW_GRAPHICS_PROJECT)
 find_package(glfw3 REQUIRED)
 find_package(OpenGL REQUIRED)
 
+add_definitions(-DGLM_FORCE_NO_CTOR_INIT)
+
 file(GLOB_RECURSE SOURCES "src/*.cpp" "src/*.c")
 
 add_executable(DrewGraphics ${SOURCES})

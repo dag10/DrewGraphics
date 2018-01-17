@@ -14,7 +14,7 @@ dg::StandardMaterial dg::StandardMaterial::WithColor(glm::vec3 color) {
 
 dg::StandardMaterial dg::StandardMaterial::WithColor(glm::vec4 color) {
   StandardMaterial material;
-  material.SetDiffuse(color);
+  material.SetDiffuse({ color.x, color.y, color.z });
   return material;
 }
 

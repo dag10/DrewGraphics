@@ -100,7 +100,8 @@ int main(int argc, const char *argv[]) {
     scene->Update();
 
     // Handle escape key to release cursor or quit app.
-    if (window->IsKeyJustPressed(GLFW_KEY_ESCAPE)) {
+    if (window->IsKeyJustPressed(GLFW_KEY_ESCAPE) ||
+        window->IsKeyJustPressed(GLFW_KEY_Q)) {
       if (window->IsCursorLocked()) {
         cursorWasLocked = true;
         window->UnlockCursor();

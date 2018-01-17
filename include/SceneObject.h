@@ -5,6 +5,7 @@
 
 #include <Transform.h>
 #include <set>
+#include <memory>
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
 #include <glad/glad.h>

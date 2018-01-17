@@ -42,11 +42,15 @@ namespace dg {
     glm::mat2x2 _mat2x2;
     glm::mat3x3 _mat3x3;
     glm::mat4x4 _mat4x4;
+
+    ShaderPropertyValue() {
+      memset(this, 0, sizeof(ShaderPropertyValue));
+    }
   };
 
   struct ShaderProperty {
     ShaderPropertyType type = PROPERTY_NULL;
-    ShaderPropertyValue value;
+	ShaderPropertyValue value;
     Texture *texture; // Weak non-owning pointer.
   };
 

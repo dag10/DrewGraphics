@@ -7,6 +7,7 @@
 #include <set>
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
+#include <glad/glad.h>
 
 namespace dg {
 

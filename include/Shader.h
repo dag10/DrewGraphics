@@ -7,11 +7,11 @@
 #include <vector>
 #include <map>
 #include <string>
-#include <GLUT/glut.h>
 #include <glm/glm.hpp>
 #include <Texture.h>
 #include <Transform.h>
 #include <ShaderSource.h>
+#include <glad/glad.h>
 
 namespace dg {
 

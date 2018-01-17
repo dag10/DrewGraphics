@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include <GLUT/glut.h>
+#include <glad/glad.h>
 #include <glm/glm.hpp>
 #include <memory>
 #include <Shader.h>

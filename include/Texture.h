@@ -5,7 +5,7 @@
 
 #include <memory>
 #include <string>
-#include <GLUT/glut.h>
+#include <glad/glad.h>
 
 namespace dg {
 

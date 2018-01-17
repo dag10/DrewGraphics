@@ -5,8 +5,8 @@
 #pragma once
 
 #include <string>
-#include <GLUT/glut.h>
 #include <glm/glm.hpp>
+#include <glad/glad.h>
 
 namespace dg {
 

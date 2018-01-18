@@ -166,6 +166,7 @@ static const float quadVertices[] = {
 std::shared_ptr<dg::Mesh> dg::Mesh::Cube = nullptr;
 std::shared_ptr<dg::Mesh> dg::Mesh::MappedCube = nullptr;
 std::shared_ptr<dg::Mesh> dg::Mesh::Quad = nullptr;
+std::shared_ptr<dg::Mesh> dg::Mesh::Cylinder = nullptr;
 
 void dg::Mesh::CreatePrimitives() {
   assert(Mesh::Cube == nullptr);
@@ -176,6 +177,9 @@ void dg::Mesh::CreatePrimitives() {
 
   assert(Mesh::Quad == nullptr);
   dg::Mesh::Quad = std::shared_ptr<Mesh>(CreateQuad());
+
+  assert(Mesh::Cylinder == nullptr);
+  dg::Mesh::Cylinder = std::shared_ptr<Mesh>(CreateCylinder(256, 1));
 }
 
 dg::Mesh::Mesh() {
@@ -340,6 +344,176 @@ std::unique_ptr<dg::Mesh> dg::Mesh::CreateQuad() {
 
   mesh->drawMode = GL_TRIANGLES;
   mesh->drawCount = 6;
+
+  return mesh;
+}
+
+std::unique_ptr<dg::Mesh> dg::Mesh::CreateCylinder(
+    int radialDivisions, int heightDivisions) {
+  if (radialDivisions < 3) {
+    radialDivisions = 3;
+  }
+
+  if (heightDivisions < 1) {
+    heightDivisions = 1;
+  }
+
+  int numTriangles = radialDivisions * (1 + 1 + (2 * heightDivisions));
+  int positionSize = 3;
+  int normalSize = 3;
+  int texCoordSize = 2;
+  int vertexStride = positionSize + normalSize + texCoordSize;
+  std::vector<float> buffer(3 * numTriangles * vertexStride);
+
+  int positionOffset = 0;
+  int normalOffset = positionSize;
+  int texCoordOffset = normalOffset + normalSize;
+
+  float halfHeight = 0.5f;
+  float degInterval = 360.f / (float)radialDivisions;
+  float radius = 0.5f;
+
+  int nextVertOffset = 0;
+  auto AddTriangle = [&](
+      glm::vec3 v1, glm::vec3 v2, glm::vec3 v3,
+      glm::vec2 uv1, glm::vec2 uv2, glm::vec2 uv3) {
+    glm::vec3 normal = glm::normalize(glm::cross(v1 - v2, v1 - v3));
+
+    buffer[nextVertOffset + positionOffset + 0] = v1.x;
+    buffer[nextVertOffset + positionOffset + 1] = v1.y;
+    buffer[nextVertOffset + positionOffset + 2] = v1.z;
+    buffer[nextVertOffset + normalOffset + 0] = normal.x;
+    buffer[nextVertOffset + normalOffset + 1] = normal.y;
+    buffer[nextVertOffset + normalOffset + 2] = normal.z;
+    buffer[nextVertOffset + texCoordOffset + 0] = uv1.x;
+    buffer[nextVertOffset + texCoordOffset + 1] = uv1.y;
+    nextVertOffset += vertexStride;
+
+    buffer[nextVertOffset + positionOffset + 0] = v2.x;
+    buffer[nextVertOffset + positionOffset + 1] = v2.y;
+    buffer[nextVertOffset + positionOffset + 2] = v2.z;
+    buffer[nextVertOffset + normalOffset + 0] = normal.x;
+    buffer[nextVertOffset + normalOffset + 1] = normal.y;
+    buffer[nextVertOffset + normalOffset + 2] = normal.z;
+    buffer[nextVertOffset + texCoordOffset + 0] = uv2.x;
+    buffer[nextVertOffset + texCoordOffset + 1] = uv2.y;
+    nextVertOffset += vertexStride;
+
+    buffer[nextVertOffset + positionOffset + 0] = v3.x;
+    buffer[nextVertOffset + positionOffset + 1] = v3.y;
+    buffer[nextVertOffset + positionOffset + 2] = v3.z;
+    buffer[nextVertOffset + normalOffset + 0] = normal.x;
+    buffer[nextVertOffset + normalOffset + 1] = normal.y;
+    buffer[nextVertOffset + normalOffset + 2] = normal.z;
+    buffer[nextVertOffset + texCoordOffset + 0] = uv3.x;
+    buffer[nextVertOffset + texCoordOffset + 1] = uv3.y;
+    nextVertOffset += vertexStride;
+  };
+
+  for (int i = 0; i < radialDivisions; i++) {
+    float degree = degInterval * i;
+    float nextDegree = degInterval * (i + 1);
+
+    glm::vec3 topLeft(
+        sin(glm::radians(degree)) * radius,
+        halfHeight,
+        cos(glm::radians(degree)) * radius);
+    glm::vec3 topRight(
+        sin(glm::radians(nextDegree)) * radius,
+        halfHeight,
+        cos(glm::radians(nextDegree)) * radius);
+    glm::vec3 bottomLeft(
+        sin(glm::radians(degree)) * radius,
+        -halfHeight,
+        cos(glm::radians(degree)) * radius);
+    glm::vec3 bottomRight(
+        sin(glm::radians(nextDegree)) * radius,
+        -halfHeight,
+        cos(glm::radians(nextDegree)) * radius);
+
+    glm::vec3 topCenter = glm::vec3(0, halfHeight, 0);
+    glm::vec3 bottomCenter = glm::vec3(0, -halfHeight, 0);
+
+    glm::vec2 uvTopCenter = glm::vec2(1.f / 6);
+    glm::vec2 uvTopExtents = glm::vec2(1.f / 3) * 0.5f;
+    glm::vec2 uvBottomCenter = uvTopCenter;
+    uvBottomCenter.y = 1 - uvBottomCenter.y;
+    glm::vec2 uvBottomExtents = uvTopExtents;
+
+    // Add top triangle.
+    AddTriangle(
+        topCenter, topLeft, topRight,
+        uvTopCenter,
+        uvTopCenter + uvTopExtents * glm::vec2(
+          sin(glm::radians(degree)),
+          cos(glm::radians(degree))),
+        uvTopCenter + uvTopExtents * glm::vec2(
+          sin(glm::radians(nextDegree)),
+          cos(glm::radians(nextDegree))));
+
+    // Add bottom triangle.
+    AddTriangle(
+        bottomCenter, bottomRight, bottomLeft,
+        uvBottomCenter,
+        uvBottomCenter + uvBottomExtents * glm::vec2(
+          sin(glm::radians(nextDegree)),
+          cos(glm::radians(nextDegree))),
+        uvBottomCenter + uvBottomExtents * glm::vec2(
+          sin(glm::radians(degree)),
+          cos(glm::radians(degree))));
+
+    // Add side quad(s).
+    float heightInterval = halfHeight * 2.f / heightDivisions;
+    for (int j = 0; j < heightDivisions; j++) {
+      glm::vec3 quadBottomLeft(
+          bottomLeft + (j * heightInterval * glm::vec3(0, 1, 0)));
+      glm::vec3 quadBottomRight(
+          bottomRight + (j * heightInterval * glm::vec3(0, 1, 0)));
+      glm::vec3 quadTopLeft(
+          bottomLeft + ((j + 1) * heightInterval * glm::vec3(0, 1, 0)));
+      glm::vec3 quadTopRight(
+          bottomRight + ((j + 1) * heightInterval * glm::vec3(0, 1, 0)));
+      glm::vec2 uvBottomLeft(degree / 360, 2.f/3);
+      glm::vec2 uvBottomRight(nextDegree / 360, 2.f/3);
+      glm::vec2 uvTopLeft(degree / 360, 1.f/3);
+      glm::vec2 uvTopRight(nextDegree / 360, 1.f/3);
+      AddTriangle(
+          quadBottomLeft, quadTopRight, quadTopLeft,
+          uvBottomLeft, uvTopRight, uvTopLeft);
+      AddTriangle(
+          quadBottomRight, quadTopRight, quadBottomLeft,
+          uvBottomRight, uvTopRight, uvBottomLeft);
+    }
+  }
+
+  std::unique_ptr<Mesh> mesh = std::unique_ptr<Mesh>(new Mesh());
+
+  glGenVertexArrays(1, &mesh->VAO);
+  glBindVertexArray(mesh->VAO);
+
+  glGenBuffers(1, &mesh->VBO);
+  glBindBuffer(GL_ARRAY_BUFFER, mesh->VBO);
+  glBufferData(
+      GL_ARRAY_BUFFER, buffer.size() * sizeof(float), buffer.data(),
+      GL_STATIC_DRAW);
+
+  glVertexAttribPointer(
+      ATTR_POSITION, positionSize, GL_FLOAT, GL_FALSE,
+      vertexStride * sizeof(float), (void*)(positionOffset * sizeof(float)));
+  mesh->useAttribute[ATTR_POSITION] = true;
+
+  glVertexAttribPointer(
+      ATTR_NORMAL, normalSize, GL_FLOAT, GL_FALSE,
+      vertexStride * sizeof(float), (void*)(normalOffset * sizeof(float)));
+  mesh->useAttribute[ATTR_NORMAL] = true;
+
+  glVertexAttribPointer(
+      ATTR_TEX_COORD, texCoordSize, GL_FLOAT, GL_FALSE,
+      vertexStride * sizeof(float), (void*)(texCoordOffset * sizeof(float)));
+  mesh->useAttribute[ATTR_TEX_COORD] = true;
+
+  mesh->drawMode = GL_TRIANGLES;
+  mesh->drawCount = numTriangles * 3;
 
   return mesh;
 }

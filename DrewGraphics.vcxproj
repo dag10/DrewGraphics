@@ -185,6 +185,7 @@
     <ClCompile Include="src\scenes\MeshesScene.cpp" />
     <ClCompile Include="src\scenes\RobotScene.cpp" />
     <ClCompile Include="src\scenes\VRScene.cpp" />
+    <ClCompile Include="src\scenes\LayoutScene.cpp" />
     <ClCompile Include="src\Shader.cpp" />
     <ClCompile Include="src\ShaderSource.cpp" />
     <ClCompile Include="src\Skybox.cpp" />
@@ -223,6 +224,7 @@
     <ClInclude Include="include\scenes\MeshesScene.h" />
     <ClInclude Include="include\scenes\RobotScene.h" />
     <ClInclude Include="include\scenes\VRScene.h" />
+    <ClInclude Include="include\scenes\LayoutScene.h" />
     <ClInclude Include="include\Shader.h" />
     <ClInclude Include="include\ShaderSource.h" />
     <ClInclude Include="include\Skybox.h" />

@@ -17,6 +17,7 @@
 #include <scenes/TutorialScene.h>
 #include <scenes/RobotScene.h>
 #include <scenes/MeshesScene.h>
+#include <scenes/LayoutScene.h>
 #include <scenes/PortalScene.h>
 #include <scenes/QuadScene.h>
 #include <scenes/VRScene.h>
@@ -48,6 +49,7 @@ int main(int argc, const char *argv[]) {
   constructors["tutorial"]  = dg::TutorialScene::Make;
   constructors["meshes"]    = dg::MeshesScene::Make;
   constructors["meshes-vr"] = dg::MeshesScene::MakeVR;
+  constructors["layout"]   = dg::LayoutScene::Make;
   constructors["robot"]     = dg::RobotScene::Make;
   constructors["robot-vr"]  = dg::RobotScene::MakeVR;
   constructors["quad"]      = dg::QuadScene::Make;

@@ -25,6 +25,32 @@
 }
 
 int main(int argc, const char *argv[]) {
+  // Find intended scene.
+  std::map<
+    std::string,
+    std::function<std::unique_ptr<dg::Scene>()>> constructors;
+  constructors["portal"]   = dg::PortalScene::Make;
+  constructors["tutorial"] = dg::TutorialScene::Make;
+  constructors["quad"]     = dg::QuadScene::Make;
+  std::string sceneName;
+  if (argc > 1) {
+    sceneName = argv[1];
+  }
+  while (constructors.find(sceneName) == constructors.end()) {
+    if (!sceneName.empty()) {
+      std::cerr << "Unknown scene \"" << sceneName << "\"." << std::endl << std::endl;
+    }
+    std::cout << "Available scenes:" << std::endl;
+    for (auto iter = constructors.begin(); iter != constructors.end(); iter++) {
+      std::cout << "\t" << iter->first << std::endl;
+    }
+    std::cout << std::endl << "Choose a scene: ";
+    std::cin >> sceneName;
+    if (std::cin.eof()) {
+      exit(0);
+    }
+  }
+
   // Print GLFW errors to stderr.
   glfwSetErrorCallback([](int code, const char *desc) {
     std::cerr << "GLFW Error: " << desc << std::endl;
@@ -45,16 +71,6 @@ int main(int argc, const char *argv[]) {
   std::shared_ptr<dg::Window> window;
   try {
     window = dg::Window::Open(800, 600, "Drew Graphics");
-
-    // Correct initial size for DPI scaling, which is needed for Windows.
-    // On macOS, this isn't needed because the initial window dimensions are scaled
-    // automatically by glfw.
-#ifdef _WIN32
-    glm::vec2 scale = window->GetContentScale();
-    if (scale != glm::vec2(1, 1)) {
-      window->SetSize(window->GetSize() * scale);
-    }
-#endif
   } catch (const std::exception& e) {
     terminateWithError(e.what());
   }
@@ -76,32 +92,8 @@ int main(int argc, const char *argv[]) {
   dg::Shader::SetFragmentHead("assets/shaders/includes/fragment_head.glsl");
   dg::Shader::AddFragmentSource("assets/shaders/includes/fragment_main.glsl");
 
-  // Find intended scene.
-  std::map<
-    std::string,
-    std::function<std::unique_ptr<dg::Scene>()>> constructors;
-  constructors["portal"]   = dg::PortalScene::Make;
-  constructors["tutorial"] = dg::TutorialScene::Make;
-  constructors["quad"]     = dg::QuadScene::Make;
-  std::string sceneName;
-  if (argc > 1) {
-    sceneName = argv[1];
-  }
-  while (constructors.find(sceneName) == constructors.end()) {
-    window->Hide();
-    if (!sceneName.empty()) {
-      std::cerr << "Unknown scene \"" << sceneName << "\"." << std::endl << std::endl;
-    }
-    std::cout << "Available scenes:" << std::endl;
-    for (auto iter = constructors.begin(); iter != constructors.end(); iter++) {
-      std::cout << "\t" << iter->first << std::endl;
-    }
-    std::cout << std::endl << "Choose a scene: ";
-    std::cin >> sceneName;
-  }
-  std::unique_ptr<dg::Scene> scene = constructors[sceneName]();
-
   // Create scene.
+  std::unique_ptr<dg::Scene> scene = constructors[sceneName]();
   try {
     scene->SetWindow(window);
     scene->Initialize();
@@ -112,7 +104,6 @@ int main(int argc, const char *argv[]) {
 
   dg::Time::Reset();
   double lastWindowUpdateTime = 0;
-  window->Show();
 
   // Application loop.
   bool cursorWasLocked = false;

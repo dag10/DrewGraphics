@@ -77,7 +77,7 @@ namespace dg {
       void HandleMouseButton(int button, int action);
       void HandleCursorPosition(double x, double y);
 
-      void Open();
+      void Open(int width, int height);
       void UseContext();
 
       std::vector<uint8_t> lastKeyStates;
@@ -85,8 +85,6 @@ namespace dg {
       std::vector<uint8_t> lastMouseButtonStates;
       std::vector<uint8_t> currentMouseButtonStates;
       GLFWwindow *glfwWindow = nullptr;
-      int width = 0;
-      int height = 0;
       std::string title;
       bool hasInitialCursorPosition = false;
       glm::vec2 lastCursorPosition;

@@ -185,6 +185,16 @@ glm::vec2 dg::Window::GetSize() const {
   return glm::vec2(width, height);
 }
 
+void dg::Window::SetSize(glm::vec2 size) {
+  glfwSetWindowSize(glfwWindow, size.x, size.y);
+}
+
+glm::vec2 dg::Window::GetContentScale() const {
+  float x, y;
+  glfwGetWindowContentScale(glfwWindow, &x, &y);
+  return glm::vec2(x, y);
+}
+
 GLFWwindow *dg::Window::GetHandle() const {
   return glfwWindow;
 }

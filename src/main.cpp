@@ -45,7 +45,16 @@ int main(int argc, const char *argv[]) {
   std::shared_ptr<dg::Window> window;
   try {
     window = dg::Window::Open(800, 600, "Drew Graphics");
-    window->Hide();
+
+    // Correct initial size for DPI scaling, which is needed for Windows.
+    // On macOS, this isn't needed because the initial window dimensions are scaled
+    // automatically by glfw.
+#ifdef _WIN32
+    glm::vec2 scale = window->GetContentScale();
+    if (scale != glm::vec2(1, 1)) {
+      window->SetSize(window->GetSize() * scale);
+    }
+#endif
   } catch (const std::exception& e) {
     terminateWithError(e.what());
   }
@@ -79,6 +88,7 @@ int main(int argc, const char *argv[]) {
     sceneName = argv[1];
   }
   while (constructors.find(sceneName) == constructors.end()) {
+    window->Hide();
     if (!sceneName.empty()) {
       std::cerr << "Unknown scene \"" << sceneName << "\"." << std::endl << std::endl;
     }

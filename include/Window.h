@@ -58,6 +58,8 @@ namespace dg {
       float GetWidth() const;
       float GetHeight() const;
       glm::vec2 GetSize() const;
+      void SetSize(glm::vec2 size);
+      glm::vec2 GetContentScale() const;
 
       GLFWwindow *GetHandle() const;
 

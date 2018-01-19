@@ -18,8 +18,6 @@
 #include <scenes/PortalScene.h>
 #include <scenes/QuadScene.h>
 
-std::shared_ptr<dg::Window> window;
-
 [[noreturn]] void terminateWithError(const char *error) {
   std::cerr << error << std::endl;
   glfwTerminate();
@@ -44,8 +42,10 @@ int main(int argc, const char *argv[]) {
 #endif
 
   // Create window.
+  std::shared_ptr<dg::Window> window;
   try {
     window = dg::Window::Open(800, 600, "Drew Graphics");
+    window->Hide();
   } catch (const std::exception& e) {
     terminateWithError(e.what());
   }
@@ -74,12 +74,20 @@ int main(int argc, const char *argv[]) {
   constructors["portal"]   = dg::PortalScene::Make;
   constructors["tutorial"] = dg::TutorialScene::Make;
   constructors["quad"]     = dg::QuadScene::Make;
-  if (argc < 2) {
-    terminateWithError("Specify a scene.");
+  std::string sceneName;
+  if (argc > 1) {
+    sceneName = argv[1];
   }
-  std::string sceneName(argv[1]);
-  if (constructors.find(sceneName) == constructors.end()) {
-    terminateWithError("Unknown scene.");
+  while (constructors.find(sceneName) == constructors.end()) {
+    if (!sceneName.empty()) {
+      std::cerr << "Unknown scene \"" << sceneName << "\"." << std::endl << std::endl;
+    }
+    std::cout << "Available scenes:" << std::endl;
+    for (auto iter = constructors.begin(); iter != constructors.end(); iter++) {
+      std::cout << "\t" << iter->first << std::endl;
+    }
+    std::cout << std::endl << "Choose a scene: ";
+    std::cin >> sceneName;
   }
   std::unique_ptr<dg::Scene> scene = constructors[sceneName]();
 
@@ -94,6 +102,7 @@ int main(int argc, const char *argv[]) {
 
   dg::Time::Reset();
   double lastWindowUpdateTime = 0;
+  window->Show();
 
   // Application loop.
   bool cursorWasLocked = false;
@@ -134,7 +143,6 @@ int main(int argc, const char *argv[]) {
     window->FinishRender();
   }
 
-  window = nullptr; // Close window.
   return 0;
 }
 

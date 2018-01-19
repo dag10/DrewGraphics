@@ -43,6 +43,9 @@ namespace dg {
       glm::vec2 GetCursorPosition() const;
       glm::vec2 GetCursorDelta() const;
 
+      void Hide();
+      void Show();
+
       bool ShouldClose() const;
       void SetShouldClose(bool shouldClose);
 

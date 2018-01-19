@@ -128,6 +128,14 @@ glm::vec2 dg::Window::GetCursorDelta() const {
   return currentCursorPosition - lastCursorPosition;
 }
 
+void dg::Window::Hide() {
+  glfwHideWindow(glfwWindow);
+}
+
+void dg::Window::Show() {
+  glfwShowWindow(glfwWindow);
+}
+
 bool dg::Window::ShouldClose() const {
   return glfwWindowShouldClose(glfwWindow);
 }

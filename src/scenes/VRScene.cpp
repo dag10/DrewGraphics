@@ -7,6 +7,7 @@
 #include <memory>
 #include <glm/glm.hpp>
 #include <EngineTime.h>
+#include <Exceptions.h>
 #include <Texture.h>
 #include <Mesh.h>
 #include <Transform.h>
@@ -14,6 +15,7 @@
 #include <behaviors/KeyboardCameraController.h>
 #include <lights/DirectionalLight.h>
 #include <lights/PointLight.h>
+#include <openvr.h>
 
 static const glm::vec3 cubePositions[] = {
   glm::vec3(  0.0f,  0.25f,  0.0f ),
@@ -29,7 +31,19 @@ std::unique_ptr<dg::VRScene> dg::VRScene::Make() {
 
 dg::VRScene::VRScene() : Scene() {}
 
+dg::VRScene::~VRScene() {
+  vr::VR_Shutdown();
+}
+
 void dg::VRScene::Initialize() {
+  // Initialize OpenVR.
+  vr::HmdError error;
+  vr::IVRSystem *vrSystem = vr::VR_Init(
+    &error, vr::EVRApplicationType::VRApplication_Scene);
+  if (vrSystem == nullptr) {
+    throw new OpenVRError(error);
+  }
+
   // Lock window cursor to center.
   window->LockCursor();
 

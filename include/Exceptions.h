@@ -6,8 +6,15 @@
 
 #include <stdexcept>
 #include <string>
+#include <openvr.h>
 
 namespace dg {
+
+class OpenVRError : public std::runtime_error {
+  public:
+    OpenVRError(vr::HmdError hmdError)
+        : std::runtime_error("OpenVR HmdError " + (int)hmdError) { };
+};
 
 class ShaderCompileError : public std::runtime_error {
   public:

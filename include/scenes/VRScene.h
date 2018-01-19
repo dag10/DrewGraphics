@@ -23,6 +23,7 @@ namespace dg {
       static std::unique_ptr<VRScene> Make();
 
       VRScene();
+      virtual ~VRScene();
 
       virtual void Initialize();
       virtual void Update();

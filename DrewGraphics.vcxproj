@@ -70,20 +70,26 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>$(ProjectDir)external\glfw\include;$(ProjectDir)external\glm;$(ProjectDir)include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(ProjectDir)external\glfw\build\src\Debug;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(ProjectDir)external\glfw\include;$(ProjectDir)external\glm;$(ProjectDir)include;$(ProjectDir)external\openvr\headers;$(IncludePath)</IncludePath>
+    <LibraryPath>$(ProjectDir)external\glfw\build\src\Debug;$(LibraryPath);$(ProjectDir)external\openvr\lib\win32</LibraryPath>
+    <ReferencePath>$(SolutionDir)external\openvr\bin\win32;$(ReferencePath)</ReferencePath>
+    <ExecutablePath>$(ExecutablePath)</ExecutablePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>$(ProjectDir)external\glfw\include;$(ProjectDir)external\glm;$(ProjectDir)include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(ProjectDir)external\glfw\build\src\Release;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(ProjectDir)external\glfw\include;$(ProjectDir)external\glm;$(ProjectDir)include;$(ProjectDir)external\openvr\headers;$(IncludePath)</IncludePath>
+    <LibraryPath>$(ProjectDir)external\glfw\build\src\Release;$(LibraryPath);$(ProjectDir)external\openvr\lib\win32</LibraryPath>
+    <ReferencePath>$(SolutionDir)external\openvr\bin\win32;$(ReferencePath)</ReferencePath>
+    <ExecutablePath>$(ExecutablePath)</ExecutablePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(ProjectDir)external\glfw\include;$(ProjectDir)external\glm;$(ProjectDir)include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(ProjectDir)external\glfw\build\src\Debug;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(ProjectDir)external\glfw\include;$(ProjectDir)external\glm;$(ProjectDir)include;$(ProjectDir)external\openvr\headers;$(IncludePath)</IncludePath>
+    <LibraryPath>$(ProjectDir)external\glfw\build\src\Debug;$(LibraryPath);$(ProjectDir)external\openvr\lib\win64</LibraryPath>
+    <ReferencePath>$(SolutionDir)external\openvr\bin\win64;$(ReferencePath)</ReferencePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>$(ProjectDir)external\glfw\include;$(ProjectDir)external\glm;$(ProjectDir)include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(ProjectDir)external\glfw\build\src\Release;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(ProjectDir)external\glfw\include;$(ProjectDir)external\glm;$(ProjectDir)include;$(ProjectDir)external\openvr\headers;$(IncludePath)</IncludePath>
+    <LibraryPath>$(ProjectDir)external\glfw\build\src\Release;$(LibraryPath);$(ProjectDir)external\openvr\lib\win64</LibraryPath>
+    <ReferencePath>$(SolutionDir)external\openvr\bin\win64;$(ReferencePath)</ReferencePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -94,8 +100,12 @@
     </ClCompile>
     <Link />
     <Link>
-      <AdditionalDependencies>opengl32.lib;glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;glfw3.lib;openvr_api.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
+    <PostBuildEvent>
+      <Command>xcopy /d /y "$(ProjectDir)external\openvr\bin\win32\*.*" "$(OutDir)"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -104,7 +114,8 @@
       <SDLCheck>true</SDLCheck>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>opengl32.lib;glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;glfw3.lib;openvr_api.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -118,8 +129,12 @@
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>opengl32.lib;glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;glfw3.lib;openvr_api.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
+    <PostBuildEvent>
+      <Command>xcopy /d /y "$(ProjectDir)external\openvr\bin\win32\*.*" "$(OutDir)"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -132,7 +147,8 @@
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>opengl32.lib;glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;glfw3.lib;openvr_api.lib;openvr_api.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>

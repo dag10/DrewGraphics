@@ -120,6 +120,9 @@
     <ClCompile Include="src\scenes\TutorialScene.cpp">
       <Filter>Source Files\scenes</Filter>
     </ClCompile>
+    <ClCompile Include="src\scenes\VRScene.cpp">
+      <Filter>Source Files\scenes</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Behavior.h">
@@ -204,6 +207,9 @@
       <Filter>Header Files\scenes</Filter>
     </ClInclude>
     <ClInclude Include="include\scenes\TutorialScene.h">
+      <Filter>Header Files\scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="include\scenes\VRScene.h">
       <Filter>Header Files\scenes</Filter>
     </ClInclude>
   </ItemGroup>

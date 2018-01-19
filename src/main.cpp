@@ -17,6 +17,7 @@
 #include <scenes/TutorialScene.h>
 #include <scenes/PortalScene.h>
 #include <scenes/QuadScene.h>
+#include <scenes/VRScene.h>
 
 [[noreturn]] void terminateWithError(const char *error) {
   std::cerr << error << std::endl;
@@ -32,6 +33,7 @@ int main(int argc, const char *argv[]) {
   constructors["portal"]   = dg::PortalScene::Make;
   constructors["tutorial"] = dg::TutorialScene::Make;
   constructors["quad"]     = dg::QuadScene::Make;
+  constructors["vr"]       = dg::VRScene::Make;
   std::string sceneName;
   if (argc > 1) {
     sceneName = argv[1];

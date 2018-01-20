@@ -33,7 +33,6 @@ void dg::MeshesScene::Initialize() {
 
   // Container for meshes.
   auto meshes = std::make_shared<SceneObject>();
-  meshes->transform.translation.x = 0.5;
   AddChild(meshes);
 
   // Create ceiling light source.
@@ -63,11 +62,18 @@ void dg::MeshesScene::Initialize() {
       Transform::TS(glm::vec3(0, 0.25, 0), glm::vec3(0.5)));
   meshes->AddChild(quad, false);
 
+  // Create sphere.
+  auto sphere = std::make_shared<Model>(
+      dg::Mesh::Sphere,
+      std::make_shared<UVMaterial>(),
+      Transform::TS(glm::vec3(1, 0.25, 0), glm::vec3(0.5)));
+  meshes->AddChild(sphere, false);
+
   // Create cylinder.
   auto cylinder = std::make_shared<Model>(
       dg::Mesh::Cylinder,
       std::make_shared<UVMaterial>(),
-      Transform::TS(glm::vec3(1, 0.25, 0), glm::vec3(0.5)));
+      Transform::TS(glm::vec3(2, 0.25, 0), glm::vec3(0.5)));
   meshes->AddChild(cylinder, false);
 
   // Create floor material.

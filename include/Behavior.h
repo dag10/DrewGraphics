@@ -10,6 +10,7 @@ namespace dg {
 
     public:
 
+      virtual void Start() {};
       virtual void Update() = 0;
 
   }; // class Behavior

@@ -44,6 +44,7 @@ namespace dg {
       std::vector<std::unique_ptr<Behavior>> behaviors;
       std::shared_ptr<Window> window = nullptr;
       std::unique_ptr<Skybox> skybox = nullptr;
+      bool started = false;
 
   }; // class Scene
 

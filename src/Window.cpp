@@ -121,7 +121,11 @@ bool dg::Window::IsCursorLocked() const {
 glm::vec2 dg::Window::GetCursorPosition() const {
   double x, y;
   glfwGetCursorPos(glfwWindow, &x, &y);
-  return glm::vec2(x, y);
+  glm::vec2 pos(x, y);
+#ifdef _WIN32
+  pos /= GetContentScale();
+#endif
+  return pos;
 }
 
 glm::vec2 dg::Window::GetCursorDelta() const {

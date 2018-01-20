@@ -37,11 +37,17 @@ dg::VRScene::~VRScene() {
 
 void dg::VRScene::Initialize() {
   // Initialize OpenVR.
+  if (!vr::VR_IsRuntimeInstalled()) {
+    throw std::runtime_error("Please insteall the OpenVR Runtime.");
+  }
+  if (!vr::VR_IsHmdPresent()) {
+    throw std::runtime_error("No VR headset is detected.");
+  }
   vr::HmdError error;
   vr::IVRSystem *vrSystem = vr::VR_Init(
     &error, vr::EVRApplicationType::VRApplication_Scene);
   if (vrSystem == nullptr) {
-    throw new OpenVRError(error);
+    throw OpenVRError(error);
   }
 
   // Lock window cursor to center.

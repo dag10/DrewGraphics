@@ -1,5 +1,5 @@
 //
-//  KeyboardCameraController.h
+//  behaviors/KeyboardCameraController.h
 //
 
 #pragma once
@@ -18,12 +18,15 @@ namespace dg {
       KeyboardCameraController(
           std::weak_ptr<Camera> camera, std::weak_ptr<Window> window);
 
+      virtual void Start();
       virtual void Update();
 
     private:
 
       std::weak_ptr<Camera> camera;
       std::weak_ptr<Window> window;
+
+      Transform originalTransform;
 
   }; // class KeyboardCameraController
 

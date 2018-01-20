@@ -1,5 +1,5 @@
 //
-//  KeyboardCameraController.cpp
+//  behaviors/KeyboardCameraController.cpp
 //
 
 #include <behaviors/KeyboardCameraController.h>
@@ -9,6 +9,13 @@ dg::KeyboardCameraController::KeyboardCameraController(
     std::weak_ptr<Camera> camera, std::weak_ptr<Window> window)
   : camera(camera), window(window) {}
 
+void dg::KeyboardCameraController::Start() {
+  auto camera = this->camera.lock();
+  if (!camera) return;
+
+  originalTransform = camera->transform;
+}
+
 void dg::KeyboardCameraController::Update() {
   auto camera = this->camera.lock();
   auto window = this->window.lock();
@@ -17,6 +24,12 @@ void dg::KeyboardCameraController::Update() {
   const float speed = 1.8f; // units per second
   const float rotationSpeed = 90; // degrees per second
   const float cursorRotationSpeed = 0.3f; // degrees per cursor pixels moved
+
+  // If R is tapped, just reset the camera position.
+  if (window->IsKeyJustPressed(GLFW_KEY_R)) {
+    camera->transform = originalTransform;
+    return;
+  }
 
   // Calculate new rotation for camera based on mouse.
   if (window->IsCursorLocked()) {

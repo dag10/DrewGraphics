@@ -473,10 +473,15 @@ std::unique_ptr<dg::Mesh> dg::Mesh::CreateCylinder(
           bottomLeft + ((j + 1) * heightInterval * glm::vec3(0, 1, 0)));
       glm::vec3 quadTopRight(
           bottomRight + ((j + 1) * heightInterval * glm::vec3(0, 1, 0)));
-      glm::vec2 uvBottomLeft(degree / 360, 2.f/3);
-      glm::vec2 uvBottomRight(nextDegree / 360, 2.f/3);
-      glm::vec2 uvTopLeft(degree / 360, 1.f/3);
-      glm::vec2 uvTopRight(nextDegree / 360, 1.f/3);
+      float uvMinHeight = 1.f/3;
+      float uvMaxHeight = 2.f/3;
+      float uvHeightInterval = (uvMaxHeight - uvMinHeight) / heightDivisions;
+      float uvBottomHeight = uvMinHeight + (uvHeightInterval * j);
+      float uvTopHeight = uvMinHeight + (uvHeightInterval * (j + 1));
+      glm::vec2 uvBottomLeft(degree / 360, uvBottomHeight);
+      glm::vec2 uvBottomRight(nextDegree / 360, uvBottomHeight);
+      glm::vec2 uvTopLeft(degree / 360, uvTopHeight);
+      glm::vec2 uvTopRight(nextDegree / 360, uvTopHeight);
       AddTriangle(
           quadBottomLeft, quadTopRight, quadTopLeft,
           uvBottomLeft, uvTopRight, uvTopLeft);

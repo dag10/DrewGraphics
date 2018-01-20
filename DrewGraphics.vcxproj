@@ -178,6 +178,7 @@
     <ClCompile Include="src\scenes\PortalScene.cpp" />
     <ClCompile Include="src\scenes\QuadScene.cpp" />
     <ClCompile Include="src\scenes\TutorialScene.cpp" />
+    <ClCompile Include="src\scenes\MeshesScene.cpp" />
     <ClCompile Include="src\scenes\VRScene.cpp" />
     <ClCompile Include="src\Shader.cpp" />
     <ClCompile Include="src\ShaderSource.cpp" />
@@ -209,6 +210,7 @@
     <ClInclude Include="include\scenes\PortalScene.h" />
     <ClInclude Include="include\scenes\QuadScene.h" />
     <ClInclude Include="include\scenes\TutorialScene.h" />
+    <ClInclude Include="include\scenes\MeshesScene.h" />
     <ClInclude Include="include\scenes\VRScene.h" />
     <ClInclude Include="include\Shader.h" />
     <ClInclude Include="include\ShaderSource.h" />

@@ -13,7 +13,7 @@ namespace dg {
 class OpenVRError : public std::runtime_error {
   public:
     OpenVRError(vr::HmdError hmdError)
-        : std::runtime_error("OpenVR HmdError " + (int)hmdError) { };
+        : std::runtime_error("OpenVR HmdError " + std::to_string(hmdError)) { };
 };
 
 class ShaderCompileError : public std::runtime_error {

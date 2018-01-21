@@ -4,6 +4,7 @@
 
 #include <behaviors/KeyboardCameraController.h>
 #include <EngineTime.h>
+#include <iostream>
 
 dg::KeyboardCameraController::KeyboardCameraController(
     std::weak_ptr<Camera> camera, std::weak_ptr<Window> window)
@@ -27,6 +28,17 @@ void dg::KeyboardCameraController::Update() {
 
   const float rotationSpeed = 90; // degrees per second
   const float cursorRotationSpeed = 0.3f; // degrees per cursor pixels moved
+
+  // If C is tapped, print out the camera position and orientation.
+  if (window->IsKeyJustPressed(GLFW_KEY_C)) {
+    std::cout << std::endl << "Camera position:" << std::endl;
+    std::cout << camera->transform << std::endl;
+    glm::vec3 dir = camera->transform.Forward();
+    std::cout << "Forward: ";
+    std::cout << dir.x << ", ";
+    std::cout << dir.y << ", ";
+    std::cout << dir.z << std::endl;
+  }
 
   // If R is tapped, just reset the camera position.
   if (window->IsKeyJustPressed(GLFW_KEY_R)) {

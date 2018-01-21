@@ -180,10 +180,10 @@ void dg::Mesh::CreatePrimitives() {
   dg::Mesh::Quad = std::shared_ptr<Mesh>(CreateQuad());
 
   assert(Mesh::Cylinder == nullptr);
-  dg::Mesh::Cylinder = std::shared_ptr<Mesh>(CreateCylinder(256, 1));
+  dg::Mesh::Cylinder = std::shared_ptr<Mesh>(CreateCylinder(64, 1));
 
   assert(Mesh::Sphere == nullptr);
-  dg::Mesh::Sphere = std::shared_ptr<Mesh>(CreateSphere(16));
+  dg::Mesh::Sphere = std::shared_ptr<Mesh>(CreateSphere(32));
 }
 
 dg::Mesh::Mesh() {
@@ -374,21 +374,20 @@ std::unique_ptr<dg::Mesh> dg::Mesh::CreateCylinder(
   int texCoordOffset = normalOffset + normalSize;
 
   float halfHeight = 0.5f;
-  float degInterval = 360.f / (float)radialDivisions;
+  float radInterval = glm::radians(360.f) / (float)radialDivisions;
   float radius = 0.5f;
 
   int nextVertOffset = 0;
   auto AddTriangle = [&](
       glm::vec3 v1, glm::vec3 v2, glm::vec3 v3,
+      glm::vec3 n1, glm::vec3 n2, glm::vec3 n3,
       glm::vec2 uv1, glm::vec2 uv2, glm::vec2 uv3) {
-    glm::vec3 normal = glm::normalize(glm::cross(v1 - v2, v1 - v3));
-
     buffer[nextVertOffset + positionOffset + 0] = v1.x;
     buffer[nextVertOffset + positionOffset + 1] = v1.y;
     buffer[nextVertOffset + positionOffset + 2] = v1.z;
-    buffer[nextVertOffset + normalOffset + 0] = normal.x;
-    buffer[nextVertOffset + normalOffset + 1] = normal.y;
-    buffer[nextVertOffset + normalOffset + 2] = normal.z;
+    buffer[nextVertOffset + normalOffset + 0] = n1.x;
+    buffer[nextVertOffset + normalOffset + 1] = n1.y;
+    buffer[nextVertOffset + normalOffset + 2] = n1.z;
     buffer[nextVertOffset + texCoordOffset + 0] = uv1.x;
     buffer[nextVertOffset + texCoordOffset + 1] = uv1.y;
     nextVertOffset += vertexStride;
@@ -396,9 +395,9 @@ std::unique_ptr<dg::Mesh> dg::Mesh::CreateCylinder(
     buffer[nextVertOffset + positionOffset + 0] = v2.x;
     buffer[nextVertOffset + positionOffset + 1] = v2.y;
     buffer[nextVertOffset + positionOffset + 2] = v2.z;
-    buffer[nextVertOffset + normalOffset + 0] = normal.x;
-    buffer[nextVertOffset + normalOffset + 1] = normal.y;
-    buffer[nextVertOffset + normalOffset + 2] = normal.z;
+    buffer[nextVertOffset + normalOffset + 0] = n2.x;
+    buffer[nextVertOffset + normalOffset + 1] = n2.y;
+    buffer[nextVertOffset + normalOffset + 2] = n2.z;
     buffer[nextVertOffset + texCoordOffset + 0] = uv2.x;
     buffer[nextVertOffset + texCoordOffset + 1] = uv2.y;
     nextVertOffset += vertexStride;
@@ -406,34 +405,25 @@ std::unique_ptr<dg::Mesh> dg::Mesh::CreateCylinder(
     buffer[nextVertOffset + positionOffset + 0] = v3.x;
     buffer[nextVertOffset + positionOffset + 1] = v3.y;
     buffer[nextVertOffset + positionOffset + 2] = v3.z;
-    buffer[nextVertOffset + normalOffset + 0] = normal.x;
-    buffer[nextVertOffset + normalOffset + 1] = normal.y;
-    buffer[nextVertOffset + normalOffset + 2] = normal.z;
+    buffer[nextVertOffset + normalOffset + 0] = n3.x;
+    buffer[nextVertOffset + normalOffset + 1] = n3.y;
+    buffer[nextVertOffset + normalOffset + 2] = n3.z;
     buffer[nextVertOffset + texCoordOffset + 0] = uv3.x;
     buffer[nextVertOffset + texCoordOffset + 1] = uv3.y;
     nextVertOffset += vertexStride;
   };
 
   for (int i = 0; i < radialDivisions; i++) {
-    float degree = degInterval * i;
-    float nextDegree = degInterval * (i + 1);
+    glm::vec3 leftNormal = glm::quat(
+        glm::vec3(0, radInterval * i, 0)) * -FORWARD;
+    glm::vec3 rightNormal = glm::quat(
+        glm::vec3(0, radInterval * (i + 1), 0)) * -FORWARD;
 
-    glm::vec3 topLeft(
-        sin(glm::radians(degree)) * radius,
-        halfHeight,
-        cos(glm::radians(degree)) * radius);
-    glm::vec3 topRight(
-        sin(glm::radians(nextDegree)) * radius,
-        halfHeight,
-        cos(glm::radians(nextDegree)) * radius);
-    glm::vec3 bottomLeft(
-        sin(glm::radians(degree)) * radius,
-        -halfHeight,
-        cos(glm::radians(degree)) * radius);
-    glm::vec3 bottomRight(
-        sin(glm::radians(nextDegree)) * radius,
-        -halfHeight,
-        cos(glm::radians(nextDegree)) * radius);
+    glm::vec3 topLeft = (leftNormal * radius) + glm::vec3(0, halfHeight, 0);
+    glm::vec3 topRight = (rightNormal * radius) + glm::vec3(0, halfHeight, 0);
+    glm::vec3 bottomLeft = (leftNormal * radius) - glm::vec3(0, halfHeight, 0);
+    glm::vec3 bottomRight =
+      (rightNormal * radius) - glm::vec3(0, halfHeight, 0);
 
     glm::vec3 topCenter = glm::vec3(0, halfHeight, 0);
     glm::vec3 bottomCenter = glm::vec3(0, -halfHeight, 0);
@@ -447,52 +437,50 @@ std::unique_ptr<dg::Mesh> dg::Mesh::CreateCylinder(
     // Add top triangle.
     AddTriangle(
         topCenter, topLeft, topRight,
+        UP, UP, UP,
         uvTopCenter,
-        uvTopCenter + uvTopExtents * glm::vec2(
-          sin(glm::radians(degree)),
-          cos(glm::radians(degree))),
-        uvTopCenter + uvTopExtents * glm::vec2(
-          sin(glm::radians(nextDegree)),
-          cos(glm::radians(nextDegree))));
+        uvTopCenter + uvTopExtents * glm::vec2(leftNormal.x, leftNormal.z),
+        uvTopCenter + uvTopExtents * glm::vec2(rightNormal.x, rightNormal.z));
 
     // Add bottom triangle.
     AddTriangle(
         bottomCenter, bottomRight, bottomLeft,
+        -UP, -UP, -UP,
         uvBottomCenter,
         uvBottomCenter + uvBottomExtents * glm::vec2(
-          sin(glm::radians(nextDegree)),
-          cos(glm::radians(nextDegree))),
+          rightNormal.x, rightNormal.z),
         uvBottomCenter + uvBottomExtents * glm::vec2(
-          sin(glm::radians(degree)),
-          cos(glm::radians(degree))));
+            leftNormal.x, leftNormal.z));
 
     // Add side quad(s).
     float heightInterval = halfHeight * 2.f / heightDivisions;
     for (int j = 0; j < heightDivisions; j++) {
       glm::vec3 quadBottomLeft(
-          bottomLeft + (j * heightInterval * glm::vec3(0, 1, 0)));
+          bottomLeft + (j * heightInterval * UP));
       glm::vec3 quadBottomRight(
-          bottomRight + (j * heightInterval * glm::vec3(0, 1, 0)));
+          bottomRight + (j * heightInterval * UP));
       glm::vec3 quadTopLeft(
-          bottomLeft + ((j + 1) * heightInterval * glm::vec3(0, 1, 0)));
+          bottomLeft + ((j + 1) * heightInterval * UP));
       glm::vec3 quadTopRight(
-          bottomRight + ((j + 1) * heightInterval * glm::vec3(0, 1, 0)));
+          bottomRight + ((j + 1) * heightInterval * UP));
 
       float uvMinHeight = 1.f/3;
       float uvMaxHeight = 2.f/3;
       float uvHeightInterval = (uvMaxHeight - uvMinHeight) / heightDivisions;
       float uvBottomHeight = uvMinHeight + (uvHeightInterval * j);
       float uvTopHeight = uvMinHeight + (uvHeightInterval * (j + 1));
-      glm::vec2 uvBottomLeft(degree / 360, uvBottomHeight);
-      glm::vec2 uvBottomRight(nextDegree / 360, uvBottomHeight);
-      glm::vec2 uvTopLeft(degree / 360, uvTopHeight);
-      glm::vec2 uvTopRight(nextDegree / 360, uvTopHeight);
+      glm::vec2 uvBottomLeft((float)i / radialDivisions, uvBottomHeight);
+      glm::vec2 uvBottomRight((float)(i + 1) / radialDivisions, uvBottomHeight);
+      glm::vec2 uvTopLeft((float)i / radialDivisions, uvTopHeight);
+      glm::vec2 uvTopRight((float)(i + 1) / radialDivisions, uvTopHeight);
 
       AddTriangle(
           quadBottomLeft, quadTopRight, quadTopLeft,
+          leftNormal, rightNormal, leftNormal,
           uvBottomLeft, uvTopRight, uvTopLeft);
       AddTriangle(
           quadBottomRight, quadTopRight, quadBottomLeft,
+          rightNormal, rightNormal, leftNormal,
           uvBottomRight, uvTopRight, uvBottomLeft);
     }
   }
@@ -546,19 +534,25 @@ std::unique_ptr<dg::Mesh> dg::Mesh::CreateSphere(int subdivisions) {
   int texCoordOffset = normalOffset + normalSize;
 
   float radInterval = glm::radians(360.f) / (float)subdivisions;
+  float radius = 0.5f;
 
   int nextVertOffset = 0;
   auto AddTriangle = [&](
       glm::vec3 v1, glm::vec3 v2, glm::vec3 v3,
       glm::vec2 uv1, glm::vec2 uv2, glm::vec2 uv3) {
-    glm::vec3 normal = glm::normalize(glm::cross(v1 - v2, v1 - v3));
+
+    // All vertices on a sphere will be on the surface, thus their
+    // normal will also be their normalized position.
+    glm::vec3 n1 = glm::normalize(v1);
+    glm::vec3 n2 = glm::normalize(v2);
+    glm::vec3 n3 = glm::normalize(v3);
 
     buffer[nextVertOffset + positionOffset + 0] = v1.x;
     buffer[nextVertOffset + positionOffset + 1] = v1.y;
     buffer[nextVertOffset + positionOffset + 2] = v1.z;
-    buffer[nextVertOffset + normalOffset + 0] = normal.x;
-    buffer[nextVertOffset + normalOffset + 1] = normal.y;
-    buffer[nextVertOffset + normalOffset + 2] = normal.z;
+    buffer[nextVertOffset + normalOffset + 0] = n1.x;
+    buffer[nextVertOffset + normalOffset + 1] = n1.y;
+    buffer[nextVertOffset + normalOffset + 2] = n1.z;
     buffer[nextVertOffset + texCoordOffset + 0] = uv1.x;
     buffer[nextVertOffset + texCoordOffset + 1] = uv1.y;
     nextVertOffset += vertexStride;
@@ -566,9 +560,9 @@ std::unique_ptr<dg::Mesh> dg::Mesh::CreateSphere(int subdivisions) {
     buffer[nextVertOffset + positionOffset + 0] = v2.x;
     buffer[nextVertOffset + positionOffset + 1] = v2.y;
     buffer[nextVertOffset + positionOffset + 2] = v2.z;
-    buffer[nextVertOffset + normalOffset + 0] = normal.x;
-    buffer[nextVertOffset + normalOffset + 1] = normal.y;
-    buffer[nextVertOffset + normalOffset + 2] = normal.z;
+    buffer[nextVertOffset + normalOffset + 0] = n2.x;
+    buffer[nextVertOffset + normalOffset + 1] = n2.y;
+    buffer[nextVertOffset + normalOffset + 2] = n2.z;
     buffer[nextVertOffset + texCoordOffset + 0] = uv2.x;
     buffer[nextVertOffset + texCoordOffset + 1] = uv2.y;
     nextVertOffset += vertexStride;
@@ -576,9 +570,9 @@ std::unique_ptr<dg::Mesh> dg::Mesh::CreateSphere(int subdivisions) {
     buffer[nextVertOffset + positionOffset + 0] = v3.x;
     buffer[nextVertOffset + positionOffset + 1] = v3.y;
     buffer[nextVertOffset + positionOffset + 2] = v3.z;
-    buffer[nextVertOffset + normalOffset + 0] = normal.x;
-    buffer[nextVertOffset + normalOffset + 1] = normal.y;
-    buffer[nextVertOffset + normalOffset + 2] = normal.z;
+    buffer[nextVertOffset + normalOffset + 0] = n3.x;
+    buffer[nextVertOffset + normalOffset + 1] = n3.y;
+    buffer[nextVertOffset + normalOffset + 2] = n3.z;
     buffer[nextVertOffset + texCoordOffset + 0] = uv3.x;
     buffer[nextVertOffset + texCoordOffset + 1] = uv3.y;
     nextVertOffset += vertexStride;
@@ -595,7 +589,7 @@ std::unique_ptr<dg::Mesh> dg::Mesh::CreateSphere(int subdivisions) {
       glm::quat topLatitudeQuat(
           glm::vec3(glm::radians(90.f) - (latInterval * (j + 1)), 0, 0));
 
-      glm::vec3 unit(0, 0, 0.5);
+      glm::vec3 unit = -FORWARD * radius;
       glm::vec3 bottomLeft = leftLongitudeQuat * bottomLatitudeQuat * unit;
       glm::vec3 bottomRight = rightLongitudeQuat * bottomLatitudeQuat * unit;
       glm::vec3 topLeft = leftLongitudeQuat * topLatitudeQuat * unit;

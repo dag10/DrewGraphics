@@ -25,6 +25,12 @@ namespace dg {
       MeshesScene();
 
       virtual void Initialize();
+      virtual void Update();
+
+    private:
+
+      std::shared_ptr<Model> texturedSphere;
+      std::shared_ptr<Model> texturedCylinder;
 
   }; // class MeshesScene
 

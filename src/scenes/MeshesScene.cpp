@@ -31,15 +31,15 @@ void dg::MeshesScene::Initialize() {
   // Create skybox.
   skybox = std::unique_ptr<Skybox>(new Skybox(skyboxTexture));
 
-  // Container for meshes.
-  auto meshes = std::make_shared<SceneObject>();
-  AddChild(meshes);
-
   // Create ceiling light source.
   auto ceilingLight = std::make_shared<PointLight>(
       glm::vec3(1.0, 0.93, 0.86), 0.732, 0.399, 0.968);
-  ceilingLight->transform.translation = glm::vec3(0.8, 1.2, -0.2);
-  meshes->AddChild(ceilingLight, false);
+  ceilingLight->transform.translation = glm::vec3(0, 0.8, 0.5);
+  AddChild(ceilingLight);
+
+  // Container for meshes.
+  auto meshes = std::make_shared<SceneObject>();
+  AddChild(meshes);
 
   // Create cube.
   auto cube = std::make_shared<Model>(
@@ -82,6 +82,29 @@ void dg::MeshesScene::Initialize() {
       hardwoodTexture);
   floorMaterial.SetUVScale(glm::vec2(floorSize));
 
+  // Create shiny brick material.
+  StandardMaterial brickMaterial = StandardMaterial::WithTexture(
+      std::make_shared<Texture>(
+        Texture::FromPath("assets/textures/brickwall.jpg")));
+  brickMaterial.SetNormalMap(std::make_shared<Texture>(
+      Texture::FromPath("assets/textures/brickwall_normal.jpg")));
+  brickMaterial.SetSpecular(0.6f);
+  brickMaterial.SetShininess(64);
+
+  // Create a sphere made out of shiny brick.
+  texturedSphere = std::make_shared<Model>(
+      dg::Mesh::Sphere,
+      std::make_shared<StandardMaterial>(brickMaterial),
+      Transform::TS(glm::vec3(-1, 0.25, 1), glm::vec3(0.5)));
+  meshes->AddChild(texturedSphere, false);
+
+  // Create a cylinder made out of shiny brick.
+  texturedCylinder = std::make_shared<Model>(
+      dg::Mesh::Cylinder,
+      std::make_shared<StandardMaterial>(brickMaterial),
+      Transform::TS(glm::vec3(1, 0.25, 1), glm::vec3(0.5)));
+  meshes->AddChild(texturedCylinder, false);
+
   // Create floor plane.
   AddChild(std::make_shared<Model>(
         dg::Mesh::Quad,
@@ -99,5 +122,15 @@ void dg::MeshesScene::Initialize() {
   // Allow camera to be controller by the keyboard and mouse.
   behaviors.push_back(std::unique_ptr<Behavior>(
         new KeyboardCameraController(mainCamera, window)));
+}
+
+void dg::MeshesScene::Update() {
+  Scene::Update();
+
+  // Slowly rotate brick cylinder and sphere.
+  texturedSphere->transform.rotation = glm::quat(glm::radians(
+        glm::vec3(0, dg::Time::Elapsed * -10, 0)));
+  texturedCylinder->transform.rotation = glm::quat(glm::radians(
+        glm::vec3(0, dg::Time::Elapsed * 10, 0)));
 }
 

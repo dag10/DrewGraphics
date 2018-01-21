@@ -427,14 +427,14 @@ std::unique_ptr<dg::Mesh> dg::Mesh::CreateCylinder(
 
   for (int i = 0; i < radialDivisions; i++) {
     glm::vec3 leftNormal = glm::quat(
-        glm::vec3(0, radInterval * i, 0)) * FORWARD;
+        glm::vec3(0, radInterval * i, 0)) * -FORWARD;
     glm::vec3 rightNormal = glm::quat(
-        glm::vec3(0, radInterval * (i + 1), 0)) * FORWARD;
+        glm::vec3(0, radInterval * (i + 1), 0)) * -FORWARD;
 
     glm::vec3 leftTangent = glm::quat(
-        glm::vec3(0, radInterval * i, 0)) * -RIGHT;
+        glm::vec3(0, radInterval * i, 0)) * RIGHT;
     glm::vec3 rightTangent = glm::quat(
-        glm::vec3(0, radInterval * (i + 1), 0)) * -RIGHT;
+        glm::vec3(0, radInterval * (i + 1), 0)) * RIGHT;
 
     glm::vec3 topLeft = (leftNormal * radius) + glm::vec3(0, halfHeight, 0);
     glm::vec3 topRight = (rightNormal * radius) + glm::vec3(0, halfHeight, 0);
@@ -548,13 +548,15 @@ std::unique_ptr<dg::Mesh> dg::Mesh::CreateSphere(int subdivisions) {
   int numTriangles = subdivisions * (1 + 1 + (2 * subdivisions));
   int positionSize = 3;
   int normalSize = 3;
+  int tangentSize = 3;
   int texCoordSize = 2;
-  int vertexStride = positionSize + normalSize + texCoordSize;
+  int vertexStride = positionSize + normalSize + tangentSize + texCoordSize;
   std::vector<float> buffer(3 * numTriangles * vertexStride);
 
   int positionOffset = 0;
   int normalOffset = positionSize;
-  int texCoordOffset = normalOffset + normalSize;
+  int tangentOffset = normalOffset + normalSize;
+  int texCoordOffset = tangentOffset + tangentSize;
 
   float radInterval = glm::radians(360.f) / (float)subdivisions;
   float radius = 0.5f;
@@ -562,6 +564,7 @@ std::unique_ptr<dg::Mesh> dg::Mesh::CreateSphere(int subdivisions) {
   int nextVertOffset = 0;
   auto AddTriangle = [&](
       glm::vec3 v1, glm::vec3 v2, glm::vec3 v3,
+      glm::vec3 t1, glm::vec3 t2, glm::vec3 t3,
       glm::vec2 uv1, glm::vec2 uv2, glm::vec2 uv3) {
 
     // All vertices on a sphere will be on the surface, thus their
@@ -576,6 +579,9 @@ std::unique_ptr<dg::Mesh> dg::Mesh::CreateSphere(int subdivisions) {
     buffer[nextVertOffset + normalOffset + 0] = n1.x;
     buffer[nextVertOffset + normalOffset + 1] = n1.y;
     buffer[nextVertOffset + normalOffset + 2] = n1.z;
+    buffer[nextVertOffset + tangentOffset + 0] = t1.x;
+    buffer[nextVertOffset + tangentOffset + 1] = t1.y;
+    buffer[nextVertOffset + tangentOffset + 2] = t1.z;
     buffer[nextVertOffset + texCoordOffset + 0] = uv1.x;
     buffer[nextVertOffset + texCoordOffset + 1] = uv1.y;
     nextVertOffset += vertexStride;
@@ -586,6 +592,9 @@ std::unique_ptr<dg::Mesh> dg::Mesh::CreateSphere(int subdivisions) {
     buffer[nextVertOffset + normalOffset + 0] = n2.x;
     buffer[nextVertOffset + normalOffset + 1] = n2.y;
     buffer[nextVertOffset + normalOffset + 2] = n2.z;
+    buffer[nextVertOffset + tangentOffset + 0] = t2.x;
+    buffer[nextVertOffset + tangentOffset + 1] = t2.y;
+    buffer[nextVertOffset + tangentOffset + 2] = t2.z;
     buffer[nextVertOffset + texCoordOffset + 0] = uv2.x;
     buffer[nextVertOffset + texCoordOffset + 1] = uv2.y;
     nextVertOffset += vertexStride;
@@ -596,6 +605,9 @@ std::unique_ptr<dg::Mesh> dg::Mesh::CreateSphere(int subdivisions) {
     buffer[nextVertOffset + normalOffset + 0] = n3.x;
     buffer[nextVertOffset + normalOffset + 1] = n3.y;
     buffer[nextVertOffset + normalOffset + 2] = n3.z;
+    buffer[nextVertOffset + tangentOffset + 0] = t3.x;
+    buffer[nextVertOffset + tangentOffset + 1] = t3.y;
+    buffer[nextVertOffset + tangentOffset + 2] = t3.z;
     buffer[nextVertOffset + texCoordOffset + 0] = uv3.x;
     buffer[nextVertOffset + texCoordOffset + 1] = uv3.y;
     nextVertOffset += vertexStride;
@@ -618,6 +630,16 @@ std::unique_ptr<dg::Mesh> dg::Mesh::CreateSphere(int subdivisions) {
       glm::vec3 topLeft = leftLongitudeQuat * topLatitudeQuat * unit;
       glm::vec3 topRight = rightLongitudeQuat * topLatitudeQuat * unit;
 
+      glm::vec3 tangent = RIGHT;
+      glm::vec3 bottomLeftTangent =
+        leftLongitudeQuat * bottomLatitudeQuat * tangent;
+      glm::vec3 bottomRightTangent =
+        rightLongitudeQuat * bottomLatitudeQuat * tangent;
+      glm::vec3 topLeftTangent =
+        leftLongitudeQuat * topLatitudeQuat * tangent;
+      glm::vec3 topRightTangent =
+        rightLongitudeQuat * topLatitudeQuat * tangent;
+
       float uvHeightInterval = 1.f / subdivisions;
       float uvBottomHeight = uvHeightInterval * j;
       float uvTopHeight = uvHeightInterval * (j + 1);
@@ -628,9 +650,11 @@ std::unique_ptr<dg::Mesh> dg::Mesh::CreateSphere(int subdivisions) {
 
       AddTriangle(
           bottomLeft, topRight, topLeft,
+          bottomLeftTangent, topRightTangent, topLeftTangent,
           uvBottomLeft, uvTopRight, uvTopLeft);
       AddTriangle(
           bottomRight, topRight, bottomLeft,
+          bottomRightTangent, topRightTangent, bottomLeftTangent,
           uvBottomRight, uvTopRight, uvBottomLeft);
     }
   }
@@ -655,6 +679,11 @@ std::unique_ptr<dg::Mesh> dg::Mesh::CreateSphere(int subdivisions) {
       ATTR_NORMAL, normalSize, GL_FLOAT, GL_FALSE,
       vertexStride * sizeof(float), (void*)(normalOffset * sizeof(float)));
   mesh->useAttribute[ATTR_NORMAL] = true;
+
+  glVertexAttribPointer(
+      ATTR_TANGENT, tangentSize, GL_FLOAT, GL_FALSE,
+      vertexStride * sizeof(float), (void*)(tangentOffset * sizeof(float)));
+  mesh->useAttribute[ATTR_TANGENT] = true;
 
   glVertexAttribPointer(
       ATTR_TEX_COORD, texCoordSize, GL_FLOAT, GL_FALSE,

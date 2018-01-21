@@ -365,13 +365,15 @@ std::unique_ptr<dg::Mesh> dg::Mesh::CreateCylinder(
   int numTriangles = radialDivisions * (1 + 1 + (2 * heightDivisions));
   int positionSize = 3;
   int normalSize = 3;
+  int tangentSize = 3;
   int texCoordSize = 2;
-  int vertexStride = positionSize + normalSize + texCoordSize;
+  int vertexStride = positionSize + normalSize + tangentSize + texCoordSize;
   std::vector<float> buffer(3 * numTriangles * vertexStride);
 
   int positionOffset = 0;
   int normalOffset = positionSize;
-  int texCoordOffset = normalOffset + normalSize;
+  int tangentOffset = normalOffset + normalSize;
+  int texCoordOffset = tangentOffset + tangentSize;
 
   float halfHeight = 0.5f;
   float radInterval = glm::radians(360.f) / (float)radialDivisions;
@@ -381,6 +383,7 @@ std::unique_ptr<dg::Mesh> dg::Mesh::CreateCylinder(
   auto AddTriangle = [&](
       glm::vec3 v1, glm::vec3 v2, glm::vec3 v3,
       glm::vec3 n1, glm::vec3 n2, glm::vec3 n3,
+      glm::vec3 t1, glm::vec3 t2, glm::vec3 t3,
       glm::vec2 uv1, glm::vec2 uv2, glm::vec2 uv3) {
     buffer[nextVertOffset + positionOffset + 0] = v1.x;
     buffer[nextVertOffset + positionOffset + 1] = v1.y;
@@ -388,6 +391,9 @@ std::unique_ptr<dg::Mesh> dg::Mesh::CreateCylinder(
     buffer[nextVertOffset + normalOffset + 0] = n1.x;
     buffer[nextVertOffset + normalOffset + 1] = n1.y;
     buffer[nextVertOffset + normalOffset + 2] = n1.z;
+    buffer[nextVertOffset + tangentOffset + 0] = t1.x;
+    buffer[nextVertOffset + tangentOffset + 1] = t1.y;
+    buffer[nextVertOffset + tangentOffset + 2] = t1.z;
     buffer[nextVertOffset + texCoordOffset + 0] = uv1.x;
     buffer[nextVertOffset + texCoordOffset + 1] = uv1.y;
     nextVertOffset += vertexStride;
@@ -398,6 +404,9 @@ std::unique_ptr<dg::Mesh> dg::Mesh::CreateCylinder(
     buffer[nextVertOffset + normalOffset + 0] = n2.x;
     buffer[nextVertOffset + normalOffset + 1] = n2.y;
     buffer[nextVertOffset + normalOffset + 2] = n2.z;
+    buffer[nextVertOffset + tangentOffset + 0] = t2.x;
+    buffer[nextVertOffset + tangentOffset + 1] = t2.y;
+    buffer[nextVertOffset + tangentOffset + 2] = t2.z;
     buffer[nextVertOffset + texCoordOffset + 0] = uv2.x;
     buffer[nextVertOffset + texCoordOffset + 1] = uv2.y;
     nextVertOffset += vertexStride;
@@ -408,6 +417,9 @@ std::unique_ptr<dg::Mesh> dg::Mesh::CreateCylinder(
     buffer[nextVertOffset + normalOffset + 0] = n3.x;
     buffer[nextVertOffset + normalOffset + 1] = n3.y;
     buffer[nextVertOffset + normalOffset + 2] = n3.z;
+    buffer[nextVertOffset + tangentOffset + 0] = t3.x;
+    buffer[nextVertOffset + tangentOffset + 1] = t3.y;
+    buffer[nextVertOffset + tangentOffset + 2] = t3.z;
     buffer[nextVertOffset + texCoordOffset + 0] = uv3.x;
     buffer[nextVertOffset + texCoordOffset + 1] = uv3.y;
     nextVertOffset += vertexStride;
@@ -415,9 +427,14 @@ std::unique_ptr<dg::Mesh> dg::Mesh::CreateCylinder(
 
   for (int i = 0; i < radialDivisions; i++) {
     glm::vec3 leftNormal = glm::quat(
-        glm::vec3(0, radInterval * i, 0)) * -FORWARD;
+        glm::vec3(0, radInterval * i, 0)) * FORWARD;
     glm::vec3 rightNormal = glm::quat(
-        glm::vec3(0, radInterval * (i + 1), 0)) * -FORWARD;
+        glm::vec3(0, radInterval * (i + 1), 0)) * FORWARD;
+
+    glm::vec3 leftTangent = glm::quat(
+        glm::vec3(0, radInterval * i, 0)) * -RIGHT;
+    glm::vec3 rightTangent = glm::quat(
+        glm::vec3(0, radInterval * (i + 1), 0)) * -RIGHT;
 
     glm::vec3 topLeft = (leftNormal * radius) + glm::vec3(0, halfHeight, 0);
     glm::vec3 topRight = (rightNormal * radius) + glm::vec3(0, halfHeight, 0);
@@ -428,29 +445,28 @@ std::unique_ptr<dg::Mesh> dg::Mesh::CreateCylinder(
     glm::vec3 topCenter = glm::vec3(0, halfHeight, 0);
     glm::vec3 bottomCenter = glm::vec3(0, -halfHeight, 0);
 
-    glm::vec2 uvTopCenter = glm::vec2(1.f / 6);
-    glm::vec2 uvTopExtents = glm::vec2(1.f / 3) * 0.5f;
+    glm::vec2 uvTopCenter = glm::vec2(1.f / 6, 5.f / 6);
+    float uvExtents = 1.f / 6;
     glm::vec2 uvBottomCenter = uvTopCenter;
     uvBottomCenter.y = 1 - uvBottomCenter.y;
-    glm::vec2 uvBottomExtents = uvTopExtents;
 
     // Add top triangle.
     AddTriangle(
-        topCenter, topLeft, topRight,
-        UP, UP, UP,
+        topCenter, topLeft, topRight, // vertices
+        UP, UP, UP, // normals
+        -RIGHT, -RIGHT, -RIGHT, // tangents
         uvTopCenter,
-        uvTopCenter + uvTopExtents * glm::vec2(leftNormal.x, leftNormal.z),
-        uvTopCenter + uvTopExtents * glm::vec2(rightNormal.x, rightNormal.z));
+        uvTopCenter + uvExtents * glm::vec2(-leftNormal.x, leftNormal.z),
+        uvTopCenter + uvExtents * glm::vec2(-rightNormal.x, rightNormal.z));
 
     // Add bottom triangle.
     AddTriangle(
-        bottomCenter, bottomRight, bottomLeft,
-        -UP, -UP, -UP,
+        bottomCenter, bottomRight, bottomLeft, // vertices
+        -UP, -UP, -UP, // normals
+        -RIGHT, -RIGHT, -RIGHT, // tangents
         uvBottomCenter,
-        uvBottomCenter + uvBottomExtents * glm::vec2(
-          rightNormal.x, rightNormal.z),
-        uvBottomCenter + uvBottomExtents * glm::vec2(
-            leftNormal.x, leftNormal.z));
+        uvBottomCenter - uvExtents * glm::vec2(rightNormal.x, rightNormal.z),
+        uvBottomCenter - uvExtents * glm::vec2(leftNormal.x, leftNormal.z));
 
     // Add side quad(s).
     float heightInterval = halfHeight * 2.f / heightDivisions;
@@ -477,10 +493,12 @@ std::unique_ptr<dg::Mesh> dg::Mesh::CreateCylinder(
       AddTriangle(
           quadBottomLeft, quadTopRight, quadTopLeft,
           leftNormal, rightNormal, leftNormal,
+          leftTangent, rightTangent, leftTangent,
           uvBottomLeft, uvTopRight, uvTopLeft);
       AddTriangle(
           quadBottomRight, quadTopRight, quadBottomLeft,
           rightNormal, rightNormal, leftNormal,
+          rightTangent, rightTangent, leftTangent,
           uvBottomRight, uvTopRight, uvBottomLeft);
     }
   }
@@ -505,6 +523,11 @@ std::unique_ptr<dg::Mesh> dg::Mesh::CreateCylinder(
       ATTR_NORMAL, normalSize, GL_FLOAT, GL_FALSE,
       vertexStride * sizeof(float), (void*)(normalOffset * sizeof(float)));
   mesh->useAttribute[ATTR_NORMAL] = true;
+
+  glVertexAttribPointer(
+      ATTR_TANGENT, tangentSize, GL_FLOAT, GL_FALSE,
+      vertexStride * sizeof(float), (void*)(tangentOffset * sizeof(float)));
+  mesh->useAttribute[ATTR_TANGENT] = true;
 
   glVertexAttribPointer(
       ATTR_TEX_COORD, texCoordSize, GL_FLOAT, GL_FALSE,

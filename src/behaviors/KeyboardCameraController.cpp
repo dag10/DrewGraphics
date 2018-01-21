@@ -9,6 +9,10 @@ dg::KeyboardCameraController::KeyboardCameraController(
     std::weak_ptr<Camera> camera, std::weak_ptr<Window> window)
   : camera(camera), window(window) {}
 
+dg::KeyboardCameraController::KeyboardCameraController(
+    std::weak_ptr<Camera> camera, std::weak_ptr<Window> window, float speed)
+  : camera(camera), window(window), speed(speed) {}
+
 void dg::KeyboardCameraController::Start() {
   auto camera = this->camera.lock();
   if (!camera) return;
@@ -21,7 +25,6 @@ void dg::KeyboardCameraController::Update() {
   auto window = this->window.lock();
   if (!camera || !window) return;
 
-  const float speed = 1.8f; // units per second
   const float rotationSpeed = 90; // degrees per second
   const float cursorRotationSpeed = 0.3f; // degrees per cursor pixels moved
 

@@ -17,6 +17,11 @@ namespace dg {
 
       KeyboardCameraController(
           std::weak_ptr<Camera> camera, std::weak_ptr<Window> window);
+      KeyboardCameraController(
+          std::weak_ptr<Camera> camera, std::weak_ptr<Window> window,
+          float speed);
+
+      float speed = 1.8f; // units per second
 
       virtual void Start();
       virtual void Update();

@@ -13,7 +13,6 @@
 #include <materials/StandardMaterial.h>
 #include <Light.h>
 #include <lights/SpotLight.h>
-#include <openvr.h>
 
 namespace dg {
 
@@ -24,7 +23,6 @@ namespace dg {
       static std::unique_ptr<VRScene> Make();
 
       VRScene();
-      virtual ~VRScene();
 
       virtual void Initialize();
       virtual void Update();
@@ -52,8 +50,6 @@ namespace dg {
 
       std::shared_ptr<SceneObject> leftController;
       std::shared_ptr<SceneObject> rightController;
-
-      vr::IVRSystem *vrSystem;
 
   }; // class VRScene
 

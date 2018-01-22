@@ -43,6 +43,12 @@
     <Filter Include="Header Files\scenes">
       <UniqueIdentifier>{adbb3a12-eed1-47d6-8658-828259c8605f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\vr">
+      <UniqueIdentifier>{b8dc3a69-449b-4f2d-b035-d69aced06d12}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\vr">
+      <UniqueIdentifier>{7a7146b2-8404-41fd-8171-72f7711d9eef}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Camera.cpp">
@@ -128,6 +134,9 @@
     </ClCompile>
     <ClCompile Include="src\scenes\MeshesScene.cpp">
       <Filter>Source Files\scenes</Filter>
+    </ClCompile>
+    <ClCompile Include="src\vr\VRSystem.cpp">
+      <Filter>Source Files\vr</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -223,6 +232,9 @@
     </ClInclude>
     <ClInclude Include="include\scenes\MeshesScene.h">
       <Filter>Header Files\scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="include\vr\VRSystem.h">
+      <Filter>Header Files\vr</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

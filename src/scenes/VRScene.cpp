@@ -12,10 +12,9 @@
 #include <Mesh.h>
 #include <Transform.h>
 #include <iostream>
-#include <behaviors/KeyboardCameraController.h>
 #include <lights/DirectionalLight.h>
 #include <lights/PointLight.h>
-#include <openvr.h>
+#include <vr/VRSystem.h>
 
 static const glm::vec3 cubePositions[] = {
   glm::vec3(  0.0f,  0.25f,  0.0f ),
@@ -31,26 +30,9 @@ std::unique_ptr<dg::VRScene> dg::VRScene::Make() {
 
 dg::VRScene::VRScene() : Scene() {}
 
-dg::VRScene::~VRScene() {
-  vr::VR_Shutdown();
-}
-
 void dg::VRScene::Initialize() {
   // Initialize OpenVR.
-  if (!vr::VR_IsRuntimeInstalled()) {
-    throw std::runtime_error("Please insteall the OpenVR Runtime.");
-  }
-  if (!vr::VR_IsHmdPresent()) {
-    throw std::runtime_error("No VR headset is detected.");
-  }
-  vr::HmdError error;
-  vrSystem = vr::VR_Init(&error, vr::EVRApplicationType::VRApplication_Scene);
-  if (vrSystem == nullptr) {
-    throw OpenVRError(error);
-  }
-
-  // Lock window cursor to center.
-  //window->LockCursor();
+  VRSystem::Initialize();
 
   // Create textures.
   std::shared_ptr<Texture> crateTexture = std::make_shared<Texture>(
@@ -226,10 +208,6 @@ void dg::VRScene::Initialize() {
   mainCamera->farClip = 10;
   VRContainer->AddChild(mainCamera);
 
-  // Allow camera to be controller by the keyboard and mouse.
-  behaviors.push_back(std::unique_ptr<Behavior>(
-    new KeyboardCameraController(mainCamera, window)));
-
   // Create a flashlight attached to the camera.
   flashlight = std::make_shared<SpotLight>(
       glm::vec3(0, 0, -1), glm::radians(25.f),
@@ -275,7 +253,7 @@ void dg::VRScene::Update() {
   // Get tracked device poses.
   const int maxDevices = 16;
   vr::TrackedDevicePose_t devicePoses[maxDevices];
-  vrSystem->GetDeviceToAbsoluteTrackingPose(
+  VRSystem::Instance->vrSystem->GetDeviceToAbsoluteTrackingPose(
     vr::ETrackingUniverseOrigin::TrackingUniverseStanding, 0, devicePoses,
     maxDevices);
 
@@ -290,7 +268,7 @@ void dg::VRScene::Update() {
   leftController->enabled = false;
   rightController->enabled = false;
   for (int i = 0; i < vr::k_unMaxTrackedDeviceCount; i++) {
-    if (vrSystem->GetTrackedDeviceClass(i)
+    if (VRSystem::Instance->vrSystem->GetTrackedDeviceClass(i)
         == vr::TrackedDeviceClass_Controller) {
       if (!leftController->enabled) {
         leftController->enabled = true;

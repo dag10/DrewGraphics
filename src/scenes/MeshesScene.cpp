@@ -33,7 +33,7 @@ void dg::MeshesScene::Initialize() {
 
   // Create ceiling light source.
   auto ceilingLight = std::make_shared<PointLight>(
-      glm::vec3(1.0, 0.93, 0.86), 0.732, 0.399, 0.968);
+      glm::vec3(1, 0.93, 0.86), 0.732f, 0.399f, 0.968f);
   ceilingLight->transform.translation = glm::vec3(0, 0.8, 0.5);
   AddChild(ceilingLight);
 
@@ -80,7 +80,7 @@ void dg::MeshesScene::Initialize() {
   const int floorSize = 10;
   StandardMaterial floorMaterial = StandardMaterial::WithTexture(
       hardwoodTexture);
-  floorMaterial.SetUVScale(glm::vec2(floorSize));
+  floorMaterial.SetUVScale(glm::vec2((float)floorSize));
 
   // Create shiny brick material.
   StandardMaterial brickMaterial = StandardMaterial::WithTexture(

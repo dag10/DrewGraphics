@@ -204,7 +204,7 @@ void dg::Window::SetSize(glm::vec2 size) {
 #ifdef _WIN32
   size *= GetContentScale();
 #endif
-  glfwSetWindowSize(glfwWindow, size.x, size.y);
+  glfwSetWindowSize(glfwWindow, (int)size.x, (int)size.y);
 }
 
 /// Gets the DPI scale for the window if it exists, or of the primary monitor if
@@ -255,8 +255,8 @@ void dg::Window::Open(int width, int height) {
   // Only Windows sets window sizes by pixel sizes. Mac automatically adjusts for DPI scale.
 #ifdef _WIN32
   glm::vec2 scale = GetContentScale();
-  width *= scale.x;
-  height *= scale.y;
+  width = (int)((float)width * scale.x);
+  height = (int)((float)height * scale.y);
 #endif
 
   glfwWindow = glfwCreateWindow(width, height, title.c_str(), NULL, NULL);

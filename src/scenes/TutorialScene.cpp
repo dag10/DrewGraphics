@@ -69,7 +69,7 @@ void dg::TutorialScene::Initialize() {
   const int floorSize = 10;
   StandardMaterial floorMaterial = StandardMaterial::WithTexture(
       hardwoodTexture);
-  floorMaterial.SetUVScale(glm::vec2(floorSize));
+  floorMaterial.SetUVScale(glm::vec2((float)floorSize));
 
   // Create floor plane.
   AddChild(std::make_shared<Model>(

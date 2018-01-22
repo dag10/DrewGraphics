@@ -406,7 +406,7 @@ void dg::PortalScene::Update() {
 
   // Animate light position.
   if (animatingLight) {
-    lightModel->transform.translation.x = 1.f + 1.f * sin(5.f * Time::Elapsed);
+    lightModel->transform.translation.x = 1 + 1 * (float)sin(5 * Time::Elapsed);
   } else {
     lightModel->transform.translation.x = 1.5f;
   }

@@ -106,7 +106,7 @@ void dg::Material::SetProperty(
   prop.type = PROPERTY_TEXTURE;
   prop.texture = value;
   prop.texUnitHint = texUnitHint;
-  if (texUnitHint > highestTexUnitHint) {
+  if (texUnitHint > (int)highestTexUnitHint) {
     highestTexUnitHint = texUnitHint;
   }
   properties[name] = prop;

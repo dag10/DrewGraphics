@@ -18,7 +18,6 @@ int dg::Shader::MAX_FRAGMENT_TEXTURE_UNITS = 0;
 int dg::Shader::MAX_COMBINED_TEXTURE_UNITS = 0;
 
 void dg::Shader::Initialize() {
-  int vertex, geometry, fragment, combined;
   glGetIntegerv(GL_MAX_VERTEX_TEXTURE_IMAGE_UNITS, &MAX_VERTEX_TEXTURE_UNITS);
   glGetIntegerv(
       GL_MAX_GEOMETRY_TEXTURE_IMAGE_UNITS, &MAX_GEOMETRY_TEXTURE_UNITS);

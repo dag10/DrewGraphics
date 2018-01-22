@@ -244,24 +244,6 @@ void dg::VRScene::Initialize() {
   animatingLight = false;
 }
 
-// TODO: Refactor
-static glm::mat4x4 HmdToMat4x4(vr::HmdMatrix34_t in) {
-  return glm::mat4x4(
-    glm::vec4(in.m[0][0], in.m[1][0], in.m[2][0], 0),
-    glm::vec4(in.m[0][1], in.m[1][1], in.m[2][1], 0),
-    glm::vec4(in.m[0][2], in.m[1][2], in.m[2][2], 0),
-    glm::vec4(in.m[0][3], in.m[1][3], in.m[2][3], 1));
-}
-
-// TODO: Refactor
-static dg::Transform HmdToTransform(vr::HmdMatrix34_t in) {
-  glm::mat4x4 mat = HmdToMat4x4(in);
-  dg::Transform xf;
-  xf.translation = mat * glm::vec4(0, 0, 0, 1);
-  xf.rotation = glm::quat_cast(mat);
-  return xf;
-}
-
 void dg::VRScene::Update() {
   Scene::Update();
 
@@ -270,8 +252,7 @@ void dg::VRScene::Update() {
   vrSystem->GetDeviceToAbsoluteTrackingPose(
     vr::ETrackingUniverseOrigin::TrackingUniverseStanding, 0, devicePoses, 1);
   if (devicePoses[0].bPoseIsValid) {
-    mainCamera->transform = HmdToTransform(
-      devicePoses[0].mDeviceToAbsoluteTracking);
+    mainCamera->transform = Transform(devicePoses[0].mDeviceToAbsoluteTracking);
   } else {
     std::cout << "Pose is not valid." << std::endl;
   }
@@ -356,9 +337,9 @@ void dg::VRScene::Update() {
 
   // Animate light position.
   if (animatingLight) {
-    lightModel->transform.translation.x = 1.f + 1.f * sin(5.f * Time::Elapsed);
+    lightModel->transform.translation.x = 1 + 1 * (float)sin(5 * Time::Elapsed);
   } else {
-    lightModel->transform.translation.x = 1.5f;
+    lightModel->transform.translation.x = 1.5;
   }
 
   // Update light cube model to be consistent with point light.

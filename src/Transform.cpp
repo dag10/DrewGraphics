@@ -3,7 +3,7 @@
 //
 
 #include <Transform.h>
-
+#include <openvr.h>
 #include <sstream>
 #include <glm/gtc/matrix_transform.hpp>
 #define GLM_ENABLE_EXPERIMENTAL
@@ -55,6 +55,17 @@ dg::Transform dg::Transform::TRS(
   xf.rotation = rotation;
   xf.scale = scale;
   return xf;
+}
+
+dg::Transform::Transform(vr::HmdMatrix34_t in) {
+  glm::mat4x4 mat(
+    glm::vec4(in.m[0][0], in.m[1][0], in.m[2][0], 0),
+    glm::vec4(in.m[0][1], in.m[1][1], in.m[2][1], 0),
+    glm::vec4(in.m[0][2], in.m[1][2], in.m[2][2], 0),
+    glm::vec4(in.m[0][3], in.m[1][3], in.m[2][3], 1));
+  translation = glm::vec3(mat * glm::vec4(0, 0, 0, 1));
+  rotation = glm::quat_cast(mat);
+  scale = glm::vec3(1);
 }
 
 dg::Transform dg::Transform::Inverse() const {

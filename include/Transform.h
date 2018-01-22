@@ -9,6 +9,10 @@
 #include <string>
 #include <ostream>
 
+namespace vr {
+  struct HmdMatrix34_t;
+}
+
 namespace dg {
   static const glm::vec3 X_BASIS ( 1,  0,  0 );
   static const glm::vec3 Y_BASIS ( 0,  1,  0 );
@@ -29,6 +33,9 @@ namespace dg {
 
       static Transform TRS(
           glm::vec3 translation, glm::quat rotation, glm::vec3 scale);
+
+      Transform() = default;
+      Transform(vr::HmdMatrix34_t in);
 
       glm::vec3 translation = glm::vec3(0, 0, 0);
       glm::quat rotation = glm::quat(1, 0, 0, 0);

@@ -44,8 +44,7 @@ void dg::VRScene::Initialize() {
     throw std::runtime_error("No VR headset is detected.");
   }
   vr::HmdError error;
-  vr::IVRSystem *vrSystem = vr::VR_Init(
-    &error, vr::EVRApplicationType::VRApplication_Scene);
+  vrSystem = vr::VR_Init(&error, vr::EVRApplicationType::VRApplication_Scene);
   if (vrSystem == nullptr) {
     throw OpenVRError(error);
   }
@@ -234,8 +233,8 @@ void dg::VRScene::Initialize() {
       Transform::S(glm::vec3(0.2f, 0.1f, 0.1f))), false);
 
   // Allow camera to be controller by the keyboard and mouse.
-  behaviors.push_back(std::unique_ptr<Behavior>(
-        new KeyboardCameraController(mainCamera, window)));
+  //behaviors.push_back(std::unique_ptr<Behavior>(
+  //      new KeyboardCameraController(mainCamera, window)));
 
   // Initial lighting configuration is the indoor point light.
   lightingType = PointLighting;
@@ -245,8 +244,37 @@ void dg::VRScene::Initialize() {
   animatingLight = false;
 }
 
+// TODO: Refactor
+static glm::mat4x4 HmdToMat4x4(vr::HmdMatrix34_t in) {
+  return glm::mat4x4(
+    glm::vec4(in.m[0][0], in.m[1][0], in.m[2][0], 0),
+    glm::vec4(in.m[0][1], in.m[1][1], in.m[2][1], 0),
+    glm::vec4(in.m[0][2], in.m[1][2], in.m[2][2], 0),
+    glm::vec4(in.m[0][3], in.m[1][3], in.m[2][3], 1));
+}
+
+// TODO: Refactor
+static dg::Transform HmdToTransform(vr::HmdMatrix34_t in) {
+  glm::mat4x4 mat = HmdToMat4x4(in);
+  dg::Transform xf;
+  xf.translation = mat * glm::vec4(0, 0, 0, 1);
+  xf.rotation = glm::quat_cast(mat);
+  return xf;
+}
+
 void dg::VRScene::Update() {
   Scene::Update();
+
+  // Update camera transform to HMD's position.
+  vr::TrackedDevicePose_t devicePoses[1];
+  vrSystem->GetDeviceToAbsoluteTrackingPose(
+    vr::ETrackingUniverseOrigin::TrackingUniverseStanding, 0, devicePoses, 1);
+  if (devicePoses[0].bPoseIsValid) {
+    mainCamera->transform = HmdToTransform(
+      devicePoses[0].mDeviceToAbsoluteTracking);
+  } else {
+    std::cout << "Pose is not valid." << std::endl;
+  }
 
   // Adjust light ambient power with keyboard.
   const float lightDelta = 0.05f;

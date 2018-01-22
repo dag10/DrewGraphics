@@ -13,6 +13,7 @@
 #include <materials/StandardMaterial.h>
 #include <Light.h>
 #include <lights/SpotLight.h>
+#include <openvr.h>
 
 namespace dg {
 
@@ -48,6 +49,8 @@ namespace dg {
       std::shared_ptr<Light> outdoorCeilingLight;
       std::shared_ptr<SpotLight> spotLight;
       std::shared_ptr<SpotLight> flashlight;
+
+      vr::IVRSystem *vrSystem;
 
   }; // class VRScene
 

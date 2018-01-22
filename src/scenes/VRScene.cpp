@@ -200,6 +200,12 @@ void dg::VRScene::Initialize() {
   rightController = std::make_shared<SceneObject>();
   VRContainer->AddChild(rightController);
 
+  // Create a flashlight attached to the right controller.
+  flashlight = std::make_shared<SpotLight>(
+      glm::vec3(0, 0, -1), glm::radians(25.f),
+      ceilingLightColor, 0.314f, 2.16f, 2.11f);
+  rightController->AddChild(flashlight, false);
+
   // Create camera.
   mainCamera = std::make_shared<Camera>();
   mainCamera->transform.translation = glm::vec3(2.2f, 0.85f, 1);
@@ -207,13 +213,6 @@ void dg::VRScene::Initialize() {
   mainCamera->nearClip = 0.01f;
   mainCamera->farClip = 10;
   VRContainer->AddChild(mainCamera);
-
-  // Create a flashlight attached to the camera.
-  flashlight = std::make_shared<SpotLight>(
-      glm::vec3(0, 0, -1), glm::radians(25.f),
-      ceilingLightColor, 0.314f, 2.16f, 2.11f);
-  flashlight->transform = Transform::T(glm::vec3(0.1f, -0.1f, 0));
-  mainCamera->AddChild(flashlight, false);
 
   // Create box that represents the camera's position.
   mainCamera->AddChild(std::make_shared<Model>(

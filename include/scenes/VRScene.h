@@ -50,6 +50,9 @@ namespace dg {
       std::shared_ptr<SpotLight> spotLight;
       std::shared_ptr<SpotLight> flashlight;
 
+      std::shared_ptr<SceneObject> leftController;
+      std::shared_ptr<SceneObject> rightController;
+
       vr::IVRSystem *vrSystem;
 
   }; // class VRScene

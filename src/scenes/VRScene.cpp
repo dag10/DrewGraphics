@@ -50,7 +50,7 @@ void dg::VRScene::Initialize() {
   }
 
   // Lock window cursor to center.
-  window->LockCursor();
+  //window->LockCursor();
 
   // Create textures.
   std::shared_ptr<Texture> crateTexture = std::make_shared<Texture>(
@@ -210,13 +210,25 @@ void dg::VRScene::Initialize() {
   ceiling->transform.translation.y = 2;
   AddChild(ceiling);
 
+  // Create container for OpenVR tracked devices.
+  auto VRContainer = std::make_shared<SceneObject>();
+  AddChild(VRContainer);
+  leftController = std::make_shared<SceneObject>();
+  VRContainer->AddChild(leftController);
+  rightController = std::make_shared<SceneObject>();
+  VRContainer->AddChild(rightController);
+
   // Create camera.
   mainCamera = std::make_shared<Camera>();
   mainCamera->transform.translation = glm::vec3(2.2f, 0.85f, 1);
   mainCamera->LookAtPoint(glm::vec3(0, mainCamera->transform.translation.y, 0));
   mainCamera->nearClip = 0.01f;
   mainCamera->farClip = 10;
-  AddChild(mainCamera);
+  VRContainer->AddChild(mainCamera);
+
+  // Allow camera to be controller by the keyboard and mouse.
+  behaviors.push_back(std::unique_ptr<Behavior>(
+    new KeyboardCameraController(mainCamera, window)));
 
   // Create a flashlight attached to the camera.
   flashlight = std::make_shared<SpotLight>(
@@ -232,9 +244,22 @@ void dg::VRScene::Initialize() {
         StandardMaterial::WithColor(glm::vec3(0.8f, 1.0f, 0.8f))),
       Transform::S(glm::vec3(0.2f, 0.1f, 0.1f))), false);
 
-  // Allow camera to be controller by the keyboard and mouse.
-  //behaviors.push_back(std::unique_ptr<Behavior>(
-  //      new KeyboardCameraController(mainCamera, window)));
+  // Create controller sphere material.
+  StandardMaterial controllerMaterial = StandardMaterial::WithColor(
+    glm::vec3(0.4, 0, 0));
+  controllerMaterial.SetSpecular(0.3);
+
+  // Create spheres to represent left and right controllers.
+  auto leftControllerSphere = std::make_shared<Model>(
+    Mesh::Cube,
+    std::make_shared<StandardMaterial>(controllerMaterial),
+    Transform::S(glm::vec3(0.05, 0.03, 0.1)));
+  leftController->AddChild(leftControllerSphere);
+  auto rightControllerSphere = std::make_shared<Model>(
+    Mesh::Cube,
+    std::make_shared<StandardMaterial>(controllerMaterial),
+    Transform::S(glm::vec3(0.05, 0.03, 0.1)));
+  rightController->AddChild(rightControllerSphere);
 
   // Initial lighting configuration is the indoor point light.
   lightingType = PointLighting;
@@ -247,14 +272,36 @@ void dg::VRScene::Initialize() {
 void dg::VRScene::Update() {
   Scene::Update();
 
-  // Update camera transform to HMD's position.
-  vr::TrackedDevicePose_t devicePoses[1];
+  // Get tracked device poses.
+  const int maxDevices = 16;
+  vr::TrackedDevicePose_t devicePoses[maxDevices];
   vrSystem->GetDeviceToAbsoluteTrackingPose(
-    vr::ETrackingUniverseOrigin::TrackingUniverseStanding, 0, devicePoses, 1);
+    vr::ETrackingUniverseOrigin::TrackingUniverseStanding, 0, devicePoses,
+    maxDevices);
+
+  // Update camera pose.
   if (devicePoses[0].bPoseIsValid) {
     mainCamera->transform = Transform(devicePoses[0].mDeviceToAbsoluteTracking);
   } else {
     std::cout << "Pose is not valid." << std::endl;
+  }
+
+  // Update controller poses.
+  leftController->enabled = false;
+  rightController->enabled = false;
+  for (int i = 0; i < vr::k_unMaxTrackedDeviceCount; i++) {
+    if (vrSystem->GetTrackedDeviceClass(i)
+        == vr::TrackedDeviceClass_Controller) {
+      if (!leftController->enabled) {
+        leftController->enabled = true;
+        leftController->transform = Transform(
+          devicePoses[i].mDeviceToAbsoluteTracking);
+      } else if (!rightController->enabled) {
+        rightController->enabled = true;
+        rightController->transform = Transform(
+          devicePoses[i].mDeviceToAbsoluteTracking);
+      }
+    }
   }
 
   // Adjust light ambient power with keyboard.

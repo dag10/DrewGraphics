@@ -26,6 +26,7 @@ namespace dg {
 
       virtual void Initialize();
       virtual void Update();
+      virtual void RenderFrame();
 
     private:
 

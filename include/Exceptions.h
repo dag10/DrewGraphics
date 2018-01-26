@@ -12,8 +12,8 @@ namespace dg {
 
 class OpenVRError : public std::runtime_error {
   public:
-    OpenVRError(vr::HmdError hmdError)
-        : std::runtime_error("OpenVR HmdError " + std::to_string(hmdError)) { };
+    OpenVRError(vr::EVRInitError error) : std::runtime_error(
+      VR_GetVRInitErrorAsSymbol(error)) { };
 };
 
 class ShaderCompileError : public std::runtime_error {

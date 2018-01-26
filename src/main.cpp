@@ -21,8 +21,9 @@
 #include <scenes/VRScene.h>
 
 [[noreturn]] void terminateWithError(const char *error) {
-  std::cerr << error << std::endl;
+  std::cerr << error << std::endl << std::endl << "Press enter to quit...";
   glfwTerminate();
+  getchar();
   exit(-1);
 }
 

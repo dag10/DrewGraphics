@@ -249,36 +249,22 @@ void dg::VRScene::Initialize() {
 void dg::VRScene::Update() {
   Scene::Update();
 
-  // Get tracked device poses.
-  const int maxDevices = 16;
-  vr::TrackedDevicePose_t devicePoses[maxDevices];
-  VRSystem::Instance->vrSystem->GetDeviceToAbsoluteTrackingPose(
-    vr::ETrackingUniverseOrigin::TrackingUniverseStanding, 0, devicePoses,
-    maxDevices);
-
   // Update camera pose.
-  if (devicePoses[0].bPoseIsValid) {
-    mainCamera->transform = Transform(devicePoses[0].mDeviceToAbsoluteTracking);
-  } else {
-    std::cout << "Pose is not valid." << std::endl;
+  const Transform *xfHmd = VRSystem::Instance->GetHmdTransform();
+  if (xfHmd != nullptr) {
+    mainCamera->transform = *xfHmd;
   }
 
   // Update controller poses.
-  leftController->enabled = false;
-  rightController->enabled = false;
-  for (int i = 0; i < vr::k_unMaxTrackedDeviceCount; i++) {
-    if (VRSystem::Instance->vrSystem->GetTrackedDeviceClass(i)
-        == vr::TrackedDeviceClass_Controller) {
-      if (!leftController->enabled) {
-        leftController->enabled = true;
-        leftController->transform = Transform(
-          devicePoses[i].mDeviceToAbsoluteTracking);
-      } else if (!rightController->enabled) {
-        rightController->enabled = true;
-        rightController->transform = Transform(
-          devicePoses[i].mDeviceToAbsoluteTracking);
-      }
-    }
+  const Transform *xfLeft = VRSystem::Instance->GetLeftControllerTransform();
+  leftController->enabled = (xfLeft != nullptr);
+  if (xfLeft != nullptr) {
+    leftController->transform = *xfLeft;
+  }
+  const Transform *xfRight = VRSystem::Instance->GetRightControllerTransform();
+  rightController->enabled = (xfRight != nullptr);
+  if (xfRight != nullptr) {
+    rightController->transform = *xfRight;
   }
 
   // Adjust light ambient power with keyboard.
@@ -380,4 +366,22 @@ void dg::VRScene::UpdateLightingConfiguration() {
   outdoorCeilingLight->enabled = (lightingType == OutdoorLighting);
   spotLight->enabled = (lightingType == SpotLighting);
   flashlight->enabled = (lightingType == FlashlightLighting);
+}
+
+void dg::VRScene::RenderFrame() {
+  // Clear back buffer.
+  glClearColor(0, 0, 0, 1);
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+
+  // Render params.
+  glEnable(GL_DEPTH_TEST);
+  glEnable(GL_CULL_FACE);
+  glCullFace(GL_BACK);
+
+  // Wait for running start, and get latest poses.
+  VRSystem::Instance->WaitGetPoses();
+
+  // TODO: Update transforms to render poses, then to game poses after render.
+
+  RenderScene(*mainCamera);
 }

@@ -142,105 +142,55 @@ GLint dg::Shader::GetAttributeLocation(const std::string& name) const {
 }
 
 void dg::Shader::SetBool(const std::string& name, bool value) {
-  ShaderProperty prop;
-  prop.type = PROPERTY_BOOL;
-  prop.value._bool = value;
   glUniform1i(GetUniformLocation(name), (int)value);
-  properties[name] = prop;
 }
 
 void dg::Shader::SetInt(const std::string& name, int value) {
   glUniform1i(GetUniformLocation(name), (int)value);
-  ShaderProperty prop;
-  prop.type = PROPERTY_INT;
-  prop.value._int = value;
-  properties[name] = prop;
 }
 
 void dg::Shader::SetFloat(const std::string& name, float value) {
   glUniform1f(GetUniformLocation(name), value);
-  ShaderProperty prop;
-  prop.type = PROPERTY_FLOAT;
-  prop.value._float = value;
-  properties[name] = prop;
 }
 
 void dg::Shader::SetVec2(
     const std::string& name, const glm::vec2& value) {
   glUniform2fv(GetUniformLocation(name), 1, glm::value_ptr(value));
-  ShaderProperty prop;
-  prop.type = PROPERTY_VEC2;
-  prop.value._vec2 = value;
-  properties[name] = prop;
 }
 
 void dg::Shader::SetVec3(
     const std::string& name, const glm::vec3& value) {
   glUniform3fv(GetUniformLocation(name), 1, glm::value_ptr(value));
-  ShaderProperty prop;
-  prop.type = PROPERTY_VEC3;
-  prop.value._vec3 = value;
-  properties[name] = prop;
 }
 
 void dg::Shader::SetVec4(const std::string& name, const glm::vec4& value) {
   glUniform4fv(GetUniformLocation(name), 1, glm::value_ptr(value));
-  ShaderProperty prop;
-  prop.type = PROPERTY_VEC4;
-  prop.value._vec4 = value;
-  properties[name] = prop;
 }
 
 void dg::Shader::SetMat2(const std::string& name, const glm::mat2& mat) {
   glUniformMatrix2fv(
       GetUniformLocation(name), 1, GL_FALSE, glm::value_ptr(mat));
-  ShaderProperty prop;
-  prop.type = PROPERTY_MAT2X2;
-  prop.value._mat2x2 = mat;
-  properties[name] = prop;
 }
 
 void dg::Shader::SetMat3(const std::string& name, const glm::mat3& mat) {
   glUniformMatrix3fv(
       GetUniformLocation(name), 1, GL_FALSE, glm::value_ptr(mat));
-  ShaderProperty prop;
-  prop.type = PROPERTY_MAT3X3;
-  prop.value._mat3x3 = mat;
-  properties[name] = prop;
 }
 
 void dg::Shader::SetMat4(const std::string& name, const glm::mat4& mat) {
   glUniformMatrix4fv(
       GetUniformLocation(name), 1, GL_FALSE, glm::value_ptr(mat));
-  ShaderProperty prop;
-  prop.type = PROPERTY_MAT4X4;
-  prop.value._mat4x4 = mat;
-  properties[name] = prop;
 }
 
 void dg::Shader::SetMat4(
     const std::string& name, const dg::Transform& xf) {
   glm::mat4x4 mat = xf.ToMat4();
   SetMat4(name, mat);
-  ShaderProperty prop;
-  prop.type = PROPERTY_MAT4X4;
-  prop.value._mat4x4 = mat;
-  properties[name] = prop;
 }
 
 void dg::Shader::SetTexture(
     unsigned int textureUnit, const std::string& name, Texture *texture) {
   assert(texture != nullptr);
-
-  if (properties.find(name) != properties.end() &&
-      properties[name].texture == texture) {
-    return;
-  }
-
-  ShaderProperty prop;
-  prop.type = PROPERTY_TEXTURE;
-  prop.texture = texture;
-  properties[name] = prop;
 
   glActiveTexture(GL_TEXTURE0 + textureUnit);
   glBindTexture(GL_TEXTURE_2D, texture->GetHandle());

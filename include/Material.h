@@ -4,7 +4,7 @@
 #pragma once
 
 #include <memory>
-#include <map>
+#include <unordered_map>
 #include <Shader.h>
 #include <Texture.h>
 #include <Light.h>
@@ -67,7 +67,7 @@ namespace dg {
 
     private:
 
-      std::map<std::string, MaterialProperty> properties;
+      std::unordered_map<std::string, MaterialProperty> properties;
       unsigned int highestTexUnitHint = 0;
 
   }; // class Material

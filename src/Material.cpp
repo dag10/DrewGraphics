@@ -35,63 +35,63 @@ void dg::Material::SetProperty(const std::string& name, bool value) {
   MaterialProperty prop;
   prop.type = PROPERTY_BOOL;
   prop.value._bool = value;
-  properties[name] = prop;
+  properties.insert_or_assign(name, prop);
 }
 
 void dg::Material::SetProperty(const std::string& name, int value) {
   MaterialProperty prop;
   prop.type = PROPERTY_INT;
   prop.value._int = value;
-  properties[name] = prop;
+  properties.insert_or_assign(name, prop);
 }
 
 void dg::Material::SetProperty(const std::string& name, float value) {
   MaterialProperty prop;
   prop.type = PROPERTY_FLOAT;
   prop.value._float = value;
-  properties[name] = prop;
+  properties.insert_or_assign(name, prop);
 }
 
 void dg::Material::SetProperty(const std::string& name, glm::vec2 value) {
   MaterialProperty prop;
   prop.type = PROPERTY_VEC2;
   prop.value._vec2 = value;
-  properties[name] = prop;
+  properties.insert_or_assign(name, prop);
 }
 
 void dg::Material::SetProperty(const std::string& name, glm::vec3 value) {
   MaterialProperty prop;
   prop.type = PROPERTY_VEC3;
   prop.value._vec3 = value;
-  properties[name] = prop;
+  properties.insert_or_assign(name, prop);
 }
 
 void dg::Material::SetProperty(const std::string& name, glm::vec4 value) {
   MaterialProperty prop;
   prop.type = PROPERTY_VEC4;
   prop.value._vec4 = value;
-  properties[name] = prop;
+  properties.insert_or_assign(name, prop);
 }
 
 void dg::Material::SetProperty(const std::string& name, glm::mat2x2 value) {
   MaterialProperty prop;
   prop.type = PROPERTY_MAT2X2;
   prop.value._mat2x2 = value;
-  properties[name] = prop;
+  properties.insert_or_assign(name, prop);
 }
 
 void dg::Material::SetProperty(const std::string& name, glm::mat3x3 value) {
   MaterialProperty prop;
   prop.type = PROPERTY_MAT3X3;
   prop.value._mat3x3 = value;
-  properties[name] = prop;
+  properties.insert_or_assign(name, prop);
 }
 
 void dg::Material::SetProperty(const std::string& name, glm::mat4x4 value) {
   MaterialProperty prop;
   prop.type = PROPERTY_MAT4X4;
   prop.value._mat4x4 = value;
-  properties[name] = prop;
+  properties.insert_or_assign(name, prop);
 }
 
 void dg::Material::SetProperty(
@@ -109,7 +109,7 @@ void dg::Material::SetProperty(
   if (texUnitHint > (int)highestTexUnitHint) {
     highestTexUnitHint = texUnitHint;
   }
-  properties[name] = prop;
+  properties.insert_or_assign(name, prop);
 }
 
 void dg::Material::ClearProperty(const std::string& name) {

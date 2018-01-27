@@ -5,7 +5,7 @@
 #pragma once
 
 #include <vector>
-#include <map>
+#include <unordered_map>
 #include <string>
 #include <glm/glm.hpp>
 #include <Texture.h>
@@ -115,8 +115,6 @@ namespace dg {
 
       std::string vertexPath = std::string();
       std::string fragmentPath = std::string();
-
-      std::map<std::string, ShaderProperty> properties;
 
       GLuint programHandle = 0;
 

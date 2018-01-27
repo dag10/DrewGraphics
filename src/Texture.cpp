@@ -19,6 +19,15 @@ dg::Texture dg::Texture::FromPath(const std::string& path) {
   return tex;
 }
 
+dg::Texture dg::Texture::WithDimensions(
+  unsigned int width, unsigned int height) {
+  dg::Texture tex;
+  tex.width = width;
+  tex.height = height;
+  tex.GenerateImage(GL_RGBA, nullptr, GL_RGBA, GL_UNSIGNED_BYTE, false);
+  return tex;
+}
+
 GLuint dg::Texture::GetHandle() const {
   return textureHandle;
 }
@@ -52,10 +61,18 @@ void dg::Texture::LoadFromPath(const std::string& path) {
   stbi_set_flip_vertically_on_load(true);
   int nrChannels;
   std::unique_ptr<stbi_uc[]> pixels = std::unique_ptr<stbi_uc[]>(stbi_load(
-      path.c_str(), &width, &height, &nrChannels, 0));
+    path.c_str(), &width, &height, &nrChannels, 0));
   if (pixels == nullptr) {
     throw dg::STBLoadError(path, stbi_failure_reason());
   }
+
+  GLenum format = (nrChannels == 3) ? GL_RGB : GL_RGBA;
+  GenerateImage(format, pixels.get(), format, GL_UNSIGNED_BYTE, true);
+}
+
+void dg::Texture::GenerateImage(
+  GLenum internalFormat, void *pixels, GLenum externalFormat,
+  GLenum externalType, bool mipmap) {
 
   // Generate one new texture handle.
   glGenTextures(1, &textureHandle);
@@ -66,25 +83,26 @@ void dg::Texture::LoadFromPath(const std::string& path) {
   // Set parameters for this texture.
   // It will use linear interpolation, and clamp out-of-bound
   // values to the nearest edge.
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+  GLenum minFilter = mipmap ? GL_LINEAR_MIPMAP_LINEAR : GL_LINEAR;
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, minFilter);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
   // Allocate the texture space and transfer the pixel data.
-  GLenum externalFormat = (nrChannels == 3) ? GL_RGB : GL_RGBA;
   glTexImage2D(
       GL_TEXTURE_2D,
       0, // Level of detail
-      GL_RGB, // Internal format
+      internalFormat, // Internal format
       width,
       height,
       0, // Border
       externalFormat, // External format
-      GL_UNSIGNED_BYTE, // Type
-      pixels.get()
+      externalType, // Type
+      pixels
       );
 
-  glGenerateMipmap(GL_TEXTURE_2D);
+  if (mipmap) {
+    glGenerateMipmap(GL_TEXTURE_2D);
+  }
 }
-

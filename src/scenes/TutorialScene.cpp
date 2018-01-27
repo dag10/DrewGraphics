@@ -41,14 +41,14 @@ void dg::TutorialScene::Initialize() {
   ceilingLight->transform.translation = glm::vec3(0.8f, 1.2f, -0.2f);
   AddChild(ceilingLight);
 
-  // Create light cube material.
+  // Create light sphere material.
   StandardMaterial lightMaterial = StandardMaterial::WithColor(
       ceilingLight->specular);
   lightMaterial.SetLit(false);
 
-  // Create light cube.
+  // Create light sphere.
   auto lightModel = std::make_shared<Model>(
-      dg::Mesh::Cube,
+      dg::Mesh::Sphere,
       std::make_shared<StandardMaterial>(lightMaterial),
       Transform::S(glm::vec3(0.05f)));
   ceilingLight->AddChild(lightModel, false);
@@ -79,6 +79,27 @@ void dg::TutorialScene::Initialize() {
           glm::quat(glm::radians(glm::vec3(-90, 0, 0))),
           glm::vec3(floorSize, floorSize, 1))));
 
+  // Create frame buffer.
+  framebuffer = std::make_shared<FrameBuffer>(2048, 2048);
+
+  // Create material for displaying the framebuffer.
+  StandardMaterial framebufferMaterial =
+    StandardMaterial::WithTexture(framebuffer->GetColorTexture());
+  framebufferMaterial.SetLit(false);
+
+  // Create quad to show framebuffer.
+  renderQuad = std::make_shared<Model>(
+    dg::Mesh::Quad,
+    std::make_shared<StandardMaterial>(framebufferMaterial),
+    Transform::TS(glm::vec3(0, 1.25f, -1), glm::vec3(0.5f)));
+  AddChild(renderQuad);
+
+  // Create virtual camera.
+  virtualCamera = std::make_shared<Camera>();
+  virtualCamera->transform.translation = glm::vec3(0, 1, 2);
+  virtualCamera->LookAtPoint(glm::vec3(cube->transform.translation));
+  AddChild(virtualCamera);
+
   // Create camera.
   mainCamera = std::make_shared<Camera>();
   mainCamera->transform.translation = glm::vec3(-1.25f, 2, 1.1f);
@@ -92,3 +113,36 @@ void dg::TutorialScene::Initialize() {
         new KeyboardCameraController(mainCamera, window)));
 }
 
+void dg::TutorialScene::Update() {
+  Scene::Update();
+
+  virtualCamera->transform = Transform::R(glm::quat(glm::radians(
+    glm::vec3(0, Time::Delta * 10, 0)))) * virtualCamera->transform;
+}
+
+void dg::TutorialScene::RenderFrame() {
+  // Clear framebuffer
+  framebuffer->Bind();
+  glViewport(0,0, framebuffer->GetWidth(), framebuffer->GetHeight());
+  glClearColor(0, 1, 1, 1);
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+  glEnable(GL_DEPTH_TEST);
+  glEnable(GL_CULL_FACE);
+  glCullFace(GL_BACK);
+  //renderQuad->enabled = false;
+  RenderScene(*mainCamera);
+  renderQuad->enabled = true;
+  framebuffer->Unbind();
+  glViewport(0,0, window->GetWidth() * 2, window->GetHeight() * 2);
+
+  // Clear back buffer.
+  glClearColor(0, 0, 0, 1);
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+
+  // Render params.
+  glEnable(GL_DEPTH_TEST);
+  glEnable(GL_CULL_FACE);
+  glCullFace(GL_BACK);
+
+  RenderScene(*mainCamera);
+}

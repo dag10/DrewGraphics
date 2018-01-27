@@ -13,6 +13,7 @@
 #include <Mesh.h>
 #include <Model.h>
 #include <Skybox.h>
+#include <FrameBuffer.h>
 
 namespace dg {
 
@@ -25,6 +26,14 @@ namespace dg {
       TutorialScene();
 
       virtual void Initialize();
+      virtual void Update();
+      virtual void RenderFrame();
+
+    private:
+
+      std::shared_ptr<FrameBuffer> framebuffer;
+      std::shared_ptr<Model> renderQuad;
+      std::shared_ptr<Camera> virtualCamera;
 
   }; // class TutorialScene
 

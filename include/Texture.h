@@ -15,6 +15,7 @@ namespace dg {
 
     public:
       static Texture FromPath(const std::string& path);
+      static Texture WithDimensions(unsigned int width, unsigned int height);
 
       Texture() = default;
       Texture(Texture& other) = delete;
@@ -28,6 +29,9 @@ namespace dg {
 
     private:
       void LoadFromPath(const std::string& path);
+      void GenerateImage(
+        GLenum internalFormat, void *pixels, GLenum externalFormat,
+        GLenum externalType, bool mipmap);
 
       GLuint textureHandle = 0;
       int width = 0;

@@ -138,6 +138,9 @@
     <ClCompile Include="src\vr\VRSystem.cpp">
       <Filter>Source Files\vr</Filter>
     </ClCompile>
+    <ClCompile Include="src\FrameBuffer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Behavior.h">
@@ -235,6 +238,9 @@
     </ClInclude>
     <ClInclude Include="include\vr\VRSystem.h">
       <Filter>Header Files\vr</Filter>
+    </ClInclude>
+    <ClInclude Include="include\FrameBuffer.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

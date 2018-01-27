@@ -11,6 +11,7 @@ std::map<GLFWwindow*, std::weak_ptr<dg::Window>> dg::Window::windowMap;
 
 void dg::Window::glfwKeyCallback(
     GLFWwindow *glfwWindow, int key, int scancode, int action, int mods) {
+  if (key < 0) return;
   auto pair = windowMap.find(glfwWindow);
   if (pair == windowMap.end()) {
     return;
@@ -22,6 +23,7 @@ void dg::Window::glfwKeyCallback(
 
 void dg::Window::glfwMouseButtonCallback(
     GLFWwindow *glfwWindow, int button, int action, int mods) {
+  if (button < 0) return;
   auto pair = windowMap.find(glfwWindow);
   if (pair == windowMap.end()) {
     return;

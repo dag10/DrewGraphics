@@ -121,19 +121,20 @@ void dg::TutorialScene::Update() {
 }
 
 void dg::TutorialScene::RenderFrame() {
-  // Clear framebuffer
+  // Render scene for framebuffer.
   framebuffer->Bind();
-  glViewport(0,0, framebuffer->GetWidth(), framebuffer->GetHeight());
+  glViewport(0, 0, framebuffer->GetWidth(), framebuffer->GetHeight());
   glClearColor(0, 1, 1, 1);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
   glEnable(GL_DEPTH_TEST);
   glEnable(GL_CULL_FACE);
   glCullFace(GL_BACK);
-  //renderQuad->enabled = false;
-  RenderScene(*mainCamera);
+  renderQuad->enabled = false;
+  RenderScene(*virtualCamera);
   renderQuad->enabled = true;
   framebuffer->Unbind();
-  glViewport(0,0, window->GetWidth() * 2, window->GetHeight() * 2);
+  glViewport(
+    0, 0, (GLsizei)window->GetWidth() * 2, (GLsizei)window->GetHeight() * 2);
 
   // Clear back buffer.
   glClearColor(0, 0, 0, 1);
@@ -144,5 +145,6 @@ void dg::TutorialScene::RenderFrame() {
   glEnable(GL_CULL_FACE);
   glCullFace(GL_BACK);
 
+  // Render scene for real.
   RenderScene(*mainCamera);
 }

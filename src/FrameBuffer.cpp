@@ -117,7 +117,8 @@ std::shared_ptr<dg::Texture> dg::FrameBuffer::GetColorTexture() const {
   return colorTexture;
 }
 
-std::shared_ptr<dg::RenderBuffer>dg::FrameBuffer::GetDepthRenderBuffer() const {
+std::shared_ptr<dg::RenderBuffer>
+dg::FrameBuffer::GetDepthRenderBuffer() const {
   return depthRenderBuffer;
 }
 

@@ -228,7 +228,7 @@ void dg::VRScene::Initialize() {
   // Create controller sphere material.
   StandardMaterial controllerMaterial = StandardMaterial::WithColor(
     glm::vec3(0.4, 0, 0));
-  controllerMaterial.SetSpecular(0.3);
+  controllerMaterial.SetSpecular(0.3f);
 
   // Create spheres to represent left and right controllers.
   auto leftControllerSphere = std::make_shared<Model>(

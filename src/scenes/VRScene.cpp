@@ -31,6 +31,10 @@ std::unique_ptr<dg::VRScene> dg::VRScene::Make() {
 dg::VRScene::VRScene() : Scene() {}
 
 void dg::VRScene::Initialize() {
+  // Disable glfw vsync, since IVRComposer::WaitGetPoses() will wait for
+  // "running start" in 90hz anyway.
+  glfwSwapInterval(0);
+
   // Initialize OpenVR.
   VRSystem::Initialize();
 
@@ -378,7 +382,7 @@ void dg::VRScene::RenderFrame() {
   glEnable(GL_CULL_FACE);
   glCullFace(GL_BACK);
 
-  // Wait for running start, and get latest poses.
+  // Wait for "running start", and get latest poses.
   VRSystem::Instance->WaitGetPoses();
 
   // TODO: Update transforms to render poses, then to game poses after render.

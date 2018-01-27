@@ -221,6 +221,11 @@ glm::vec2 dg::Window::GetContentScale() const {
   return glm::vec2(x, y);
 }
 
+float dg::Window::GetAspectRatio() const {
+  glm::vec2 size = GetSize();
+  return size.x / size.y;
+}
+
 GLFWwindow *dg::Window::GetHandle() const {
   return glfwWindow;
 }

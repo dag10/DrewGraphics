@@ -58,14 +58,26 @@ unsigned int dg::RenderBuffer::GetHeight() const {
 
 #pragma region FrameBuffer
 
-dg::FrameBuffer::FrameBuffer(unsigned int width, unsigned int height)
+dg::FrameBuffer::FrameBuffer(
+  unsigned int width, unsigned int height, bool depthReadable)
   : width(width), height(height) {
   glGenFramebuffers(1, &bufferHandle);
 
   AttachColorTexture(std::make_shared<Texture>(
     Texture::WithDimensions(width, height)));
-  AttachDepthRenderBuffer(std::make_shared<RenderBuffer>(
-    width, height, GL_DEPTH_COMPONENT));
+
+  if (depthReadable) {
+    AttachDepthTexture(std::make_shared<Texture>(
+      Texture::DepthTexture(width, height)));
+  } else {
+    AttachDepthRenderBuffer(std::make_shared<RenderBuffer>(
+      width, height, GL_DEPTH_COMPONENT));
+  }
+
+  GLuint status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+  if (status != GL_FRAMEBUFFER_COMPLETE) {
+    throw FrameBufferException(status);
+  }
 }
 
 dg::FrameBuffer::FrameBuffer(dg::FrameBuffer&& other) {
@@ -88,6 +100,7 @@ void dg::swap(FrameBuffer& first, FrameBuffer& second) {
   using std::swap;
   swap(first.bufferHandle, second.bufferHandle);
   swap(first.colorTexture, second.colorTexture);
+  swap(first.depthTexture, second.depthTexture);
   swap(first.depthRenderBuffer, second.depthRenderBuffer);
   swap(first.width, second.width);
   swap(first.height, second.height);
@@ -117,6 +130,10 @@ std::shared_ptr<dg::Texture> dg::FrameBuffer::GetColorTexture() const {
   return colorTexture;
 }
 
+std::shared_ptr<dg::Texture> dg::FrameBuffer::GetDepthTexture() const {
+  return depthTexture;
+}
+
 std::shared_ptr<dg::RenderBuffer>
 dg::FrameBuffer::GetDepthRenderBuffer() const {
   return depthRenderBuffer;
@@ -128,6 +145,17 @@ void dg::FrameBuffer::AttachColorTexture(std::shared_ptr<Texture> texture) {
   glFramebufferTexture2D(
     GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture->GetHandle(),
     0);
+  Unbind();
+}
+
+void dg::FrameBuffer::AttachDepthTexture(std::shared_ptr<Texture> texture) {
+  depthTexture = texture;
+  Bind();
+  glFramebufferTexture2D(
+    GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, texture->GetHandle(),
+    0);
+  Unbind();
+  depthRenderBuffer = nullptr;
 }
 
 void dg::FrameBuffer::AttachDepthRenderBuffer(
@@ -136,6 +164,8 @@ void dg::FrameBuffer::AttachDepthRenderBuffer(
   Bind();
   glFramebufferRenderbuffer(
     GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, buffer->GetHandle());
+  Unbind();
+  depthTexture = nullptr;
 }
 
 #pragma endregion

@@ -16,6 +16,7 @@ namespace dg {
     public:
       static Texture FromPath(const std::string& path);
       static Texture WithDimensions(unsigned int width, unsigned int height);
+      static Texture DepthTexture(unsigned int width, unsigned int height);
 
       Texture() = default;
       Texture(Texture& other) = delete;

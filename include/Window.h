@@ -60,6 +60,7 @@ namespace dg {
       glm::vec2 GetSize() const;
       void SetSize(glm::vec2 size);
       glm::vec2 GetContentScale() const;
+      float GetAspectRatio() const;
 
       GLFWwindow *GetHandle() const;
 

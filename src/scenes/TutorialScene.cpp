@@ -80,24 +80,69 @@ void dg::TutorialScene::Initialize() {
           glm::vec3(floorSize, floorSize, 1))));
 
   // Create frame buffer.
-  framebuffer = std::make_shared<FrameBuffer>(2048, 2048);
+  framebuffer = std::make_shared<FrameBuffer>(1024, 1024, true);
 
-  // Create material for displaying the framebuffer.
-  StandardMaterial framebufferMaterial =
+  // Create material for displaying the framebuffer color buffer.
+  StandardMaterial framebufferColorMaterial =
     StandardMaterial::WithTexture(framebuffer->GetColorTexture());
-  framebufferMaterial.SetLit(false);
+  framebufferColorMaterial.SetLit(false);
 
-  // Create quad to show framebuffer.
-  renderQuad = std::make_shared<Model>(
+  // Create material for displaying the framebuffer depth buffer.
+  StandardMaterial framebufferDepthMaterial =
+    StandardMaterial::WithTexture(framebuffer->GetDepthTexture());
+  framebufferDepthMaterial.SetLit(false);
+
+  // Create solid color material for showing on framebuffer quads in
+  // scened rendered to framebuffer.
+  StandardMaterial dummyFramebufferMaterial = StandardMaterial::WithColor(
+    glm::vec3(0.1, 0.15, 0.4));
+
+  // Container for quads that show framebuffer, so they can be disabled
+  // when rendering the virtual scene.
+  renderQuads = std::make_shared<SceneObject>();
+  renderQuads->transform = Transform::TRS(
+    glm::vec3(0, 1.25f, -0.4),
+    glm::quat(glm::radians(glm::vec3(-20, 0, 0))),
+    glm::vec3(0.5f));
+  AddChild(renderQuads);
+  dummyRenderQuads = std::make_shared<SceneObject>();
+  dummyRenderQuads->transform = renderQuads->transform;
+  AddChild(dummyRenderQuads);
+
+  // Create quad to show framebuffer color and depth buffers.
+  float quadSize = 1.2f;
+  float quadSep = 0.1f;
+  renderQuads->AddChild(std::make_shared<Model>(
     dg::Mesh::Quad,
-    std::make_shared<StandardMaterial>(framebufferMaterial),
-    Transform::TS(glm::vec3(0, 1.25f, -1), glm::vec3(0.5f)));
-  AddChild(renderQuad);
+    std::make_shared<StandardMaterial>(framebufferColorMaterial),
+    Transform::TS(
+      glm::vec3(-quadSize * 0.5f - quadSep * 0.5f, 0, 0),
+      quadSize * glm::vec3(1, 1 / window->GetAspectRatio(), 1))), false);
+  renderQuads->AddChild(std::make_shared<Model>(
+    dg::Mesh::Quad,
+    std::make_shared<StandardMaterial>(framebufferDepthMaterial),
+    Transform::TS(
+      glm::vec3(quadSize * 0.5f + quadSep * 0.5f, 0, 0),
+      quadSize * glm::vec3(1, 1 / window->GetAspectRatio(), 1))), false);
+  dummyRenderQuads->AddChild(std::make_shared<Model>(
+    dg::Mesh::Quad,
+    std::make_shared<StandardMaterial>(dummyFramebufferMaterial),
+    Transform::TS(
+      glm::vec3(-quadSize * 0.5f - quadSep * 0.5f, 0, 0),
+      quadSize * glm::vec3(1, 1 / window->GetAspectRatio(), 1))), false);
+  dummyRenderQuads->AddChild(std::make_shared<Model>(
+    dg::Mesh::Quad,
+    std::make_shared<StandardMaterial>(dummyFramebufferMaterial),
+    Transform::TS(
+      glm::vec3(quadSize * 0.5f + quadSep * 0.5f, 0, 0),
+      quadSize * glm::vec3(1, 1 / window->GetAspectRatio(), 1))), false);
 
   // Create virtual camera.
   virtualCamera = std::make_shared<Camera>();
   virtualCamera->transform.translation = glm::vec3(0, 1, 2);
   virtualCamera->LookAtPoint(glm::vec3(cube->transform.translation));
+  virtualCamera->farClip = 7;
+  virtualCamera->nearClip = 1;
   AddChild(virtualCamera);
 
   // Create camera.
@@ -129,9 +174,11 @@ void dg::TutorialScene::RenderFrame() {
   glEnable(GL_DEPTH_TEST);
   glEnable(GL_CULL_FACE);
   glCullFace(GL_BACK);
-  renderQuad->enabled = false;
+  renderQuads->enabled = false;
+  dummyRenderQuads->enabled = true;
   RenderScene(*virtualCamera);
-  renderQuad->enabled = true;
+  dummyRenderQuads->enabled = false;
+  renderQuads->enabled = true;
   framebuffer->Unbind();
   glViewport(
     0, 0, (GLsizei)window->GetWidth() * 2, (GLsizei)window->GetHeight() * 2);

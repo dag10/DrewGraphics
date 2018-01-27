@@ -41,7 +41,8 @@ namespace dg {
   class FrameBuffer {
 
     public:
-      FrameBuffer(unsigned int width, unsigned int height);
+      FrameBuffer(
+        unsigned int width, unsigned int height, bool depthReadable = false);
       FrameBuffer(FrameBuffer& other) = delete;
       FrameBuffer(FrameBuffer&& other);
       ~FrameBuffer();
@@ -57,9 +58,11 @@ namespace dg {
       unsigned int GetHeight() const;
 
       std::shared_ptr<Texture> GetColorTexture() const;
+      std::shared_ptr<Texture> GetDepthTexture() const;
       std::shared_ptr<RenderBuffer> GetDepthRenderBuffer() const;
 
       void AttachColorTexture(std::shared_ptr<Texture> texture);
+      void AttachDepthTexture(std::shared_ptr<Texture> texture);
       void AttachDepthRenderBuffer(std::shared_ptr<RenderBuffer> buffer);
 
     private:
@@ -69,6 +72,7 @@ namespace dg {
       unsigned int height;
 
       std::shared_ptr<Texture> colorTexture = nullptr;
+      std::shared_ptr<Texture> depthTexture = nullptr;
       std::shared_ptr<RenderBuffer> depthRenderBuffer = nullptr;
 
   }; // class FrameBuffer

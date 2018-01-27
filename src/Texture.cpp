@@ -28,6 +28,15 @@ dg::Texture dg::Texture::WithDimensions(
   return tex;
 }
 
+dg::Texture dg::Texture::DepthTexture(unsigned int width, unsigned int height) {
+  dg::Texture tex;
+  tex.width = width;
+  tex.height = height;
+  tex.GenerateImage(
+    GL_DEPTH_COMPONENT, nullptr, GL_DEPTH_COMPONENT, GL_UNSIGNED_INT, false);
+  return tex;
+}
+
 GLuint dg::Texture::GetHandle() const {
   return textureHandle;
 }

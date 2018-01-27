@@ -32,7 +32,8 @@ namespace dg {
     private:
 
       std::shared_ptr<FrameBuffer> framebuffer;
-      std::shared_ptr<Model> renderQuad;
+      std::shared_ptr<SceneObject> renderQuads;
+      std::shared_ptr<SceneObject> dummyRenderQuads;
       std::shared_ptr<Camera> virtualCamera;
 
   }; // class TutorialScene

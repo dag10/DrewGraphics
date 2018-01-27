@@ -19,6 +19,8 @@ std::unique_ptr<dg::MeshesScene> dg::MeshesScene::Make() {
 dg::MeshesScene::MeshesScene() : Scene() {}
 
 void dg::MeshesScene::Initialize() {
+  Scene::Initialize();
+
   // Lock window cursor to center.
   window->LockCursor();
 
@@ -113,11 +115,9 @@ void dg::MeshesScene::Initialize() {
           glm::quat(glm::radians(glm::vec3(-90, 0, 0))),
           glm::vec3(floorSize, floorSize, 1))));
 
-  // Create camera.
-  mainCamera = std::make_shared<Camera>();
+  // Configure camera.
   mainCamera->transform.translation = glm::vec3(0, 2, 3);
   mainCamera->LookAtPoint(glm::vec3(0));
-  AddChild(mainCamera);
 
   // Allow camera to be controller by the keyboard and mouse.
   Behavior::Attach(

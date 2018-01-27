@@ -6,6 +6,7 @@
 
 #include <vr/VRSystem.h>
 #include <Exceptions.h>
+#include <MathUtils.h>
 
 std::unique_ptr<dg::VRSystem> dg::VRSystem::Instance = nullptr;
 
@@ -41,13 +42,14 @@ dg::VRSystem::~VRSystem() {
 
 void dg::VRSystem::WaitGetPoses() {
   // Ignore render poses for now, just use game poses, which are for next frame.
+  // TODO: Use both render poses and game poses.
   vrCompositor->WaitGetPoses(
     nullptr, 0, poses, sizeof(poses) / sizeof(poses[0]));
 
   // HMD is always device 0.
   if (poses[0].bPoseIsValid) {
     hmd.deviceIndex = 0;
-    hmd.transform = Transform(poses[0].mDeviceToAbsoluteTracking);
+    hmd.transform = Transform(HmdMat2Glm(poses[0].mDeviceToAbsoluteTracking));
   } else {
     hmd.deviceIndex = -1;
   }
@@ -102,12 +104,12 @@ void dg::VRSystem::WaitGetPoses() {
 
   // Update controllers' transforms.
   if (foundLeft) {
-    leftController.transform = Transform(
-      poses[leftController.deviceIndex].mDeviceToAbsoluteTracking);
+    leftController.transform = Transform(HmdMat2Glm(
+      poses[leftController.deviceIndex].mDeviceToAbsoluteTracking));
   }
   if (foundRight) {
-    rightController.transform = Transform(
-      poses[rightController.deviceIndex].mDeviceToAbsoluteTracking);
+    rightController.transform = Transform(HmdMat2Glm(
+      poses[rightController.deviceIndex].mDeviceToAbsoluteTracking));
   }
 }
 

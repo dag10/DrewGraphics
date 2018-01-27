@@ -55,6 +55,8 @@ namespace dg {
       void StartRender();
       void FinishRender();
 
+      void ResetViewport();
+
       float GetWidth() const;
       float GetHeight() const;
       glm::vec2 GetSize() const;

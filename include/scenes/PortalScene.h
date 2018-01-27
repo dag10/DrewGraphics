@@ -29,7 +29,9 @@ namespace dg {
       virtual void RenderFrame();
 
     protected:
-      virtual void RenderScene(const Camera& camera) const;
+      virtual void RenderScene(
+        const Camera& camera, bool renderForVR = false,
+        vr::EVREye eye = vr::EVREye::Eye_Left);
 
     private:
 

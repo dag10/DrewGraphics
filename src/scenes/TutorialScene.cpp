@@ -18,6 +18,8 @@ std::unique_ptr<dg::TutorialScene> dg::TutorialScene::Make() {
 dg::TutorialScene::TutorialScene() : Scene() {}
 
 void dg::TutorialScene::Initialize() {
+  Scene::Initialize();
+
   // Lock window cursor to center.
   window->LockCursor();
 
@@ -145,13 +147,11 @@ void dg::TutorialScene::Initialize() {
   virtualCamera->nearClip = 1;
   AddChild(virtualCamera);
 
-  // Create camera.
-  mainCamera = std::make_shared<Camera>();
+  // Configure camera.
   mainCamera->transform.translation = glm::vec3(-1.25f, 2, 1.1f);
   mainCamera->LookAtPoint(
       (cube->transform.translation +
        ceilingLight->transform.translation) / 2.f);
-  AddChild(mainCamera);
 
   // Allow camera to be controller by the keyboard and mouse.
   Behavior::Attach(

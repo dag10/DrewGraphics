@@ -172,6 +172,7 @@
     <ClCompile Include="src\Material.cpp" />
     <ClCompile Include="src\materials\StandardMaterial.cpp" />
     <ClCompile Include="src\materials\UVMaterial.cpp" />
+    <ClCompile Include="src\MathUtils.cpp" />
     <ClCompile Include="src\Mesh.cpp" />
     <ClCompile Include="src\Model.cpp" />
     <ClCompile Include="src\Scene.cpp" />
@@ -208,6 +209,7 @@
     <ClInclude Include="include\Material.h" />
     <ClInclude Include="include\materials\StandardMaterial.h" />
     <ClInclude Include="include\materials\UVMaterial.h" />
+    <ClInclude Include="include\MathUtils.h" />
     <ClInclude Include="include\Mesh.h" />
     <ClInclude Include="include\Model.h" />
     <ClInclude Include="include\Scene.h" />

@@ -50,6 +50,8 @@ std::unique_ptr<dg::PortalScene> dg::PortalScene::Make() {
 dg::PortalScene::PortalScene() : Scene() {}
 
 void dg::PortalScene::Initialize() {
+  Scene::Initialize();
+
   // Lock window cursor to center.
   window->LockCursor();
 
@@ -243,13 +245,11 @@ void dg::PortalScene::Initialize() {
   portalStencilMaterial.SetDiffuse(backgroundColor);
   portalStencilMaterial.SetInvPortal(glm::mat4x4(0));
 
-  // Create camera.
-  mainCamera = std::make_shared<Camera>();
+  // Configure camera.
   mainCamera->transform.translation = glm::vec3(2.2f, 0.85f, 1);
   mainCamera->LookAtPoint(glm::vec3(0, mainCamera->transform.translation.y, 0));
   mainCamera->nearClip = 0.01f;
   mainCamera->farClip = 10;
-  AddChild(mainCamera);
 
   // Create a flashlight attached to the camera.
   flashlight = std::make_shared<SpotLight>(
@@ -441,7 +441,7 @@ void dg::PortalScene::UpdateLightingConfiguration() {
 void dg::PortalScene::RenderPortalStencil(dg::Transform xfPortal) {
   glm::mat4x4 view = mainCamera->GetViewMatrix();
   glm::mat4x4 projection = mainCamera->GetProjectionMatrix(
-      window->GetWidth() / window->GetHeight());
+    window->GetAspectRatio());
 
   glEnable(GL_STENCIL_TEST);
   glStencilFunc(GL_ALWAYS, 1, 0xFF);
@@ -529,7 +529,8 @@ void dg::PortalScene::RenderFrame() {
   glDisable(GL_STENCIL_TEST);
 }
 
-void dg::PortalScene::RenderScene(const Camera& camera) const {
+void dg::PortalScene::RenderScene(
+  const Camera& camera, bool renderForVR, vr::EVREye eye) {
   // Move the flash light to the camera we're rendering from.
   // TODO: Don't do this, it feels very computationally heavy.
   Transform xfFlashlightOriginal = flashlight->transform;
@@ -537,7 +538,7 @@ void dg::PortalScene::RenderScene(const Camera& camera) const {
     camera.SceneSpace() * mainCamera->SceneSpace().Inverse() *
     flashlight->SceneSpace());
 
-  Scene::RenderScene(camera);
+  Scene::RenderScene(camera, renderForVR, eye);
 
   // Attach the flashlight back to the original camera.
   flashlight->transform = xfFlashlightOriginal;

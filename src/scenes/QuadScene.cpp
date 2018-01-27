@@ -16,6 +16,8 @@ std::unique_ptr<dg::QuadScene> dg::QuadScene::Make() {
 dg::QuadScene::QuadScene() : Scene() {}
 
 void dg::QuadScene::Initialize() {
+  Scene::Initialize();
+
   // Create skybox, disabled by default.
   skybox = std::unique_ptr<Skybox>(new Skybox(
         std::make_shared<Texture>(Texture::FromPath(
@@ -55,11 +57,9 @@ void dg::QuadScene::Initialize() {
       0.132f, 0.4f, 0.568f);
   AddChild(directionalLight);
 
-  // Create camera.
-  mainCamera = std::make_shared<Camera>();
+  // Configure camera.
   mainCamera->transform.translation = glm::vec3(0, 0, 2);
   mainCamera->LookAt(*quad);
-  AddChild(mainCamera);
 }
 
 void dg::QuadScene::Update() {

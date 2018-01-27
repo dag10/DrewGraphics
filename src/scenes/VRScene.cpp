@@ -28,15 +28,12 @@ std::unique_ptr<dg::VRScene> dg::VRScene::Make() {
   return std::unique_ptr<dg::VRScene>(new dg::VRScene());
 }
 
-dg::VRScene::VRScene() : Scene() {}
+dg::VRScene::VRScene() : Scene() {
+  enableVR = true;
+}
 
 void dg::VRScene::Initialize() {
-  // Disable glfw vsync, since IVRComposer::WaitGetPoses() will wait for
-  // "running start" in 90hz anyway.
-  glfwSwapInterval(0);
-
-  // Initialize OpenVR.
-  VRSystem::Initialize();
+  Scene::Initialize();
 
   // Create textures.
   std::shared_ptr<Texture> crateTexture = std::make_shared<Texture>(
@@ -49,8 +46,6 @@ void dg::VRScene::Initialize() {
       Texture::FromPath("assets/textures/brickwall_normal.jpg"));
   std::shared_ptr<Texture> hardwoodTexture = std::make_shared<Texture>(
       Texture::FromPath("assets/textures/hardwood.jpg"));
-  std::shared_ptr<Texture> rustyPlateTexture = std::make_shared<Texture>(
-      Texture::FromPath("assets/textures/rustyplate.jpg"));
   std::shared_ptr<Texture> skyboxTexture = std::make_shared<Texture>(
       Texture::FromPath("assets/textures/skybox_daylight.png"));
 
@@ -196,27 +191,11 @@ void dg::VRScene::Initialize() {
   ceiling->transform.translation.y = 2;
   AddChild(ceiling);
 
-  // Create container for OpenVR tracked devices.
-  auto VRContainer = std::make_shared<SceneObject>();
-  AddChild(VRContainer);
-  leftController = std::make_shared<SceneObject>();
-  VRContainer->AddChild(leftController);
-  rightController = std::make_shared<SceneObject>();
-  VRContainer->AddChild(rightController);
-
   // Create a flashlight attached to the right controller.
   flashlight = std::make_shared<SpotLight>(
       glm::vec3(0, 0, -1), glm::radians(25.f),
       ceilingLightColor, 0.314f, 2.16f, 2.11f);
   rightController->AddChild(flashlight, false);
-
-  // Create camera.
-  mainCamera = std::make_shared<Camera>();
-  mainCamera->transform.translation = glm::vec3(2.2f, 0.85f, 1);
-  mainCamera->LookAtPoint(glm::vec3(0, mainCamera->transform.translation.y, 0));
-  mainCamera->nearClip = 0.01f;
-  mainCamera->farClip = 10;
-  VRContainer->AddChild(mainCamera);
 
   // Create box that represents the camera's position.
   mainCamera->AddChild(std::make_shared<Model>(
@@ -252,24 +231,6 @@ void dg::VRScene::Initialize() {
 
 void dg::VRScene::Update() {
   Scene::Update();
-
-  // Update camera pose.
-  const Transform *xfHmd = VRSystem::Instance->GetHmdTransform();
-  if (xfHmd != nullptr) {
-    mainCamera->transform = *xfHmd;
-  }
-
-  // Update controller poses.
-  const Transform *xfLeft = VRSystem::Instance->GetLeftControllerTransform();
-  leftController->enabled = (xfLeft != nullptr);
-  if (xfLeft != nullptr) {
-    leftController->transform = *xfLeft;
-  }
-  const Transform *xfRight = VRSystem::Instance->GetRightControllerTransform();
-  rightController->enabled = (xfRight != nullptr);
-  if (xfRight != nullptr) {
-    rightController->transform = *xfRight;
-  }
 
   // Adjust light ambient power with keyboard.
   const float lightDelta = 0.05f;
@@ -370,22 +331,4 @@ void dg::VRScene::UpdateLightingConfiguration() {
   outdoorCeilingLight->enabled = (lightingType == OutdoorLighting);
   spotLight->enabled = (lightingType == SpotLighting);
   flashlight->enabled = (lightingType == FlashlightLighting);
-}
-
-void dg::VRScene::RenderFrame() {
-  // Clear back buffer.
-  glClearColor(0, 0, 0, 1);
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-
-  // Render params.
-  glEnable(GL_DEPTH_TEST);
-  glEnable(GL_CULL_FACE);
-  glCullFace(GL_BACK);
-
-  // Wait for "running start", and get latest poses.
-  VRSystem::Instance->WaitGetPoses();
-
-  // TODO: Update transforms to render poses, then to game poses after render.
-
-  RenderScene(*mainCamera);
 }

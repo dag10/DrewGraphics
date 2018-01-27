@@ -163,17 +163,20 @@ void dg::Window::StartRender() {
   assert(glfwWindow != nullptr);
 
   UseContext();
-
-  // Get the latest true pixel dimension of the window. This
-  // takes into account any DPIs or current window size.
-  int width, height;
-  glfwGetFramebufferSize(glfwWindow, &width, &height);
-  glViewport(0, 0, width, height);
+  ResetViewport();
 }
 
 void dg::Window::FinishRender() {
   assert(glfwWindow != nullptr);
   glfwSwapBuffers(glfwWindow);
+}
+
+void dg::Window::ResetViewport() {
+  // Get the latest true pixel dimension of the window. This
+  // takes into account any DPIs or current window size.
+  int width, height;
+  glfwGetFramebufferSize(glfwWindow, &width, &height);
+  glViewport(0, 0, width, height);
 }
 
 dg::Window::Window(dg::Window&& other) {

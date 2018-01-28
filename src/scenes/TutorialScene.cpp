@@ -80,7 +80,7 @@ void dg::TutorialScene::Initialize() {
           glm::vec3(floorSize, floorSize, 1))));
 
   // Create frame buffer.
-  framebuffer = std::make_shared<FrameBuffer>(1024, 1024, true);
+  framebuffer = std::make_shared<FrameBuffer>(1024, 1024, true, true);
 
   // Create material for displaying the framebuffer color buffer.
   StandardMaterial framebufferColorMaterial =

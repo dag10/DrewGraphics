@@ -28,12 +28,22 @@ dg::Texture dg::Texture::WithDimensions(
   return tex;
 }
 
-dg::Texture dg::Texture::DepthTexture(unsigned int width, unsigned int height) {
+dg::Texture dg::Texture::DepthTexture(
+  unsigned int width, unsigned int height, bool allowStencil) {
   dg::Texture tex;
   tex.width = width;
   tex.height = height;
+  GLenum internalFormat = allowStencil \
+    ? GL_DEPTH24_STENCIL8
+    : GL_DEPTH_COMPONENT;
+  GLenum externalFormat = allowStencil \
+    ? GL_DEPTH_STENCIL
+    : GL_DEPTH_COMPONENT;
+  GLenum type = allowStencil \
+    ? GL_UNSIGNED_INT_24_8
+    : GL_UNSIGNED_INT;
   tex.GenerateImage(
-    GL_DEPTH_COMPONENT, nullptr, GL_DEPTH_COMPONENT, GL_UNSIGNED_INT, false);
+    internalFormat, nullptr, externalFormat, type, false);
   return tex;
 }
 

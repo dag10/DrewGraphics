@@ -59,7 +59,8 @@ unsigned int dg::RenderBuffer::GetHeight() const {
 #pragma region FrameBuffer
 
 dg::FrameBuffer::FrameBuffer(
-  unsigned int width, unsigned int height, bool depthReadable)
+  unsigned int width, unsigned int height, bool depthReadable,
+  bool allowStencil)
   : width(width), height(height) {
   glGenFramebuffers(1, &bufferHandle);
 
@@ -67,11 +68,21 @@ dg::FrameBuffer::FrameBuffer(
     Texture::WithDimensions(width, height)));
 
   if (depthReadable) {
-    AttachDepthTexture(std::make_shared<Texture>(
-      Texture::DepthTexture(width, height)));
+    if (allowStencil) {
+      AttachDepthTexture(std::make_shared<Texture>(
+        Texture::DepthTexture(width, height, true)), true);
+    } else {
+      AttachDepthTexture(std::make_shared<Texture>(
+        Texture::DepthTexture(width, height, false)), false);
+    }
   } else {
-    AttachDepthRenderBuffer(std::make_shared<RenderBuffer>(
-      width, height, GL_DEPTH_COMPONENT));
+    if (allowStencil) {
+      AttachDepthRenderBuffer(std::make_shared<RenderBuffer>(
+        width, height, GL_DEPTH_STENCIL), true);
+    } else {
+      AttachDepthRenderBuffer(std::make_shared<RenderBuffer>(
+        width, height, GL_DEPTH_COMPONENT), false);
+    }
   }
 
   GLuint status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
@@ -148,22 +159,29 @@ void dg::FrameBuffer::AttachColorTexture(std::shared_ptr<Texture> texture) {
   Unbind();
 }
 
-void dg::FrameBuffer::AttachDepthTexture(std::shared_ptr<Texture> texture) {
+void dg::FrameBuffer::AttachDepthTexture(
+  std::shared_ptr<Texture> texture, bool allowStencil) {
   depthTexture = texture;
   Bind();
+  GLenum format = allowStencil \
+    ? GL_DEPTH_STENCIL_ATTACHMENT
+    : GL_DEPTH_ATTACHMENT;
   glFramebufferTexture2D(
-    GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, texture->GetHandle(),
+    GL_FRAMEBUFFER, format, GL_TEXTURE_2D, texture->GetHandle(),
     0);
   Unbind();
   depthRenderBuffer = nullptr;
 }
 
 void dg::FrameBuffer::AttachDepthRenderBuffer(
-  std::shared_ptr<RenderBuffer> buffer) {
+  std::shared_ptr<RenderBuffer> buffer, bool allowStencil) {
   depthRenderBuffer = buffer;
   Bind();
+  GLenum format = allowStencil \
+    ? GL_DEPTH_STENCIL_ATTACHMENT
+    : GL_DEPTH_ATTACHMENT;
   glFramebufferRenderbuffer(
-    GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, buffer->GetHandle());
+    GL_FRAMEBUFFER, format, GL_RENDERBUFFER, buffer->GetHandle());
   Unbind();
   depthTexture = nullptr;
 }

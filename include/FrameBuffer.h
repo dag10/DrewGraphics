@@ -42,7 +42,8 @@ namespace dg {
 
     public:
       FrameBuffer(
-        unsigned int width, unsigned int height, bool depthReadable = false);
+        unsigned int width, unsigned int height, bool depthReadable = false,
+        bool allowStencil = false);
       FrameBuffer(FrameBuffer& other) = delete;
       FrameBuffer(FrameBuffer&& other);
       ~FrameBuffer();
@@ -62,8 +63,10 @@ namespace dg {
       std::shared_ptr<RenderBuffer> GetDepthRenderBuffer() const;
 
       void AttachColorTexture(std::shared_ptr<Texture> texture);
-      void AttachDepthTexture(std::shared_ptr<Texture> texture);
-      void AttachDepthRenderBuffer(std::shared_ptr<RenderBuffer> buffer);
+      void AttachDepthTexture(
+        std::shared_ptr<Texture> texture, bool allowStencil);
+      void AttachDepthRenderBuffer(
+        std::shared_ptr<RenderBuffer> buffer, bool allowStencil);
 
     private:
 

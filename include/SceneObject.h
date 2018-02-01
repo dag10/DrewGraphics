@@ -4,7 +4,9 @@
 #pragma once
 
 #include <Transform.h>
+#include <Behavior.h>
 #include <set>
+#include <vector>
 #include <memory>
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
@@ -33,6 +35,9 @@ namespace dg {
       SceneObject& operator=(SceneObject&& other) = delete;
       virtual ~SceneObject() = default;
 
+      void AddBehavior(std::shared_ptr<Behavior> behavior);
+      void UpdateBehaviors();
+
       Transform SceneSpace() const;
       void SetSceneSpace(Transform transform);
 
@@ -50,6 +55,7 @@ namespace dg {
       void OrientUpwards();
 
     private:
+      std::vector<std::shared_ptr<Behavior>> behaviors;
       SceneObject *parent = nullptr;
       std::set<std::shared_ptr<SceneObject>> children;
 

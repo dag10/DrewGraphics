@@ -11,9 +11,26 @@
 
 dg::SceneObject::SceneObject(Transform transform) : transform(transform) {}
 
+void dg::SceneObject::AddBehavior(std::shared_ptr<Behavior> behavior) {
+  behaviors.push_back(behavior);
+}
+
+void dg::SceneObject::UpdateBehaviors() {
+  // Execute Update() for all behaviors.
+  for (
+      auto behavior = behaviors.begin();
+      behavior != behaviors.end();
+      behavior++) {
+    if ((*behavior)->enabled) {
+      (*behavior)->Update();
+    }
+  }
+}
+
 // Creates a copy of the object without copying its children, and without
 // a parent.
 dg::SceneObject::SceneObject(SceneObject& other) {
+  // TODO: Clone behaviors.
   this->transform = other.transform;
   this->enabled = other.enabled;
 }

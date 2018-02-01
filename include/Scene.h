@@ -7,7 +7,6 @@
 #include <forward_list>
 #include <memory>
 #include <Window.h>
-#include <Behavior.h>
 #include <SceneObject.h>
 #include <Skybox.h>
 #include <Model.h>
@@ -41,7 +40,6 @@ namespace dg {
           const std::forward_list<Light*>& lights) const;
 
       std::shared_ptr<Camera> mainCamera;
-      std::vector<std::unique_ptr<Behavior>> behaviors;
       std::shared_ptr<Window> window = nullptr;
       std::unique_ptr<Skybox> skybox = nullptr;
 

@@ -9,13 +9,18 @@
 dg::Scene::Scene() : SceneObject() {}
 
 void dg::Scene::Update() {
-  // Execute Update() for all behaviors.
-  for (
-      auto behavior = behaviors.begin();
-      behavior != behaviors.end();
-      behavior++) {
-    if ((*behavior)->enabled) {
-      (*behavior)->Update();
+  // Traverse the scene hierarchy and update all behaviors on all objects.
+  std::forward_list<SceneObject*> remainingObjects;
+  remainingObjects.push_front((SceneObject*)this);
+  while (!remainingObjects.empty()) {
+    SceneObject *obj = remainingObjects.front();
+    remainingObjects.pop_front();
+    obj->UpdateBehaviors();
+    for (auto child = obj->Children().begin();
+         child != obj->Children().end();
+         child++) {
+      if (!(*child)->enabled) continue;
+      remainingObjects.push_front(child->get());
     }
   }
 }

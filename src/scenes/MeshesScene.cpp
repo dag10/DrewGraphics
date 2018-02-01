@@ -120,8 +120,7 @@ void dg::MeshesScene::Initialize() {
   AddChild(mainCamera);
 
   // Allow camera to be controller by the keyboard and mouse.
-  behaviors.push_back(std::unique_ptr<Behavior>(
-        new KeyboardCameraController(mainCamera, window)));
+  AddBehavior(std::make_shared<KeyboardCameraController>(mainCamera, window));
 }
 
 void dg::MeshesScene::Update() {

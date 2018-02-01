@@ -266,8 +266,7 @@ void dg::PortalScene::Initialize() {
       Transform::S(glm::vec3(0.2f, 0.1f, 0.1f))), false);
 
   // Allow camera to be controller by the keyboard and mouse.
-  behaviors.push_back(std::unique_ptr<Behavior>(
-        new KeyboardCameraController(mainCamera, window)));
+  AddBehavior(std::make_shared<KeyboardCameraController>(mainCamera, window));
 
   // Initial lighting configuration is the indoor point light.
   lightingType = PointLighting;

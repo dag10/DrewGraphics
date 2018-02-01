@@ -15,6 +15,7 @@
 #include <Shader.h>
 #include <Mesh.h>
 #include <scenes/TutorialScene.h>
+#include <scenes/RobotScene.h>
 #include <scenes/MeshesScene.h>
 #include <scenes/PortalScene.h>
 #include <scenes/QuadScene.h>
@@ -35,6 +36,7 @@ int main(int argc, const char *argv[]) {
   constructors["portal"]   = dg::PortalScene::Make;
   constructors["tutorial"] = dg::TutorialScene::Make;
   constructors["meshes"]   = dg::MeshesScene::Make;
+  constructors["robot"]    = dg::RobotScene::Make;
   constructors["quad"]     = dg::QuadScene::Make;
   constructors["vr"]       = dg::VRScene::Make;
   std::string sceneName;

@@ -135,6 +135,9 @@
     <ClCompile Include="src\scenes\MeshesScene.cpp">
       <Filter>Source Files\scenes</Filter>
     </ClCompile>
+    <ClCompile Include="src\scenes\RobotScene.cpp">
+      <Filter>Source Files\scenes</Filter>
+    </ClCompile>
     <ClCompile Include="src\vr\VRSystem.cpp">
       <Filter>Source Files\vr</Filter>
     </ClCompile>
@@ -234,6 +237,9 @@
       <Filter>Header Files\materials</Filter>
     </ClInclude>
     <ClInclude Include="include\scenes\MeshesScene.h">
+      <Filter>Header Files\scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="include\scenes\RobotScene.h">
       <Filter>Header Files\scenes</Filter>
     </ClInclude>
     <ClInclude Include="include\vr\VRSystem.h">

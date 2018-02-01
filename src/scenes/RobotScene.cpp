@@ -224,7 +224,9 @@ void dg::RobotScene::Initialize() {
           )), false);
 
   // Allow camera to be controller by the keyboard and mouse.
-  AddBehavior(std::make_shared<KeyboardCameraController>(mainCamera, window));
+  Behavior::Attach(
+      mainCamera,
+      std::make_shared<KeyboardCameraController>(window));
 }
 
 void dg::RobotScene::Update() {

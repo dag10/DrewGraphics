@@ -12,6 +12,12 @@
 dg::SceneObject::SceneObject(Transform transform) : transform(transform) {}
 
 void dg::SceneObject::AddBehavior(std::shared_ptr<Behavior> behavior) {
+  if (behavior->SceneObject().get() != this) {
+    throw std::runtime_error(
+        "Do not call SceneObject::AddBehavior() to attach a behavior. "
+        "Use the static function Behavior::Attach() instead.");
+  }
+
   behaviors.push_back(behavior);
 }
 

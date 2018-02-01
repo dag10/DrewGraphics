@@ -15,11 +15,8 @@ namespace dg {
 
     public:
 
-      KeyboardCameraController(
-          std::weak_ptr<Camera> camera, std::weak_ptr<Window> window);
-      KeyboardCameraController(
-          std::weak_ptr<Camera> camera, std::weak_ptr<Window> window,
-          float speed);
+      KeyboardCameraController(std::weak_ptr<Window> window);
+      KeyboardCameraController(std::weak_ptr<Window> window, float speed);
 
       float speed = 1.8f; // units per second
 
@@ -28,7 +25,6 @@ namespace dg {
 
     private:
 
-      std::weak_ptr<Camera> camera;
       std::weak_ptr<Window> window;
 
       Transform originalTransform;

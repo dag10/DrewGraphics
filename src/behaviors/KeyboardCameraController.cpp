@@ -15,6 +15,8 @@ dg::KeyboardCameraController::KeyboardCameraController(
   : camera(camera), window(window), speed(speed) {}
 
 void dg::KeyboardCameraController::Start() {
+  Behavior::Start();
+
   auto camera = this->camera.lock();
   if (!camera) return;
 
@@ -22,6 +24,8 @@ void dg::KeyboardCameraController::Start() {
 }
 
 void dg::KeyboardCameraController::Update() {
+  Behavior::Update();
+
   auto camera = this->camera.lock();
   auto window = this->window.lock();
   if (!camera || !window) return;

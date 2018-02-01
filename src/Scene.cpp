@@ -9,23 +9,14 @@
 dg::Scene::Scene() : SceneObject() {}
 
 void dg::Scene::Update() {
-  if (!started) {
-    // Execute Start() for all behaviors.
-    for (
-        auto behavior = behaviors.begin();
-        behavior != behaviors.end();
-        behavior++) {
-      (*behavior)->Start();
-    }
-    started = true;
-  }
-
   // Execute Update() for all behaviors.
   for (
       auto behavior = behaviors.begin();
       behavior != behaviors.end();
       behavior++) {
-    (*behavior)->Update();
+    if ((*behavior)->enabled) {
+      (*behavior)->Update();
+    }
   }
 }
 

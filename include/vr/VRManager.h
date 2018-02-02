@@ -1,5 +1,5 @@
 //
-//  vr/VRSystem.h
+//  vr/VRManager.h
 //
 
 #pragma once
@@ -11,18 +11,18 @@
 
 namespace dg {
 
-  class VRSystem {
+  class VRManager {
 
     public:
 
-      static std::unique_ptr<VRSystem> Instance;
+      static std::unique_ptr<VRManager> Instance;
 
       static void Initialize();
 
       vr::IVRSystem *vrSystem = nullptr;
       vr::IVRCompositor *vrCompositor = nullptr;
 
-      virtual ~VRSystem();
+      virtual ~VRManager();
 
       void WaitGetPoses();
 
@@ -45,6 +45,6 @@ namespace dg {
 
       vr::TrackedDevicePose_t poses[vr::k_unMaxTrackedDeviceCount];
 
-  }; // class VRSystem
+  }; // class VRManager
 
 } // namespace dg

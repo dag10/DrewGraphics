@@ -5,7 +5,7 @@
 #include <Scene.h>
 #include <Model.h>
 #include <Camera.h>
-#include <vr/VRSystem.h>
+#include <vr/VRManager.h>
 
 dg::Scene::Scene() : SceneObject() {}
 
@@ -16,12 +16,12 @@ void dg::Scene::Initialize() {
     glfwSwapInterval(0);
 
     // Initialize OpenVR.
-    VRSystem::Initialize();
+    VRManager::Initialize();
 
     // Create framebuffers to render into.
     uint32_t vrWidth, vrHeight;
     vr::VRSystem()->GetRecommendedRenderTargetSize(&vrWidth, &vrHeight);
-    // TODO: These framebuffers should be owned by dg::VRSystem.
+    // TODO: These framebuffers should be owned by dg::VRManager.
     leftFramebuffer = std::make_shared<FrameBuffer>(
       vrWidth, vrHeight, false, true);
     rightFramebuffer = std::make_shared<FrameBuffer>(
@@ -64,18 +64,18 @@ void dg::Scene::Update() {
 
   if (enableVR) {
     // Update camera pose.
-    const Transform *xfHmd = VRSystem::Instance->GetHmdTransform();
+    const Transform *xfHmd = VRManager::Instance->GetHmdTransform();
     if (xfHmd != nullptr) {
       mainCamera->transform = *xfHmd;
     }
 
     // Update controller poses.
-    const Transform *xfLeft = VRSystem::Instance->GetLeftControllerTransform();
+    const Transform *xfLeft = VRManager::Instance->GetLeftControllerTransform();
     leftController->enabled = (xfLeft != nullptr);
     if (xfLeft != nullptr) {
       leftController->transform = *xfLeft;
     }
-    const Transform *xfRight = VRSystem::Instance->GetRightControllerTransform();
+    const Transform *xfRight = VRManager::Instance->GetRightControllerTransform();
     rightController->enabled = (xfRight != nullptr);
     if (xfRight != nullptr) {
       rightController->transform = *xfRight;
@@ -86,7 +86,7 @@ void dg::Scene::Update() {
 void dg::Scene::RenderFrame() {
   if (enableVR) {
     // Wait for "running start", and get latest poses.
-    VRSystem::Instance->WaitGetPoses();
+    VRManager::Instance->WaitGetPoses();
     // TODO: Update transforms to render poses, then to game poses after render.
 
     // Render left and right eyes for VR.

@@ -14,7 +14,7 @@
 #include <iostream>
 #include <lights/DirectionalLight.h>
 #include <lights/PointLight.h>
-#include <vr/VRSystem.h>
+#include <vr/VRManager.h>
 
 std::unique_ptr<dg::VRScene> dg::VRScene::Make() {
   return std::unique_ptr<dg::VRScene>(new dg::VRScene());

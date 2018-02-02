@@ -1,20 +1,20 @@
 //
-//  vr/VRSystem.cpp
+//  vr/VRManager.cpp
 //
 
-#include <vr/VRSystem.h>
+#include <vr/VRManager.h>
 #include <Exceptions.h>
 #include <MathUtils.h>
 
-std::unique_ptr<dg::VRSystem> dg::VRSystem::Instance = nullptr;
+std::unique_ptr<dg::VRManager> dg::VRManager::Instance = nullptr;
 
-void dg::VRSystem::Initialize() {
-  auto newInstance = std::unique_ptr<VRSystem>(new VRSystem);
+void dg::VRManager::Initialize() {
+  auto newInstance = std::unique_ptr<VRManager>(new VRManager);
   newInstance->StartOpenVR();
   Instance = std::move(newInstance);
 }
 
-void dg::VRSystem::StartOpenVR() {
+void dg::VRManager::StartOpenVR() {
   if (!vr::VR_IsRuntimeInstalled()) {
     throw std::runtime_error("Please install the OpenVR Runtime.");
   }
@@ -32,13 +32,13 @@ void dg::VRSystem::StartOpenVR() {
   vrCompositor = vr::VRCompositor();
 }
 
-dg::VRSystem::~VRSystem() {
+dg::VRManager::~VRManager() {
   vr::VR_Shutdown();
   vrSystem = nullptr;
   vrCompositor = nullptr;
 }
 
-void dg::VRSystem::WaitGetPoses() {
+void dg::VRManager::WaitGetPoses() {
   // Ignore render poses for now, just use game poses, which are for next frame.
   // TODO: Use both render poses and game poses.
   vrCompositor->WaitGetPoses(
@@ -111,14 +111,14 @@ void dg::VRSystem::WaitGetPoses() {
   }
 }
 
-const dg::Transform *dg::VRSystem::GetHmdTransform() const {
+const dg::Transform *dg::VRManager::GetHmdTransform() const {
   return hmd.deviceIndex >= 0 ? &hmd.transform : nullptr;
 }
 
-const dg::Transform *dg::VRSystem::GetLeftControllerTransform() const {
+const dg::Transform *dg::VRManager::GetLeftControllerTransform() const {
   return leftController.deviceIndex >= 0 ? &leftController.transform : nullptr;
 }
 
-const dg::Transform *dg::VRSystem::GetRightControllerTransform() const {
+const dg::Transform *dg::VRManager::GetRightControllerTransform() const {
   return rightController.deviceIndex >= 0 ? &rightController.transform : nullptr;
 }

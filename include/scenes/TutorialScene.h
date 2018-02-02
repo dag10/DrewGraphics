@@ -36,6 +36,8 @@ namespace dg {
       std::shared_ptr<SceneObject> dummyRenderQuads;
       std::shared_ptr<Camera> virtualCamera;
 
+      bool flyingMainCamera = true;
+
   }; // class TutorialScene
 
 } // namespace dg

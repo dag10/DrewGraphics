@@ -38,6 +38,17 @@ namespace dg {
       void AddBehavior(std::shared_ptr<Behavior> behavior);
       void UpdateBehaviors();
 
+      template<class T>
+      std::shared_ptr<T> GetBehavior() {
+        for (auto iter = behaviors.begin(); iter != behaviors.end(); iter++) {
+          auto cast = std::dynamic_pointer_cast<T>(*iter);
+          if (cast != nullptr) {
+            return cast;
+          }
+        }
+        return nullptr;
+      }
+
       Transform SceneSpace() const;
       void SetSceneSpace(Transform transform);
 

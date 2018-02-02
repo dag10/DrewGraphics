@@ -157,13 +157,29 @@ void dg::TutorialScene::Initialize() {
   Behavior::Attach(
       mainCamera,
       std::make_shared<KeyboardCameraController>(window));
+
+  // Allow the virtual camera to also be controller.
+  Behavior::Attach(
+      virtualCamera,
+      std::make_shared<KeyboardCameraController>(window));
+  virtualCamera->GetBehavior<KeyboardCameraController>()->enabled = false;
 }
 
 void dg::TutorialScene::Update() {
   Scene::Update();
 
-  virtualCamera->transform = Transform::R(glm::quat(glm::radians(
-    glm::vec3(0, Time::Delta * 10, 0)))) * virtualCamera->transform;
+  if (window->IsKeyJustPressed(GLFW_KEY_SPACE)) {
+    flyingMainCamera = !flyingMainCamera;
+    mainCamera->GetBehavior<KeyboardCameraController>()->enabled =
+      flyingMainCamera;
+    virtualCamera->GetBehavior<KeyboardCameraController>()->enabled =
+      !flyingMainCamera;
+  }
+
+  if (flyingMainCamera) {
+    virtualCamera->transform = Transform::R(glm::quat(glm::radians(
+            glm::vec3(0, Time::Delta * 10, 0)))) * virtualCamera->transform;
+  }
 }
 
 void dg::TutorialScene::RenderFrame() {

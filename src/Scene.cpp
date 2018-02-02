@@ -128,7 +128,8 @@ void dg::Scene::RenderFrame(vr::EVREye eye) {
   vr::Texture_t frameTexture;
   frameTexture.eColorSpace = vr::EColorSpace::ColorSpace_Auto;
   frameTexture.eType = vr::ETextureType::TextureType_OpenGL;
-  frameTexture.handle = (void *)framebuffer->GetColorTexture()->GetHandle();
+  frameTexture.handle =
+    (void *)(long)framebuffer->GetColorTexture()->GetHandle();
   vr::VRCompositor()->Submit(
     eye, &frameTexture, nullptr, vr::EVRSubmitFlags::Submit_Default);
 }

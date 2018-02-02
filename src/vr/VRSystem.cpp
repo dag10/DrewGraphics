@@ -2,8 +2,6 @@
 //  vr/VRSystem.cpp
 //
 
-#pragma once
-
 #include <vr/VRSystem.h>
 #include <Exceptions.h>
 #include <MathUtils.h>

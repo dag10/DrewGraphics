@@ -16,14 +16,6 @@
 #include <lights/PointLight.h>
 #include <vr/VRSystem.h>
 
-static const glm::vec3 cubePositions[] = {
-  glm::vec3(  0.0f,  0.25f,  0.0f ),
-  glm::vec3( -1.0f,  0.25f,  0.0f ),
-  glm::vec3(  1.0f,  0.25f,  0.0f ),
-};
-
-static const glm::vec3 backgroundColor = glm::vec3(0, 0, 0);
-
 std::unique_ptr<dg::VRScene> dg::VRScene::Make() {
   return std::unique_ptr<dg::VRScene>(new dg::VRScene());
 }
@@ -93,6 +85,11 @@ void dg::VRScene::Initialize() {
   // Create wooden cubes.
   auto cubes = std::make_shared<SceneObject>();
   AddChild(cubes);
+  const glm::vec3 cubePositions[] = {
+    glm::vec3(0.0f,  0.25f,  0.0f),
+    glm::vec3(-1.0f,  0.25f,  0.0f),
+    glm::vec3(1.0f,  0.25f,  0.0f),
+  };
   int numCubes = sizeof(cubePositions) / sizeof(cubePositions[0]);
   Model baseCubeModel(
       dg::Mesh::Cube,

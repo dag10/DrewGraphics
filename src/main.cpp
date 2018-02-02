@@ -21,10 +21,21 @@
 #include <scenes/QuadScene.h>
 #include <scenes/VRScene.h>
 
+#ifdef _MSC_VER
+  // This turns on memory leak detection on Windows.
+  #define _CRTDBG_MAP_ALLOC 1
+#endif
+
 [[noreturn]] void terminateWithError(const char *error) {
-  std::cerr << error << std::endl << std::endl << "Press enter to quit...";
+  std::cerr << error << std::endl;
   glfwTerminate();
-  getchar();
+  // If on Windows, make sure we show a minimized console window
+  // and wait for the user to press enter before quitting.
+#ifdef _MSC_VER
+  ShowWindow(GetConsoleWindow(), SW_RESTORE);
+  std::cerr << std::endl;
+  system("pause");
+#endif
   exit(-1);
 }
 
@@ -56,6 +67,7 @@ int main(int argc, const char *argv[]) {
     if (std::cin.eof()) {
       exit(0);
     }
+    std::cout << std::endl;
   }
 
   // Print GLFW errors to stderr.
@@ -109,6 +121,12 @@ int main(int argc, const char *argv[]) {
     terminateWithError(e.what());
   }
 
+  // Minimize the console window on Windows.
+#ifdef _MSC_VER
+  ShowWindow(GetConsoleWindow(), SW_MINIMIZE);
+#endif
+
+  // Set up timing.
   dg::Time::Reset();
   double lastWindowUpdateTime = 0;
 
@@ -117,7 +135,12 @@ int main(int argc, const char *argv[]) {
   while(!window->ShouldClose()) {
     dg::Time::Update();
     window->PollEvents();
-    scene->Update();
+    try {
+      scene->Update();
+    } catch (const std::exception& e) {
+      std::cerr << "Failed to update scene: ";
+      terminateWithError(e.what());
+    }
 
     // Handle escape key to release cursor or quit app.
     if (window->IsKeyJustPressed(GLFW_KEY_ESCAPE) ||
@@ -147,7 +170,12 @@ int main(int argc, const char *argv[]) {
     }
 
     window->StartRender();
-    scene->RenderFrame();
+    try {
+      scene->RenderFrame();
+    } catch (const std::exception& e) {
+      std::cerr << "Failed to render scene: ";
+      terminateWithError(e.what());
+    }
     window->FinishRender();
   }
 

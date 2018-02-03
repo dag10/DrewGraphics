@@ -20,6 +20,7 @@ namespace dg {
           std::shared_ptr<Behavior> behavior);
 
       Behavior() = default;
+      virtual ~Behavior() {};
 
       // Called when the behavior is first created or copied, even if disabled.
       // Private initial values should be set in this method, not in the

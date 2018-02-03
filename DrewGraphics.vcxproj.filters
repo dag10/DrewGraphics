@@ -150,6 +150,9 @@
     <ClCompile Include="src\vr\VRManager.cpp">
       <Filter>Source Files\vr</Filter>
     </ClCompile>
+    <ClCompile Include="src\vr\VRTrackedObject.cpp">
+      <Filter>Source Files\vr</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Behavior.h">
@@ -255,6 +258,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\vr\VRManager.h">
+      <Filter>Header Files\vr</Filter>
+    </ClInclude>
+    <ClInclude Include="include\vr\VRTrackedObject.h">
       <Filter>Header Files\vr</Filter>
     </ClInclude>
   </ItemGroup>

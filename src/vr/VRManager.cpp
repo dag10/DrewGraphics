@@ -3,15 +3,22 @@
 //
 
 #include <vr/VRManager.h>
+#include <vr/VRTrackedObject.h>
 #include <Exceptions.h>
+#include <SceneObject.h>
 #include <MathUtils.h>
 
-std::unique_ptr<dg::VRManager> dg::VRManager::Instance = nullptr;
+dg::VRManager *dg::VRManager::Instance = nullptr;
 
 void dg::VRManager::Initialize() {
-  auto newInstance = std::unique_ptr<VRManager>(new VRManager);
-  newInstance->StartOpenVR();
-  Instance = std::move(newInstance);
+  Behavior::Initialize();
+
+  if (Instance != nullptr) {
+    throw std::runtime_error("More than one VRManager was initialized.");
+  }
+
+  Instance = this;
+  StartOpenVR();
 }
 
 void dg::VRManager::StartOpenVR() {
@@ -24,7 +31,8 @@ void dg::VRManager::StartOpenVR() {
   }
 
   vr::HmdError hmdError;
-  vrSystem = vr::VR_Init(&hmdError, vr::EVRApplicationType::VRApplication_Scene);
+  vrSystem = vr::VR_Init(
+    &hmdError, vr::EVRApplicationType::VRApplication_Scene);
   if (vrSystem == nullptr) {
     throw OpenVRError(hmdError);
   }
@@ -33,92 +41,108 @@ void dg::VRManager::StartOpenVR() {
 }
 
 dg::VRManager::~VRManager() {
+  Behavior::~Behavior();
+
+  Instance = nullptr;
+
   vr::VR_Shutdown();
   vrSystem = nullptr;
   vrCompositor = nullptr;
 }
 
-void dg::VRManager::WaitGetPoses() {
-  // Ignore render poses for now, just use game poses, which are for next frame.
-  // TODO: Use both render poses and game poses.
+void dg::VRManager::ReadyToRender() {
+  // Block until OpenVR's "running start" thinks we should begin our render
+  // commands. This also loads in the tracked device poses for the upcoming
+  // render and predicted poses for the upcoming frame.
   vrCompositor->WaitGetPoses(
-    nullptr, 0, poses, sizeof(poses) / sizeof(poses[0]));
+    poses.data(), poses.size(), nextPoses.data(), nextPoses.size());
+  UpdatePoses();
+}
 
-  // HMD is always device 0.
-  if (poses[0].bPoseIsValid) {
-    hmd.deviceIndex = 0;
-    hmd.transform = Transform(HmdMat2Glm(poses[0].mDeviceToAbsoluteTracking));
-  } else {
-    hmd.deviceIndex = -1;
-  }
+void dg::VRManager::RenderFinished() {
+  // At this point poses still contains the render poses, and nextPoses
+  // contains the gamePoses for the upcoming frame.
+  // We'll swap poses with nextPoses to make poses be the poses relevant
+  // for the next frame, and we'll re-parse the new poses to update
+  // controller positions, etc.
+  std::swap(poses, nextPoses);
+  UpdatePoses();
+}
 
-  // Did we have a device index last frame?
-  bool foundLeft = (leftController.deviceIndex >= 0);
-  bool foundRight = (leftController.deviceIndex >= 0);
-
+void dg::VRManager::UpdatePoses() {
   // If we previously had a controller device index, and that device is no
   // longer connected, we'll next try to find another connected device to use.
-  if (foundLeft && !poses[leftController.deviceIndex].bDeviceIsConnected) {
-    foundLeft = false;
+  if (leftControllerIndex != -1 &&
+    !poses[leftControllerIndex].bDeviceIsConnected) {
+    leftControllerIndex = -1;
   }
-  if (foundRight && !poses[rightController.deviceIndex].bDeviceIsConnected) {
-    foundRight = false;
+  if (rightControllerIndex != -1 &&
+    !poses[rightControllerIndex].bDeviceIsConnected) {
+    rightControllerIndex = -1;
   }
 
   // Associate a device with the left controller if needed.
-  if (!foundLeft) {
-    for (int i = 1; i < sizeof(poses) / sizeof(poses[0]); i++) {
+  if (leftControllerIndex == -1) {
+    for (int i = 1; i < (int)poses.size(); i++) {
       if (!poses[i].bDeviceIsConnected) continue;
       if (vrSystem->GetTrackedDeviceClass(i) !=
         vr::TrackedDeviceClass_Controller) continue;
-      if (i == rightController.deviceIndex) continue;
+      if (i == rightControllerIndex) continue;
 
-      leftController.deviceIndex = i;
-      foundLeft = true;
+      leftControllerIndex = i;
       break;
     }
   }
-  if (!foundRight) {
-    for (int i = 1; i < sizeof(poses) / sizeof(poses[0]); i++) {
+  if (rightControllerIndex == -1) {
+    for (int i = 1; i < (int)poses.size(); i++) {
       if (!poses[i].bDeviceIsConnected) continue;
       if (vrSystem->GetTrackedDeviceClass(i) !=
         vr::TrackedDeviceClass_Controller) continue;
-      if (i == leftController.deviceIndex) continue;
+      if (i == leftControllerIndex) continue;
 
-      rightController.deviceIndex = i;
-      foundRight = true;
+      rightControllerIndex = i;
       break;
     }
   }
 
-  // If we still have't found a device for a disconnected (or never connected)
-  // controller, invalidate its transform.
-  if (!foundLeft) {
-    leftController.deviceIndex = -1;
-  }
-  if (!foundRight) {
-    rightController.deviceIndex = -1;
-  }
+  // Update registered VRTrackedObject transforms.
+  for (
+    auto iter = trackedObjects.begin();
+    iter != trackedObjects.end();
+    iter++) {
 
-  // Update controllers' transforms.
-  if (foundLeft) {
-    leftController.transform = Transform(HmdMat2Glm(
-      poses[leftController.deviceIndex].mDeviceToAbsoluteTracking));
-  }
-  if (foundRight) {
-    rightController.transform = Transform(HmdMat2Glm(
-      poses[rightController.deviceIndex].mDeviceToAbsoluteTracking));
+    auto trackedObject = *iter;
+    auto trackedSceneObject = trackedObject->SceneObject();
+
+    if (trackedObject->role ==
+      vr::ETrackedControllerRole::TrackedControllerRole_Invalid) {
+      if (trackedObject->deviceIndex == -1) {
+        continue;
+      }
+      trackedSceneObject->transform = Transform(HmdMat2Glm(
+        poses[trackedObject->deviceIndex].mDeviceToAbsoluteTracking));
+    } else {
+      int index = (trackedObject->role ==
+        vr::ETrackedControllerRole::TrackedControllerRole_LeftHand)
+        ? leftControllerIndex
+        : rightControllerIndex;
+
+      trackedObject->deviceIndex = index;
+      if (index == -1) {
+        trackedSceneObject->enabled = false;
+      } else {
+        trackedSceneObject->enabled = true;
+        trackedSceneObject->transform = Transform(HmdMat2Glm(
+          poses[index].mDeviceToAbsoluteTracking));
+      }
+    }
   }
 }
 
-const dg::Transform *dg::VRManager::GetHmdTransform() const {
-  return hmd.deviceIndex >= 0 ? &hmd.transform : nullptr;
+void dg::VRManager::RegisterTrackedObject(VRTrackedObject *object) {
+  trackedObjects.push_front(object);
 }
 
-const dg::Transform *dg::VRManager::GetLeftControllerTransform() const {
-  return leftController.deviceIndex >= 0 ? &leftController.transform : nullptr;
-}
-
-const dg::Transform *dg::VRManager::GetRightControllerTransform() const {
-  return rightController.deviceIndex >= 0 ? &rightController.transform : nullptr;
+void dg::VRManager::DeregisterTrackedObject(VRTrackedObject *object) {
+  trackedObjects.remove(object);
 }

@@ -15,6 +15,7 @@
 #include <lights/DirectionalLight.h>
 #include <lights/PointLight.h>
 #include <vr/VRManager.h>
+#include <vr/VRTrackedObject.h>
 
 std::unique_ptr<dg::VRScene> dg::VRScene::Make() {
   return std::unique_ptr<dg::VRScene>(new dg::VRScene());
@@ -188,12 +189,6 @@ void dg::VRScene::Initialize() {
   ceiling->transform.translation.y = 2;
   AddChild(ceiling);
 
-  // Create a flashlight attached to the right controller.
-  flashlight = std::make_shared<SpotLight>(
-      glm::vec3(0, 0, -1), glm::radians(25.f),
-      ceilingLightColor, 0.314f, 2.16f, 2.11f);
-  rightController->AddChild(flashlight, false);
-
   // Create box that represents the camera's position.
   mainCamera->AddChild(std::make_shared<Model>(
       dg::Mesh::Cube,
@@ -201,22 +196,38 @@ void dg::VRScene::Initialize() {
         StandardMaterial::WithColor(glm::vec3(0.8f, 1.0f, 0.8f))),
       Transform::S(glm::vec3(0.2f, 0.1f, 0.1f))), false);
 
-  // Create controller sphere material.
+  // Add objects to follow OpenVR tracked devices.
+  auto leftController = std::make_shared<SceneObject>();
+  vrContainer->AddChild(leftController);
+  Behavior::Attach(leftController, std::make_shared<VRTrackedObject>(
+    vr::ETrackedControllerRole::TrackedControllerRole_LeftHand));
+  auto rightController = std::make_shared<SceneObject>();
+  Behavior::Attach(rightController, std::make_shared<VRTrackedObject>(
+    vr::ETrackedControllerRole::TrackedControllerRole_RightHand));
+  vrContainer->AddChild(rightController);
+
+  // Create controller block material.
   StandardMaterial controllerMaterial = StandardMaterial::WithColor(
     glm::vec3(0.4, 0, 0));
   controllerMaterial.SetSpecular(0.3f);
 
-  // Create spheres to represent left and right controllers.
+  // Create blocks to represent left and right controllers.
   auto leftControllerSphere = std::make_shared<Model>(
     Mesh::Cube,
     std::make_shared<StandardMaterial>(controllerMaterial),
     Transform::S(glm::vec3(0.05, 0.03, 0.1)));
-  leftController->AddChild(leftControllerSphere);
+  leftController->AddChild(leftControllerSphere, false);
   auto rightControllerSphere = std::make_shared<Model>(
     Mesh::Cube,
     std::make_shared<StandardMaterial>(controllerMaterial),
     Transform::S(glm::vec3(0.05, 0.03, 0.1)));
-  rightController->AddChild(rightControllerSphere);
+  rightController->AddChild(rightControllerSphere, false);
+
+  // Create a flashlight attached to the right controller.
+  flashlight = std::make_shared<SpotLight>(
+      glm::vec3(0, 0, -1), glm::radians(25.f),
+      ceilingLightColor, 0.314f, 2.16f, 2.11f);
+  rightController->AddChild(flashlight, false);
 
   // Initial lighting configuration is the indoor point light.
   lightingType = PointLighting;

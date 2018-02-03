@@ -50,8 +50,6 @@ namespace dg {
       // Virtual reality
       bool enableVR = false;
       std::shared_ptr<SceneObject> vrContainer;
-      std::shared_ptr<SceneObject> leftController;
-      std::shared_ptr<SceneObject> rightController;
       std::shared_ptr<FrameBuffer> leftFramebuffer;
       std::shared_ptr<FrameBuffer> rightFramebuffer;
 

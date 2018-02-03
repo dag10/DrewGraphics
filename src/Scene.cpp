@@ -6,6 +6,7 @@
 #include <Model.h>
 #include <Camera.h>
 #include <vr/VRManager.h>
+#include <vr/VRTrackedObject.h>
 
 dg::Scene::Scene() : SceneObject() {}
 
@@ -15,8 +16,10 @@ void dg::Scene::Initialize() {
     // "running start" in 90hz anyway.
     glfwSwapInterval(0);
 
-    // Initialize OpenVR.
-    VRManager::Initialize();
+    // Create container for OpenVR behaviors and tracked devices.
+    vrContainer = std::make_shared<SceneObject>();
+    Behavior::Attach(vrContainer, std::make_shared<VRManager>());
+    AddChild(vrContainer);
 
     // Create framebuffers to render into.
     uint32_t vrWidth, vrHeight;
@@ -26,14 +29,6 @@ void dg::Scene::Initialize() {
       vrWidth, vrHeight, false, true);
     rightFramebuffer = std::make_shared<FrameBuffer>(
       vrWidth, vrHeight, false, true);
-
-    // Create container for OpenVR tracked devices.
-    auto vrContainer = std::make_shared<SceneObject>();
-    AddChild(vrContainer);
-    leftController = std::make_shared<SceneObject>();
-    vrContainer->AddChild(leftController);
-    rightController = std::make_shared<SceneObject>();
-    vrContainer->AddChild(rightController);
   }
 
   // Create camera.
@@ -41,6 +36,9 @@ void dg::Scene::Initialize() {
   mainCamera->transform.translation = glm::vec3(0, 1.5, 0);
   if (enableVR) {
     vrContainer->AddChild(mainCamera);
+    Behavior::Attach(
+      mainCamera,
+      std::make_shared<VRTrackedObject>(0));
   } else {
     AddChild(mainCamera);
   }
@@ -61,33 +59,12 @@ void dg::Scene::Update() {
       remainingObjects.push_front(child->get());
     }
   }
-
-  if (enableVR) {
-    // Update camera pose.
-    const Transform *xfHmd = VRManager::Instance->GetHmdTransform();
-    if (xfHmd != nullptr) {
-      mainCamera->transform = *xfHmd;
-    }
-
-    // Update controller poses.
-    const Transform *xfLeft = VRManager::Instance->GetLeftControllerTransform();
-    leftController->enabled = (xfLeft != nullptr);
-    if (xfLeft != nullptr) {
-      leftController->transform = *xfLeft;
-    }
-    const Transform *xfRight = VRManager::Instance->GetRightControllerTransform();
-    rightController->enabled = (xfRight != nullptr);
-    if (xfRight != nullptr) {
-      rightController->transform = *xfRight;
-    }
-  }
 }
 
 void dg::Scene::RenderFrame() {
   if (enableVR) {
     // Wait for "running start", and get latest poses.
-    VRManager::Instance->WaitGetPoses();
-    // TODO: Update transforms to render poses, then to game poses after render.
+    VRManager::Instance->ReadyToRender();
 
     // Render left and right eyes for VR.
     RenderFrame(vr::EVREye::Eye_Left);
@@ -106,6 +83,10 @@ void dg::Scene::RenderFrame() {
 
   // TODO: If VR, just render a quad of the left eye instead.
   RenderScene(*mainCamera);
+
+  if (enableVR) {
+    VRManager::Instance->RenderFinished();
+  }
 }
 
 void dg::Scene::RenderFrame(vr::EVREye eye) {

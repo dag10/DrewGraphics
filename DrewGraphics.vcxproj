@@ -190,6 +190,7 @@
     <ClCompile Include="src\Texture.cpp" />
     <ClCompile Include="src\Transform.cpp" />
     <ClCompile Include="src\vr\VRManager.cpp" />
+    <ClCompile Include="src\vr\VRTrackedObject.cpp" />
     <ClCompile Include="src\Window.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -227,6 +228,7 @@
     <ClInclude Include="include\Texture.h" />
     <ClInclude Include="include\Transform.h" />
     <ClInclude Include="include\vr\VRManager.h" />
+    <ClInclude Include="include\vr\VRTrackedObject.h" />
     <ClInclude Include="include\Window.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

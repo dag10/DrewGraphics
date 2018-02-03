@@ -5,45 +5,55 @@
 #pragma once
 
 #include <Transform.h>
+#include <Behavior.h>
 #include <memory>
 #include <vector>
+#include <forward_list>
 #include <openvr.h>
 
 namespace dg {
 
-  class VRManager {
+  class VRTrackedObject;
+
+  class VRManager : public Behavior {
 
     public:
 
-      static std::unique_ptr<VRManager> Instance;
-
-      static void Initialize();
+      static VRManager *Instance;
 
       vr::IVRSystem *vrSystem = nullptr;
       vr::IVRCompositor *vrCompositor = nullptr;
 
+      VRManager() = default;
       virtual ~VRManager();
 
-      void WaitGetPoses();
+      virtual void Initialize();
 
-      const Transform *GetHmdTransform() const;
-      const Transform *GetLeftControllerTransform() const;
-      const Transform *GetRightControllerTransform() const;
+      // To be called by the scene when the update is finished and
+      // it's ready to render. This will block until OpenVR's "running start".
+      void ReadyToRender();
+
+      // To be called by the scene once the render is finished.
+      void RenderFinished();
+
+      // These methods should only be called from
+      // VRTrackedObject::Initialize().
+      void RegisterTrackedObject(VRTrackedObject *object);
+      void DeregisterTrackedObject(VRTrackedObject *object);
 
     private:
 
-      struct TrackedDeviceInfo {
-        int deviceIndex = -1;
-        Transform transform;
-      };
-
       void StartOpenVR();
+      void UpdatePoses();
 
-      TrackedDeviceInfo hmd;
-      TrackedDeviceInfo leftController;
-      TrackedDeviceInfo rightController;
+      int leftControllerIndex = -1;
+      int rightControllerIndex = -1;
 
-      vr::TrackedDevicePose_t poses[vr::k_unMaxTrackedDeviceCount];
+      std::vector<vr::TrackedDevicePose_t> poses
+        = std::vector<vr::TrackedDevicePose_t>(vr::k_unMaxTrackedDeviceCount);
+      std::vector<vr::TrackedDevicePose_t> nextPoses
+        = std::vector<vr::TrackedDevicePose_t>(vr::k_unMaxTrackedDeviceCount);
+      std::forward_list<VRTrackedObject*> trackedObjects;
 
   }; // class VRManager
 

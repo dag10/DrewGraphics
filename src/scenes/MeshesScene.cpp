@@ -13,16 +13,24 @@
 #include <lights/PointLight.h>
 
 std::unique_ptr<dg::MeshesScene> dg::MeshesScene::Make() {
-  return std::unique_ptr<dg::MeshesScene>(new dg::MeshesScene());
+  return std::unique_ptr<dg::MeshesScene>(new dg::MeshesScene(false));
 }
 
-dg::MeshesScene::MeshesScene() : Scene() {}
+std::unique_ptr<dg::MeshesScene> dg::MeshesScene::MakeVR() {
+  return std::unique_ptr<dg::MeshesScene>(new dg::MeshesScene(true));
+}
+
+dg::MeshesScene::MeshesScene(bool enableVR) : Scene() {
+  this->enableVR = enableVR;
+}
 
 void dg::MeshesScene::Initialize() {
   Scene::Initialize();
 
   // Lock window cursor to center.
-  window->LockCursor();
+  if (!enableVR) {
+    window->LockCursor();
+  }
 
   // Create textures.
   std::shared_ptr<Texture> hardwoodTexture = std::make_shared<Texture>(
@@ -115,14 +123,16 @@ void dg::MeshesScene::Initialize() {
           glm::quat(glm::radians(glm::vec3(-90, 0, 0))),
           glm::vec3(floorSize, floorSize, 1))));
 
-  // Configure camera.
-  mainCamera->transform.translation = glm::vec3(0, 2, 3);
-  mainCamera->LookAtPoint(glm::vec3(0));
+  if (!enableVR) {
+    // Configure camera.
+    mainCamera->transform.translation = glm::vec3(0, 2, 3);
+    mainCamera->LookAtPoint(glm::vec3(0));
 
-  // Allow camera to be controller by the keyboard and mouse.
-  Behavior::Attach(
-      mainCamera,
-      std::make_shared<KeyboardCameraController>(window));
+    // Allow camera to be controller by the keyboard and mouse.
+    Behavior::Attach(
+        mainCamera,
+        std::make_shared<KeyboardCameraController>(window));
+  }
 }
 
 void dg::MeshesScene::Update() {

@@ -21,13 +21,14 @@ namespace dg {
     public:
 
       static std::unique_ptr<MeshesScene> Make();
-
-      MeshesScene();
+      static std::unique_ptr<MeshesScene> MakeVR();
 
       virtual void Initialize();
       virtual void Update();
 
     private:
+
+      MeshesScene(bool enableVR);
 
       std::shared_ptr<Model> texturedSphere;
       std::shared_ptr<Model> texturedCylinder;

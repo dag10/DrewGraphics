@@ -44,13 +44,14 @@ int main(int argc, const char *argv[]) {
   std::map<
     std::string,
     std::function<std::unique_ptr<dg::Scene>()>> constructors;
-  constructors["portal"]   = dg::PortalScene::Make;
-  constructors["tutorial"] = dg::TutorialScene::Make;
-  constructors["meshes"]   = dg::MeshesScene::Make;
-  constructors["robot"]    = dg::RobotScene::Make;
-  constructors["robot-vr"] = dg::RobotScene::MakeVR;
-  constructors["quad"]     = dg::QuadScene::Make;
-  constructors["vr"]       = dg::VRScene::Make;
+  constructors["portal"]    = dg::PortalScene::Make;
+  constructors["tutorial"]  = dg::TutorialScene::Make;
+  constructors["meshes"]    = dg::MeshesScene::Make;
+  constructors["meshes-vr"] = dg::MeshesScene::MakeVR;
+  constructors["robot"]     = dg::RobotScene::Make;
+  constructors["robot-vr"]  = dg::RobotScene::MakeVR;
+  constructors["quad"]      = dg::QuadScene::Make;
+  constructors["vr"]        = dg::VRScene::Make;
   std::string sceneName;
   if (argc > 1) {
     sceneName = argv[1];

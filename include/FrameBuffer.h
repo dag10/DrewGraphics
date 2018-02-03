@@ -68,6 +68,8 @@ namespace dg {
       void AttachDepthRenderBuffer(
         std::shared_ptr<RenderBuffer> buffer, bool allowStencil);
 
+      void SetViewport();
+
     private:
 
       GLuint bufferHandle = 0;

@@ -6,6 +6,7 @@
 
 #include <Transform.h>
 #include <Behavior.h>
+#include <FrameBuffer.h>
 #include <memory>
 #include <vector>
 #include <forward_list>
@@ -41,13 +42,20 @@ namespace dg {
       void RegisterTrackedObject(VRTrackedObject *object);
       void DeregisterTrackedObject(VRTrackedObject *object);
 
+      std::shared_ptr<FrameBuffer> GetFramebuffer(vr::EVREye eye) const;
+      void SubmitFrame(vr::EVREye eye);
+
     private:
 
       void StartOpenVR();
+      void CreateFramebuffers();
       void UpdatePoses();
 
       int leftControllerIndex = -1;
       int rightControllerIndex = -1;
+
+      std::shared_ptr<FrameBuffer> leftFramebuffer;
+      std::shared_ptr<FrameBuffer> rightFramebuffer;
 
       std::vector<vr::TrackedDevicePose_t> poses
         = std::vector<vr::TrackedDevicePose_t>(vr::k_unMaxTrackedDeviceCount);

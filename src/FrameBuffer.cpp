@@ -186,4 +186,8 @@ void dg::FrameBuffer::AttachDepthRenderBuffer(
   depthTexture = nullptr;
 }
 
+void dg::FrameBuffer::SetViewport() {
+  glViewport(0, 0, width, height);
+}
+
 #pragma endregion

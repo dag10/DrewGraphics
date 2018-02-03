@@ -38,6 +38,18 @@ void dg::VRManager::StartOpenVR() {
   }
 
   vrCompositor = vr::VRCompositor();
+
+  CreateFramebuffers();
+}
+
+void dg::VRManager::CreateFramebuffers() {
+    uint32_t vrWidth, vrHeight;
+    vrSystem->GetRecommendedRenderTargetSize(&vrWidth, &vrHeight);
+
+    leftFramebuffer = std::make_shared<FrameBuffer>(
+      vrWidth, vrHeight, false, true);
+    rightFramebuffer = std::make_shared<FrameBuffer>(
+      vrWidth, vrHeight, false, true);
 }
 
 dg::VRManager::~VRManager() {
@@ -145,4 +157,23 @@ void dg::VRManager::RegisterTrackedObject(VRTrackedObject *object) {
 
 void dg::VRManager::DeregisterTrackedObject(VRTrackedObject *object) {
   trackedObjects.remove(object);
+}
+
+std::shared_ptr<dg::FrameBuffer> dg::VRManager::GetFramebuffer(
+  vr::EVREye eye) const {
+  switch (eye) {
+    case vr::EVREye::Eye_Left:  return leftFramebuffer;
+    case vr::EVREye::Eye_Right: return rightFramebuffer;
+    default:                    return nullptr;
+  }
+}
+
+void dg::VRManager::SubmitFrame(vr::EVREye eye) {
+  vr::Texture_t frameTexture;
+  frameTexture.eColorSpace = vr::EColorSpace::ColorSpace_Auto;
+  frameTexture.eType = vr::ETextureType::TextureType_OpenGL;
+  frameTexture.handle =
+    (void *)(long)GetFramebuffer(eye)->GetColorTexture()->GetHandle();
+  vrCompositor->Submit(
+    eye, &frameTexture, nullptr, vr::EVRSubmitFlags::Submit_Default);
 }

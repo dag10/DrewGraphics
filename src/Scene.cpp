@@ -20,15 +20,6 @@ void dg::Scene::Initialize() {
     vrContainer = std::make_shared<SceneObject>();
     Behavior::Attach(vrContainer, std::make_shared<VRManager>());
     AddChild(vrContainer);
-
-    // Create framebuffers to render into.
-    uint32_t vrWidth, vrHeight;
-    vr::VRSystem()->GetRecommendedRenderTargetSize(&vrWidth, &vrHeight);
-    // TODO: These framebuffers should be owned by dg::VRManager.
-    leftFramebuffer = std::make_shared<FrameBuffer>(
-      vrWidth, vrHeight, false, true);
-    rightFramebuffer = std::make_shared<FrameBuffer>(
-      vrWidth, vrHeight, false, true);
   }
 
   // Create camera.
@@ -61,6 +52,17 @@ void dg::Scene::Update() {
   }
 }
 
+void dg::Scene::ClearBuffer() {
+  glClearColor(0, 0, 0, 1);
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+}
+
+void dg::Scene::ConfigureBuffer() {
+  glEnable(GL_DEPTH_TEST);
+  glEnable(GL_CULL_FACE);
+  glCullFace(GL_BACK);
+}
+
 void dg::Scene::RenderFrame() {
   if (enableVR) {
     // Wait for "running start", and get latest poses.
@@ -69,19 +71,11 @@ void dg::Scene::RenderFrame() {
     // Render left and right eyes for VR.
     RenderFrame(vr::EVREye::Eye_Left);
     RenderFrame(vr::EVREye::Eye_Right);
-    window->ResetViewport();
   }
 
-  // Clear back buffer.
-  glClearColor(0, 0, 0, 1);
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-
-  // Render params.
-  glEnable(GL_DEPTH_TEST);
-  glEnable(GL_CULL_FACE);
-  glCullFace(GL_BACK);
-
   // TODO: If VR, just render a quad of the left eye instead.
+  ClearBuffer();
+  ConfigureBuffer();
   RenderScene(*mainCamera);
 
   if (enableVR) {
@@ -90,33 +84,24 @@ void dg::Scene::RenderFrame() {
 }
 
 void dg::Scene::RenderFrame(vr::EVREye eye) {
-  // Set up framebuffer and render the eye.
   std::shared_ptr<FrameBuffer> framebuffer =
-    (eye == vr::EVREye::Eye_Left) ? leftFramebuffer : rightFramebuffer;
+    VRManager::Instance->GetFramebuffer(eye);
   framebuffer->Bind();
-  glViewport(0, 0, framebuffer->GetWidth(), framebuffer->GetHeight());
-  glClearColor(0, 0, 0, 1);
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-  glEnable(GL_DEPTH_TEST);
-  glEnable(GL_CULL_FACE);
-  glCullFace(GL_BACK);
+  framebuffer->SetViewport();
+  ClearBuffer();
+  ConfigureBuffer();
 
-  // Render the scene.
   RenderScene(*mainCamera, true, eye);
-  framebuffer->Unbind();
 
-  // Submit frame to SteamVR.
-  vr::Texture_t frameTexture;
-  frameTexture.eColorSpace = vr::EColorSpace::ColorSpace_Auto;
-  frameTexture.eType = vr::ETextureType::TextureType_OpenGL;
-  frameTexture.handle =
-    (void *)(long)framebuffer->GetColorTexture()->GetHandle();
-  vr::VRCompositor()->Submit(
-    eye, &frameTexture, nullptr, vr::EVRSubmitFlags::Submit_Default);
+  VRManager::Instance->SubmitFrame(eye);
+
+  framebuffer->Unbind();
+  window->ResetViewport();
 }
 
 void dg::Scene::RenderScene(
   const Camera& camera, bool renderForVR, vr::EVREye eye) {
+
   // Render skybox.
   if (skybox != nullptr && skybox->enabled) {
     skybox->Draw(camera, *window);

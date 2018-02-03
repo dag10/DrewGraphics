@@ -42,6 +42,8 @@ namespace dg {
           glm::mat4x4 view,
           glm::mat4x4 projection,
           const std::forward_list<Light*>& lights) const;
+      virtual void ClearBuffer();
+      virtual void ConfigureBuffer();
 
       std::shared_ptr<Camera> mainCamera;
       std::shared_ptr<Window> window = nullptr;
@@ -50,8 +52,6 @@ namespace dg {
       // Virtual reality
       bool enableVR = false;
       std::shared_ptr<SceneObject> vrContainer;
-      std::shared_ptr<FrameBuffer> leftFramebuffer;
-      std::shared_ptr<FrameBuffer> rightFramebuffer;
 
   }; // class Scene
 

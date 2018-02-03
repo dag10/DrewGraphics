@@ -8,6 +8,7 @@
 #include <Camera.h>
 #include <Window.h>
 #include <materials/StandardMaterial.h>
+#include <openvr.h>
 
 namespace dg {
 
@@ -27,6 +28,11 @@ namespace dg {
       friend void swap(Skybox& first, Skybox& second); // nothrow
 
       void Draw(const Camera& camera, const Window& window);
+      void Draw(const Camera& camera, vr::EVREye eye);
+
+    private:
+
+      void Draw(const Camera& camera,  glm::mat4x4 projection);
 
   }; // class Skybox
 

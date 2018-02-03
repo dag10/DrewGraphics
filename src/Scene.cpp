@@ -104,7 +104,11 @@ void dg::Scene::RenderScene(
 
   // Render skybox.
   if (skybox != nullptr && skybox->enabled) {
-    skybox->Draw(camera, *window);
+    if (enableVR && renderForVR) {
+      skybox->Draw(camera, eye);
+    } else {
+      skybox->Draw(camera, *window);
+    }
   }
 
   // Traverse scene tree and sort out different types of objects

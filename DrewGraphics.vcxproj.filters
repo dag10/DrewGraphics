@@ -153,6 +153,9 @@
     <ClCompile Include="src\vr\VRTrackedObject.cpp">
       <Filter>Source Files\vr</Filter>
     </ClCompile>
+    <ClCompile Include="src\behaviors\KeyboardLightController.cpp">
+      <Filter>Source Files\behaviors</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Behavior.h">
@@ -262,6 +265,9 @@
     </ClInclude>
     <ClInclude Include="include\vr\VRTrackedObject.h">
       <Filter>Header Files\vr</Filter>
+    </ClInclude>
+    <ClInclude Include="include\behaviors\KeyboardLightController.h">
+      <Filter>Header Files\behaviors</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

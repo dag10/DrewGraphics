@@ -14,6 +14,7 @@
 #include <iostream>
 #include <lights/DirectionalLight.h>
 #include <lights/PointLight.h>
+#include <behaviors/KeyboardLightController.h>
 #include <vr/VRManager.h>
 #include <vr/VRTrackedObject.h>
 
@@ -51,6 +52,7 @@ void dg::VRScene::Initialize() {
       glm::normalize(glm::vec3(-0.3f, -1, -0.2f)),
       glm::vec3(1.0f, 0.93f, 0.86f),
       0.34f, 1.45f, 0.07f);
+  Behavior::Attach(skyLight, std::make_shared<KeyboardLightController>(window));
   AddChild(skyLight);
 
   // Create light cube material.
@@ -77,6 +79,12 @@ void dg::VRScene::Initialize() {
   lightModel->AddChild(spotLight, false);
   lightModel->AddChild(indoorCeilingLight, false);
   lightModel->AddChild(outdoorCeilingLight, false);
+  Behavior::Attach(
+    spotLight, std::make_shared<KeyboardLightController>(window));
+  Behavior::Attach(
+    indoorCeilingLight, std::make_shared<KeyboardLightController>(window));
+  Behavior::Attach(
+    outdoorCeilingLight, std::make_shared<KeyboardLightController>(window));
 
   // Create wooden cube material.
   StandardMaterial cubeMaterial = StandardMaterial::WithTexture(crateTexture);
@@ -227,6 +235,8 @@ void dg::VRScene::Initialize() {
   flashlight = std::make_shared<SpotLight>(
       glm::vec3(0, 0, -1), glm::radians(25.f),
       ceilingLightColor, 0.314f, 2.16f, 2.11f);
+  Behavior::Attach(
+    flashlight, std::make_shared<KeyboardLightController>(window));
   rightController->AddChild(flashlight, false);
 
   // Initial lighting configuration is the indoor point light.
@@ -239,55 +249,6 @@ void dg::VRScene::Initialize() {
 
 void dg::VRScene::Update() {
   Scene::Update();
-
-  // Adjust light ambient power with keyboard.
-  const float lightDelta = 0.05f;
-  std::shared_ptr<Light> activeLight = nullptr;
-  switch (lightingType) {
-    case OutdoorLighting:
-      activeLight = outdoorCeilingLight;
-      break;
-    case PointLighting:
-      activeLight = indoorCeilingLight;
-      break;
-    case SpotLighting:
-      activeLight = spotLight;
-      break;
-    case FlashlightLighting:
-      activeLight = flashlight;
-      break;
-  }
-  if (window->IsKeyPressed(GLFW_KEY_1) &&
-      window->IsKeyJustPressed(GLFW_KEY_UP)) {
-    activeLight->ambient += activeLight->ambient * lightDelta;
-    std::cout << "Ambient R: " << activeLight->ambient.r << std::endl;
-  } else if (window->IsKeyPressed(GLFW_KEY_1) &&
-      window->IsKeyJustPressed(GLFW_KEY_DOWN)) {
-    activeLight->ambient -= activeLight->ambient * lightDelta;
-    std::cout << "Ambient R: " << activeLight->ambient.r << std::endl;
-  }
-
-  // Adjust light diffuse power with keyboard.
-  if (window->IsKeyPressed(GLFW_KEY_2) &&
-      window->IsKeyJustPressed(GLFW_KEY_UP)) {
-    activeLight->diffuse += activeLight->diffuse * lightDelta;
-    std::cout << "Diffuse R: " << activeLight->diffuse.r << std::endl;
-  } else if (window->IsKeyPressed(GLFW_KEY_2) &&
-      window->IsKeyJustPressed(GLFW_KEY_DOWN)) {
-    activeLight->diffuse -= activeLight->diffuse * lightDelta;
-    std::cout << "Diffuse R: " << activeLight->diffuse.r << std::endl;
-  }
-
-  // Adjust light specular power with keyboard.
-  if (window->IsKeyPressed(GLFW_KEY_3) &&
-      window->IsKeyJustPressed(GLFW_KEY_UP)) {
-    activeLight->specular += activeLight->specular * lightDelta;
-    std::cout << "Specular R: " << activeLight->specular.r << std::endl;
-  } else if (window->IsKeyPressed(GLFW_KEY_3) &&
-      window->IsKeyJustPressed(GLFW_KEY_DOWN)) {
-    activeLight->specular -= activeLight->specular * lightDelta;
-    std::cout << "Specular R: " << activeLight->specular.r << std::endl;
-  }
 
   // If F was tapped, switch to the flashlight configuration.
   if (window->IsKeyJustPressed(GLFW_KEY_F)) {
@@ -326,6 +287,21 @@ void dg::VRScene::Update() {
   }
 
   // Update light cube model to be consistent with point light.
+  std::shared_ptr<Light> activeLight = nullptr;
+  switch (lightingType) {
+    case OutdoorLighting:
+      activeLight = outdoorCeilingLight;
+      break;
+    case PointLighting:
+      activeLight = indoorCeilingLight;
+      break;
+    case SpotLighting:
+      activeLight = spotLight;
+      break;
+    case FlashlightLighting:
+      activeLight = flashlight;
+      break;
+  }
   std::static_pointer_cast<StandardMaterial>(lightModel->material)
     ->SetDiffuse(activeLight->specular);
 }

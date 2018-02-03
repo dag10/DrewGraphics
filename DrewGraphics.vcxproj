@@ -159,6 +159,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\behaviors\KeyboardCameraController.cpp" />
+    <ClCompile Include="src\behaviors\KeyboardLightController.cpp" />
     <ClCompile Include="src\Camera.cpp" />
     <ClCompile Include="src\EngineTime.cpp" />
     <ClCompile Include="src\FileUtils.cpp" />
@@ -196,6 +197,7 @@
   <ItemGroup>
     <ClInclude Include="include\Behavior.h" />
     <ClInclude Include="include\behaviors\KeyboardCameraController.h" />
+    <ClInclude Include="include\behaviors\KeyboardLightController.h" />
     <ClInclude Include="include\Camera.h" />
     <ClInclude Include="include\EngineTime.h" />
     <ClInclude Include="include\Exceptions.h" />

@@ -14,14 +14,16 @@ namespace dg {
     public:
 
       static std::unique_ptr<RobotScene> Make();
-
-      RobotScene();
+      static std::unique_ptr<RobotScene> MakeVR();
 
       virtual void Initialize();
       virtual void Update();
-      virtual void RenderFrame();
 
     private:
+
+      RobotScene(bool enableVR);
+
+      virtual void ClearBuffer();
 
       // Robot joints.
       std::shared_ptr<SceneObject> robot;

@@ -48,6 +48,7 @@ int main(int argc, const char *argv[]) {
   constructors["tutorial"] = dg::TutorialScene::Make;
   constructors["meshes"]   = dg::MeshesScene::Make;
   constructors["robot"]    = dg::RobotScene::Make;
+  constructors["robot-vr"] = dg::RobotScene::MakeVR;
   constructors["quad"]     = dg::QuadScene::Make;
   constructors["vr"]       = dg::VRScene::Make;
   std::string sceneName;

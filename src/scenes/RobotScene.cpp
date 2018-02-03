@@ -10,20 +10,24 @@
 #include <behaviors/KeyboardCameraController.h>
 
 std::unique_ptr<dg::RobotScene> dg::RobotScene::Make() {
-  return std::unique_ptr<dg::RobotScene>(new dg::RobotScene());
+  return std::unique_ptr<dg::RobotScene>(new dg::RobotScene(false));
 }
 
-dg::RobotScene::RobotScene() : Scene() {}
+std::unique_ptr<dg::RobotScene> dg::RobotScene::MakeVR() {
+  return std::unique_ptr<dg::RobotScene>(new dg::RobotScene(true));
+}
+
+dg::RobotScene::RobotScene(bool enableVR) : Scene() {
+  this->enableVR = enableVR;
+}
 
 void dg::RobotScene::Initialize() {
   Scene::Initialize();
 
   // Lock window cursor to center.
-  window->LockCursor();
-
-  // Create camera.
-  mainCamera = std::make_shared<Camera>();
-  AddChild(mainCamera);
+  if (!enableVR) {
+    window->LockCursor();
+  }
 
   // UV Material.
   auto robotMaterial = std::make_shared<UVMaterial>();
@@ -50,6 +54,12 @@ void dg::RobotScene::Initialize() {
   // Robot container.
   robot = std::make_shared<SceneObject>();
   AddChild(robot);
+  if (enableVR) {
+    float scale = 0.63f;
+    robot->transform = Transform::TS(
+      glm::vec3(0, (legLength + (torsoHeight / 2)) * scale, 0),
+      glm::vec3(scale));
+  }
 
   // Torso
   auto torso = std::make_shared<Model>(
@@ -224,9 +234,11 @@ void dg::RobotScene::Initialize() {
           )), false);
 
   // Allow camera to be controller by the keyboard and mouse.
-  Behavior::Attach(
-      mainCamera,
-      std::make_shared<KeyboardCameraController>(window));
+  if (!enableVR) {
+    Behavior::Attach(
+        mainCamera,
+        std::make_shared<KeyboardCameraController>(window));
+  }
 }
 
 void dg::RobotScene::Update() {
@@ -268,7 +280,7 @@ void dg::RobotScene::Update() {
 
   // Slow wobble of camera.
   float cameraMovement = sin(Time::Elapsed * 1.0f + 0.7f);
-  if (!freeFly) {
+  if (!freeFly && !enableVR) {
     mainCamera->transform =
       Transform::R(glm::quat(glm::radians(
               glm::vec3(0, cameraMovement * 20, 0)))) *
@@ -282,16 +294,8 @@ void dg::RobotScene::Update() {
     glm::quat(glm::radians(glm::vec3(-7, cameraMovement * 10, headMovement * 3)));
 }
 
-void dg::RobotScene::RenderFrame() {
-  // Clear back buffer.
+void dg::RobotScene::ClearBuffer() {
   glClearColor(0.4f, 0.6f, 0.75f, 1.f);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-
-  // Render params.
-  glEnable(GL_DEPTH_TEST);
-  glEnable(GL_CULL_FACE);
-  glCullFace(GL_BACK);
-
-  RenderScene(*mainCamera);
 }
 

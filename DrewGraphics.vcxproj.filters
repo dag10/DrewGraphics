@@ -159,6 +159,12 @@
     <ClCompile Include="src\materials\ScreenQuadMaterial.cpp">
       <Filter>Source Files\materials</Filter>
     </ClCompile>
+    <ClCompile Include="src\CanvasScene.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\scenes\CanvasTestScene.cpp">
+      <Filter>Source Files\scenes</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Behavior.h">
@@ -274,6 +280,12 @@
     </ClInclude>
     <ClInclude Include="include\materials\ScreenQuadMaterial.h">
       <Filter>Header Files\materials</Filter>
+    </ClInclude>
+    <ClInclude Include="include\CanvasScene.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\scenes\CanvasTestScene.h">
+      <Filter>Header Files\scenes</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

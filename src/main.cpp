@@ -14,6 +14,7 @@
 #include <Camera.h>
 #include <Shader.h>
 #include <Mesh.h>
+#include <scenes/CanvasTestScene.h>
 #include <scenes/TutorialScene.h>
 #include <scenes/RobotScene.h>
 #include <scenes/MeshesScene.h>
@@ -51,6 +52,7 @@ int main(int argc, const char *argv[]) {
   constructors["robot"]     = dg::RobotScene::Make;
   constructors["robot-vr"]  = dg::RobotScene::MakeVR;
   constructors["quad"]      = dg::QuadScene::Make;
+  constructors["canvas"]    = dg::CanvasTestScene::Make;
   constructors["vr"]        = dg::VRScene::Make;
   std::string sceneName;
   if (argc > 1) {

@@ -156,6 +156,9 @@
     <ClCompile Include="src\behaviors\KeyboardLightController.cpp">
       <Filter>Source Files\behaviors</Filter>
     </ClCompile>
+    <ClCompile Include="src\materials\ScreenQuadMaterial.cpp">
+      <Filter>Source Files\materials</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Behavior.h">
@@ -268,6 +271,9 @@
     </ClInclude>
     <ClInclude Include="include\behaviors\KeyboardLightController.h">
       <Filter>Header Files\behaviors</Filter>
+    </ClInclude>
+    <ClInclude Include="include\materials\ScreenQuadMaterial.h">
+      <Filter>Header Files\materials</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -171,6 +171,7 @@
     <ClCompile Include="src\lights\SpotLight.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\Material.cpp" />
+    <ClCompile Include="src\materials\ScreenQuadMaterial.cpp" />
     <ClCompile Include="src\materials\StandardMaterial.cpp" />
     <ClCompile Include="src\materials\UVMaterial.cpp" />
     <ClCompile Include="src\MathUtils.cpp" />
@@ -210,6 +211,7 @@
     <ClInclude Include="include\lights\PointLight.h" />
     <ClInclude Include="include\lights\SpotLight.h" />
     <ClInclude Include="include\Material.h" />
+    <ClInclude Include="include\materials\ScreenQuadMaterial.h" />
     <ClInclude Include="include\materials\StandardMaterial.h" />
     <ClInclude Include="include\materials\UVMaterial.h" />
     <ClInclude Include="include\MathUtils.h" />

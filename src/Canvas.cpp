@@ -8,7 +8,7 @@ dg::Canvas::Canvas(unsigned int width, unsigned int height) {
   texture = std::make_shared<Texture>(
       Texture::WithDimensions(width, height));
 
-  pixels = new PixelRGB[width * height];
+  pixels = new Pixel[width * height];
   memset(pixels, 0, width * height * sizeof(pixels[0]));
   Submit();
 }
@@ -45,16 +45,23 @@ unsigned int dg::Canvas::GetHeight() const {
 }
 
 void dg::Canvas::SetPixel(
-    unsigned int x, unsigned int y, GLubyte red, GLubyte green, GLubyte blue) {
+    unsigned int x, unsigned int y,
+    GLubyte red, GLubyte green, GLubyte blue, GLubyte alpha) {
   if (x >= GetWidth() || y >= GetHeight()) {
     throw std::runtime_error("Canvas SetPixel() coordinates out of bounds.");
   }
 
-  pixels[(GetWidth() * y) + x] = {
-    red = red,
-    green = green,
-    blue = blue,
-  };
+  //pixels[(GetWidth() * y) + x] = {
+    //red = red,
+    //green = green,
+    //blue = blue,
+  //};
+
+  Pixel *pixel = pixels + (GetWidth() * y) + x;
+  pixel->red = red;
+  pixel->green = green;
+  pixel->blue = blue;
+  pixel->alpha = alpha;
 }
 
 void dg::Canvas::Submit() {
@@ -66,7 +73,7 @@ void dg::Canvas::Submit() {
       0,
       GetWidth(),
       GetHeight(),
-      GL_RGB,
+      GL_RGBA,
       GL_UNSIGNED_BYTE,
       pixels);
 }

@@ -30,19 +30,20 @@ namespace dg {
       // X is from left, Y is from bottom.
       void SetPixel(
           unsigned int x, unsigned int y, GLubyte red, GLubyte green,
-          GLubyte blue);
+          GLubyte blue, GLubyte alpha = 255);
 
       void Submit();
 
     private:
 
-      struct PixelRGB {
+      struct Pixel {
         GLubyte red;
         GLubyte green;
         GLubyte blue;
+        GLubyte alpha;
       };
 
-      PixelRGB *pixels = nullptr;
+      Pixel *pixels = nullptr;
       std::shared_ptr<Texture> texture = nullptr;
 
   }; // class Canvas

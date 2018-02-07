@@ -51,6 +51,14 @@ GLuint dg::Texture::GetHandle() const {
   return textureHandle;
 }
 
+unsigned int dg::Texture::GetWidth() const {
+  return width;
+}
+
+unsigned int dg::Texture::GetHeight() const {
+  return height;
+}
+
 dg::Texture::Texture(dg::Texture&& other) {
   *this = std::move(other);
 }

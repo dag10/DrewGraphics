@@ -5,7 +5,7 @@
 #pragma once
 
 #include <memory>
-#include <Texture.h>
+#include <Canvas.h>
 #include <materials/ScreenQuadMaterial.h>
 #include <Scene.h>
 
@@ -24,8 +24,8 @@ namespace dg {
 
       virtual void ConfigureBuffer();
 
-      std::shared_ptr<Texture> canvas; // TODO: Will become a Canvas.
-      std::shared_ptr<ScreenQuadMaterial> quadMaterial;
+      std::shared_ptr<Canvas> canvas = nullptr;
+      std::shared_ptr<ScreenQuadMaterial> quadMaterial = nullptr;
 
   }; // class CanvasScene
 

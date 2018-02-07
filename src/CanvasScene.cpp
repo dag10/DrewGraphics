@@ -8,7 +8,10 @@
 dg::CanvasScene::CanvasScene() : Scene() {}
 
 void dg::CanvasScene::Initialize() {
-  quadMaterial = std::make_shared<ScreenQuadMaterial>(canvas);
+  Scene::Initialize();
+
+  canvas = std::make_shared<Canvas>(window->GetWidth(), window->GetHeight());
+  quadMaterial = std::make_shared<ScreenQuadMaterial>();
 }
 
 void dg::CanvasScene::ConfigureBuffer() {
@@ -16,8 +19,13 @@ void dg::CanvasScene::ConfigureBuffer() {
 }
 
 void dg::CanvasScene::RenderFrame() {
+  window->ResetViewport();
+
   ClearBuffer();
   ConfigureBuffer();
+
+  // In case the canvas is ever recreated.
+  quadMaterial->SetTexture(canvas->GetTexture());
 
   quadMaterial->Use();
   Mesh::Quad->Use();

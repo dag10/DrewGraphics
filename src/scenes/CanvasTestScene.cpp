@@ -13,10 +13,10 @@ dg::CanvasTestScene::CanvasTestScene() : CanvasScene() {}
 void dg::CanvasTestScene::Initialize() {
   CanvasScene::Initialize();
 
-  // Create canvas.
-  // TODO: Actual make this a Canvas.
-  canvas = std::make_shared<Texture>(
-      Texture::FromPath("assets/textures/container2.png"));
-  quadMaterial->SetTexture(canvas);
+  canvas->SetPixel(10, 10, 255, 0, 0);
+  canvas->SetPixel(11, 10, 0, 255, 0);
+  canvas->SetPixel(10, 11, 0, 0, 255);
+  canvas->SetPixel(11, 11, 255, 255, 255);
+  canvas->Submit();
 }
 

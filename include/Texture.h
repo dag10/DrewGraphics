@@ -28,6 +28,8 @@ namespace dg {
       friend void swap(Texture& first, Texture& second); // nothrow
 
       GLuint GetHandle() const;
+      unsigned int GetWidth() const;
+      unsigned int GetHeight() const;
 
     private:
       void LoadFromPath(const std::string& path);

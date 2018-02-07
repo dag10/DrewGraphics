@@ -161,6 +161,7 @@
     <ClCompile Include="src\behaviors\KeyboardCameraController.cpp" />
     <ClCompile Include="src\behaviors\KeyboardLightController.cpp" />
     <ClCompile Include="src\Camera.cpp" />
+    <ClCompile Include="src\Canvas.cpp" />
     <ClCompile Include="src\CanvasScene.cpp" />
     <ClCompile Include="src\EngineTime.cpp" />
     <ClCompile Include="src\FileUtils.cpp" />
@@ -202,6 +203,7 @@
     <ClInclude Include="include\behaviors\KeyboardCameraController.h" />
     <ClInclude Include="include\behaviors\KeyboardLightController.h" />
     <ClInclude Include="include\Camera.h" />
+    <ClInclude Include="include\Canvas.h" />
     <ClInclude Include="include\CanvasScene.h" />
     <ClInclude Include="include\EngineTime.h" />
     <ClInclude Include="include\Exceptions.h" />

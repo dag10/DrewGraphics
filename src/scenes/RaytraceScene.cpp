@@ -1,21 +1,23 @@
 //
-//  scenes/LayoutScene.h
+//  scenes/RaytraceScene.h
 //
 
-#include <scenes/LayoutScene.h>
+#include <scenes/RaytraceScene.h>
 
 #include <glm/glm.hpp>
 #include <materials/StandardMaterial.h>
+#include <materials/ScreenQuadMaterial.h>
 #include <behaviors/KeyboardCameraController.h>
 #include <lights/DirectionalLight.h>
+#include <raytracing/Renderer.h>
 
-std::unique_ptr<dg::LayoutScene> dg::LayoutScene::Make() {
-  return std::unique_ptr<dg::LayoutScene>(new dg::LayoutScene());
+std::unique_ptr<dg::RaytraceScene> dg::RaytraceScene::Make() {
+  return std::unique_ptr<dg::RaytraceScene>(new dg::RaytraceScene());
 }
 
-dg::LayoutScene::LayoutScene() : Scene() {}
+dg::RaytraceScene::RaytraceScene() : Scene() {}
 
-void dg::LayoutScene::Initialize() {
+void dg::RaytraceScene::Initialize() {
   // Lock window cursor to center.
   window->LockCursor();
 
@@ -75,5 +77,48 @@ void dg::LayoutScene::Initialize() {
   Behavior::Attach(
       mainCamera,
       std::make_shared<KeyboardCameraController>(window, 4));
+
+  // Material for rendering render canvas to screen.
+  quadMaterial = std::make_shared<ScreenQuadMaterial>(
+      glm::vec3(1), glm::vec2(2));
+}
+
+void dg::RaytraceScene::Update() {
+  if (showRender) {
+    if (window->IsKeyJustPressed(Key::SPACE)) {
+      showRender = false;
+    }
+    return;
+  }
+
+  Scene::Update();
+
+  if (window->IsKeyJustPressed(Key::SPACE)) {
+    if (mainCamera->transform != renderCameraTransform) {
+      std::unique_ptr<Renderer> renderer = std::unique_ptr<Renderer>(
+          new Renderer(window->GetWidth(), window->GetHeight(), this));
+      renderer->Render();
+      quadMaterial->SetTexture(renderer->GetTexture());
+      renderCameraTransform = mainCamera->transform;
+    }
+
+    showRender = true;
+  }
+}
+
+void dg::RaytraceScene::RenderFrame() {
+  if (showRender) {
+    window->ResetViewport();
+
+    ClearBuffer();
+    ConfigureBuffer();
+
+    quadMaterial->Use();
+    Mesh::Quad->Draw();
+
+    return;
+  }
+
+  Scene::RenderFrame();
 }
 

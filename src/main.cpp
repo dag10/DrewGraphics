@@ -8,7 +8,7 @@
 #include <glad/glad.h>
 #include <scenes/CanvasTestScene.h>
 #include <scenes/MeshesScene.h>
-#include <scenes/LayoutScene.h>
+#include <scenes/RaytraceScene.h>
 #include <scenes/PortalScene.h>
 #include <scenes/QuadScene.h>
 #include <scenes/RobotScene.h>
@@ -52,7 +52,7 @@ int main(int argc, const char *argv[]) {
   constructors["textures"]  = dg::TexturesScene::Make;
   constructors["meshes"]    = dg::MeshesScene::Make;
   constructors["meshes-vr"] = dg::MeshesScene::MakeVR;
-  constructors["layout"]   = dg::LayoutScene::Make;
+  constructors["raytrace"]  = dg::RaytraceScene::Make;
   constructors["robot"]     = dg::RobotScene::Make;
   constructors["robot-vr"]  = dg::RobotScene::MakeVR;
   constructors["quad"]      = dg::QuadScene::Make;

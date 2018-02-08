@@ -53,6 +53,9 @@ namespace dg {
       std::string ToString() const;
       friend std::ostream& operator<<(std::ostream& os, const dg::Transform& xf);
 
+      bool operator==(const Transform& rhs) const;
+      bool operator!=(const Transform& rhs) const;
+
   }; // struct Transform
 
 } // namespace dg

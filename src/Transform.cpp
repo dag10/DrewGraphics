@@ -137,3 +137,14 @@ std::ostream& dg::operator<<(std::ostream& os, const dg::Transform& xf) {
   return os;
 }
 
+bool dg::Transform::operator==(const Transform& rhs) const {
+  return \
+    translation == rhs.translation &&
+    rotation == rhs.rotation &&
+    scale == rhs.scale;
+}
+
+bool dg::Transform::operator!=(const Transform& rhs) const {
+  return !operator==(rhs);
+}
+

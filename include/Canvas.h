@@ -29,18 +29,18 @@ namespace dg {
 
       // X is from left, Y is from bottom.
       void SetPixel(
-          unsigned int x, unsigned int y, GLubyte red, GLubyte green,
-          GLubyte blue, GLubyte alpha = 255);
+          unsigned int x, unsigned int y,
+          uint8_t red, uint8_t green, uint8_t blue, uint8_t alpha = 255);
 
       void Submit();
 
     private:
 
       struct Pixel {
-        GLubyte red;
-        GLubyte green;
-        GLubyte blue;
-        GLubyte alpha;
+        uint8_t red   = 0;
+        uint8_t green = 0;
+        uint8_t blue  = 0;
+        uint8_t alpha = 255;
       };
 
       Pixel *pixels = nullptr;

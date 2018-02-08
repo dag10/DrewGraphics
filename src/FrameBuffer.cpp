@@ -64,8 +64,11 @@ dg::FrameBuffer::FrameBuffer(
   : width(width), height(height) {
   glGenFramebuffers(1, &bufferHandle);
 
-  AttachColorTexture(std::make_shared<Texture>(
-    Texture::WithDimensions(width, height)));
+  TextureOptions texOpts;
+  texOpts.width = width;
+  texOpts.height = height;
+  texOpts.wrap = TextureWrap::CLAMP_EDGE;
+  AttachColorTexture(std::make_shared<Texture>(texOpts));
 
   if (depthReadable) {
     if (allowStencil) {

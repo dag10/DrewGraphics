@@ -13,7 +13,6 @@
 #include <Mesh.h>
 #include <Model.h>
 #include <Skybox.h>
-#include <FrameBuffer.h>
 
 namespace dg {
 
@@ -26,17 +25,8 @@ namespace dg {
       TutorialScene();
 
       virtual void Initialize();
-      virtual void Update();
-      virtual void RenderFrame();
 
     private:
-
-      std::shared_ptr<FrameBuffer> framebuffer;
-      std::shared_ptr<SceneObject> renderQuads;
-      std::shared_ptr<SceneObject> dummyRenderQuads;
-      std::shared_ptr<Camera> virtualCamera;
-
-      bool flyingMainCamera = true;
 
   }; // class TutorialScene
 

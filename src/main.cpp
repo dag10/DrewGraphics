@@ -16,6 +16,7 @@
 #include <Mesh.h>
 #include <scenes/CanvasTestScene.h>
 #include <scenes/TutorialScene.h>
+#include <scenes/TexturesScene.h>
 #include <scenes/RobotScene.h>
 #include <scenes/MeshesScene.h>
 #include <scenes/PortalScene.h>
@@ -47,6 +48,7 @@ int main(int argc, const char *argv[]) {
     std::function<std::unique_ptr<dg::Scene>()>> constructors;
   constructors["portal"]    = dg::PortalScene::Make;
   constructors["tutorial"]  = dg::TutorialScene::Make;
+  constructors["textures"]  = dg::TexturesScene::Make;
   constructors["meshes"]    = dg::MeshesScene::Make;
   constructors["meshes-vr"] = dg::MeshesScene::MakeVR;
   constructors["robot"]     = dg::RobotScene::Make;

@@ -185,6 +185,7 @@
     <ClCompile Include="src\scenes\CanvasTestScene.cpp" />
     <ClCompile Include="src\scenes\PortalScene.cpp" />
     <ClCompile Include="src\scenes\QuadScene.cpp" />
+    <ClCompile Include="src\scenes\TexturesScene.cpp" />
     <ClCompile Include="src\scenes\TutorialScene.cpp" />
     <ClCompile Include="src\scenes\MeshesScene.cpp" />
     <ClCompile Include="src\scenes\RobotScene.cpp" />
@@ -227,6 +228,7 @@
     <ClInclude Include="include\scenes\CanvasTestScene.h" />
     <ClInclude Include="include\scenes\PortalScene.h" />
     <ClInclude Include="include\scenes\QuadScene.h" />
+    <ClInclude Include="include\scenes\TexturesScene.h" />
     <ClInclude Include="include\scenes\TutorialScene.h" />
     <ClInclude Include="include\scenes\MeshesScene.h" />
     <ClInclude Include="include\scenes\RobotScene.h" />

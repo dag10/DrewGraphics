@@ -168,6 +168,9 @@
     <ClCompile Include="src\Canvas.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\scenes\TexturesScene.cpp">
+      <Filter>Source Files\scenes</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Behavior.h">
@@ -292,6 +295,9 @@
     </ClInclude>
     <ClInclude Include="include\Canvas.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\scenes\TexturesScene.h">
+      <Filter>Header Files\scenes</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

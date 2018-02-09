@@ -257,14 +257,14 @@ void dg::RobotScene::Update() {
     const float blinkDuration = 0.1f; // seconds
     const float maxBlinkInterval = 3.0f; // seconds
     nextBlink =
-      Time::Elapsed +
+      (float)Time::Elapsed +
       ((float)rand()) / (float)RAND_MAX * maxBlinkInterval;
     endOfBlink = nextBlink + blinkDuration;
   }
 
   // Waving movement of left arm.
-  float waveAmount = sin(Time::Elapsed * 13);
-  float waveAmountOffset = sin(Time::Elapsed * 13 + 0.1f);
+  float waveAmount = (float)sin(Time::Elapsed * 13);
+  float waveAmountOffset = (float)sin(Time::Elapsed * 13 + 0.1f);
 
   leftShoulder->transform.rotation =
     glm::quat(glm::radians(glm::vec3(-15, 0, -10 + waveAmount * -2)));
@@ -272,14 +272,14 @@ void dg::RobotScene::Update() {
     glm::quat(glm::radians(glm::vec3(0, 0, -75 + waveAmountOffset * 20)));
 
   // Slow subtle movement of right arm.
-  float rightArmMovement = sin(Time::Elapsed * 2);
+  float rightArmMovement = (float)sin(Time::Elapsed * 2);
   rightShoulder->transform.rotation =
     glm::quat(glm::radians(glm::vec3(0, 0, -70 + rightArmMovement * 2)));
   rightElbow->transform.rotation =
     glm::quat(glm::radians(glm::vec3(0, 0, -24 + rightArmMovement * -6)));
 
   // Slow wobble of camera.
-  float cameraMovement = sin(Time::Elapsed * 1.0f + 0.7f);
+  float cameraMovement = (float)sin(Time::Elapsed * 1.0f + 0.7f);
   if (!freeFly && !enableVR) {
     mainCamera->transform =
       Transform::R(glm::quat(glm::radians(
@@ -289,7 +289,7 @@ void dg::RobotScene::Update() {
   }
 
   // Slow head wobble. Head also partially follows camera.
-  float headMovement = cos(Time::Elapsed * 2);
+  float headMovement = (float)cos(Time::Elapsed * 2);
   neck->transform.rotation =
     glm::quat(glm::radians(glm::vec3(-7, cameraMovement * 10, headMovement * 3)));
 }

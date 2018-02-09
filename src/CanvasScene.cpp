@@ -10,7 +10,9 @@ dg::CanvasScene::CanvasScene() : Scene() {}
 void dg::CanvasScene::Initialize() {
   Scene::Initialize();
 
-  canvas = std::make_shared<Canvas>(window->GetWidth(), window->GetHeight());
+  canvas = std::make_shared<Canvas>(
+    (unsigned int)window->GetWidth(),
+    (unsigned int)window->GetHeight());
   quadMaterial = std::make_shared<ScreenQuadMaterial>();
 }
 

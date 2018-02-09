@@ -29,6 +29,20 @@ dg::VRScene::VRScene() : Scene() {
 void dg::VRScene::Initialize() {
   Scene::Initialize();
 
+  std::cout
+    << "This scene is a demo of OpenVR integration." << std::endl
+    << std::endl
+    << "Lighting controls:" << std::endl
+    << "  I: Switch to indoor lighting (default)" << std::endl
+    << "  F: Switch to camera-mounted flashlight" << std::endl
+    << "  O: Switch to outdoor lighting" << std::endl
+    << "  T: Switch to indoor spot lighting" << std::endl
+    << "  L: Toggle ceiling light animation" << std::endl
+    << std::endl
+    << "Press ESC or Q to release the cursor, and press "
+       "again to quit." << std::endl
+    << std::endl;
+
   // Create textures.
   std::shared_ptr<Texture> crateTexture = std::make_shared<Texture>(
       Texture::FromPath("assets/textures/container2.png"));

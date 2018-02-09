@@ -4,6 +4,7 @@
 
 #include <scenes/PortalScene.h>
 
+#include <iostream>
 #include <memory>
 #include <glm/glm.hpp>
 #include <EngineTime.h>
@@ -52,6 +53,32 @@ dg::PortalScene::PortalScene() : Scene() {}
 
 void dg::PortalScene::Initialize() {
   Scene::Initialize();
+
+  std::cout
+    << "This scene is a demo of portal rendering." << std::endl
+    << "Fly through a red portal to emerge from the blue "
+       "portal, and vice-versa." << std::endl
+    << std::endl
+    << "Camera controls:" << std::endl
+    << "  Mouse: Look around" << std::endl
+    << "  W: Move forward" << std::endl
+    << "  A: Move left" << std::endl
+    << "  S: Move backward" << std::endl
+    << "  D: Move right" << std::endl
+    << "  Shift: Increase move speed" << std::endl
+    << "  R: Reset camera to initial position" << std::endl
+    << "  C: Print current camera pose" << std::endl
+    << std::endl
+    << "Lighting controls:" << std::endl
+    << "  I: Switch to indoor lighting (default)" << std::endl
+    << "  O: Switch to outdoor lighting" << std::endl
+    << "  T: Switch to indoor spot lighting" << std::endl
+    << "  F: Switch to camera-mounted flashlight" << std::endl
+    << "  L: Toggle ceiling light animation" << std::endl
+    << std::endl
+    << "Press ESC or Q to release the cursor, and press "
+       "again to quit." << std::endl
+    << std::endl;
 
   // Lock window cursor to center.
   window->LockCursor();

@@ -4,6 +4,7 @@
 
 #include <scenes/MeshesScene.h>
 
+#include <iostream>
 #include <glm/glm.hpp>
 #include <EngineTime.h>
 #include <forward_list>
@@ -26,6 +27,26 @@ dg::MeshesScene::MeshesScene(bool enableVR) : Scene() {
 
 void dg::MeshesScene::Initialize() {
   Scene::Initialize();
+
+  std::cout
+    << "This scene is a demo of various built-in meshes." << std::endl
+    << std::endl;
+  if (!enableVR) {
+    std::cout
+      << "Camera controls:" << std::endl
+      << "  Mouse: Look around" << std::endl
+      << "  W: Move forward" << std::endl
+      << "  A: Move left" << std::endl
+      << "  S: Move backward" << std::endl
+      << "  D: Move right" << std::endl
+      << "  Shift: Increase move speed" << std::endl
+      << "  R: Reset camera to initial position" << std::endl
+      << "  C: Print current camera pose" << std::endl
+      << std::endl
+      << "Press ESC or Q to release the cursor, and press "
+         "again to quit." << std::endl
+      << std::endl;
+  }
 
   // Lock window cursor to center.
   if (!enableVR) {

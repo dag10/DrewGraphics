@@ -27,6 +27,8 @@ xcode
 *.userprefs
 
 # Build results
+VRDemo/
+vrdemo/
 [Dd]ebug/
 [Dd]ebugPublic/
 [Rr]elease/

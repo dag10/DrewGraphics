@@ -59,6 +59,10 @@ int main(int argc, const char *argv[]) {
   std::string sceneName;
   if (argc > 1) {
     sceneName = argv[1];
+  } else {
+#ifdef DEFAULT_SCENE
+    sceneName = DEFAULT_SCENE;
+#endif
   }
   while (constructors.find(sceneName) == constructors.end()) {
     if (!sceneName.empty()) {
@@ -129,7 +133,9 @@ int main(int argc, const char *argv[]) {
 
   // Minimize the console window on Windows.
 #ifdef _MSC_VER
+#ifndef DEFAULT_SCENE
   ShowWindow(GetConsoleWindow(), SW_MINIMIZE);
+#endif
 #endif
 
   // Set up timing.

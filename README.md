@@ -19,7 +19,7 @@ scenes:
 | **"portal"** | First-person camera in a room with portals you can fly through, implemented in [src/scenes/PortalScene.cpp](./src/scenes/PortalScene.cpp).<br><br>Here's a video of the portal project: https://fb.com/1925626090797272 |
 | **"quad"** | A scene with just a single quad in front of the period, rotating to look at the cursor. I use it to test out new materials as I create them. Implemented in [src/scenes/QuadScene.cpp](./src/scenes/QuadScene.cpp). |
 | **"meshes"** | A scene showing the few procedural meshes I've created, including cubes, a cylinder, and a cone. Implemented in [src/scenes/MeshesScene.cpp](./src/scenes/MeshesScene.cpp). |
-| **"vr"** | A scene that creates a VR environment I'm developing as I learn the SteamVR API. Implemented in [src/scenes/VRScene.cpp](./src/scenes/VRScene.cpp). |
+| **"vr"** | A scene that creates a VR environment I'm developing as I learn the SteamVR API. Implemented in [src/scenes/VRScene.cpp](./src/scenes/VRScene.cpp).<br><br>Note: You can build the VRDemo configuration to default to this scene.|
 
 The scene is chosen as the first command-line argument. So to launch the app with a portal renderer, the command would be:
 
@@ -57,4 +57,3 @@ $ cmake ..
 $ make
 $ ./DrewGraphics tutorial
 ```
-

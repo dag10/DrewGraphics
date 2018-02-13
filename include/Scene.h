@@ -32,6 +32,8 @@ namespace dg {
         this->window = window;
       }
 
+      std::shared_ptr<Camera> GetMainCamera() const;
+
     protected:
 
       // Pipeline functions for overriding in special cases.

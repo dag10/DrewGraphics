@@ -191,3 +191,7 @@ bool dg::Scene::AutomaticWindowTitle() const {
   return true;
 }
 
+std::shared_ptr<dg::Camera> dg::Scene::GetMainCamera() const {
+  return mainCamera;
+}
+

@@ -72,7 +72,7 @@ void dg::Renderer::Render() {
   canvas->Submit();
 }
 
-dg::Renderer::RayResult dg::Renderer::TraceRay(Ray ray) {
+dg::RayResult dg::Renderer::TraceRay(Ray ray) {
   return RayResult(ray, 0); // TODO
 }
 

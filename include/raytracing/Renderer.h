@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include <raytracing/Rays.h>
 #include <memory>
 #include <glm/glm.hpp>
 
@@ -24,22 +25,6 @@ namespace dg {
       std::shared_ptr<Texture> GetTexture() const;
 
     private:
-
-      struct Ray {
-        glm::vec3 origin;
-        glm::vec3 direction;
-
-        Ray(glm::vec3 origin, glm::vec3 direction)
-          : origin(origin), direction(direction) {}
-      };
-
-      struct RayResult {
-        Ray ray;
-        float distance;
-
-        RayResult(Ray ray, float distance)
-          : ray(ray), distance(distance) {}
-      };
 
       struct Pixel {
         uint8_t red   = 0;

@@ -10,6 +10,7 @@
 #include <behaviors/KeyboardCameraController.h>
 #include <lights/DirectionalLight.h>
 #include <raytracing/Renderer.h>
+#include <raytracing/TraceableModel.h>
 
 std::unique_ptr<dg::RaytraceScene> dg::RaytraceScene::Make() {
   return std::unique_ptr<dg::RaytraceScene>(new dg::RaytraceScene());
@@ -43,7 +44,7 @@ void dg::RaytraceScene::Initialize() {
   floorMaterial.SetProperty("_Colors[1]", glm::vec3(1, 1, 0));
 
   // Create floor plane.
-  AddChild(std::make_shared<Model>(
+  AddChild(std::make_shared<TraceableModel>(
         dg::Mesh::Quad,
         std::make_shared<Material>(floorMaterial),
         Transform::RS(
@@ -56,13 +57,13 @@ void dg::RaytraceScene::Initialize() {
   sphereMaterial.SetShininess(64);
 
   // Create front sphere.
-  AddChild(std::make_shared<Model>(
+  AddChild(std::make_shared<TraceableModel>(
       dg::Mesh::Sphere,
       std::make_shared<StandardMaterial>(sphereMaterial),
       Transform::TS(glm::vec3(-3, 2, 0), glm::vec3(2.5))));
 
   // Create back sphere.
-  AddChild(std::make_shared<Model>(
+  AddChild(std::make_shared<TraceableModel>(
       dg::Mesh::Sphere,
       std::make_shared<StandardMaterial>(sphereMaterial),
       Transform::TS(glm::vec3(-1, 1.5, -2), glm::vec3(2.5))));

@@ -25,6 +25,8 @@ namespace dg {
       virtual void Update();
       virtual void RenderFrame();
 
+      virtual bool AutomaticWindowTitle() const;
+
       void SetWindow(std::shared_ptr<Window> window) {
         this->window = window;
       }

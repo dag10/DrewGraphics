@@ -171,3 +171,7 @@ void dg::Scene::PrepareModelForDraw(
   }
 }
 
+bool dg::Scene::AutomaticWindowTitle() const {
+  return true;
+}
+

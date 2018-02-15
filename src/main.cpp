@@ -174,10 +174,12 @@ int main(int argc, const char *argv[]) {
     // Update window title every 0.1 seconds.
     const float titleUpdateFreq = 0.1f;
     if (dg::Time::Elapsed > lastWindowUpdateTime + titleUpdateFreq) {
-      window->SetTitle(((std::ostringstream&)(std::ostringstream()
-            << "Drew Graphics | " << sceneName << " | "
-            << (int)(1.0 / dg::Time::Delta) << " FPS | "
-            << dg::Time::AverageFrameRate << " average FPS")).str());
+      if (scene->AutomaticWindowTitle()) {
+        window->SetTitle(((std::ostringstream&)(std::ostringstream()
+              << "Drew Graphics | " << sceneName << " | "
+              << (int)(1.0 / dg::Time::Delta) << " FPS | "
+              << dg::Time::AverageFrameRate << " average FPS")).str());
+      }
       lastWindowUpdateTime = dg::Time::Elapsed;
     }
 

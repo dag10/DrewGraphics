@@ -81,7 +81,8 @@ dg::SceneObject *dg::SceneObject::Parent() const {
   return parent;
 }
 
-std::set<std::shared_ptr<dg::SceneObject>> &dg::SceneObject::Children() {
+const std::set<std::shared_ptr<dg::SceneObject>>
+    &dg::SceneObject::Children() const{
   return children;
 }
 

@@ -58,7 +58,7 @@ namespace dg {
       void RemoveChild(std::shared_ptr<SceneObject> child);
 
       SceneObject *Parent() const;
-      std::set<std::shared_ptr<SceneObject>> &Children();
+      const std::set<std::shared_ptr<SceneObject>> &Children() const;
 
       void LookAt(const SceneObject& object);
       void LookAtDirection(glm::vec3 direction);

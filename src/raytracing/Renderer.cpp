@@ -3,9 +3,11 @@
 //
 
 #include <raytracing/Renderer.h>
+#include <raytracing/TraceableModel.h>
 #include <Texture.h>
 #include <Canvas.h>
 #include <Scene.h>
+#include <forward_list>
 #include <glm/gtc/matrix_access.hpp>
 
 dg::Renderer::Renderer(unsigned int width, unsigned int height, Scene *scene)
@@ -73,15 +75,39 @@ void dg::Renderer::Render() {
 }
 
 dg::RayResult dg::Renderer::TraceRay(Ray ray) {
-  return RayResult(ray, 0); // TODO
+  std::shared_ptr<Camera> camera = scene->GetMainCamera();
+  RayResult shortest = RayResult::Miss(ray);
+
+  std::forward_list<const SceneObject*> remainingObjects;
+  remainingObjects.push_front(scene);
+  while (!remainingObjects.empty()) {
+    const SceneObject *obj = remainingObjects.front();
+    remainingObjects.pop_front();
+    for (auto child = obj->Children().begin();
+         child != obj->Children().end();
+         child++) {
+      if (!(*child)->enabled) continue;
+      remainingObjects.push_front(child->get());
+      if (auto model = std::dynamic_pointer_cast<TraceableModel>(*child)) {
+        RayResult res = model->RayTest(ray);
+        if (!res.hit) continue;
+        //if (res.distance < camera->nearClip) continue;
+        if (!shortest.hit || res.distance < shortest.distance) {
+          shortest = res;
+        }
+      }
+    }
+  }
+
+  return shortest;
 }
 
 dg::Renderer::Pixel dg::Renderer::RenderPixel(RayResult rayres) {
+  if (rayres.hit) {
+    return Pixel(glm::vec3(1));
+  }
+
   // Encode direction as pixel.
   return Pixel((rayres.ray.direction + 1.f) * 0.5f);
-
-  // Encode distance as pixel.
-  //uint8_t value = rayres.distance * 255 / 10;
-  //return Pixel(value, value, value);
 }
 

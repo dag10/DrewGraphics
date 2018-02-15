@@ -96,11 +96,7 @@ void dg::RaytraceScene::Update() {
 
   if (window->IsKeyJustPressed(Key::SPACE)) {
     if (mainCamera->transform != renderCameraTransform) {
-      std::unique_ptr<Renderer> renderer = std::unique_ptr<Renderer>(
-          new Renderer(window->GetWidth(), window->GetHeight(), this));
-      renderer->Render();
-      quadMaterial->SetTexture(renderer->GetTexture());
-      renderCameraTransform = mainCamera->transform;
+      Raytrace();
     }
 
     showRender = true;
@@ -121,5 +117,14 @@ void dg::RaytraceScene::RenderFrame() {
   }
 
   Scene::RenderFrame();
+}
+
+void dg::RaytraceScene::Raytrace() {
+  window->UnlockCursor();
+  std::unique_ptr<Renderer> renderer = std::unique_ptr<Renderer>(
+      new Renderer(window->GetWidth(), window->GetHeight(), this));
+  renderer->Render();
+  quadMaterial->SetTexture(renderer->GetTexture());
+  renderCameraTransform = mainCamera->transform;
 }
 

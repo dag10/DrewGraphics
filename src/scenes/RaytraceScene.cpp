@@ -85,7 +85,14 @@ void dg::RaytraceScene::Initialize() {
 }
 
 void dg::RaytraceScene::Update() {
+  if (raytraceNextFrame) {
+    raytraceNextFrame = false;
+    Raytrace(); // NOTE: Extremely blocking.
+    showRender = true;
+  }
+
   if (showRender) {
+    window->SetTitle("Rendered Scene");
     if (window->IsKeyJustPressed(Key::SPACE)) {
       showRender = false;
     }
@@ -95,11 +102,12 @@ void dg::RaytraceScene::Update() {
   Scene::Update();
 
   if (window->IsKeyJustPressed(Key::SPACE)) {
-    if (mainCamera->transform != renderCameraTransform) {
-      Raytrace();
+    if (mainCamera->transform == renderCameraTransform) {
+      showRender = true;
+    } else {
+      window->SetTitle("Rendering...");
+      raytraceNextFrame = true;
     }
-
-    showRender = true;
   }
 }
 
@@ -126,5 +134,9 @@ void dg::RaytraceScene::Raytrace() {
   renderer->Render();
   quadMaterial->SetTexture(renderer->GetTexture());
   renderCameraTransform = mainCamera->transform;
+}
+
+bool dg::RaytraceScene::AutomaticWindowTitle() const {
+  return !showRender && !raytraceNextFrame;
 }
 

@@ -24,6 +24,8 @@ namespace dg {
       virtual void Update();
       virtual void RenderFrame();
 
+      virtual bool AutomaticWindowTitle() const;
+
     private:
 
       void Raytrace();
@@ -31,6 +33,7 @@ namespace dg {
       std::shared_ptr<ScreenQuadMaterial> quadMaterial = nullptr;
       Transform renderCameraTransform;
       bool showRender = false;
+      bool raytraceNextFrame = false;
 
   }; // class RaytraceScene
 

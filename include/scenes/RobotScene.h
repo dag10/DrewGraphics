@@ -25,6 +25,8 @@ namespace dg {
 
       virtual void ClearBuffer();
 
+      std::shared_ptr<SceneObject> lightContainer;
+
       // Robot joints.
       std::shared_ptr<SceneObject> robot;
       std::shared_ptr<SceneObject> leftShoulder;

@@ -114,6 +114,8 @@
     <LibraryPath>$(ProjectDir)external\glfw\build\src\Release;$(LibraryPath);$(ProjectDir)external\openvr\lib\win32</LibraryPath>
     <ReferencePath>$(SolutionDir)external\openvr\bin\win32;$(ReferencePath)</ReferencePath>
     <ExecutablePath>$(ExecutablePath)</ExecutablePath>
+    <CustomBuildAfterTargets>
+    </CustomBuildAfterTargets>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <IncludePath>$(ProjectDir)external\glfw\include;$(ProjectDir)external\glm;$(ProjectDir)include;$(ProjectDir)external\openvr\headers;$(IncludePath)</IncludePath>
@@ -203,8 +205,13 @@ xcopy /d /e /y "$(ProjectDir)assets" "$(OutDir)\assets"</Command>
       <Command>xcopy /d /y "$(ProjectDir)external\openvr\bin\win32\*.*" "$(OutDir)"
 mkdir "$(OutDir)assets"
 xcopy /d /e /y "$(ProjectDir)assets" "$(OutDir)\assets"
-del /s $(OutDir)*.obj, $(OutDir)*.pdb, $(OutDir)*.tlog, $(OutDir)*.ipdb, $(OutDir)*.iobj, $(OutDir)*.log</Command>
+del /s $(OutDir)*.obj, $(OutDir)*.pdb, $(OutDir)*.ipdb, $(OutDir)*.iobj</Command>
     </PostBuildEvent>
+    <CustomBuildStep>
+      <Command>
+      </Command>
+      <Message />
+    </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -245,7 +252,7 @@ xcopy /d /e /y "$(ProjectDir)assets" "$(OutDir)\assets"</Command>
       <Command>xcopy /d /y "$(ProjectDir)external\openvr\bin\win64\*.*" "$(OutDir)"
 mkdir "$(OutDir)assets"
 xcopy /d /e /y "$(ProjectDir)assets" "$(OutDir)\assets"
-del /s $(OutDir)*.obj, $(OutDir)*.pdb, $(OutDir)*.tlog, $(OutDir)*.ipdb, $(OutDir)*.iobj, $(OutDir)*.log</Command>
+del /s $(OutDir)*.obj, $(OutDir)*.pdb, $(OutDir)*.ipdb, $(OutDir)*.iobj</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>

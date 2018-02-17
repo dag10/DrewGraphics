@@ -8,7 +8,7 @@
 // NOTE: Keep these consistent with MAX_LIGHTS in
 //       assets/shaders/includes/fragment_head.glsl.
 const char *dg::Light::LIGHTS_ARRAY_NAME = "_Lights";
-const int dg::Light::MAX_LIGHTS = 2;
+const int dg::Light::MAX_LIGHTS = 3;
 
 dg::Light::Light(
     glm::vec3 color, float ambient, float diffuse, float specular)

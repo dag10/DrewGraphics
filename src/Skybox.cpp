@@ -59,9 +59,7 @@ void dg::Skybox::Draw(const Camera& camera, glm::mat4x4 projection) {
   glCullFace(GL_FRONT);
   glDepthMask(GL_FALSE);
   glDisable(GL_DEPTH_TEST);
-  Mesh::MappedCube->Use();
   Mesh::MappedCube->Draw();
-  Mesh::MappedCube->FinishUsing();
   glEnable(GL_DEPTH_TEST);
   glDepthMask(GL_TRUE);
   glCullFace(GL_BACK);

@@ -28,8 +28,6 @@ void dg::Model::Draw(glm::mat4x4 view, glm::mat4x4 projection) const {
 
   material->Use();
 
-  mesh->Use();
   mesh->Draw();
-  mesh->FinishUsing();
 }
 

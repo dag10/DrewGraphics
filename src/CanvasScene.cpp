@@ -30,8 +30,6 @@ void dg::CanvasScene::RenderFrame() {
   quadMaterial->SetTexture(canvas->GetTexture());
 
   quadMaterial->Use();
-  Mesh::Quad->Use();
   Mesh::Quad->Draw();
-  Mesh::Quad->FinishUsing();
 }
 

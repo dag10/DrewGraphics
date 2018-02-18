@@ -456,9 +456,7 @@ void dg::PortalScene::RenderPortalStencil(dg::Transform xfPortal) {
       projection * view * xfPortal * portalOpeningScale);
   portalStencilMaterial.Use();
 
-  Mesh::Quad->Use();
   Mesh::Quad->Draw();
-  Mesh::Quad->FinishUsing();
 
   glDisable(GL_STENCIL_TEST);
 }
@@ -468,9 +466,7 @@ void dg::PortalScene::ClearDepth() {
   glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
 
   depthResetShader->Use();
-  Mesh::Quad->Use();
   Mesh::Quad->Draw();
-  Mesh::Quad->FinishUsing();
 
   glDepthFunc(GL_LESS);
   glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);

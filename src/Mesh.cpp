@@ -79,9 +79,7 @@ void dg::Mesh::AddQuad(
 }
 
 void dg::Mesh::AddTriangle(Vertex v1, Vertex v2, Vertex v3, Winding winding) {
-  if (attributes == Vertex::AttrFlag::NONE) {
-    attributes = v1.attributes;
-  }
+  using Flag = Vertex::AttrFlag;
 
   if (v1.attributes != v2.attributes || v1.attributes != v3.attributes) {
     throw std::runtime_error(
@@ -89,40 +87,73 @@ void dg::Mesh::AddTriangle(Vertex v1, Vertex v2, Vertex v3, Winding winding) {
         "attributes.");
   }
 
+  if (winding == Winding::CCW) {
+    std::swap(v1, v2);
+  }
+
+  Vertex *v[] = { &v1, &v2, &v3 };
+
+  // If we have positions and texture coordinates but no tangents, compute
+  // the tangents.
+  //
+  // Adapted from http://www.terathon.com/code/tangent.html
+  if (!!(v1.attributes & (Flag::POSITION | Flag::TEXCOORD)) &&
+      !(v1.attributes & Flag::TANGENT)) {
+
+    float x1 = v2.position.x - v1.position.x;
+    float x2 = v3.position.x - v1.position.x;
+    float y1 = v2.position.y - v1.position.y;
+    float y2 = v3.position.y - v1.position.y;
+    float z1 = v2.position.z - v1.position.z;
+    float z2 = v3.position.z - v1.position.z;
+
+    float s1 = v2.texCoord.x - v1.texCoord.x;
+    float s2 = v3.texCoord.x - v1.texCoord.x;
+    float t1 = v2.texCoord.y - v1.texCoord.y;
+    float t2 = v3.texCoord.y - v1.texCoord.y;
+
+    float r = 1.0F / (s1 * t2 - s2 * t1);
+    glm::vec3 sdir((t2 * x1 - t1 * x2) * r, (t2 * y1 - t1 * y2) * r,
+        (t2 * z1 - t1 * z2) * r);
+    glm::vec3 tdir((s1 * x2 - s2 * x1) * r, (s1 * y2 - s2 * y1) * r,
+        (s1 * z2 - s2 * z1) * r);
+
+    for (long i = 0; i < 3; i++) {
+      const glm::vec3& n = v[i]->normal;
+      const glm::vec3& t = sdir;
+
+      // Gram-Schmidt orthogonalize
+      v[i]->tangent = glm::normalize(t - n * glm::dot(n, t));
+
+      v[i]->attributes |= Vertex::AttrFlag::TANGENT;
+    }
+  }
+
+  if (attributes == Flag::NONE) {
+    attributes = v1.attributes;
+  }
+
   if (v1.attributes != attributes) {
     throw std::runtime_error(
         "Attempted to add a triangle to a mesh with noncompatible attributes.");
   }
 
-  if (winding == Winding::CCW) {
-    std::swap(v1, v2);
-  }
-
   // TODO: Use a vertex->index map to find identical existing vertexes
   //       and reuse their index.
 
-  if (v1.HasAllAttr(Vertex::AttrFlag::POSITION)) {
-    vertexPositions.push_back(v1.position);
-    vertexPositions.push_back(v2.position);
-    vertexPositions.push_back(v3.position);
-  }
-
-  if (v1.HasAllAttr(Vertex::AttrFlag::NORMAL)) {
-    vertexNormals.push_back(v1.normal);
-    vertexNormals.push_back(v2.normal);
-    vertexNormals.push_back(v3.normal);
-  }
-
-  if (v1.HasAllAttr(Vertex::AttrFlag::TEXCOORD)) {
-    vertexTexCoords.push_back(v1.texCoord);
-    vertexTexCoords.push_back(v2.texCoord);
-    vertexTexCoords.push_back(v3.texCoord);
-  }
-
-  if (v1.HasAllAttr(Vertex::AttrFlag::TANGENT)) {
-    vertexTangents.push_back(v1.tangent);
-    vertexTangents.push_back(v2.tangent);
-    vertexTangents.push_back(v3.tangent);
+  for (int i = 0; i < 3; i++) {
+    if (!!(attributes & Flag::POSITION)) {
+      vertexPositions.push_back(v[i]->position);
+    }
+    if (!!(attributes & Flag::NORMAL)) {
+      vertexNormals.push_back(v[i]->normal);
+    }
+    if (!!(attributes & Flag::TEXCOORD)) {
+      vertexTexCoords.push_back(v[i]->texCoord);
+    }
+    if (!!(attributes & Flag::TANGENT)) {
+      vertexTangents.push_back(v[i]->tangent);
+    }
   }
 }
 

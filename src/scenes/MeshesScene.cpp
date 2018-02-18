@@ -14,11 +14,11 @@
 #include <lights/PointLight.h>
 
 std::unique_ptr<dg::MeshesScene> dg::MeshesScene::Make() {
-  return std::unique_ptr<dg::MeshesScene>(new dg::MeshesScene(false));
+  return std::unique_ptr<MeshesScene>(new MeshesScene(false));
 }
 
 std::unique_ptr<dg::MeshesScene> dg::MeshesScene::MakeVR() {
-  return std::unique_ptr<dg::MeshesScene>(new dg::MeshesScene(true));
+  return std::unique_ptr<MeshesScene>(new MeshesScene(true));
 }
 
 dg::MeshesScene::MeshesScene(bool enableVR) : Scene() {
@@ -65,53 +65,43 @@ void dg::MeshesScene::Initialize() {
   // Create ceiling light source.
   auto ceilingLight = std::make_shared<PointLight>(
       glm::vec3(1, 0.93, 0.86), 0.732f, 0.399f, 0.968f);
-  ceilingLight->transform.translation = glm::vec3(0, 0.8, 0.5);
+  ceilingLight->transform.translation = glm::vec3(0, 0.8, -0.5);
   AddChild(ceilingLight);
 
-  // Container for meshes.
-  auto meshes = std::make_shared<SceneObject>();
-  AddChild(meshes);
+  // Container for UV meshes.
+  auto uvMeshes = std::make_shared<SceneObject>(
+      Transform::T(FORWARD * -1.f));
+  AddChild(uvMeshes);
 
-  // Create cube.
-  auto cube = std::make_shared<Model>(
-      dg::Mesh::Cube,
+  // Create UV cube.
+  uvMeshes->AddChild(std::make_shared<Model>(
+      Mesh::Cube,
       std::make_shared<UVMaterial>(),
-      Transform::TS(glm::vec3(-2, 0.25, 0), glm::vec3(0.5)));
-  meshes->AddChild(cube, false);
+      Transform::TS(glm::vec3(-2, 0.25, 0), glm::vec3(0.5))), false);
 
-  // Create mapped cube.
-  auto mappedcube = std::make_shared<Model>(
-      dg::Mesh::MappedCube,
+  // Create UV mapped cube.
+  uvMeshes->AddChild(std::make_shared<Model>(
+      Mesh::MappedCube,
       std::make_shared<UVMaterial>(),
-      Transform::TS(glm::vec3(-1, 0.25, 0), glm::vec3(0.5)));
-  meshes->AddChild(mappedcube, false);
+      Transform::TS(glm::vec3(-1, 0.25, 0), glm::vec3(0.5))), false);
 
-  // Create quad.
-  auto quad = std::make_shared<Model>(
-      dg::Mesh::Quad,
+  // Create UV quad.
+  uvMeshes->AddChild(std::make_shared<Model>(
+      Mesh::Quad,
       std::make_shared<UVMaterial>(),
-      Transform::TS(glm::vec3(0, 0.25, 0), glm::vec3(0.5)));
-  meshes->AddChild(quad, false);
+      Transform::TS(glm::vec3(0, 0.25, 0), glm::vec3(0.5))), false);
 
-  // Create sphere.
-  auto sphere = std::make_shared<Model>(
-      dg::Mesh::Sphere,
+  // Create UV sphere.
+  uvMeshes->AddChild(std::make_shared<Model>(
+      Mesh::Sphere,
       std::make_shared<UVMaterial>(),
-      Transform::TS(glm::vec3(1, 0.25, 0), glm::vec3(0.5)));
-  meshes->AddChild(sphere, false);
+      Transform::TS(glm::vec3(1, 0.25, 0), glm::vec3(0.5))), false);
 
-  // Create cylinder.
-  auto cylinder = std::make_shared<Model>(
-      dg::Mesh::Cylinder,
+  // Create UV cylinder.
+  uvMeshes->AddChild(std::make_shared<Model>(
+      Mesh::Cylinder,
       std::make_shared<UVMaterial>(),
-      Transform::TS(glm::vec3(2, 0.25, 0), glm::vec3(0.5)));
-  meshes->AddChild(cylinder, false);
-
-  // Create floor material.
-  const int floorSize = 10;
-  StandardMaterial floorMaterial = StandardMaterial::WithTexture(
-      hardwoodTexture);
-  floorMaterial.SetUVScale(glm::vec2((float)floorSize));
+      Transform::TS(glm::vec3(2, 0.25, 0), glm::vec3(0.5))), false);
 
   // Create shiny brick material.
   StandardMaterial brickMaterial = StandardMaterial::WithTexture(
@@ -122,23 +112,64 @@ void dg::MeshesScene::Initialize() {
   brickMaterial.SetSpecular(0.6f);
   brickMaterial.SetShininess(64);
 
-  // Create a sphere made out of shiny brick.
-  texturedSphere = std::make_shared<Model>(
-      dg::Mesh::Sphere,
-      std::make_shared<StandardMaterial>(brickMaterial),
-      Transform::TS(glm::vec3(-1, 0.25, 1), glm::vec3(0.5)));
-  meshes->AddChild(texturedSphere, false);
+  // Container for textured meshes.
+  auto texturedMeshes = std::make_shared<SceneObject>(
+      Transform::T(FORWARD * 1.f));
+  AddChild(texturedMeshes);
 
-  // Create a cylinder made out of shiny brick.
-  texturedCylinder = std::make_shared<Model>(
-      dg::Mesh::Cylinder,
+  // Create textured cube.
+  texturedMeshes->AddChild(std::make_shared<Model>(
+      Mesh::Cube,
       std::make_shared<StandardMaterial>(brickMaterial),
-      Transform::TS(glm::vec3(1, 0.25, 1), glm::vec3(0.5)));
-  meshes->AddChild(texturedCylinder, false);
+      Transform::TS(glm::vec3(-2, 0.25, 0), glm::vec3(0.5))), false);
+
+  // Create textured mapped cube.
+  texturedMeshes->AddChild(std::make_shared<Model>(
+      Mesh::MappedCube,
+      std::make_shared<StandardMaterial>(brickMaterial),
+      Transform::TS(glm::vec3(-1, 0.25, 0), glm::vec3(0.5))), false);
+
+  // Create textured quad.
+  texturedMeshes->AddChild(std::make_shared<Model>(
+      Mesh::Quad,
+      std::make_shared<StandardMaterial>(brickMaterial),
+      Transform::TS(glm::vec3(0, 0.25, 0), glm::vec3(0.5))), false);
+
+  // Create textured sphere.
+  texturedMeshes->AddChild(std::make_shared<Model>(
+      Mesh::Sphere,
+      std::make_shared<StandardMaterial>(brickMaterial),
+      Transform::TS(glm::vec3(1, 0.25, 0), glm::vec3(0.5))), false);
+
+  // Create textured cylinder.
+  texturedMeshes->AddChild(std::make_shared<Model>(
+      Mesh::Cylinder,
+      std::make_shared<StandardMaterial>(brickMaterial),
+      Transform::TS(glm::vec3(2, 0.25, 0), glm::vec3(0.5))), false);
+
+  // Create a spinning helix to demonstrate loading an OBJ model.
+  spinningHelix = std::make_shared<Model>(
+      Mesh::LoadOBJ("assets/models/helix.obj"),
+      std::make_shared<StandardMaterial>(brickMaterial),
+      Transform::TS(glm::vec3(-1, 0.25, 0), glm::vec3(0.2)));
+  AddChild(spinningHelix, false);
+
+  // Create a spinning torus to demonstrate loading an OBJ model.
+  spinningTorus = std::make_shared<Model>(
+      Mesh::LoadOBJ("assets/models/torus.obj"),
+      std::make_shared<StandardMaterial>(brickMaterial),
+      Transform::TS(glm::vec3(1, 0.25, 0), glm::vec3(0.5)));
+  AddChild(spinningTorus, false);
+
+  // Create floor material.
+  const int floorSize = 10;
+  StandardMaterial floorMaterial = StandardMaterial::WithTexture(
+      hardwoodTexture);
+  floorMaterial.SetUVScale(glm::vec2((float)floorSize));
 
   // Create floor plane.
   AddChild(std::make_shared<Model>(
-        dg::Mesh::Quad,
+        Mesh::Quad,
         std::make_shared<StandardMaterial>(floorMaterial),
         Transform::RS(
           glm::quat(glm::radians(glm::vec3(-90, 0, 0))),
@@ -160,9 +191,9 @@ void dg::MeshesScene::Update() {
   Scene::Update();
 
   // Slowly rotate brick cylinder and sphere.
-  texturedSphere->transform.rotation = glm::quat(glm::radians(
+  spinningHelix->transform.rotation = glm::quat(glm::radians(
         glm::vec3(0, dg::Time::Elapsed * -10, 0)));
-  texturedCylinder->transform.rotation = glm::quat(glm::radians(
+  spinningTorus->transform.rotation = glm::quat(glm::radians(
         glm::vec3(0, dg::Time::Elapsed * 10, 0)));
 }
 

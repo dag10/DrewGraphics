@@ -96,7 +96,7 @@ void dg::RobotScene::Initialize() {
   // Add spot light cone.
   lightModelMaterial.SetDiffuse(spotLight->diffuse);
   spotLight->AddChild(std::make_shared<Model>(
-    Mesh::Sphere,
+    Mesh::LoadOBJ("assets/models/cone.obj"),
     std::make_shared<StandardMaterial>(lightModelMaterial),
     Transform::RS(
       glm::quat(glm::radians(glm::vec3(90, 0, 0))),
@@ -151,7 +151,7 @@ void dg::RobotScene::Initialize() {
 
   // Load torus.
   AddChild(std::make_shared<Model>(
-    Mesh::Sphere,
+    Mesh::LoadOBJ("assets/models/torus.obj"),
     objMaterial,
     Transform::TS(
       { -1.5f, 0, 0 },
@@ -160,7 +160,7 @@ void dg::RobotScene::Initialize() {
 
   // Load helix.
   AddChild(std::make_shared<Model>(
-    Mesh::Sphere,
+    Mesh::LoadOBJ("assets/models/helix.obj"),
     objMaterial,
     Transform::TS(
       { 1.2f, 0, 0 },

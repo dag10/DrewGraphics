@@ -7,7 +7,8 @@
 #include <glad/glad.h>
 #include <glm/glm.hpp>
 #include <memory>
-#include <Shader.h>
+#include <vector>
+#include <unordered_map>
 
 namespace dg {
 
@@ -96,6 +97,8 @@ namespace dg {
 
       static void CreatePrimitives();
 
+      static std::shared_ptr<Mesh> LoadOBJ(const char *filename);
+
       Mesh() = default;
       Mesh(Mesh& other) = delete;
       Mesh(Mesh&& other);
@@ -130,6 +133,7 @@ namespace dg {
       static std::unique_ptr<Mesh> CreateSphere(int subdivisions);
 
       static Mesh *lastDrawnMesh;
+      static std::unordered_map<std::string, std::weak_ptr<Mesh>> fileMap;
 
       GLenum drawMode = 0;
       GLsizei drawCount = 0;

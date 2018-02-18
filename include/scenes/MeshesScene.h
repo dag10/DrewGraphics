@@ -30,8 +30,8 @@ namespace dg {
 
       MeshesScene(bool enableVR);
 
-      std::shared_ptr<Model> texturedSphere;
-      std::shared_ptr<Model> texturedCylinder;
+      std::shared_ptr<Model> spinningHelix;
+      std::shared_ptr<Model> spinningTorus;
 
   }; // class MeshesScene
 

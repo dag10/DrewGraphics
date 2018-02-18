@@ -4,25 +4,16 @@
 
 #include <glad/glad.h>
 #include <Mesh.h>
-
+#include <Exceptions.h>
+#include <iostream>
+#include <fstream>
 #include <cassert>
 #include <memory>
+#include <Transform.h>
 #include <glm/gtc/type_ptr.hpp>
 
 dg::Mesh *dg::Mesh::lastDrawnMesh = nullptr;
-
-
-static const float quadVertices[] = {
-  // positions         // texture // normals // tangents
-  //                   // coords  //
-
-  -0.5f, -0.5f,  0.0f, 0, 0,      0, 0, 1,    1, 0, 0,
-   0.5f, -0.5f,  0.0f, 1, 0,      0, 0, 1,    1, 0, 0,
-   0.5f,  0.5f,  0.0f, 1, 1,      0, 0, 1,    1, 0, 0,
-   0.5f,  0.5f,  0.0f, 1, 1,      0, 0, 1,    1, 0, 0,
-  -0.5f,  0.5f,  0.0f, 0, 1,      0, 0, 1,    1, 0, 0,
-  -0.5f, -0.5f,  0.0f, 0, 0,      0, 0, 1,    1, 0, 0,
-};
+std::unordered_map<std::string, std::weak_ptr<dg::Mesh>> dg::Mesh::fileMap;
 
 std::shared_ptr<dg::Mesh> dg::Mesh::Cube = nullptr;
 std::shared_ptr<dg::Mesh> dg::Mesh::MappedCube = nullptr;
@@ -634,6 +625,108 @@ std::unique_ptr<dg::Mesh> dg::Mesh::CreateSphere(int subdivisions) {
 
   mesh->FinishBuilding();
 
+  return mesh;
+}
+
+std::shared_ptr<dg::Mesh> dg::Mesh::LoadOBJ(const char *filename) {
+  auto found = fileMap.find(filename);
+  if (found != fileMap.end()) {
+    std::shared_ptr<Mesh> mesh = found->second.lock();
+    if (mesh == nullptr) {
+      fileMap.erase(filename);
+    } else {
+      return mesh;
+    }
+  }
+
+  auto mesh = std::make_shared<Mesh>();
+
+  std::ifstream obj(filename, std::ifstream::binary);
+
+  if (!obj.is_open()) {
+    throw FileNotFoundException(filename);
+  }
+
+  std::vector<glm::vec3> positions;
+  std::vector<glm::vec3> normals;
+  std::vector<glm::vec2> uvs;
+  std::string line;
+
+  while (obj.good()) {
+    std::getline(obj, line);
+
+    if (line.empty()) continue;
+
+    if (line.at(0) == 'v' && line.at(1) == 'n') {
+      glm::vec3 norm;
+      sscanf(
+          line.c_str(),
+          "vn %f %f %f",
+          &norm.x, &norm.y, &norm.z);
+      normals.push_back(norm);
+    } else if (line.at(0) == 'v' && line.at(1) == 't') {
+      glm::vec2 uv;
+      sscanf(
+          line.c_str(),
+          "vt %f %f",
+          &uv.x, &uv.y);
+      uvs.push_back(uv);
+    } else if (line.at(0) == 'v') {
+      glm::vec3 pos;
+      sscanf(
+          line.c_str(),
+          "v %f %f %f",
+          &pos.x, &pos.y, &pos.z);
+      positions.push_back(pos);
+    } else if (line.at(0) == 'f') {
+      // Read the face indices into an array.
+      unsigned int i[12];
+      int facesRead = sscanf(
+          line.c_str(),
+          "f %d/%d/%d %d/%d/%d %d/%d/%d %d/%d/%d",
+          &i[0], &i[1], &i[2],
+          &i[3], &i[4], &i[5],
+          &i[6], &i[7], &i[8],
+          &i[9], &i[10], &i[11]);
+
+      // OBJ file indices are 1-based.
+      Vertex v1(
+          positions[i[0] - 1],
+          normals[i[2] - 1],
+          uvs[i[1] - 1]);
+      Vertex v2(
+          positions[i[3] - 1],
+          normals[i[5] - 1],
+          uvs[i[4] - 1]);
+      Vertex v3(
+          positions[i[6] - 1],
+          normals[i[8] - 1],
+          uvs[i[7] - 1]);
+
+      // TODO: Calculate tangent vectors based on a triangle's three
+      //       UV coordinates.
+
+      // Add triangle.
+      mesh->AddTriangle(v1, v2, v3, Winding::CW);
+
+      // Was there a 4th face?
+      if (facesRead == 12) {
+        // Make the last vertex.
+        Vertex v4(
+            positions[i[9] - 1],
+            normals[i[11] - 1],
+            uvs[i[10] - 1]);
+
+        // Add a whole triangle.
+        mesh->AddTriangle(v1, v3, v4, Winding::CW);
+      }
+    }
+  }
+
+  obj.close();
+
+  mesh->FinishBuilding();
+  fileMap.insert_or_assign(filename, mesh);
   return mesh;
 }
 

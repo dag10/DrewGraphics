@@ -11,144 +11,6 @@
 
 dg::Mesh *dg::Mesh::lastDrawnMesh = nullptr;
 
-static const float cubeVertices[] = {
-  // positions          // texture   // normals
-  //                    // coords    //
-
-  // Back face
-   0.5f, -0.5f, -0.5f,  0.0f, 0.0f,  0.0f,  0.0f, -1.0f,
-  -0.5f, -0.5f, -0.5f,  1.0f, 0.0f,  0.0f,  0.0f, -1.0f,
-   0.5f,  0.5f, -0.5f,  0.0f, 1.0f,  0.0f,  0.0f, -1.0f,
-  -0.5f,  0.5f, -0.5f,  1.0f, 1.0f,  0.0f,  0.0f, -1.0f,
-   0.5f,  0.5f, -0.5f,  0.0f, 1.0f,  0.0f,  0.0f, -1.0f,
-  -0.5f, -0.5f, -0.5f,  1.0f, 0.0f,  0.0f,  0.0f, -1.0f,
-
-  // Front face
-  -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,  0.0f,  0.0f,  1.0f,
-   0.5f, -0.5f,  0.5f,  1.0f, 0.0f,  0.0f,  0.0f,  1.0f,
-   0.5f,  0.5f,  0.5f,  1.0f, 1.0f,  0.0f,  0.0f,  1.0f,
-   0.5f,  0.5f,  0.5f,  1.0f, 1.0f,  0.0f,  0.0f,  1.0f,
-  -0.5f,  0.5f,  0.5f,  0.0f, 1.0f,  0.0f,  0.0f,  1.0f,
-  -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,  0.0f,  0.0f,  1.0f,
-
-  // Left face
-  -0.5f,  0.5f,  0.5f,  1.0f, 1.0f, -1.0f,  0.0f,  0.0f,
-  -0.5f,  0.5f, -0.5f,  0.0f, 1.0f, -1.0f,  0.0f,  0.0f,
-  -0.5f, -0.5f, -0.5f,  0.0f, 0.0f, -1.0f,  0.0f,  0.0f,
-  -0.5f, -0.5f, -0.5f,  0.0f, 0.0f, -1.0f,  0.0f,  0.0f,
-  -0.5f, -0.5f,  0.5f,  1.0f, 0.0f, -1.0f,  0.0f,  0.0f,
-  -0.5f,  0.5f,  0.5f,  1.0f, 1.0f, -1.0f,  0.0f,  0.0f,
-
-  // Right face
-   0.5f,  0.5f, -0.5f,  1.0f, 1.0f,  1.0f,  0.0f,  0.0f,
-   0.5f,  0.5f,  0.5f,  0.0f, 1.0f,  1.0f,  0.0f,  0.0f,
-   0.5f, -0.5f, -0.5f,  1.0f, 0.0f,  1.0f,  0.0f,  0.0f,
-   0.5f, -0.5f,  0.5f,  0.0f, 0.0f,  1.0f,  0.0f,  0.0f,
-   0.5f, -0.5f, -0.5f,  1.0f, 0.0f,  1.0f,  0.0f,  0.0f,
-   0.5f,  0.5f,  0.5f,  0.0f, 1.0f,  1.0f,  0.0f,  0.0f,
-
-   // Bottom face
-  -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,  0.0f, -1.0f,  0.0f,
-   0.5f, -0.5f, -0.5f,  1.0f, 0.0f,  0.0f, -1.0f,  0.0f,
-   0.5f, -0.5f,  0.5f,  1.0f, 1.0f,  0.0f, -1.0f,  0.0f,
-   0.5f, -0.5f,  0.5f,  1.0f, 1.0f,  0.0f, -1.0f,  0.0f,
-  -0.5f, -0.5f,  0.5f,  0.0f, 1.0f,  0.0f, -1.0f,  0.0f,
-  -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,  0.0f, -1.0f,  0.0f,
-
-  // Top face
-   0.5f,  0.5f, -0.5f,  1.0f, 1.0f,  0.0f,  1.0f,  0.0f,
-  -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,  0.0f,  1.0f,  0.0f,
-   0.5f,  0.5f,  0.5f,  1.0f, 0.0f,  0.0f,  1.0f,  0.0f,
-  -0.5f,  0.5f,  0.5f,  0.0f, 0.0f,  0.0f,  1.0f,  0.0f,
-   0.5f,  0.5f,  0.5f,  1.0f, 0.0f,  0.0f,  1.0f,  0.0f,
-  -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,  0.0f,  1.0f,  0.0f,
-};
-
-static const float Q = 1.f / 4.f; // quater
-static const float T = 1.f / 3.f; // third
-static const float E = 1.f / (2048.f / 4.f * 3.f);    // epsilon to hide seams
-
-static const glm::vec2 BACK_TL   (Q*3+E, T*2-E);
-static const glm::vec2 BACK_TR   (Q*4-E, T*2-E);
-static const glm::vec2 BACK_BL   (Q*3+E, T*1+E);
-static const glm::vec2 BACK_BR   (Q*4-E, T*1+E);
-
-static const glm::vec2 FRONT_TL  (Q*1+E, T*2-E);
-static const glm::vec2 FRONT_TR  (Q*2-E, T*2-E);
-static const glm::vec2 FRONT_BL  (Q*1+E, T*1+E);
-static const glm::vec2 FRONT_BR  (Q*2-E, T*1+E);
-
-static const glm::vec2 LEFT_TL   (Q*0+E, T*2-E);
-static const glm::vec2 LEFT_TR   (Q*1-E, T*2-E);
-static const glm::vec2 LEFT_BL   (Q*0+E, T*1+E);
-static const glm::vec2 LEFT_BR   (Q*1-E, T*1+E);
-
-static const glm::vec2 RIGHT_TL  (Q*2+E, T*2-E);
-static const glm::vec2 RIGHT_TR  (Q*3-E, T*2-E);
-static const glm::vec2 RIGHT_BL  (Q*2+E, T*1+E);
-static const glm::vec2 RIGHT_BR  (Q*3-E, T*1+E);
-
-static const glm::vec2 BOTTOM_TL (Q*1+E, T*1-E);
-static const glm::vec2 BOTTOM_TR (Q*2-E, T*1-E);
-static const glm::vec2 BOTTOM_BL (Q*1+E, T*0+E);
-static const glm::vec2 BOTTOM_BR (Q*2-E, T*0+E);
-
-static const glm::vec2 TOP_TL    (Q*1+E, T*3-E);
-static const glm::vec2 TOP_TR    (Q*2-E, T*3-E);
-static const glm::vec2 TOP_BL    (Q*1+E, T*2+E);
-static const glm::vec2 TOP_BR    (Q*2-E, T*2+E);
-
-static const float mappedCubeVertices[] = {
-  // positions          // texture coords          // normals
-
-  // Back face
-   0.5f, -0.5f, -0.5f,  BACK_BL.x,   BACK_BL.y,    0.0f,  0.0f, -1.0f, // BL
-  -0.5f, -0.5f, -0.5f,  BACK_BR.x,   BACK_BR.y,    0.0f,  0.0f, -1.0f, // BR
-   0.5f,  0.5f, -0.5f,  BACK_TL.x,   BACK_TL.y,    0.0f,  0.0f, -1.0f, // TL
-  -0.5f,  0.5f, -0.5f,  BACK_TR.x,   BACK_TR.y,    0.0f,  0.0f, -1.0f, // TR
-   0.5f,  0.5f, -0.5f,  BACK_TL.x,   BACK_TL.y,    0.0f,  0.0f, -1.0f, // TL
-  -0.5f, -0.5f, -0.5f,  BACK_BR.x,   BACK_BR.y,    0.0f,  0.0f, -1.0f, // BR
-
-  // Front face
-  -0.5f, -0.5f,  0.5f,  FRONT_BL.x,  FRONT_BL.y,   0.0f,  0.0f,  1.0f, // BL
-   0.5f, -0.5f,  0.5f,  FRONT_BR.x,  FRONT_BR.y,   0.0f,  0.0f,  1.0f, // BR
-   0.5f,  0.5f,  0.5f,  FRONT_TR.x,  FRONT_TR.y,   0.0f,  0.0f,  1.0f, // TR
-   0.5f,  0.5f,  0.5f,  FRONT_TR.x,  FRONT_TR.y,   0.0f,  0.0f,  1.0f, // TR
-  -0.5f,  0.5f,  0.5f,  FRONT_TL.x,  FRONT_TL.y,   0.0f,  0.0f,  1.0f, // TL
-  -0.5f, -0.5f,  0.5f,  FRONT_BL.x,  FRONT_BL.y,   0.0f,  0.0f,  1.0f, // BL
-
-  // Left face
-  -0.5f,  0.5f,  0.5f,  LEFT_TR.x,   LEFT_TR.y,   -1.0f,  0.0f,  0.0f, // TR
-  -0.5f,  0.5f, -0.5f,  LEFT_TL.x,   LEFT_TL.y,   -1.0f,  0.0f,  0.0f, // TL
-  -0.5f, -0.5f, -0.5f,  LEFT_BL.x,   LEFT_BL.y,   -1.0f,  0.0f,  0.0f, // BL
-  -0.5f, -0.5f, -0.5f,  LEFT_BL.x,   LEFT_BL.y,   -1.0f,  0.0f,  0.0f, // BL
-  -0.5f, -0.5f,  0.5f,  LEFT_BR.x,   LEFT_BR.y,   -1.0f,  0.0f,  0.0f, // BR
-  -0.5f,  0.5f,  0.5f,  LEFT_TR.x,   LEFT_TR.y,   -1.0f,  0.0f,  0.0f, // TR
-
-  // Right face
-   0.5f,  0.5f, -0.5f,  RIGHT_TR.x,  RIGHT_TR.y,   1.0f,  0.0f,  0.0f, // TR
-   0.5f,  0.5f,  0.5f,  RIGHT_TL.x,  RIGHT_TL.y,   1.0f,  0.0f,  0.0f, // TL
-   0.5f, -0.5f, -0.5f,  RIGHT_BR.x,  RIGHT_BR.y,   1.0f,  0.0f,  0.0f, // BR
-   0.5f, -0.5f,  0.5f,  RIGHT_BL.x,  RIGHT_BL.y,   1.0f,  0.0f,  0.0f, // BL
-   0.5f, -0.5f, -0.5f,  RIGHT_BR.x,  RIGHT_BR.y,   1.0f,  0.0f,  0.0f, // BR
-   0.5f,  0.5f,  0.5f,  RIGHT_TL.x,  RIGHT_TL.y,   1.0f,  0.0f,  0.0f, // TL
-
-   // Bottom face
-  -0.5f, -0.5f, -0.5f,  BOTTOM_BL.x, BOTTOM_BL.y,  0.0f, -1.0f,  0.0f, // BL
-   0.5f, -0.5f, -0.5f,  BOTTOM_BR.x, BOTTOM_BR.y,  0.0f, -1.0f,  0.0f, // BR
-   0.5f, -0.5f,  0.5f,  BOTTOM_TR.x, BOTTOM_TR.y,  0.0f, -1.0f,  0.0f, // TR
-   0.5f, -0.5f,  0.5f,  BOTTOM_TR.x, BOTTOM_TR.y,  0.0f, -1.0f,  0.0f, // TR
-  -0.5f, -0.5f,  0.5f,  BOTTOM_TL.x, BOTTOM_TL.y,  0.0f, -1.0f,  0.0f, // TL
-  -0.5f, -0.5f, -0.5f,  BOTTOM_BL.x, BOTTOM_BL.y,  0.0f, -1.0f,  0.0f, // BL
-
-  // Top face
-   0.5f,  0.5f, -0.5f,  TOP_TR.x,   TOP_TR.y,     0.0f,  1.0f,  0.0f, // TR
-  -0.5f,  0.5f, -0.5f,  TOP_TL.x,   TOP_TL.y,     0.0f,  1.0f,  0.0f, // TL
-   0.5f,  0.5f,  0.5f,  TOP_BR.x,   TOP_BR.y,     0.0f,  1.0f,  0.0f, // BR
-  -0.5f,  0.5f,  0.5f,  TOP_BL.x,   TOP_BL.y,     0.0f,  1.0f,  0.0f, // BL
-   0.5f,  0.5f,  0.5f,  TOP_BR.x,   TOP_BR.y,     0.0f,  1.0f,  0.0f, // BR
-  -0.5f,  0.5f, -0.5f,  TOP_TL.x,   TOP_TL.y,     0.0f,  1.0f,  0.0f, // TL
-};
 
 static const float quadVertices[] = {
   // positions         // texture // normals // tangents
@@ -219,6 +81,137 @@ void dg::swap(Mesh& first, Mesh& second) {
   swap(first.attributes, second.attributes);
 }
 
+void dg::Mesh::AddQuad(
+    Vertex v1, Vertex v2, Vertex v3, Vertex v4, Winding winding) {
+  AddTriangle(v1, v2, v3, winding);
+  AddTriangle(v1, v3, v4, winding);
+}
+
+void dg::Mesh::AddTriangle(Vertex v1, Vertex v2, Vertex v3, Winding winding) {
+  if (attributes == Vertex::AttrFlag::NONE) {
+    attributes = v1.attributes;
+  }
+
+  if (v1.attributes != v2.attributes || v1.attributes != v3.attributes) {
+    throw std::runtime_error(
+        "Attempted to add a triangle to a mesh when it has mismatched "
+        "attributes.");
+  }
+
+  if (v1.attributes != attributes) {
+    throw std::runtime_error(
+        "Attempted to add a triangle to a mesh with noncompatible attributes.");
+  }
+
+  if (winding == Winding::CCW) {
+    std::swap(v1, v2);
+  }
+
+  // TODO: Use a vertex->index map to find identical existing vertexes
+  //       and reuse their index.
+
+  if (v1.HasAllAttr(Vertex::AttrFlag::POSITION)) {
+    vertexPositions.push_back(v1.position);
+    vertexPositions.push_back(v2.position);
+    vertexPositions.push_back(v3.position);
+  }
+
+  if (v1.HasAllAttr(Vertex::AttrFlag::NORMAL)) {
+    vertexNormals.push_back(v1.normal);
+    vertexNormals.push_back(v2.normal);
+    vertexNormals.push_back(v3.normal);
+  }
+
+  if (v1.HasAllAttr(Vertex::AttrFlag::TEXCOORD)) {
+    vertexTexCoords.push_back(v1.texCoord);
+    vertexTexCoords.push_back(v2.texCoord);
+    vertexTexCoords.push_back(v3.texCoord);
+  }
+
+  if (v1.HasAllAttr(Vertex::AttrFlag::TANGENT)) {
+    vertexTangents.push_back(v1.tangent);
+    vertexTangents.push_back(v2.tangent);
+    vertexTangents.push_back(v3.tangent);
+  }
+}
+
+void dg::Mesh::FinishBuilding() {
+  assert(VAO == 0 && VBO == 0);
+
+  const size_t positionSize = sizeof(Vertex::position);
+  const size_t normalSize = sizeof(Vertex::normal);
+  const size_t texCoordSize = sizeof(Vertex::texCoord);
+  const size_t tangentSize = sizeof(Vertex::tangent);
+
+  const size_t stride =
+    (static_cast<bool>(attributes & Vertex::AttrFlag::POSITION)
+      ? positionSize : 0) +
+    (static_cast<bool>(attributes & Vertex::AttrFlag::NORMAL)
+      ? normalSize : 0) +
+    (static_cast<bool>(attributes & Vertex::AttrFlag::TEXCOORD)
+      ? texCoordSize : 0) +
+    (static_cast<bool>(attributes & Vertex::AttrFlag::TANGENT)
+      ? tangentSize : 0);
+  const int numVertices = vertexPositions.size();
+  const size_t totalSize = numVertices * stride;
+
+  glGenVertexArrays(1, &VAO);
+  glBindVertexArray(VAO);
+
+  glGenBuffers(1, &VBO);
+  glBindBuffer(GL_ARRAY_BUFFER, VBO);
+  glBufferData(GL_ARRAY_BUFFER, totalSize, nullptr, GL_STATIC_DRAW);
+
+  size_t offset = 0;
+
+  if (!!(attributes & Vertex::AttrFlag::POSITION)) {
+    const size_t attribSize = positionSize;
+    const size_t arraySize = numVertices * attribSize;
+    glBufferSubData(GL_ARRAY_BUFFER, offset, arraySize, vertexPositions.data());
+    glVertexAttribPointer(
+        Vertex::AttrFlagToIndex(Vertex::AttrFlag::POSITION),
+        attribSize / sizeof(float), GL_FLOAT, GL_FALSE, attribSize,
+        (void*)offset);
+    offset += arraySize;
+  }
+
+  if (!!(attributes & Vertex::AttrFlag::NORMAL)) {
+    const size_t attribSize = normalSize;
+    const size_t arraySize = numVertices * attribSize;
+    glBufferSubData(GL_ARRAY_BUFFER, offset, arraySize, vertexNormals.data());
+    glVertexAttribPointer(
+        Vertex::AttrFlagToIndex(Vertex::AttrFlag::NORMAL),
+        attribSize / sizeof(float), GL_FLOAT, GL_FALSE, attribSize,
+        (void*)offset);
+    offset += arraySize;
+  }
+
+  if (!!(attributes & Vertex::AttrFlag::TEXCOORD)) {
+    const size_t attribSize = texCoordSize;
+    const size_t arraySize = numVertices * attribSize;
+    glBufferSubData(GL_ARRAY_BUFFER, offset, arraySize, vertexTexCoords.data());
+    glVertexAttribPointer(
+        Vertex::AttrFlagToIndex(Vertex::AttrFlag::TEXCOORD),
+        attribSize / sizeof(float), GL_FLOAT, GL_FALSE, attribSize,
+        (void*)offset);
+    offset += arraySize;
+  }
+
+  if (!!(attributes & Vertex::AttrFlag::TANGENT)) {
+    const size_t attribSize = tangentSize;
+    const size_t arraySize = numVertices * attribSize;
+    glBufferSubData(GL_ARRAY_BUFFER, offset, arraySize, vertexTangents.data());
+    glVertexAttribPointer(
+        Vertex::AttrFlagToIndex(Vertex::AttrFlag::TANGENT),
+        attribSize / sizeof(float), GL_FLOAT, GL_FALSE, attribSize,
+        (void*)offset);
+    offset += arraySize;
+  }
+
+  drawMode = GL_TRIANGLES;
+  drawCount = numVertices;
+}
+
 void dg::Mesh::Draw() const {
   glBindVertexArray(VAO);
   if (lastDrawnMesh != this) {
@@ -235,125 +228,199 @@ void dg::Mesh::Draw() const {
 }
 
 std::unique_ptr<dg::Mesh> dg::Mesh::CreateCube() {
-  std::unique_ptr<Mesh> mesh = std::unique_ptr<Mesh>(new Mesh());
+  auto mesh = std::unique_ptr<Mesh>(new Mesh());
+  float S = 0.5f; // half size
 
-  glGenVertexArrays(1, &mesh->VAO);
-  glBindVertexArray(mesh->VAO);
+  // Front
+  mesh->AddQuad(
+    // position       normal          texCoord  tangent
+    { { -S, -S, +S }, { +0, +0, +1 }, { 0, 0 }, RIGHT },
+    { { -S, +S, +S }, { +0, +0, +1 }, { 0, 1 }, RIGHT },
+    { { +S, +S, +S }, { +0, +0, +1 }, { 1, 1 }, RIGHT },
+    { { +S, -S, +S }, { +0, +0, +1 }, { 1, 0 }, RIGHT },
+    Winding::CCW
+  );
 
-  glGenBuffers(1, &mesh->VBO);
-  glBindBuffer(GL_ARRAY_BUFFER, mesh->VBO);
-  glBufferData(
-      GL_ARRAY_BUFFER, sizeof(cubeVertices), cubeVertices, GL_STATIC_DRAW);
+  // Back
+  mesh->AddQuad(
+    // position       normal          texCoord  tangent
+    { { -S, -S, -S }, { +0, +0, -1 }, { 1, 0 }, -RIGHT },
+    { { +S, -S, -S }, { +0, +0, -1 }, { 0, 0 }, -RIGHT },
+    { { +S, +S, -S }, { +0, +0, -1 }, { 0, 1 }, -RIGHT },
+    { { -S, +S, -S }, { +0, +0, -1 }, { 1, 1 }, -RIGHT },
+    Winding::CCW
+  );
 
-  glVertexAttribPointer(
-      Vertex::AttrFlagToIndex(Vertex::AttrFlag::POSITION),
-      3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
-  mesh->attributes |= Vertex::AttrFlag::POSITION;
+  // Left
+  mesh->AddQuad(
+    // position       normal          texCoord  tangent
+    { { -S, -S, -S }, { -1, +0, +0 }, { 0, 0 }, -FORWARD },
+    { { -S, +S, -S }, { -1, +0, +0 }, { 0, 1 }, -FORWARD },
+    { { -S, +S, +S }, { -1, +0, +0 }, { 1, 1 }, -FORWARD },
+    { { -S, -S, +S }, { -1, +0, +0 }, { 1, 0 }, -FORWARD },
+    Winding::CCW
+  );
 
-  glVertexAttribPointer(
-      Vertex::AttrFlagToIndex(Vertex::AttrFlag::TEXCOORD),
-      2, GL_FLOAT, GL_FALSE, 8 * sizeof(float),
-      (void*)(3 * sizeof(float)));
-  mesh->attributes |= Vertex::AttrFlag::TEXCOORD;
+  // Right
+  mesh->AddQuad(
+    // position       normal          texCoord  tangent
+    { { +S, -S, +S }, { +1, +0, +0 }, { 0, 0 }, FORWARD },
+    { { +S, +S, +S }, { +1, +0, +0 }, { 0, 1 }, FORWARD },
+    { { +S, +S, -S }, { +1, +0, +0 }, { 1, 1 }, FORWARD },
+    { { +S, -S, -S }, { +1, +0, +0 }, { 1, 0 }, FORWARD },
+    Winding::CCW
+  );
 
-  glVertexAttribPointer(
-      Vertex::AttrFlagToIndex(Vertex::AttrFlag::NORMAL),
-      3, GL_FLOAT, GL_FALSE, 8 * sizeof(float),
-      (void*)(5 * sizeof(float)));
-  mesh->attributes |= Vertex::AttrFlag::NORMAL;
+  // Top
+  mesh->AddQuad(
+    // position       normal          texCoord  tangent
+    { { -S, +S, +S }, { +0, +1, +0 }, { 0, 0 }, RIGHT },
+    { { -S, +S, -S }, { +0, +1, +0 }, { 0, 1 }, RIGHT },
+    { { +S, +S, -S }, { +0, +1, +0 }, { 1, 1 }, RIGHT },
+    { { +S, +S, +S }, { +0, +1, +0 }, { 1, 0 }, RIGHT },
+    Winding::CCW
+  );
 
-  mesh->drawMode = GL_TRIANGLES;
-  mesh->drawCount = 36;
+  // Bottom
+  mesh->AddQuad(
+    // position       normal          texCoord  tangent
+    { { -S, -S, -S }, { +0, -1, +0 }, { 0, 0 }, RIGHT },
+    { { -S, -S, +S }, { +0, -1, +0 }, { 0, 1 }, RIGHT },
+    { { +S, -S, +S }, { +0, -1, +0 }, { 1, 1 }, RIGHT },
+    { { +S, -S, -S }, { +0, -1, +0 }, { 1, 0 }, RIGHT },
+    Winding::CCW
+  );
+
+  mesh->FinishBuilding();
 
   return mesh;
 }
 
 std::unique_ptr<dg::Mesh> dg::Mesh::CreateMappedCube() {
-  std::unique_ptr<Mesh> mesh = std::unique_ptr<Mesh>(new Mesh());
+  auto mesh = std::unique_ptr<Mesh>(new Mesh());
 
-  glGenVertexArrays(1, &mesh->VAO);
-  glBindVertexArray(mesh->VAO);
+  const float S = 0.5f; // half size
+  const float Q = 1.f / 4.f; // quater
+  const float T = 1.f / 3.f; // third
+  const float E = 1.f / (2048.f / 4.f * 3.f); // epsilon to hide seams
 
-  glGenBuffers(1, &mesh->VBO);
-  glBindBuffer(GL_ARRAY_BUFFER, mesh->VBO);
-  glBufferData(
-      GL_ARRAY_BUFFER, sizeof(mappedCubeVertices), mappedCubeVertices,
-      GL_STATIC_DRAW);
+  const glm::vec2 BACK_TL   (Q*3+E, T*2-E);
+  const glm::vec2 BACK_TR   (Q*4-E, T*2-E);
+  const glm::vec2 BACK_BL   (Q*3+E, T*1+E);
+  const glm::vec2 BACK_BR   (Q*4-E, T*1+E);
 
-  glVertexAttribPointer(
-      Vertex::AttrFlagToIndex(Vertex::AttrFlag::POSITION),
-      3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
-  mesh->attributes |= Vertex::AttrFlag::POSITION;
+  const glm::vec2 FRONT_TL  (Q*1+E, T*2-E);
+  const glm::vec2 FRONT_TR  (Q*2-E, T*2-E);
+  const glm::vec2 FRONT_BL  (Q*1+E, T*1+E);
+  const glm::vec2 FRONT_BR  (Q*2-E, T*1+E);
 
-  glVertexAttribPointer(
-      Vertex::AttrFlagToIndex(Vertex::AttrFlag::TEXCOORD),
-      2, GL_FLOAT, GL_FALSE, 8 * sizeof(float),
-      (void*)(3 * sizeof(float)));
-  mesh->attributes |= Vertex::AttrFlag::TEXCOORD;
+  const glm::vec2 LEFT_TL   (Q*0+E, T*2-E);
+  const glm::vec2 LEFT_TR   (Q*1-E, T*2-E);
+  const glm::vec2 LEFT_BL   (Q*0+E, T*1+E);
+  const glm::vec2 LEFT_BR   (Q*1-E, T*1+E);
 
-  glVertexAttribPointer(
-      Vertex::AttrFlagToIndex(Vertex::AttrFlag::NORMAL),
-      3, GL_FLOAT, GL_FALSE, 8 * sizeof(float),
-      (void*)(5 * sizeof(float)));
-  mesh->attributes |= Vertex::AttrFlag::NORMAL;
+  const glm::vec2 RIGHT_TL  (Q*2+E, T*2-E);
+  const glm::vec2 RIGHT_TR  (Q*3-E, T*2-E);
+  const glm::vec2 RIGHT_BL  (Q*2+E, T*1+E);
+  const glm::vec2 RIGHT_BR  (Q*3-E, T*1+E);
 
-  mesh->drawMode = GL_TRIANGLES;
-  mesh->drawCount = 36;
+  const glm::vec2 BOTTOM_TL (Q*1+E, T*1-E);
+  const glm::vec2 BOTTOM_TR (Q*2-E, T*1-E);
+  const glm::vec2 BOTTOM_BL (Q*1+E, T*0+E);
+  const glm::vec2 BOTTOM_BR (Q*2-E, T*0+E);
+
+  const glm::vec2 TOP_TL    (Q*1+E, T*3-E);
+  const glm::vec2 TOP_TR    (Q*2-E, T*3-E);
+  const glm::vec2 TOP_BL    (Q*1+E, T*2+E);
+  const glm::vec2 TOP_BR    (Q*2-E, T*2+E);
+
+  // Front
+  mesh->AddQuad(
+    // position       normal          texCoord  tangent
+    { { -S, -S, +S }, { +0, +0, +1 }, FRONT_BL, RIGHT },
+    { { -S, +S, +S }, { +0, +0, +1 }, FRONT_TL, RIGHT },
+    { { +S, +S, +S }, { +0, +0, +1 }, FRONT_TR, RIGHT },
+    { { +S, -S, +S }, { +0, +0, +1 }, FRONT_BR, RIGHT },
+    Winding::CCW
+  );
+
+  // Back
+  mesh->AddQuad(
+    // position       normal          texCoord  tangent
+    { { -S, -S, -S }, { +0, +0, -1 }, BACK_BR,  -RIGHT },
+    { { +S, -S, -S }, { +0, +0, -1 }, BACK_BL,  -RIGHT },
+    { { +S, +S, -S }, { +0, +0, -1 }, BACK_TL,  -RIGHT },
+    { { -S, +S, -S }, { +0, +0, -1 }, BACK_TR,  -RIGHT },
+    Winding::CCW
+  );
+
+  // Left
+  mesh->AddQuad(
+    // position       normal          texCoord  tangent
+    { { -S, -S, -S }, { -1, +0, +0 }, LEFT_BL,  -FORWARD },
+    { { -S, +S, -S }, { -1, +0, +0 }, LEFT_TL,  -FORWARD },
+    { { -S, +S, +S }, { -1, +0, +0 }, LEFT_TR,  -FORWARD },
+    { { -S, -S, +S }, { -1, +0, +0 }, LEFT_BR,  -FORWARD },
+    Winding::CCW
+  );
+
+  // Right
+  mesh->AddQuad(
+    // position       normal          texCoord  tangent
+    { { +S, -S, +S }, { +1, +0, +0 }, RIGHT_BL, FORWARD },
+    { { +S, +S, +S }, { +1, +0, +0 }, RIGHT_TL, FORWARD },
+    { { +S, +S, -S }, { +1, +0, +0 }, RIGHT_TR, FORWARD },
+    { { +S, -S, -S }, { +1, +0, +0 }, RIGHT_BR, FORWARD },
+    Winding::CCW
+  );
+
+  // Top
+  mesh->AddQuad(
+    // position       normal          texCoord  tangent
+    { { -S, +S, +S }, { +0, +1, +0 }, TOP_BL,   RIGHT },
+    { { -S, +S, -S }, { +0, +1, +0 }, TOP_TL,   RIGHT },
+    { { +S, +S, -S }, { +0, +1, +0 }, TOP_TR,   RIGHT },
+    { { +S, +S, +S }, { +0, +1, +0 }, TOP_BR,   RIGHT },
+    Winding::CCW
+  );
+
+  // Bottom
+  mesh->AddQuad(
+    // position       normal          texCoord   tangent
+    { { -S, -S, -S }, { +0, -1, +0 }, BOTTOM_BL, RIGHT },
+    { { -S, -S, +S }, { +0, -1, +0 }, BOTTOM_TL, RIGHT },
+    { { +S, -S, +S }, { +0, -1, +0 }, BOTTOM_TR, RIGHT },
+    { { +S, -S, -S }, { +0, -1, +0 }, BOTTOM_BR, RIGHT },
+    Winding::CCW
+  );
+
+  mesh->FinishBuilding();
 
   return mesh;
 }
 
 std::unique_ptr<dg::Mesh> dg::Mesh::CreateQuad() {
-  std::unique_ptr<Mesh> mesh = std::unique_ptr<Mesh>(new Mesh());
+  auto mesh = std::unique_ptr<Mesh>(new Mesh());
+  float S = 0.5f; // half size
 
-  glGenVertexArrays(1, &mesh->VAO);
-  glBindVertexArray(mesh->VAO);
+  mesh->AddQuad(
+    // position       normal          texCoord  tangent
+    { { -S, -S, +0 }, { +0, +0, +1 }, { 0, 0 }, { 1, 0, 0 } },
+    { { -S, +S, +0 }, { +0, +0, +1 }, { 0, 1 }, { 1, 0, 0 } },
+    { { +S, +S, +0 }, { +0, +0, +1 }, { 1, 1 }, { 1, 0, 0 } },
+    { { +S, -S, +0 }, { +0, +0, +1 }, { 1, 0 }, { 1, 0, 0 } },
+    Winding::CCW
+  );
 
-  glGenBuffers(1, &mesh->VBO);
-  glBindBuffer(GL_ARRAY_BUFFER, mesh->VBO);
-  glBufferData(
-      GL_ARRAY_BUFFER, sizeof(quadVertices), quadVertices, GL_STATIC_DRAW);
-
-  GLsizei stride = 0;
-  stride += 3 * sizeof(float); // position
-  stride += 2 * sizeof(float); // texture coords
-  stride += 3 * sizeof(float); // normals
-  stride += 3 * sizeof(float); // tangents
-
-  long offset = 0;
-
-  glVertexAttribPointer(
-      Vertex::AttrFlagToIndex(Vertex::AttrFlag::POSITION),
-      3, GL_FLOAT, GL_FALSE, stride, (void*)offset);
-  offset += 3 * sizeof(float);
-  mesh->attributes |= Vertex::AttrFlag::POSITION;
-
-  glVertexAttribPointer(
-      Vertex::AttrFlagToIndex(Vertex::AttrFlag::TEXCOORD),
-      2, GL_FLOAT, GL_FALSE, stride, (void*)offset);
-  offset += 2 * sizeof(float);
-  mesh->attributes |= Vertex::AttrFlag::TEXCOORD;
-
-  glVertexAttribPointer(
-      Vertex::AttrFlagToIndex(Vertex::AttrFlag::NORMAL),
-      3, GL_FLOAT, GL_FALSE, stride, (void*)offset);
-  offset += 3 * sizeof(float);
-  mesh->attributes |= Vertex::AttrFlag::NORMAL;
-
-  glVertexAttribPointer(
-      Vertex::AttrFlagToIndex(Vertex::AttrFlag::TANGENT),
-      3, GL_FLOAT, GL_FALSE, stride, (void*)offset);
-  offset += 3 * sizeof(float);
-  mesh->attributes |= Vertex::AttrFlag::TANGENT;
-
-  mesh->drawMode = GL_TRIANGLES;
-  mesh->drawCount = 6;
+  mesh->FinishBuilding();
 
   return mesh;
 }
 
 std::unique_ptr<dg::Mesh> dg::Mesh::CreateCylinder(
     int radialDivisions, int heightDivisions) {
+  auto mesh = std::unique_ptr<Mesh>(new Mesh());
+
   if (radialDivisions < 3) {
     radialDivisions = 3;
   }
@@ -362,68 +429,9 @@ std::unique_ptr<dg::Mesh> dg::Mesh::CreateCylinder(
     heightDivisions = 1;
   }
 
-  int numTriangles = radialDivisions * (1 + 1 + (2 * heightDivisions));
-  int positionSize = 3;
-  int normalSize = 3;
-  int tangentSize = 3;
-  int texCoordSize = 2;
-  int vertexStride = positionSize + normalSize + tangentSize + texCoordSize;
-  std::vector<float> buffer(3 * numTriangles * vertexStride);
-
-  int positionOffset = 0;
-  int normalOffset = positionSize;
-  int tangentOffset = normalOffset + normalSize;
-  int texCoordOffset = tangentOffset + tangentSize;
-
   float halfHeight = 0.5f;
   float radInterval = glm::radians(360.f) / (float)radialDivisions;
   float radius = 0.5f;
-
-  int nextVertOffset = 0;
-  auto AddTriangle = [&](
-      glm::vec3 v1, glm::vec3 v2, glm::vec3 v3,
-      glm::vec3 n1, glm::vec3 n2, glm::vec3 n3,
-      glm::vec3 t1, glm::vec3 t2, glm::vec3 t3,
-      glm::vec2 uv1, glm::vec2 uv2, glm::vec2 uv3) {
-    buffer[nextVertOffset + positionOffset + 0] = v1.x;
-    buffer[nextVertOffset + positionOffset + 1] = v1.y;
-    buffer[nextVertOffset + positionOffset + 2] = v1.z;
-    buffer[nextVertOffset + normalOffset + 0] = n1.x;
-    buffer[nextVertOffset + normalOffset + 1] = n1.y;
-    buffer[nextVertOffset + normalOffset + 2] = n1.z;
-    buffer[nextVertOffset + tangentOffset + 0] = t1.x;
-    buffer[nextVertOffset + tangentOffset + 1] = t1.y;
-    buffer[nextVertOffset + tangentOffset + 2] = t1.z;
-    buffer[nextVertOffset + texCoordOffset + 0] = uv1.x;
-    buffer[nextVertOffset + texCoordOffset + 1] = uv1.y;
-    nextVertOffset += vertexStride;
-
-    buffer[nextVertOffset + positionOffset + 0] = v2.x;
-    buffer[nextVertOffset + positionOffset + 1] = v2.y;
-    buffer[nextVertOffset + positionOffset + 2] = v2.z;
-    buffer[nextVertOffset + normalOffset + 0] = n2.x;
-    buffer[nextVertOffset + normalOffset + 1] = n2.y;
-    buffer[nextVertOffset + normalOffset + 2] = n2.z;
-    buffer[nextVertOffset + tangentOffset + 0] = t2.x;
-    buffer[nextVertOffset + tangentOffset + 1] = t2.y;
-    buffer[nextVertOffset + tangentOffset + 2] = t2.z;
-    buffer[nextVertOffset + texCoordOffset + 0] = uv2.x;
-    buffer[nextVertOffset + texCoordOffset + 1] = uv2.y;
-    nextVertOffset += vertexStride;
-
-    buffer[nextVertOffset + positionOffset + 0] = v3.x;
-    buffer[nextVertOffset + positionOffset + 1] = v3.y;
-    buffer[nextVertOffset + positionOffset + 2] = v3.z;
-    buffer[nextVertOffset + normalOffset + 0] = n3.x;
-    buffer[nextVertOffset + normalOffset + 1] = n3.y;
-    buffer[nextVertOffset + normalOffset + 2] = n3.z;
-    buffer[nextVertOffset + tangentOffset + 0] = t3.x;
-    buffer[nextVertOffset + tangentOffset + 1] = t3.y;
-    buffer[nextVertOffset + tangentOffset + 2] = t3.z;
-    buffer[nextVertOffset + texCoordOffset + 0] = uv3.x;
-    buffer[nextVertOffset + texCoordOffset + 1] = uv3.y;
-    nextVertOffset += vertexStride;
-  };
 
   for (int i = 0; i < radialDivisions; i++) {
     glm::vec3 leftNormal = glm::quat(
@@ -451,22 +459,48 @@ std::unique_ptr<dg::Mesh> dg::Mesh::CreateCylinder(
     uvBottomCenter.y = 1 - uvBottomCenter.y;
 
     // Add top triangle.
-    AddTriangle(
-        topCenter, topLeft, topRight, // vertices
-        UP, UP, UP, // normals
-        -RIGHT, -RIGHT, -RIGHT, // tangents
-        uvTopCenter,
-        uvTopCenter + uvExtents * glm::vec2(-leftNormal.x, leftNormal.z),
-        uvTopCenter + uvExtents * glm::vec2(-rightNormal.x, rightNormal.z));
+    mesh->AddTriangle(
+        {
+          topLeft,
+          UP,
+          uvTopCenter + uvExtents * glm::vec2(-leftNormal.x, leftNormal.z),
+          -RIGHT,
+        },
+        {
+          topCenter,
+          UP,
+          uvTopCenter,
+          -RIGHT,
+        },
+        {
+          topRight,
+          UP,
+          uvTopCenter + uvExtents * glm::vec2(-rightNormal.x, rightNormal.z),
+          -RIGHT,
+        },
+        Winding::CCW);
 
     // Add bottom triangle.
-    AddTriangle(
-        bottomCenter, bottomRight, bottomLeft, // vertices
-        -UP, -UP, -UP, // normals
-        -RIGHT, -RIGHT, -RIGHT, // tangents
-        uvBottomCenter,
-        uvBottomCenter - uvExtents * glm::vec2(rightNormal.x, rightNormal.z),
-        uvBottomCenter - uvExtents * glm::vec2(leftNormal.x, leftNormal.z));
+    mesh->AddTriangle(
+        {
+          bottomRight,
+          -UP,
+          uvBottomCenter - uvExtents * glm::vec2(rightNormal.x, rightNormal.z),
+          -RIGHT,
+        },
+        {
+          bottomCenter,
+          -UP,
+          uvBottomCenter,
+          -RIGHT,
+        },
+        {
+          bottomLeft,
+          -UP,
+          uvBottomCenter - uvExtents * glm::vec2(leftNormal.x, leftNormal.z),
+          -RIGHT,
+        },
+        Winding::CCW);
 
     // Add side quad(s).
     float heightInterval = halfHeight * 2.f / heightDivisions;
@@ -490,132 +524,49 @@ std::unique_ptr<dg::Mesh> dg::Mesh::CreateCylinder(
       glm::vec2 uvTopLeft((float)i / radialDivisions, uvTopHeight);
       glm::vec2 uvTopRight((float)(i + 1) / radialDivisions, uvTopHeight);
 
-      AddTriangle(
-          quadBottomLeft, quadTopRight, quadTopLeft,
-          leftNormal, rightNormal, leftNormal,
-          leftTangent, rightTangent, leftTangent,
-          uvBottomLeft, uvTopRight, uvTopLeft);
-      AddTriangle(
-          quadBottomRight, quadTopRight, quadBottomLeft,
-          rightNormal, rightNormal, leftNormal,
-          rightTangent, rightTangent, leftTangent,
-          uvBottomRight, uvTopRight, uvBottomLeft);
+      mesh->AddQuad(
+          {
+            quadBottomLeft,  // Position
+            leftNormal,      // Normal
+            uvBottomLeft,    // Texture coordinate
+            leftTangent,     // Tangent
+          },
+          {
+            quadTopLeft,     // Position
+            leftNormal,      // Normal
+            uvTopLeft,       // Texture coordinate
+            leftTangent,     // Tangent
+          },
+          {
+            quadTopRight,    // Position
+            rightNormal,     // Normal
+            uvTopRight,      // Texture coordinate
+            rightTangent,    // Tangent
+          },
+          {
+            quadBottomRight, // Position
+            rightNormal,     // Normal
+            uvBottomRight,   // Texture coordinate
+            rightTangent,    // Tangent
+          },
+          Winding::CCW);
     }
   }
 
-  std::unique_ptr<Mesh> mesh = std::unique_ptr<Mesh>(new Mesh());
-
-  glGenVertexArrays(1, &mesh->VAO);
-  glBindVertexArray(mesh->VAO);
-
-  glGenBuffers(1, &mesh->VBO);
-  glBindBuffer(GL_ARRAY_BUFFER, mesh->VBO);
-  glBufferData(
-      GL_ARRAY_BUFFER, buffer.size() * sizeof(float), buffer.data(),
-      GL_STATIC_DRAW);
-
-  glVertexAttribPointer(
-      Vertex::AttrFlagToIndex(Vertex::AttrFlag::POSITION),
-      positionSize, GL_FLOAT, GL_FALSE,
-      vertexStride * sizeof(float), (void*)(positionOffset * sizeof(float)));
-  mesh->attributes |= Vertex::AttrFlag::POSITION;
-
-  glVertexAttribPointer(
-      Vertex::AttrFlagToIndex(Vertex::AttrFlag::NORMAL),
-      normalSize, GL_FLOAT, GL_FALSE,
-      vertexStride * sizeof(float), (void*)(normalOffset * sizeof(float)));
-  mesh->attributes |= Vertex::AttrFlag::NORMAL;
-
-  glVertexAttribPointer(
-      Vertex::AttrFlagToIndex(Vertex::AttrFlag::TANGENT),
-      tangentSize, GL_FLOAT, GL_FALSE,
-      vertexStride * sizeof(float), (void*)(tangentOffset * sizeof(float)));
-  mesh->attributes |= Vertex::AttrFlag::TANGENT;
-
-  glVertexAttribPointer(
-      Vertex::AttrFlagToIndex(Vertex::AttrFlag::TEXCOORD),
-      texCoordSize, GL_FLOAT, GL_FALSE,
-      vertexStride * sizeof(float), (void*)(texCoordOffset * sizeof(float)));
-  mesh->attributes |= Vertex::AttrFlag::TEXCOORD;
-
-  mesh->drawMode = GL_TRIANGLES;
-  mesh->drawCount = numTriangles * 3;
+  mesh->FinishBuilding();
 
   return mesh;
 }
 
 std::unique_ptr<dg::Mesh> dg::Mesh::CreateSphere(int subdivisions) {
+  auto mesh = std::unique_ptr<Mesh>(new Mesh());
+
   if (subdivisions < 3) {
     subdivisions = 3;
   }
 
-  int numTriangles = subdivisions * (1 + 1 + (2 * subdivisions));
-  int positionSize = 3;
-  int normalSize = 3;
-  int tangentSize = 3;
-  int texCoordSize = 2;
-  int vertexStride = positionSize + normalSize + tangentSize + texCoordSize;
-  std::vector<float> buffer(3 * numTriangles * vertexStride);
-
-  int positionOffset = 0;
-  int normalOffset = positionSize;
-  int tangentOffset = normalOffset + normalSize;
-  int texCoordOffset = tangentOffset + tangentSize;
-
   float radInterval = glm::radians(360.f) / (float)subdivisions;
   float radius = 0.5f;
-
-  int nextVertOffset = 0;
-  auto AddTriangle = [&](
-      glm::vec3 v1, glm::vec3 v2, glm::vec3 v3,
-      glm::vec3 t1, glm::vec3 t2, glm::vec3 t3,
-      glm::vec2 uv1, glm::vec2 uv2, glm::vec2 uv3) {
-
-    // All vertices on a sphere will be on the surface, thus their
-    // normal will also be their normalized position.
-    glm::vec3 n1 = glm::normalize(v1);
-    glm::vec3 n2 = glm::normalize(v2);
-    glm::vec3 n3 = glm::normalize(v3);
-
-    buffer[nextVertOffset + positionOffset + 0] = v1.x;
-    buffer[nextVertOffset + positionOffset + 1] = v1.y;
-    buffer[nextVertOffset + positionOffset + 2] = v1.z;
-    buffer[nextVertOffset + normalOffset + 0] = n1.x;
-    buffer[nextVertOffset + normalOffset + 1] = n1.y;
-    buffer[nextVertOffset + normalOffset + 2] = n1.z;
-    buffer[nextVertOffset + tangentOffset + 0] = t1.x;
-    buffer[nextVertOffset + tangentOffset + 1] = t1.y;
-    buffer[nextVertOffset + tangentOffset + 2] = t1.z;
-    buffer[nextVertOffset + texCoordOffset + 0] = uv1.x;
-    buffer[nextVertOffset + texCoordOffset + 1] = uv1.y;
-    nextVertOffset += vertexStride;
-
-    buffer[nextVertOffset + positionOffset + 0] = v2.x;
-    buffer[nextVertOffset + positionOffset + 1] = v2.y;
-    buffer[nextVertOffset + positionOffset + 2] = v2.z;
-    buffer[nextVertOffset + normalOffset + 0] = n2.x;
-    buffer[nextVertOffset + normalOffset + 1] = n2.y;
-    buffer[nextVertOffset + normalOffset + 2] = n2.z;
-    buffer[nextVertOffset + tangentOffset + 0] = t2.x;
-    buffer[nextVertOffset + tangentOffset + 1] = t2.y;
-    buffer[nextVertOffset + tangentOffset + 2] = t2.z;
-    buffer[nextVertOffset + texCoordOffset + 0] = uv2.x;
-    buffer[nextVertOffset + texCoordOffset + 1] = uv2.y;
-    nextVertOffset += vertexStride;
-
-    buffer[nextVertOffset + positionOffset + 0] = v3.x;
-    buffer[nextVertOffset + positionOffset + 1] = v3.y;
-    buffer[nextVertOffset + positionOffset + 2] = v3.z;
-    buffer[nextVertOffset + normalOffset + 0] = n3.x;
-    buffer[nextVertOffset + normalOffset + 1] = n3.y;
-    buffer[nextVertOffset + normalOffset + 2] = n3.z;
-    buffer[nextVertOffset + tangentOffset + 0] = t3.x;
-    buffer[nextVertOffset + tangentOffset + 1] = t3.y;
-    buffer[nextVertOffset + tangentOffset + 2] = t3.z;
-    buffer[nextVertOffset + texCoordOffset + 0] = uv3.x;
-    buffer[nextVertOffset + texCoordOffset + 1] = uv3.y;
-    nextVertOffset += vertexStride;
-  };
 
   for (int i = 0; i < subdivisions; i++) {
     glm::quat leftLongitudeQuat(glm::vec3(0, radInterval * i, 0));
@@ -652,54 +603,36 @@ std::unique_ptr<dg::Mesh> dg::Mesh::CreateSphere(int subdivisions) {
       glm::vec2 uvTopLeft((float)i / subdivisions, uvTopHeight);
       glm::vec2 uvTopRight((float)(i + 1) / subdivisions, uvTopHeight);
 
-      AddTriangle(
-          bottomLeft, topRight, topLeft,
-          bottomLeftTangent, topRightTangent, topLeftTangent,
-          uvBottomLeft, uvTopRight, uvTopLeft);
-      AddTriangle(
-          bottomRight, topRight, bottomLeft,
-          bottomRightTangent, topRightTangent, bottomLeftTangent,
-          uvBottomRight, uvTopRight, uvBottomLeft);
+      mesh->AddQuad(
+          {
+            bottomLeft,                  // Position
+            glm::normalize(bottomLeft),  // Normal (the normalized position)
+            uvBottomLeft,                // Texture coordinate
+            bottomLeftTangent,           // Tangent
+          },
+          {
+            topLeft,                     // Position
+            glm::normalize(topLeft),     // Normal (the normalized position)
+            uvTopLeft,                   // Texture coordinate
+            topLeftTangent,              // Tangent
+          },
+          {
+            topRight,                    // Position
+            glm::normalize(topRight),    // Normal (the normalized position)
+            uvTopRight,                  // Texture coordinate
+            topRightTangent,             // Tangent
+          },
+          {
+            bottomRight,                 // Position
+            glm::normalize(bottomRight), // Normal (the normalized position)
+            uvBottomRight,               // Texture coordinate
+            bottomRightTangent,          // Tangent
+          },
+          Winding::CCW);
     }
   }
 
-  std::unique_ptr<Mesh> mesh = std::unique_ptr<Mesh>(new Mesh());
-
-  glGenVertexArrays(1, &mesh->VAO);
-  glBindVertexArray(mesh->VAO);
-
-  glGenBuffers(1, &mesh->VBO);
-  glBindBuffer(GL_ARRAY_BUFFER, mesh->VBO);
-  glBufferData(
-      GL_ARRAY_BUFFER, buffer.size() * sizeof(float), buffer.data(),
-      GL_STATIC_DRAW);
-
-  glVertexAttribPointer(
-      Vertex::AttrFlagToIndex(Vertex::AttrFlag::POSITION),
-      positionSize, GL_FLOAT, GL_FALSE,
-      vertexStride * sizeof(float), (void*)(positionOffset * sizeof(float)));
-  mesh->attributes |= Vertex::AttrFlag::POSITION;
-
-  glVertexAttribPointer(
-      Vertex::AttrFlagToIndex(Vertex::AttrFlag::NORMAL),
-      normalSize, GL_FLOAT, GL_FALSE,
-      vertexStride * sizeof(float), (void*)(normalOffset * sizeof(float)));
-  mesh->attributes |= Vertex::AttrFlag::NORMAL;
-
-  glVertexAttribPointer(
-      Vertex::AttrFlagToIndex(Vertex::AttrFlag::TANGENT),
-      tangentSize, GL_FLOAT, GL_FALSE,
-      vertexStride * sizeof(float), (void*)(tangentOffset * sizeof(float)));
-  mesh->attributes |= Vertex::AttrFlag::TANGENT;
-
-  glVertexAttribPointer(
-      Vertex::AttrFlagToIndex(Vertex::AttrFlag::TEXCOORD),
-      texCoordSize, GL_FLOAT, GL_FALSE,
-      vertexStride * sizeof(float), (void*)(texCoordOffset * sizeof(float)));
-  mesh->attributes |= Vertex::AttrFlag::TEXCOORD;
-
-  mesh->drawMode = GL_TRIANGLES;
-  mesh->drawCount = numTriangles * 3;
+  mesh->FinishBuilding();
 
   return mesh;
 }

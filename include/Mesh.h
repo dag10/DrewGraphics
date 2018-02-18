@@ -25,20 +25,26 @@ namespace dg {
 
     glm::vec3 position;
     glm::vec3 normal;
-    glm::vec3 tangent;
     glm::vec2 texCoord;
-    AttrFlag attrFlags = AttrFlag::NONE;
+    glm::vec3 tangent;
+    AttrFlag attributes = AttrFlag::NONE;
 
     Vertex(glm::vec3 position)
-      : position(position), attrFlags(AttrFlag::POSITION) {};
+      : position(position), attributes(AttrFlag::POSITION) {};
     Vertex(
-        glm::vec3 position, glm::vec3 normal, glm::vec3 tangent,
-        glm::vec2 texCoord)
-      : position(position), attrFlags(
-          AttrFlag::POSITION | AttrFlag::NORMAL) {};
+        glm::vec3 position, glm::vec3 normal, glm::vec2 texCoord)
+      : position(position), normal(normal), texCoord(texCoord),
+      attributes(AttrFlag::POSITION | AttrFlag::NORMAL | AttrFlag::TEXCOORD) {};
+    Vertex(
+        glm::vec3 position, glm::vec3 normal, glm::vec2 texCoord,
+        glm::vec3 tangent)
+      : position(position), normal(normal), texCoord(texCoord),
+      tangent(tangent), attributes(
+          AttrFlag::POSITION | AttrFlag::NORMAL |
+          AttrFlag::TEXCOORD | AttrFlag::TANGENT) {};
 
     bool HasAllAttr(AttrFlag flags) {
-      return (this->attrFlags & flags) == flags;
+      return (this->attributes & flags) == flags;
     }
 
     static int AttrFlagToIndex(AttrFlag flag) {
@@ -63,6 +69,9 @@ namespace dg {
     friend inline bool operator == (AttrFlag lhs, AttrFlag rhs) {
       return static_cast<T>(lhs) == static_cast<T>(rhs);
     };
+    friend inline bool operator ! (AttrFlag flag) {
+      return (static_cast<T>(flag) == 0);
+    }
   };
 
 
@@ -73,6 +82,11 @@ namespace dg {
     public:
 
       enum class Winding { CW, CCW };
+
+      struct Triangle {
+        Vertex vertices[3];
+        Winding winding;
+      };
 
       static std::shared_ptr<Mesh> Cube;
       static std::shared_ptr<Mesh> MappedCube;
@@ -90,6 +104,11 @@ namespace dg {
       Mesh& operator=(Mesh&& other);
       friend void swap(Mesh& first, Mesh& second); // nothrow
 
+      void AddQuad(
+          Vertex v1, Vertex v2, Vertex v3, Vertex v4, Winding winding);
+      void AddTriangle(Vertex v1, Vertex v2, Vertex v3, Winding winding);
+      void FinishBuilding();
+
       void Draw() const;
 
     private:
@@ -99,8 +118,8 @@ namespace dg {
       // of each list belongs to the same vertex.
       std::vector<glm::vec3> vertexPositions;
       std::vector<glm::vec3> vertexNormals;
-      std::vector<glm::vec3> vertexTangents;
       std::vector<glm::vec2> vertexTexCoords;
+      std::vector<glm::vec3> vertexTangents;
       Vertex::AttrFlag attributes = Vertex::AttrFlag::NONE;
 
       static std::unique_ptr<Mesh> CreateCube();

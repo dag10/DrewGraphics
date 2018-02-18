@@ -406,7 +406,7 @@ void dg::RobotScene::Update() {
 }
 
 void dg::RobotScene::ClearBuffer() {
-  glClearColor(0.4f, 0.6f, 0.75f, 1.f);
+  glClearColor(26.f / 255, 37.f / 255, 43.f / 255, 1.f);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 }
 

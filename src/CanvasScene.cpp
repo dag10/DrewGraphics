@@ -13,7 +13,8 @@ void dg::CanvasScene::Initialize() {
   canvas = std::make_shared<Canvas>(
     (unsigned int)window->GetWidth(),
     (unsigned int)window->GetHeight());
-  quadMaterial = std::make_shared<ScreenQuadMaterial>();
+  quadMaterial = std::make_shared<ScreenQuadMaterial>(
+    glm::vec3(0), glm::vec2(2));
 }
 
 void dg::CanvasScene::ConfigureBuffer() {

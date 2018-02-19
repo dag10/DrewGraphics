@@ -15,7 +15,12 @@ namespace dg {
     public:
 
       ScreenQuadMaterial();
-      ScreenQuadMaterial(std::shared_ptr<Texture> texture);
+      ScreenQuadMaterial(
+        glm::vec3 color, glm::vec2 scale = glm::vec2(1),
+        glm::vec2 offset = glm::vec2(0));
+      ScreenQuadMaterial(
+        std::shared_ptr<Texture> texture, glm::vec2 scale = glm::vec2(1),
+        glm::vec2 offset = glm::vec2(0));
 
       ScreenQuadMaterial(ScreenQuadMaterial& other);
       ScreenQuadMaterial(ScreenQuadMaterial&& other);
@@ -25,13 +30,16 @@ namespace dg {
 
       void Use() const;
 
+      void SetColor(glm::vec3 color);
       void SetTexture(std::shared_ptr<Texture> texture);
+      void SetScale(glm::vec2 scale);
+      void SetOffset(glm::vec2 offset);
 
     private:
 
-      static std::shared_ptr<Shader> uvShader;
+      static std::shared_ptr<Shader> screenQuadShader;
 
-  }; // class Material
+  }; // class ScreenQuadMaterial
 
 } // namespace dg
 

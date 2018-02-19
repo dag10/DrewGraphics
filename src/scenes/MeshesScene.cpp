@@ -151,7 +151,7 @@ void dg::MeshesScene::Initialize() {
   spinningHelix = std::make_shared<Model>(
       Mesh::LoadOBJ("assets/models/helix.obj"),
       std::make_shared<StandardMaterial>(brickMaterial),
-      Transform::TS(glm::vec3(-1, 0.25, 0), glm::vec3(0.2)));
+      Transform::TS(glm::vec3(-1.f, 0.25f, 0.f), glm::vec3(0.2f)));
   AddChild(spinningHelix, false);
 
   // Create a spinning torus to demonstrate loading an OBJ model.

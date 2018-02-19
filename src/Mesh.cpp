@@ -12,6 +12,10 @@
 #include <Transform.h>
 #include <glm/gtc/type_ptr.hpp>
 
+#ifdef _WIN32
+#define sscanf sscanf_s
+#endif
+
 dg::Mesh *dg::Mesh::lastDrawnMesh = nullptr;
 std::unordered_map<std::string, std::weak_ptr<dg::Mesh>> dg::Mesh::fileMap;
 

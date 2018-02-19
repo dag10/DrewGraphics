@@ -53,8 +53,6 @@ void dg::VRManager::CreateFramebuffers() {
 }
 
 dg::VRManager::~VRManager() {
-  Behavior::~Behavior();
-
   Instance = nullptr;
 
   vr::VR_Shutdown();

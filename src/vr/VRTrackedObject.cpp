@@ -14,7 +14,6 @@ dg::VRTrackedObject::VRTrackedObject(int deviceIndex)
   deviceIndex(deviceIndex), Behavior() {}
 
 dg::VRTrackedObject::~VRTrackedObject() {
-  Behavior::~Behavior();
   if (VRManager::Instance != nullptr) {
     VRManager::Instance->DeregisterTrackedObject(this);
   }

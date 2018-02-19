@@ -5,6 +5,7 @@
 #include <vr/VRManager.h>
 #include <vr/VRTrackedObject.h>
 #include <Exceptions.h>
+#include <Mesh.h>
 #include <SceneObject.h>
 #include <MathUtils.h>
 
@@ -174,4 +175,41 @@ void dg::VRManager::SubmitFrame(vr::EVREye eye) {
     (void *)(long)GetFramebuffer(eye)->GetColorTexture()->GetHandle();
   vrCompositor->Submit(
     eye, &frameTexture, nullptr, vr::EVRSubmitFlags::Submit_Default);
+}
+
+std::shared_ptr<dg::Mesh> dg::VRManager::GetHiddenAreaMesh(vr::EVREye eye) {
+  std::shared_ptr<Mesh> *hiddenAreaMesh = (eye == vr::EVREye::Eye_Left) \
+    ? &leftHiddenAreaMesh
+    : &rightHiddenAreaMesh;
+
+  if (*hiddenAreaMesh == nullptr) {
+    *hiddenAreaMesh = std::make_shared<Mesh>();
+    vr::HiddenAreaMesh_t mesh = vrSystem->GetHiddenAreaMesh(eye);
+    for (unsigned int i = 0; i < mesh.unTriangleCount; i++) {
+      int offset = i * 3;
+      (*hiddenAreaMesh)->AddTriangle(
+        Vertex({
+            mesh.pVertexData[offset + 0].v[0],
+            mesh.pVertexData[offset + 0].v[1],
+            0.f
+          }),
+        Vertex({
+            mesh.pVertexData[offset + 1].v[0],
+            mesh.pVertexData[offset + 1].v[1],
+            0.f
+          }),
+        Vertex({
+            mesh.pVertexData[offset + 2].v[0],
+            mesh.pVertexData[offset + 2].v[1],
+            0.f
+          }),
+
+        // Actually unknown, doesn't matter, backface culling is disabled.
+        Mesh::Winding::CW
+      );
+    }
+    (*hiddenAreaMesh)->FinishBuilding();
+  }
+
+  return *hiddenAreaMesh;
 }

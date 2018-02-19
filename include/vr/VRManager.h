@@ -15,6 +15,7 @@
 namespace dg {
 
   class VRTrackedObject;
+  class Mesh;
 
   class VRManager : public Behavior {
 
@@ -45,6 +46,8 @@ namespace dg {
       std::shared_ptr<FrameBuffer> GetFramebuffer(vr::EVREye eye) const;
       void SubmitFrame(vr::EVREye eye);
 
+      std::shared_ptr<Mesh> GetHiddenAreaMesh(vr::EVREye eye);
+
     private:
 
       void StartOpenVR();
@@ -56,6 +59,9 @@ namespace dg {
 
       std::shared_ptr<FrameBuffer> leftFramebuffer;
       std::shared_ptr<FrameBuffer> rightFramebuffer;
+
+      std::shared_ptr<Mesh> leftHiddenAreaMesh = nullptr;
+      std::shared_ptr<Mesh> rightHiddenAreaMesh = nullptr;
 
       std::vector<vr::TrackedDevicePose_t> poses
         = std::vector<vr::TrackedDevicePose_t>(vr::k_unMaxTrackedDeviceCount);

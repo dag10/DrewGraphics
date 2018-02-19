@@ -12,6 +12,7 @@
 #include <Model.h>
 #include <Light.h>
 #include <FrameBuffer.h>
+#include <materials/ScreenQuadMaterial.h>
 
 namespace dg {
 
@@ -45,6 +46,7 @@ namespace dg {
           glm::mat4x4 projection,
           const std::forward_list<Light*>& lights) const;
       virtual void ClearBuffer();
+      virtual void DrawHiddenAreaMesh(vr::EVREye eye);
       virtual void ConfigureBuffer();
 
       std::shared_ptr<Camera> mainCamera;
@@ -54,6 +56,10 @@ namespace dg {
       // Virtual reality
       bool enableVR = false;
       std::shared_ptr<SceneObject> vrContainer;
+
+  private:
+
+      std::unique_ptr<ScreenQuadMaterial> hiddenAreaMeshMaterial = nullptr;
 
   }; // class Scene
 

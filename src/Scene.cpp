@@ -12,6 +12,9 @@ dg::Scene::Scene() : SceneObject() {}
 
 void dg::Scene::Initialize() {
   if (enableVR) {
+    hiddenAreaMeshMaterial = std::unique_ptr<ScreenQuadMaterial>(
+      new ScreenQuadMaterial(glm::vec3(0), glm::vec2(2), glm::vec2(-1)));
+
     // Disable glfw vsync, since IVRComposer::WaitGetPoses() will wait for
     // "running start" in 90hz anyway.
     glfwSwapInterval(0);
@@ -57,8 +60,18 @@ void dg::Scene::ClearBuffer() {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 }
 
+void dg::Scene::DrawHiddenAreaMesh(vr::EVREye eye) {
+  glEnable(GL_DEPTH_TEST);
+  glDepthFunc(GL_ALWAYS);
+  glDisable(GL_CULL_FACE);
+  hiddenAreaMeshMaterial->Use();
+  VRManager::Instance->GetHiddenAreaMesh(eye)->Draw();
+}
+
 void dg::Scene::ConfigureBuffer() {
   glEnable(GL_DEPTH_TEST);
+  glDepthFunc(GL_LESS);
+  glDepthMask(GL_TRUE);
   glEnable(GL_CULL_FACE);
   glCullFace(GL_BACK);
 }
@@ -89,6 +102,7 @@ void dg::Scene::RenderFrame(vr::EVREye eye) {
   framebuffer->Bind();
   framebuffer->SetViewport();
   ClearBuffer();
+  DrawHiddenAreaMesh(eye);
   ConfigureBuffer();
 
   RenderScene(*mainCamera, true, eye);
@@ -110,6 +124,8 @@ void dg::Scene::RenderScene(
       skybox->Draw(camera, *window);
     }
   }
+
+  ConfigureBuffer();
 
   // Traverse scene tree and sort out different types of objects
   // into their own lists.

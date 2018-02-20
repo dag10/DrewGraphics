@@ -365,31 +365,31 @@ void dg::PortalScene::Update() {
   }
 
   // If F was tapped, switch to the flashlight configuration.
-  if (window->IsKeyJustPressed(GLFW_KEY_F)) {
+  if (window->IsKeyJustPressed(Key::F)) {
     lightingType = FlashlightLighting;
     UpdateLightingConfiguration();
   }
 
   // If T was tapped, switch to the spotlight configuration.
-  if (window->IsKeyJustPressed(GLFW_KEY_T)) {
+  if (window->IsKeyJustPressed(Key::T)) {
     lightingType = SpotLighting;
     UpdateLightingConfiguration();
   }
 
   // If I was tapped, switch to the indoor point light configuration.
-  if (window->IsKeyJustPressed(GLFW_KEY_I)) {
+  if (window->IsKeyJustPressed(Key::I)) {
     lightingType = PointLighting;
     UpdateLightingConfiguration();
   }
 
   // If O was tapped, switch to the outdoor configuration.
-  if (window->IsKeyJustPressed(GLFW_KEY_O)) {
+  if (window->IsKeyJustPressed(Key::O)) {
     lightingType = OutdoorLighting;
     UpdateLightingConfiguration();
   }
 
   // Toggle animating light with keyboard tap of L.
-  if (window->IsKeyJustPressed(GLFW_KEY_L)) {
+  if (window->IsKeyJustPressed(Key::L)) {
     animatingLight = !animatingLight;
   }
 

@@ -309,6 +309,7 @@ del /s $(OutDir)*.obj, $(OutDir)*.pdb, $(OutDir)*.ipdb, $(OutDir)*.iobj</Command
     <ClInclude Include="include\FileUtils.h" />
     <ClInclude Include="include\FrameBuffer.h" />
     <ClInclude Include="include\glad\glad.h" />
+    <ClInclude Include="include\InputCodes.h" />
     <ClInclude Include="include\KHR\khrplatform.h" />
     <ClInclude Include="include\Light.h" />
     <ClInclude Include="include\lights\DirectionalLight.h" />

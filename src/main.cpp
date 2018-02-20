@@ -1,27 +1,27 @@
-#include <iostream>
-#include <sstream>
-#include <ostream>
-#include <memory>
-#include <map>
-#include <functional>
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-
-#include <EngineTime.h>
-#include <Window.h>
 #include <Camera.h>
-#include <Shader.h>
+#include <EngineTime.h>
+#include <GLFW/glfw3.h>
+#include <InputCodes.h>
 #include <Mesh.h>
+#include <Shader.h>
+#include <Window.h>
+#include <glad/glad.h>
 #include <scenes/CanvasTestScene.h>
-#include <scenes/TutorialScene.h>
-#include <scenes/TexturesScene.h>
-#include <scenes/RobotScene.h>
 #include <scenes/MeshesScene.h>
 #include <scenes/PortalScene.h>
 #include <scenes/QuadScene.h>
+#include <scenes/RobotScene.h>
+#include <scenes/TexturesScene.h>
+#include <scenes/TutorialScene.h>
 #include <scenes/VRScene.h>
+#include <functional>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <iostream>
+#include <map>
+#include <memory>
+#include <ostream>
+#include <sstream>
 
 #ifdef _MSC_VER
   // This turns on memory leak detection on Windows.
@@ -155,8 +155,8 @@ int main(int argc, const char *argv[]) {
     }
 
     // Handle escape key to release cursor or quit app.
-    if (window->IsKeyJustPressed(GLFW_KEY_ESCAPE) ||
-        window->IsKeyJustPressed(GLFW_KEY_Q)) {
+    if (window->IsKeyJustPressed(dg::Key::ESCAPE) ||
+        window->IsKeyJustPressed(dg::Key::Q)) {
       if (window->IsCursorLocked()) {
         cursorWasLocked = true;
         window->UnlockCursor();
@@ -167,7 +167,7 @@ int main(int argc, const char *argv[]) {
 
     // Handle click to regain cursor focus.
     if (cursorWasLocked && !window->IsCursorLocked() &&
-        window->IsMouseButtonJustPressed(GLFW_MOUSE_BUTTON_1)) {
+        window->IsMouseButtonJustPressed(dg::BUTTON_LEFT)) {
       window->LockCursor();
     }
 

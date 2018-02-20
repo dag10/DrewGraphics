@@ -162,6 +162,9 @@
     <ClCompile Include="src\scenes\TexturesScene.cpp">
       <Filter>Source Files\scenes</Filter>
     </ClCompile>
+    <ClCompile Include="src\scenes\DeepCloningScene.cpp">
+      <Filter>Source Files\scenes</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Behavior.h">
@@ -283,6 +286,9 @@
     </ClInclude>
     <ClInclude Include="include\InputCodes.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\scenes\DeepCloningScene.h">
+      <Filter>Header Files\scenes</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

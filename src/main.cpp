@@ -13,6 +13,7 @@
 #include <scenes/RobotScene.h>
 #include <scenes/TexturesScene.h>
 #include <scenes/TutorialScene.h>
+#include <scenes/DeepCloningScene.h>
 #include <scenes/VRScene.h>
 #include <functional>
 #include <glm/glm.hpp>
@@ -48,6 +49,7 @@ int main(int argc, const char *argv[]) {
     std::function<std::unique_ptr<dg::Scene>()>> constructors;
   constructors["portal"]    = dg::PortalScene::Make;
   constructors["tutorial"]  = dg::TutorialScene::Make;
+  constructors["cloning"]   = dg::DeepCloningScene::Make;
   constructors["textures"]  = dg::TexturesScene::Make;
   constructors["meshes"]    = dg::MeshesScene::Make;
   constructors["meshes-vr"] = dg::MeshesScene::MakeVR;

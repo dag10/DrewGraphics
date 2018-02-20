@@ -278,6 +278,7 @@ del /s $(OutDir)*.obj, $(OutDir)*.pdb, $(OutDir)*.ipdb, $(OutDir)*.iobj</Command
     <ClCompile Include="src\Behavior.cpp" />
     <ClCompile Include="src\SceneObject.cpp" />
     <ClCompile Include="src\scenes\CanvasTestScene.cpp" />
+    <ClCompile Include="src\scenes\DeepCloningScene.cpp" />
     <ClCompile Include="src\scenes\PortalScene.cpp" />
     <ClCompile Include="src\scenes\QuadScene.cpp" />
     <ClCompile Include="src\scenes\TexturesScene.cpp" />
@@ -319,6 +320,7 @@ del /s $(OutDir)*.obj, $(OutDir)*.pdb, $(OutDir)*.ipdb, $(OutDir)*.iobj</Command
     <ClInclude Include="include\Scene.h" />
     <ClInclude Include="include\SceneObject.h" />
     <ClInclude Include="include\scenes\CanvasTestScene.h" />
+    <ClInclude Include="include\scenes\DeepCloningScene.h" />
     <ClInclude Include="include\scenes\PortalScene.h" />
     <ClInclude Include="include\scenes\QuadScene.h" />
     <ClInclude Include="include\scenes\TexturesScene.h" />

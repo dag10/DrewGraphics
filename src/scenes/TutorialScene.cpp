@@ -1,5 +1,5 @@
 //
-//  scenes/TutorialScene.h
+//  scenes/TutorialScene.cpp
 //
 
 #include <scenes/TutorialScene.h>
@@ -9,7 +9,14 @@
 #include <forward_list>
 #include <materials/StandardMaterial.h>
 #include <behaviors/KeyboardCameraController.h>
-#include <lights/PointLight.h>
+#include <Lights.h>
+#include <Window.h>
+#include <Camera.h>
+#include <Shader.h>
+#include <Texture.h>
+#include <Mesh.h>
+#include <Model.h>
+#include <Skybox.h>
 
 std::unique_ptr<dg::TutorialScene> dg::TutorialScene::Make() {
   return std::unique_ptr<dg::TutorialScene>(new dg::TutorialScene());
@@ -34,7 +41,7 @@ void dg::TutorialScene::Initialize() {
       Texture::FromPath("assets/textures/skybox_daylight.png"));
 
   // Create skybox.
-  skybox = std::unique_ptr<Skybox>(new Skybox(skyboxTexture));
+  skybox = std::make_shared<Skybox>(skyboxTexture);
 
   // Create ceiling light source.
   auto ceilingLight = std::make_shared<PointLight>(
@@ -45,7 +52,7 @@ void dg::TutorialScene::Initialize() {
 
   // Create light sphere material.
   StandardMaterial lightMaterial = StandardMaterial::WithColor(
-      ceilingLight->specular);
+      ceilingLight->GetSpecular());
   lightMaterial.SetLit(false);
 
   // Create light sphere.

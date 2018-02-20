@@ -3,17 +3,23 @@
 //
 
 #include <Scene.h>
+#include <Skybox.h>
 #include <Model.h>
 #include <Camera.h>
 #include <vr/VRManager.h>
 #include <vr/VRTrackedObject.h>
+#include <Window.h>
+#include <Lights.h>
+#include <FrameBuffer.h>
+#include <materials/ScreenQuadMaterial.h>
 
 dg::Scene::Scene() : SceneObject() {}
+dg::Scene::~Scene() {}
 
 void dg::Scene::Initialize() {
   if (enableVR) {
-    hiddenAreaMeshMaterial = std::unique_ptr<ScreenQuadMaterial>(
-      new ScreenQuadMaterial(glm::vec3(0), glm::vec2(2), glm::vec2(-1)));
+    hiddenAreaMeshMaterial = std::make_shared<ScreenQuadMaterial>(
+      glm::vec3(0), glm::vec2(2), glm::vec2(-1));
 
     // Disable glfw vsync, since IVRComposer::WaitGetPoses() will wait for
     // "running start" in 90hz anyway.
@@ -182,7 +188,7 @@ void dg::Scene::PrepareModelForDraw(
     if (lightIndex >= Light::MAX_LIGHTS) {
       break;
     }
-    model.material->SetLight(lightIndex, **light);
+    model.material->SetLight(lightIndex, (*light)->GetShaderData());
     lightIndex++;
   }
 }

@@ -7,7 +7,7 @@
 #include <unordered_map>
 #include <Shader.h>
 #include <Texture.h>
-#include <Light.h>
+#include <Lights.h>
 
 namespace dg {
 
@@ -54,7 +54,7 @@ namespace dg {
       void SetMatrixMVP(glm::mat4x4 mvp);
       void SetMatrixM(glm::mat4x4 m);
       void SetMatrixNormal(glm::mat3x3 normal);
-      void SetLight(int index, const Light& light);
+      void SetLight(int index, const Light::ShaderData& data);
       void ClearLights();
       void ClearLight(int index);
 
@@ -64,6 +64,11 @@ namespace dg {
       void SetInvPortal(glm::mat4x4 invPortal);
 
       void Use() const;
+
+    protected:
+
+      static const std::string LightProperty(
+          int index, const std::string& property);
 
     private:
 

@@ -6,8 +6,10 @@
 
 #include <glm/glm.hpp>
 #include <materials/StandardMaterial.h>
-#include <lights/PointLight.h>
-#include <lights/DirectionalLight.h>
+#include <Mesh.h>
+#include <Model.h>
+#include <Lights.h>
+#include <Skybox.h>
 
 std::unique_ptr<dg::QuadScene> dg::QuadScene::Make() {
   return std::unique_ptr<dg::QuadScene>(new dg::QuadScene());
@@ -19,9 +21,9 @@ void dg::QuadScene::Initialize() {
   Scene::Initialize();
 
   // Create skybox, disabled by default.
-  skybox = std::unique_ptr<Skybox>(new Skybox(
-        std::make_shared<Texture>(Texture::FromPath(
-            "assets/textures/skybox_daylight.png"))));
+  skybox = std::make_shared<Skybox>(
+      std::make_shared<Texture>(Texture::FromPath(
+          "assets/textures/skybox_daylight.png")));
   skybox->enabled = false;
 
   // Create quad material.
@@ -52,9 +54,10 @@ void dg::QuadScene::Initialize() {
 
   // Create directional fill light.
   auto directionalLight = std::make_shared<DirectionalLight>(
-      glm::normalize(glm::vec3(0.5f, -0.9f, -0.2)),
       glm::vec3(1), // White light
       0.132f, 0.4f, 0.568f);
+  directionalLight->LookAtDirection(
+      glm::normalize(glm::vec3(0.5f, -0.9f, -0.2)));
   AddChild(directionalLight);
 
   // Configure camera.

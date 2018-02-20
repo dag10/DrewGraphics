@@ -265,10 +265,7 @@ del /s $(OutDir)*.obj, $(OutDir)*.pdb, $(OutDir)*.ipdb, $(OutDir)*.iobj</Command
     <ClCompile Include="src\FileUtils.cpp" />
     <ClCompile Include="src\FrameBuffer.cpp" />
     <ClCompile Include="src\glad.c" />
-    <ClCompile Include="src\Light.cpp" />
-    <ClCompile Include="src\lights\DirectionalLight.cpp" />
-    <ClCompile Include="src\lights\PointLight.cpp" />
-    <ClCompile Include="src\lights\SpotLight.cpp" />
+    <ClCompile Include="src\Lights.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\Material.cpp" />
     <ClCompile Include="src\materials\ScreenQuadMaterial.cpp" />
@@ -311,10 +308,7 @@ del /s $(OutDir)*.obj, $(OutDir)*.pdb, $(OutDir)*.ipdb, $(OutDir)*.iobj</Command
     <ClInclude Include="include\glad\glad.h" />
     <ClInclude Include="include\InputCodes.h" />
     <ClInclude Include="include\KHR\khrplatform.h" />
-    <ClInclude Include="include\Light.h" />
-    <ClInclude Include="include\lights\DirectionalLight.h" />
-    <ClInclude Include="include\lights\PointLight.h" />
-    <ClInclude Include="include\lights\SpotLight.h" />
+    <ClInclude Include="include\Lights.h" />
     <ClInclude Include="include\Material.h" />
     <ClInclude Include="include\materials\ScreenQuadMaterial.h" />
     <ClInclude Include="include\materials\StandardMaterial.h" />

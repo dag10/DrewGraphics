@@ -6,15 +6,15 @@
 
 #include <memory>
 #include <Scene.h>
-#include <Camera.h>
-#include <Shader.h>
-#include <Transform.h>
-#include <Model.h>
 #include <materials/StandardMaterial.h>
-#include <Light.h>
-#include <lights/SpotLight.h>
 
 namespace dg {
+
+  class Camera;
+  class Light;
+  class SpotLight;
+  class DirectionalLight;
+  class Shader;
 
   class PortalScene : public Scene {
 

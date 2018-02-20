@@ -10,13 +10,18 @@
 #include <EngineTime.h>
 #include <Texture.h>
 #include <Mesh.h>
+#include <Skybox.h>
 #include <Transform.h>
 #include <forward_list>
 #include <iostream>
 #include <behaviors/KeyboardCameraController.h>
 #include <behaviors/KeyboardLightController.h>
-#include <lights/DirectionalLight.h>
-#include <lights/PointLight.h>
+#include <Camera.h>
+#include <Shader.h>
+#include <Transform.h>
+#include <Model.h>
+#include <materials/StandardMaterial.h>
+#include <Lights.h>
 
 static const glm::vec3 cubePositions[] = {
   glm::vec3(  0.0f,  0.25f,  0.0f ),
@@ -105,14 +110,14 @@ void dg::PortalScene::Initialize() {
       Texture::FromPath("assets/textures/skybox_daylight.png"));
 
   // Create skybox.
-  skybox = std::unique_ptr<Skybox>(new Skybox(skyboxTexture));
+  skybox = std::make_shared<Skybox>(skyboxTexture);
   skybox->material.SetInvPortal(glm::mat4x4(0));
 
   // Create sky light.
   skyLight = std::make_shared<DirectionalLight>(
-      glm::normalize(glm::vec3(-0.3f, -1, -0.2f)),
       glm::vec3(1.0f, 0.93f, 0.86f),
       0.34f, 1.45f, 0.07f);
+  skyLight->LookAtDirection(glm::normalize(glm::vec3(-0.3f, -1, -0.2f)));
   Behavior::Attach(skyLight, std::make_shared<KeyboardLightController>(window));
   AddChild(skyLight);
 
@@ -130,9 +135,10 @@ void dg::PortalScene::Initialize() {
   // Create indoor and outdoor ceiling light source.
   glm::vec3 ceilingLightColor = glm::vec3(1.0f, 0.93f, 0.86f);
   spotLight = std::make_shared<SpotLight>(
-      glm::vec3(0, -1, 0), glm::radians(35.f),
       ceilingLightColor, 0.286f, 1.344f, 2.21f);
-  spotLight->feather = glm::radians(3.f);
+  spotLight->LookAtDirection(glm::vec3(0, -1, 0));
+  spotLight->SetCutoff(glm::radians(35.f));
+  spotLight->SetFeather(glm::radians(3.f));
   indoorCeilingLight = std::make_shared<PointLight>(
       ceilingLightColor, 0.927f, 0.903f, 1.063f);
   outdoorCeilingLight = std::make_shared<PointLight>(
@@ -288,8 +294,9 @@ void dg::PortalScene::Initialize() {
 
   // Create a flashlight attached to the camera.
   flashlight = std::make_shared<SpotLight>(
-      glm::vec3(0, 0, -1), glm::radians(25.f),
       ceilingLightColor, 0.314f, 2.16f, 2.11f);
+  flashlight->LookAtDirection(FORWARD);
+  flashlight->SetCutoff(glm::radians(25.f));
   flashlight->transform = Transform::T(glm::vec3(0.1f, -0.1f, 0));
   Behavior::Attach(
     flashlight, std::make_shared<KeyboardLightController>(window));
@@ -417,7 +424,7 @@ void dg::PortalScene::Update() {
       break;
   }
   std::static_pointer_cast<StandardMaterial>(lightModel->material)
-    ->SetDiffuse(activeLight->specular);
+    ->SetDiffuse(activeLight->GetSpecular());
 }
 
 void dg::PortalScene::PrepareModelForDraw(

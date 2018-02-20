@@ -3,6 +3,7 @@
 //
 
 #include <scenes/CanvasTestScene.h>
+#include <Canvas.h>
 
 std::unique_ptr<dg::CanvasTestScene> dg::CanvasTestScene::Make() {
   return std::unique_ptr<dg::CanvasTestScene>(new dg::CanvasTestScene());

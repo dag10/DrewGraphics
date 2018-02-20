@@ -4,13 +4,14 @@
 
 #pragma once
 
-#include <Behavior.h>
-#include <Light.h>
-#include <Window.h>
-#include <InputCodes.h>
 #include <memory>
+#include <Behavior.h>
+#include <InputCodes.h>
 
 namespace dg {
+
+  class Window;
+  class Light;
 
   class KeyboardLightController : public Behavior {
 

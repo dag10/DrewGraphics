@@ -9,6 +9,8 @@
 
 namespace dg {
 
+  class Model;
+
   class QuadScene : public Scene {
 
     public:

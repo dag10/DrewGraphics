@@ -50,8 +50,9 @@ vec3 calculateLight(
   // Attenuation
   if (light.type == LIGHT_TYPE_POINT || light.type == LIGHT_TYPE_SPOT) {
     float distance = length(light.position - v_ScenePos.xyz);
-    float attenuation = 1.0 / (light.constant + light.linear * distance +
-                        light.quadratic * (distance * distance));
+    float attenuation =
+      1.0 / (light.constantCoeff + light.linearCoeff * distance +
+          light.quadraticCoeff * (distance * distance));
     diffuse *= attenuation;
     ambient *= attenuation;
     specular *= attenuation;

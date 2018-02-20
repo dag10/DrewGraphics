@@ -2,10 +2,15 @@
 //  CanvasScene.cpp
 //
 
-#include <Mesh.h>
 #include <CanvasScene.h>
+#include <Mesh.h>
+#include <Canvas.h>
+#include <Window.h>
+#include <materials/ScreenQuadMaterial.h>
 
 dg::CanvasScene::CanvasScene() : Scene() {}
+
+dg::CanvasScene::~CanvasScene() {}
 
 void dg::CanvasScene::Initialize() {
   Scene::Initialize();

@@ -66,7 +66,7 @@
     <ClCompile Include="src\glad.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Light.cpp">
+    <ClCompile Include="src\Lights.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\main.cpp">
@@ -107,15 +107,6 @@
     </ClCompile>
     <ClCompile Include="src\behaviors\KeyboardCameraController.cpp">
       <Filter>Source Files\behaviors</Filter>
-    </ClCompile>
-    <ClCompile Include="src\lights\DirectionalLight.cpp">
-      <Filter>Source Files\lights</Filter>
-    </ClCompile>
-    <ClCompile Include="src\lights\PointLight.cpp">
-      <Filter>Source Files\lights</Filter>
-    </ClCompile>
-    <ClCompile Include="src\lights\SpotLight.cpp">
-      <Filter>Source Files\lights</Filter>
     </ClCompile>
     <ClCompile Include="src\materials\StandardMaterial.cpp">
       <Filter>Source Files\materials</Filter>
@@ -188,7 +179,7 @@
     <ClInclude Include="include\FileUtils.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Light.h">
+    <ClInclude Include="include\Lights.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Material.h">
@@ -235,15 +226,6 @@
     </ClInclude>
     <ClInclude Include="include\KHR\khrplatform.h">
       <Filter>Header Files\KHR</Filter>
-    </ClInclude>
-    <ClInclude Include="include\lights\DirectionalLight.h">
-      <Filter>Header Files\lights</Filter>
-    </ClInclude>
-    <ClInclude Include="include\lights\PointLight.h">
-      <Filter>Header Files\lights</Filter>
-    </ClInclude>
-    <ClInclude Include="include\lights\SpotLight.h">
-      <Filter>Header Files\lights</Filter>
     </ClInclude>
     <ClInclude Include="include\materials\StandardMaterial.h">
       <Filter>Header Files\materials</Filter>

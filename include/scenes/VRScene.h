@@ -6,17 +6,13 @@
 
 #include <memory>
 #include <Scene.h>
-#include <Camera.h>
-#include <Shader.h>
-#include <Transform.h>
-#include <Model.h>
-#include <materials/StandardMaterial.h>
-#include <Light.h>
-#include <lights/SpotLight.h>
-#include <FrameBuffer.h>
 #include <openvr.h>
 
 namespace dg {
+
+  class Model;
+  class Light;
+  class SpotLight;
 
   class VRScene : public Scene {
 

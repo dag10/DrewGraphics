@@ -6,16 +6,12 @@
 
 #include <memory>
 #include <Scene.h>
-#include <Window.h>
-#include <Camera.h>
-#include <Shader.h>
-#include <Texture.h>
-#include <Mesh.h>
-#include <Model.h>
-#include <Skybox.h>
-#include <FrameBuffer.h>
 
 namespace dg {
+
+  class FrameBuffer;
+  class SceneObject;
+  class Camera;
 
   class TexturesScene : public Scene {
 

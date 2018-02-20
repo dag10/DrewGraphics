@@ -6,21 +6,25 @@
 
 #include <forward_list>
 #include <memory>
-#include <Window.h>
 #include <SceneObject.h>
-#include <Skybox.h>
-#include <Model.h>
-#include <Light.h>
-#include <FrameBuffer.h>
-#include <materials/ScreenQuadMaterial.h>
+#include <openvr.h>
 
 namespace dg {
+
+  class Camera;
+  class Model;
+  class Window;
+  class Skybox;
+  class Light;
+  class FrameBuffer;
+  class ScreenQuadMaterial;
 
   class Scene : public SceneObject {
 
     public:
 
       Scene();
+      virtual ~Scene();
 
       virtual void Initialize();
       virtual void Update();
@@ -51,7 +55,7 @@ namespace dg {
 
       std::shared_ptr<Camera> mainCamera;
       std::shared_ptr<Window> window = nullptr;
-      std::unique_ptr<Skybox> skybox = nullptr;
+      std::shared_ptr<Skybox> skybox = nullptr;
 
       // Virtual reality
       bool enableVR = false;
@@ -59,7 +63,7 @@ namespace dg {
 
   private:
 
-      std::unique_ptr<ScreenQuadMaterial> hiddenAreaMeshMaterial = nullptr;
+      std::shared_ptr<ScreenQuadMaterial> hiddenAreaMeshMaterial = nullptr;
 
   }; // class Scene
 

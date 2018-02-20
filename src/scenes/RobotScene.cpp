@@ -6,11 +6,12 @@
 
 #include <glm/glm.hpp>
 #include <EngineTime.h>
+#include <materials/StandardMaterial.h>
 #include <materials/UVMaterial.h>
 #include <behaviors/KeyboardCameraController.h>
-#include <lights/DirectionalLight.h>
-#include <lights/PointLight.h>
-#include <lights/SpotLight.h>
+#include <Mesh.h>
+#include <Model.h>
+#include <Lights.h>
 
 std::unique_ptr<dg::RobotScene> dg::RobotScene::Make() {
   return std::unique_ptr<dg::RobotScene>(new dg::RobotScene(false));
@@ -77,7 +78,7 @@ void dg::RobotScene::Initialize() {
   lightContainer->AddChild(pointLight, false);
 
   // Add point light sphere.
-  lightModelMaterial.SetDiffuse(pointLight->diffuse);
+  lightModelMaterial.SetDiffuse(pointLight->GetDiffuse());
   pointLight->AddChild(std::make_shared<Model>(
     Mesh::Sphere,
     std::make_shared<StandardMaterial>(lightModelMaterial),
@@ -86,15 +87,14 @@ void dg::RobotScene::Initialize() {
   // Create spot light.
   auto spotLight = std::make_shared<SpotLight>(
     glm::vec3(0.4f, 0.63f, 0.86f), 0.186f, 1.344f, 2.21f);
-  spotLight->direction = glm::vec3(0, 0, -1);
-  spotLight->feather = glm::radians(3.f);
+  spotLight->SetFeather(glm::radians(3.f));
   spotLight->transform = Transform::TR(
-    { 0, 2, 2 },
-    glm::quat(glm::radians(glm::vec3(-50, 0, 0))));
+      { 0, 2, 2 },
+      glm::quat(glm::radians(glm::vec3(-50, 0, 0))));
   lightContainer->AddChild(spotLight, false);
 
   // Add spot light cone.
-  lightModelMaterial.SetDiffuse(spotLight->diffuse);
+  lightModelMaterial.SetDiffuse(spotLight->GetDiffuse());
   spotLight->AddChild(std::make_shared<Model>(
     Mesh::LoadOBJ("assets/models/cone.obj"),
     std::make_shared<StandardMaterial>(lightModelMaterial),

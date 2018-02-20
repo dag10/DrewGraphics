@@ -5,17 +5,19 @@
 #pragma once
 
 #include <memory>
-#include <Canvas.h>
-#include <materials/ScreenQuadMaterial.h>
 #include <Scene.h>
 
 namespace dg {
+
+  class Canvas;
+  class ScreenQuadMaterial;
 
   class CanvasScene : public Scene {
 
     public:
 
       CanvasScene();
+      virtual ~CanvasScene();
 
       virtual void Initialize();
       virtual void RenderFrame();

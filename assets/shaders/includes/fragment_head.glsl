@@ -27,9 +27,9 @@ struct Light {
   float outerCutoff;
 
   // Point light attenuation properties.
-  float constant;
-  float linear;
-  float quadratic;
+  float constantCoeff;
+  float linearCoeff;
+  float quadraticCoeff;
 };
 
 in vec4 v_ScenePos;

@@ -132,8 +132,18 @@ void dg::Material::SetMatrixNormal(glm::mat3x3 normal) {
   SetProperty("_Matrix_Normal", normal);
 }
 
-void dg::Material::SetLight(int index, const Light& light) {
-  light.SetMaterialProperties(index, *this);
+void dg::Material::SetLight(int index, const Light::ShaderData& data) {
+  SetProperty(LightProperty(index, "diffuse"), data.diffuse);
+  SetProperty(LightProperty(index, "type"), (int)data.type);
+  SetProperty(LightProperty(index, "ambient"), data.ambient);
+  SetProperty(LightProperty(index, "innerCutoff"), data.innerCutoff);
+  SetProperty(LightProperty(index, "specular"), data.specular);
+  SetProperty(LightProperty(index, "outerCutoff"), data.outerCutoff);
+  SetProperty(LightProperty(index, "position"), data.position);
+  SetProperty(LightProperty(index, "constantCoeff"), data.constantCoeff);
+  SetProperty(LightProperty(index, "direction"), data.direction);
+  SetProperty(LightProperty(index, "linearCoeff"), data.linearCoeff);
+  SetProperty(LightProperty(index, "quadraticCoeff"), data.quadraticCoeff);
 }
 
 void dg::Material::ClearLights() {
@@ -143,7 +153,17 @@ void dg::Material::ClearLights() {
 }
 
 void dg::Material::ClearLight(int index) {
-  Light::ClearMaterialProperties(index, *this);
+  SetProperty(LightProperty(index, "type"), (int)Light::LightType::NONE);
+}
+
+const std::string dg::Material::LightProperty(
+    int index, const std::string& property) {
+  char buffer[128];
+  assert(index >= 0 && index < Light::MAX_LIGHTS);
+  assert(snprintf(
+        buffer, sizeof(buffer), "%s[%d].%s",
+        Light::LIGHTS_ARRAY_NAME, index, property.c_str()) >= 0);
+  return std::string(buffer);
 }
 
 void dg::Material::SetInvPortal(glm::mat4x4 invPortal) {

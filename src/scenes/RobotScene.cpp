@@ -356,7 +356,7 @@ void dg::RobotScene::Update() {
     glm::quat(glm::radians(glm::vec3(0, Time::Elapsed * 50, 0)));
 
   // If space is tapped, toggle between free-fly mode and wobble mode.
-  if (window->IsKeyJustPressed(GLFW_KEY_SPACE)) {
+  if (window->IsKeyJustPressed(Key::SPACE)) {
     freeFly = !freeFly;
   }
 

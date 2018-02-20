@@ -32,7 +32,7 @@ void dg::KeyboardCameraController::Update() {
   const float cursorRotationSpeed = 0.3f; // degrees per cursor pixels moved
 
   // If C is tapped, print out the sceneObject position and orientation.
-  if (window->IsKeyJustPressed(GLFW_KEY_C)) {
+  if (window->IsKeyJustPressed(Key::C)) {
     std::cout << std::endl << "Camera position:" << std::endl;
     std::cout << sceneObject->transform << std::endl;
     glm::vec3 dir = sceneObject->transform.Forward();
@@ -43,7 +43,7 @@ void dg::KeyboardCameraController::Update() {
   }
 
   // If R is tapped, just reset the sceneObject position.
-  if (window->IsKeyJustPressed(GLFW_KEY_R)) {
+  if (window->IsKeyJustPressed(Key::R)) {
     sceneObject->transform = originalTransform;
     return;
   }
@@ -66,20 +66,20 @@ void dg::KeyboardCameraController::Update() {
 
   // Calculate new movement relative to sceneObject, based on WASD keys.
   glm::vec3 movementDir(0);
-  if (window->IsKeyPressed(GLFW_KEY_W)) {
+  if (window->IsKeyPressed(Key::W)) {
     movementDir += FORWARD;
   }
-  if (window->IsKeyPressed(GLFW_KEY_S)) {
+  if (window->IsKeyPressed(Key::S)) {
     movementDir += -FORWARD;
   }
-  if (window->IsKeyPressed(GLFW_KEY_A)) {
+  if (window->IsKeyPressed(Key::A)) {
     movementDir += -RIGHT;
   }
-  if (window->IsKeyPressed(GLFW_KEY_D)) {
+  if (window->IsKeyPressed(Key::D)) {
     movementDir += RIGHT;
   }
   float speedMultiplier =
-    (window->IsKeyPressed(GLFW_KEY_LEFT_SHIFT)) ? 2.f : 1.f;
+    (window->IsKeyPressed(Key::LEFT_SHIFT)) ? 2.f : 1.f;
   dg::Transform xfDelta = dg::Transform::T(
       movementDir * speed * speedMultiplier * (float)Time::Delta);
 

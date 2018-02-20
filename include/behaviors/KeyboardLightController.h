@@ -7,6 +7,7 @@
 #include <Behavior.h>
 #include <Light.h>
 #include <Window.h>
+#include <InputCodes.h>
 #include <memory>
 
 namespace dg {
@@ -18,12 +19,12 @@ namespace dg {
       KeyboardLightController(std::weak_ptr<Window> window);
       KeyboardLightController(
           std::weak_ptr<Window> window,
-          int ambientModifierKey, int diffuseModifierKey,
-          int specularModifierKey);
+          Key ambientModifierKey, Key diffuseModifierKey,
+          Key specularModifierKey);
 
-      int ambientModifierKey  = GLFW_KEY_1;
-      int diffuseModifierKey  = GLFW_KEY_2;
-      int specularModifierKey = GLFW_KEY_3;
+      Key ambientModifierKey  = Key::NUM_1;
+      Key diffuseModifierKey  = Key::NUM_2;
+      Key specularModifierKey = Key::NUM_3;
 
       virtual void Update();
 

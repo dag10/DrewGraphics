@@ -3,11 +3,13 @@
 //
 #pragma once
 
+#include <glad/glad.h>
+
+#include <InputCodes.h>
 #include <memory>
 #include <string>
 #include <vector>
 #include <map>
-#include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <glm/vec2.hpp>
 
@@ -31,11 +33,11 @@ namespace dg {
 
       void PollEvents();
 
-      bool IsKeyPressed(GLenum key) const;
-      bool IsKeyJustPressed(GLenum key) const;
+      bool IsKeyPressed(Key key) const;
+      bool IsKeyJustPressed(Key key) const;
 
-      bool IsMouseButtonPressed(GLenum key) const;
-      bool IsMouseButtonJustPressed(GLenum key) const;
+      bool IsMouseButtonPressed(MouseButton button) const;
+      bool IsMouseButtonJustPressed(MouseButton button) const;
 
       void LockCursor();
       void UnlockCursor();
@@ -67,6 +69,13 @@ namespace dg {
       GLFWwindow *GetHandle() const;
 
     private:
+
+      enum class InputState : int8_t {
+        PRESS   = GLFW_PRESS,
+        RELEASE = GLFW_RELEASE,
+        REPEAT  = GLFW_REPEAT,
+      };
+
       static std::map<GLFWwindow*, std::weak_ptr<Window>> windowMap;
 
       static void glfwKeyCallback(
@@ -76,17 +85,17 @@ namespace dg {
       static void glfwCursorPositionCallback(
           GLFWwindow *glfwWindow, double x, double y);
 
-      void HandleKey(int key, int action);
-      void HandleMouseButton(int button, int action);
+      void HandleKey(Key key, InputState action);
+      void HandleMouseButton(MouseButton button, InputState action);
       void HandleCursorPosition(double x, double y);
 
       void Open(int width, int height);
       void UseContext();
 
-      std::vector<uint8_t> lastKeyStates;
-      std::vector<uint8_t> currentKeyStates;
-      std::vector<uint8_t> lastMouseButtonStates;
-      std::vector<uint8_t> currentMouseButtonStates;
+      std::vector<InputState> lastKeyStates;
+      std::vector<InputState> currentKeyStates;
+      std::vector<InputState> lastMouseButtonStates;
+      std::vector<InputState> currentMouseButtonStates;
       GLFWwindow *glfwWindow = nullptr;
       std::string title;
       bool hasInitialCursorPosition = false;

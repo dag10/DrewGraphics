@@ -11,7 +11,7 @@ dg::KeyboardLightController::KeyboardLightController(
 
 dg::KeyboardLightController::KeyboardLightController(
     std::weak_ptr<Window> window,
-    int ambientModifierKey, int diffuseModifierKey, int specularModifierKey)
+    Key ambientModifierKey, Key diffuseModifierKey, Key specularModifierKey)
   : window(window), ambientModifierKey(ambientModifierKey),
     diffuseModifierKey(diffuseModifierKey),
     specularModifierKey(specularModifierKey),
@@ -27,33 +27,33 @@ void dg::KeyboardLightController::Update() {
 
   const float lightDelta = 0.05f;
   if (window->IsKeyPressed(ambientModifierKey) &&
-      window->IsKeyJustPressed(GLFW_KEY_UP)) {
+      window->IsKeyJustPressed(Key::UP)) {
     light->ambient += light->ambient * lightDelta;
     std::cout << "Ambient R: " << light->ambient.r << std::endl;
   } else if (window->IsKeyPressed(ambientModifierKey) &&
-      window->IsKeyJustPressed(GLFW_KEY_DOWN)) {
+      window->IsKeyJustPressed(Key::DOWN)) {
     light->ambient -= light->ambient * lightDelta;
     std::cout << "Ambient R: " << light->ambient.r << std::endl;
   }
 
   // Adjust light diffuse power with keyboard.
   if (window->IsKeyPressed(diffuseModifierKey) &&
-      window->IsKeyJustPressed(GLFW_KEY_UP)) {
+      window->IsKeyJustPressed(Key::UP)) {
     light->diffuse += light->diffuse * lightDelta;
     std::cout << "Diffuse R: " << light->diffuse.r << std::endl;
   } else if (window->IsKeyPressed(diffuseModifierKey) &&
-      window->IsKeyJustPressed(GLFW_KEY_DOWN)) {
+      window->IsKeyJustPressed(Key::DOWN)) {
     light->diffuse -= light->diffuse * lightDelta;
     std::cout << "Diffuse R: " << light->diffuse.r << std::endl;
   }
 
   // Adjust light specular power with keyboard.
   if (window->IsKeyPressed(specularModifierKey) &&
-      window->IsKeyJustPressed(GLFW_KEY_UP)) {
+      window->IsKeyJustPressed(Key::UP)) {
     light->specular += light->specular * lightDelta;
     std::cout << "Specular R: " << light->specular.r << std::endl;
   } else if (window->IsKeyPressed(specularModifierKey) &&
-      window->IsKeyJustPressed(GLFW_KEY_DOWN)) {
+      window->IsKeyJustPressed(Key::DOWN)) {
     light->specular -= light->specular * lightDelta;
     std::cout << "Specular R: " << light->specular.r << std::endl;
   }

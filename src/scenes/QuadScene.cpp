@@ -77,7 +77,7 @@ void dg::QuadScene::Update() {
   quad->LookAtPoint(quadLookTarget);
 
   // Toggle the skybox with a tap of the S key.
-  if (window->IsKeyJustPressed(GLFW_KEY_S)) {
+  if (window->IsKeyJustPressed(Key::S)) {
     skybox->enabled = !skybox->enabled;
   }
 }

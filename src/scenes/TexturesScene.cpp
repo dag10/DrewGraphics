@@ -188,7 +188,7 @@ void dg::TexturesScene::Initialize() {
 void dg::TexturesScene::Update() {
   Scene::Update();
 
-  if (window->IsKeyJustPressed(GLFW_KEY_SPACE)) {
+  if (window->IsKeyJustPressed(Key::SPACE)) {
     flyingMainCamera = !flyingMainCamera;
     mainCamera->GetBehavior<KeyboardCameraController>()->enabled =
       flyingMainCamera;

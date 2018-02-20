@@ -56,6 +56,11 @@ dg::Mesh::~Mesh() {
     glDeleteBuffers(1, &VBO);
     VBO = 0;
   }
+
+  if (EBO != 0) {
+    glDeleteBuffers(1, &EBO);
+    EBO = 0;
+  }
 }
 
 dg::Mesh& dg::Mesh::operator=(dg::Mesh&& other) {
@@ -65,15 +70,16 @@ dg::Mesh& dg::Mesh::operator=(dg::Mesh&& other) {
 
 void dg::swap(Mesh& first, Mesh& second) {
   using std::swap;
-  swap(first.drawMode, second.drawMode);
-  swap(first.drawCount, second.drawCount);
   swap(first.VAO, second.VAO);
   swap(first.VBO, second.VBO);
+  swap(first.EBO, second.EBO);
   swap(first.vertexPositions, second.vertexPositions);
   swap(first.vertexNormals, second.vertexNormals);
-  swap(first.vertexTangents, second.vertexTangents);
   swap(first.vertexTexCoords, second.vertexTexCoords);
+  swap(first.vertexTangents, second.vertexTangents);
+  swap(first.indices, second.indices);
   swap(first.attributes, second.attributes);
+  swap(first.vertexMap, second.vertexMap);
 }
 
 void dg::Mesh::AddQuad(
@@ -135,34 +141,40 @@ void dg::Mesh::AddTriangle(Vertex v1, Vertex v2, Vertex v3, Winding winding) {
 
   if (attributes == Flag::NONE) {
     attributes = v1.attributes;
-  }
-
-  if (v1.attributes != attributes) {
+  } if (v1.attributes != attributes) {
     throw std::runtime_error(
         "Attempted to add a triangle to a mesh with noncompatible attributes.");
   }
 
-  // TODO: Use a vertex->index map to find identical existing vertexes
-  //       and reuse their index.
-
   for (int i = 0; i < 3; i++) {
-    if (!!(attributes & Flag::POSITION)) {
-      vertexPositions.push_back(v[i]->position);
+    auto hash = std::hash<Vertex>{}(*v[i]);
+    auto pair = vertexMap.find(hash);
+    unsigned int index = -1;
+    if (pair == vertexMap.end()) {
+      if (!!(attributes & Flag::POSITION)) {
+        vertexPositions.push_back(v[i]->position);
+      }
+      if (!!(attributes & Flag::NORMAL)) {
+        vertexNormals.push_back(v[i]->normal);
+      }
+      if (!!(attributes & Flag::TEXCOORD)) {
+        vertexTexCoords.push_back(v[i]->texCoord);
+      }
+      if (!!(attributes & Flag::TANGENT)) {
+        vertexTangents.push_back(v[i]->tangent);
+      }
+      index = vertexPositions.size() - 1;
+      vertexMap[hash] = index;
+    } else {
+      index = pair->second;
     }
-    if (!!(attributes & Flag::NORMAL)) {
-      vertexNormals.push_back(v[i]->normal);
-    }
-    if (!!(attributes & Flag::TEXCOORD)) {
-      vertexTexCoords.push_back(v[i]->texCoord);
-    }
-    if (!!(attributes & Flag::TANGENT)) {
-      vertexTangents.push_back(v[i]->tangent);
-    }
+
+    indices.push_back(index);
   }
 }
 
 void dg::Mesh::FinishBuilding() {
-  assert(VAO == 0 && VBO == 0);
+  assert(VAO == 0 && VBO == 0 && EBO == 0);
 
   const size_t positionSize = sizeof(Vertex::position);
   const size_t normalSize = sizeof(Vertex::normal);
@@ -183,6 +195,12 @@ void dg::Mesh::FinishBuilding() {
 
   glGenVertexArrays(1, &VAO);
   glBindVertexArray(VAO);
+
+  glGenBuffers(1, &EBO);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+  glBufferData(
+    GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int),
+    indices.data(), GL_STATIC_DRAW);
 
   glGenBuffers(1, &VBO);
   glBindBuffer(GL_ARRAY_BUFFER, VBO);
@@ -234,8 +252,7 @@ void dg::Mesh::FinishBuilding() {
     offset += arraySize;
   }
 
-  drawMode = GL_TRIANGLES;
-  drawCount = numVertices;
+  vertexMap.clear();
 }
 
 void dg::Mesh::Draw() const {
@@ -250,7 +267,7 @@ void dg::Mesh::Draw() const {
     }
     lastDrawnMesh = (Mesh*)this; // Although we're const, we'll allow this.
   }
-  glDrawArrays(drawMode, 0, drawCount);
+  glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, (void*)0);
 }
 
 std::unique_ptr<dg::Mesh> dg::Mesh::CreateCube() {

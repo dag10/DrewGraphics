@@ -6,6 +6,7 @@
 
 #include <glad/glad.h>
 #include <glm/glm.hpp>
+#include <glm/gtx/hash.hpp>
 #include <memory>
 #include <vector>
 #include <unordered_map>
@@ -13,6 +14,8 @@
 namespace dg {
 
   struct Vertex {
+    typedef std::size_t hash_type;
+
     // Flags to keep trach of which attributes this vertex has,
     // since the vertex attribute vector fields aren't nulltable.
     enum class AttrFlag : uint32_t {
@@ -44,7 +47,7 @@ namespace dg {
           AttrFlag::POSITION | AttrFlag::NORMAL |
           AttrFlag::TEXCOORD | AttrFlag::TANGENT) {};
 
-    bool HasAllAttr(AttrFlag flags) {
+    bool HasAllAttr(AttrFlag flags) const {
       return (this->attributes & flags) == flags;
     }
 
@@ -123,7 +126,14 @@ namespace dg {
       std::vector<glm::vec3> vertexNormals;
       std::vector<glm::vec2> vertexTexCoords;
       std::vector<glm::vec3> vertexTangents;
+      std::vector<unsigned int> indices;
+
+      // Bitmask of which attributes this mesh's vertices have.
+      // If no vertices added yet, value is NONE.
       Vertex::AttrFlag attributes = Vertex::AttrFlag::NONE;
+
+      // Map of hash of vertex to index of vertex already in vertex list.
+      std::unordered_map<Vertex::hash_type, unsigned int> vertexMap;
 
       static std::unique_ptr<Mesh> CreateCube();
       static std::unique_ptr<Mesh> CreateMappedCube();
@@ -135,11 +145,33 @@ namespace dg {
       static Mesh *lastDrawnMesh;
       static std::unordered_map<std::string, std::weak_ptr<Mesh>> fileMap;
 
-      GLenum drawMode = 0;
-      GLsizei drawCount = 0;
       GLuint VAO = 0;
       GLuint VBO = 0;
+      GLuint EBO = 0;
 
   }; // class Mesh
 
 } // namespace dg
+
+namespace std {
+  template<> struct hash<dg::Vertex> {
+    typedef dg::Vertex argument_type;
+    typedef dg::Vertex::hash_type result_type;
+    result_type operator()(argument_type const& v) const noexcept {
+      result_type h = 0;
+      if (v.HasAllAttr(dg::Vertex::AttrFlag::POSITION)) {
+        h ^= std::hash<glm::vec3>{}(v.position);
+      }
+      if (v.HasAllAttr(dg::Vertex::AttrFlag::NORMAL)) {
+        h ^= std::hash<glm::vec3>{}(v.normal) << 1;
+      }
+      if (v.HasAllAttr(dg::Vertex::AttrFlag::TEXCOORD)) {
+        h ^= std::hash<glm::vec2>{}(v.texCoord) << 2;
+      }
+      if (v.HasAllAttr(dg::Vertex::AttrFlag::TANGENT)) {
+        h ^= std::hash<glm::vec3>{}(v.tangent) << 3;
+      }
+      return h;
+    }
+  };
+}

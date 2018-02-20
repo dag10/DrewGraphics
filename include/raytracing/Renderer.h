@@ -6,6 +6,7 @@
 
 #include <raytracing/Rays.h>
 #include <memory>
+#include <forward_list>
 #include <glm/glm.hpp>
 
 namespace dg {
@@ -13,6 +14,7 @@ namespace dg {
   class Texture;
   class Canvas;
   class Scene;
+  class TraceableModel;
 
   class Renderer {
 
@@ -38,9 +40,12 @@ namespace dg {
           : Pixel(colors.x * 255, colors.y * 255, colors.z * 255) {}
       };
 
+      void ProcessSceneObjects();
       RayResult TraceRay(Ray ray);
       Pixel RenderPixel(RayResult rayres);
 
+      int numObjects = 0;
+      std::forward_list<const TraceableModel*> objects;
       std::shared_ptr<Canvas> canvas;
       const Scene *scene;
 

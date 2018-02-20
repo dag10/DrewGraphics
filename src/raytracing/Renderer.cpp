@@ -7,8 +7,8 @@
 #include <Texture.h>
 #include <Canvas.h>
 #include <Scene.h>
-#include <forward_list>
 #include <glm/gtc/matrix_access.hpp>
+#include <iostream>
 
 dg::Renderer::Renderer(unsigned int width, unsigned int height, Scene *scene)
   : scene(scene) {
@@ -20,6 +20,10 @@ std::shared_ptr<dg::Texture> dg::Renderer::GetTexture() const {
 }
 
 void dg::Renderer::Render() {
+  double startTime = glfwGetTime();
+
+  ProcessSceneObjects();
+
   std::shared_ptr<Camera> camera = scene->GetMainCamera();
   Transform xfCamera = camera->SceneSpace();
 
@@ -72,12 +76,22 @@ void dg::Renderer::Render() {
     }
   }
   canvas->Submit();
+
+  double endTime = glfwGetTime();
+  double deltaTime = endTime - startTime;
+  double deltaPerPixel = deltaTime / (width * height);
+  double deltaPerObject = deltaTime / numObjects;
+  double deltaPerObjectPixel = deltaTime / (width * height) / numObjects;
+  std::cout << std::fixed
+    << "Render finished in " << deltaTime << " seconds." << std::endl
+    << std::endl
+    << deltaPerPixel << " seconds per pixel" << std::endl
+    << deltaPerObject << " seconds per object (cumulative)" << std::endl
+    << deltaPerObjectPixel << " seconds per object per pixel" << std::endl
+    << std::endl;
 }
 
-dg::RayResult dg::Renderer::TraceRay(Ray ray) {
-  std::shared_ptr<Camera> camera = scene->GetMainCamera();
-  RayResult shortest = RayResult::Miss(ray);
-
+void dg::Renderer::ProcessSceneObjects() {
   std::forward_list<const SceneObject*> remainingObjects;
   remainingObjects.push_front(scene);
   while (!remainingObjects.empty()) {
@@ -89,13 +103,25 @@ dg::RayResult dg::Renderer::TraceRay(Ray ray) {
       if (!(*child)->enabled) continue;
       remainingObjects.push_front(child->get());
       if (auto model = std::dynamic_pointer_cast<TraceableModel>(*child)) {
-        RayResult res = model->RayTest(ray);
-        if (!res.hit) continue;
-        //if (res.distance < camera->nearClip) continue;
-        if (!shortest.hit || res.distance < shortest.distance) {
-          shortest = res;
-        }
+        objects.push_front((const TraceableModel*)(model.get()));
+        numObjects++;
       }
+    }
+  }
+
+  std::cout << "Rendering " << numObjects << " objects..." << std::endl;
+}
+
+dg::RayResult dg::Renderer::TraceRay(Ray ray) {
+  std::shared_ptr<Camera> camera = scene->GetMainCamera();
+  RayResult shortest = RayResult::Miss(ray);
+
+  for (auto model = objects.begin(); model != objects.end(); model++) {
+    RayResult res = (*model)->RayTest(ray);
+    if (!res.hit) continue;
+    //if (res.distance < camera->nearClip) continue;
+    if (!shortest.hit || res.distance < shortest.distance) {
+      shortest = res;
     }
   }
 

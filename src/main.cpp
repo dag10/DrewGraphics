@@ -1,11 +1,29 @@
+//
+//  main.cpp
+//
+
+#ifndef _OPENGL
+#ifndef _DIRECTX
+#error "No graphics platform specified. Define either _OPENGL or _DIRECTX."
+#endif
+#endif
+
+#ifdef _OPENGL
+#include <glad/glad.h>
+
+#include <GLFW/glfw3.h>
+#endif
+
+#ifdef _WIN32
+#include <Windows.h>
+#endif
+
 #include <Camera.h>
 #include <EngineTime.h>
-#include <GLFW/glfw3.h>
 #include <InputCodes.h>
 #include <Mesh.h>
 #include <Shader.h>
 #include <Window.h>
-#include <glad/glad.h>
 #include <scenes/CanvasTestScene.h>
 #include <scenes/MeshesScene.h>
 #include <scenes/PortalScene.h>

@@ -30,8 +30,12 @@ xcode
 VRDemo/
 vrdemo/
 [Dd]ebug/
+[Dd]_[Oo]pen[Gg][Ll]/
+[Dd]_[Dd][Xx]/
 [Dd]ebugPublic/
 [Rr]elease/
+[Rr]_[Oo]pen[Gg][Ll]/
+[Rr]_[Dd][Xx]/
 [Rr]eleases/
 x64/
 x86/

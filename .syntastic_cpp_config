@@ -2,4 +2,5 @@
 -Iinclude/
 -Iexternal/openvr/headers
 -Iexternal/glm
+-D_OPENGL
 

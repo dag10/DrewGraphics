@@ -1,12 +1,15 @@
 //
 //  Window.h
 //
+
 #pragma once
 
-#ifdef _OPENGL
+#if defined(_OPENGL)
 #include <glad/glad.h>
 
 #include <GLFW/glfw3.h>
+#elif defined(_DIRECTX)
+#include <Windows.h>
 #endif
 
 #include <InputCodes.h>
@@ -23,10 +26,16 @@ namespace dg {
   class Window {
 
     public:
+#if defined(_OPENGL)
       static std::shared_ptr<Window> Open(
           unsigned int width, unsigned int height, std::string title);
+#elif defined(_DIRECTX)
+      static std::shared_ptr<Window> Open(
+          unsigned int width, unsigned int height, std::string title,
+          HINSTANCE hInstance);
+#endif
 
-      Window() = default;
+      Window();
       Window(Window& other) = delete;
       Window(Window&& other);
       ~Window();
@@ -69,14 +78,14 @@ namespace dg {
       glm::vec2 GetContentScale() const;
       float GetAspectRatio() const;
 
-#ifdef _OPENGL
+#if defined(_OPENGL)
       GLFWwindow *GetHandle() const;
 #endif
 
     private:
 
       enum class InputState : int8_t {
-#ifdef _OPENGL
+#if defined(_OPENGL)
         PRESS   = GLFW_PRESS,
         RELEASE = GLFW_RELEASE,
         REPEAT  = GLFW_REPEAT,
@@ -87,7 +96,7 @@ namespace dg {
 #endif
       };
 
-#ifdef _OPENGL
+#if defined(_OPENGL)
       static std::map<GLFWwindow*, std::weak_ptr<Window>> windowMap;
 
       static void glfwKeyCallback(
@@ -96,6 +105,9 @@ namespace dg {
           GLFWwindow *glfwWindow, int button, int action, int mods);
       static void glfwCursorPositionCallback(
           GLFWwindow *glfwWindow, double x, double y);
+#elif defined(_DIRECTX)
+      static LRESULT CALLBACK ProcessMessage(
+          HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 #endif
 
       void HandleKey(Key key, InputState action);
@@ -105,8 +117,11 @@ namespace dg {
       void Open(int width, int height);
       void UseContext();
 
-#ifdef _OPENGL
+#if defined(_OPENGL)
       GLFWwindow *glfwWindow = nullptr;
+#elif defined(_DIRECTX)
+      HINSTANCE hInstance = nullptr;
+      HWND hWnd = nullptr;
 #endif
 
       std::vector<InputState> lastKeyStates;

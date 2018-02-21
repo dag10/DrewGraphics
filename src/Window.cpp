@@ -7,11 +7,15 @@
 
 #include <Window.h>
 
-#ifdef _OPENGL
+#if defined(_DIRECTX)
+#include <WindowsX.h>
+#endif
+
+#if defined(_OPENGL)
 std::map<GLFWwindow*, std::weak_ptr<dg::Window>> dg::Window::windowMap;
 #endif
 
-#ifdef _OPENGL
+#if defined(_OPENGL)
 void dg::Window::glfwKeyCallback(
     GLFWwindow *glfwWindow, int key, int scancode, int action, int mods) {
   if (key < 0 || key >= (int)Key::LAST) return;
@@ -25,7 +29,7 @@ void dg::Window::glfwKeyCallback(
 }
 #endif
 
-#ifdef _OPENGL
+#if defined(_OPENGL)
 void dg::Window::glfwMouseButtonCallback(
     GLFWwindow *glfwWindow, int button, int action, int mods) {
   if (button < 0 || button >= (int)MouseButton::LAST) return;
@@ -39,7 +43,7 @@ void dg::Window::glfwMouseButtonCallback(
 }
 #endif
 
-#ifdef _OPENGL
+#if defined(_OPENGL)
 void dg::Window::glfwCursorPositionCallback(
     GLFWwindow *glfwWindow, double x, double y) {
   auto pair = windowMap.find(glfwWindow);
@@ -64,32 +68,51 @@ void dg::Window::HandleCursorPosition(double x, double y) {
   currentCursorPosition = glm::vec2((float)x, (float)y);
 }
 
-/// Opens a window with a title and size.
-/// Sizes are assuming 1x DPI scale, even if on a higher-DPI display.
+// Opens a window with a title and size.
+// Sizes are assuming 1x DPI scale, even if on a higher-DPI display.
 std::shared_ptr<dg::Window> dg::Window::Open(
-    unsigned int width, unsigned int height, std::string title) {
+#if defined(_OPENGL)
+    unsigned int width,
+    unsigned int height,
+    std::string title)
+#elif defined(_DIRECTX)
+    unsigned int width,
+    unsigned int height,
+    std::string title,
+    HINSTANCE hInstance)
+#endif
+{
+
   std::shared_ptr<Window> window = std::make_shared<Window>();
+
+#if defined(_DIRECTX)
+  window->hInstance = hInstance;
+#endif
   window->title = title;
-  window->lastKeyStates = std::vector<InputState>(
-      (int)Key::LAST + 1, InputState::RELEASE);
-  window->currentKeyStates = std::vector<InputState>(
-      (int)Key::LAST + 1, InputState::RELEASE);
-  window->lastMouseButtonStates = std::vector<InputState>(
-      (int)MouseButton::LAST + 1, InputState::RELEASE);
-  window->currentMouseButtonStates = std::vector<InputState>(
-      (int)MouseButton::LAST + 1, InputState::RELEASE);
   window->Open(width, height);
-#ifdef _OPENGL
+#if defined(_OPENGL)
   windowMap[window->GetHandle()] = window;
 #endif
+
   return window;
+}
+
+dg::Window::Window() {
+  lastKeyStates = std::vector<InputState>(
+      (int)Key::LAST + 1, InputState::RELEASE);
+  currentKeyStates = std::vector<InputState>(
+      (int)Key::LAST + 1, InputState::RELEASE);
+  lastMouseButtonStates = std::vector<InputState>(
+      (int)MouseButton::LAST + 1, InputState::RELEASE);
+  currentMouseButtonStates = std::vector<InputState>(
+      (int)MouseButton::LAST + 1, InputState::RELEASE);
 }
 
 void dg::Window::PollEvents() {
   if (!hasInitialCursorPosition) {
     hasInitialCursorPosition = true;
     double x, y;
-#ifdef _OPENGL
+#if defined(_OPENGL)
     glfwGetCursorPos(glfwWindow, &x, &y);
 #elif defined _DIRECTX
     // TODO: Get cursor position in DirectInput.
@@ -100,7 +123,7 @@ void dg::Window::PollEvents() {
   lastCursorPosition = currentCursorPosition;
   lastKeyStates = currentKeyStates;
   lastMouseButtonStates = currentMouseButtonStates;
-#ifdef _OPENGL
+#if defined(_OPENGL)
   glfwPollEvents();
 #endif
 }
@@ -126,7 +149,7 @@ bool dg::Window::IsMouseButtonJustPressed(MouseButton button) const {
 }
 
 void dg::Window::LockCursor() {
-#ifdef _OPENGL
+#if defined(_OPENGL)
   glfwSetInputMode(glfwWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 #elif defined _DIRECTX
   // TODO
@@ -134,7 +157,7 @@ void dg::Window::LockCursor() {
 }
 
 void dg::Window::UnlockCursor() {
-#ifdef _OPENGL
+#if defined(_OPENGL)
   glfwSetInputMode(glfwWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 #elif defined _DIRECTX
   // TODO
@@ -142,7 +165,7 @@ void dg::Window::UnlockCursor() {
 }
 
 bool dg::Window::IsCursorLocked() const {
-#ifdef _OPENGL
+#if defined(_OPENGL)
   return glfwGetInputMode(glfwWindow, GLFW_CURSOR) == GLFW_CURSOR_DISABLED;
 #elif defined _DIRECTX
   // TODO
@@ -163,7 +186,7 @@ glm::vec2 dg::Window::GetCursorDelta() const {
 }
 
 void dg::Window::Hide() {
-#ifdef _OPENGL
+#if defined(_OPENGL)
   glfwHideWindow(glfwWindow);
 #elif defined _DIRECTX
   // TODO
@@ -171,7 +194,7 @@ void dg::Window::Hide() {
 }
 
 void dg::Window::Show() {
-#ifdef _OPENGL
+#if defined(_OPENGL)
   glfwShowWindow(glfwWindow);
 #elif defined _DIRECTX
   // TODO
@@ -179,7 +202,7 @@ void dg::Window::Show() {
 }
 
 bool dg::Window::ShouldClose() const {
-#ifdef _OPENGL
+#if defined(_OPENGL)
   return glfwWindowShouldClose(glfwWindow);
 #elif defined _DIRECTX
   // TODO
@@ -188,7 +211,7 @@ bool dg::Window::ShouldClose() const {
 }
 
 void dg::Window::SetShouldClose(bool shouldClose) {
-#ifdef _OPENGL
+#if defined(_OPENGL)
   glfwSetWindowShouldClose(glfwWindow, shouldClose);
 #elif defined _DIRECTX
   // TODO
@@ -201,7 +224,7 @@ const std::string dg::Window::GetTitle() const {
 
 void dg::Window::SetTitle(const std::string& title) {
   this->title = title;
-#ifdef _OPENGL
+#if defined(_OPENGL)
   glfwSetWindowTitle(glfwWindow, title.c_str());
 #elif defined _DIRECTX
   // TODO
@@ -209,7 +232,7 @@ void dg::Window::SetTitle(const std::string& title) {
 }
 
 void dg::Window::StartRender() {
-#ifdef _OPENGL
+#if defined(_OPENGL)
   assert(glfwWindow != nullptr);
 #endif
 
@@ -220,7 +243,7 @@ void dg::Window::StartRender() {
 }
 
 void dg::Window::FinishRender() {
-#ifdef _OPENGL
+#if defined(_OPENGL)
   assert(glfwWindow != nullptr);
   glfwSwapBuffers(glfwWindow);
 #endif
@@ -231,7 +254,7 @@ void dg::Window::FinishRender() {
 void dg::Window::ResetViewport() {
   // Get the latest true pixel dimension of the window. This
   // takes into account any DPIs or current window size.
-#ifdef _OPENGL
+#if defined(_OPENGL)
   int width, height;
   glfwGetFramebufferSize(glfwWindow, &width, &height);
   glViewport(0, 0, width, height);
@@ -255,7 +278,7 @@ float dg::Window::GetHeight() const {
 /// Returns the size of the window as if monitor is 1x DPI scale, even if it's high-DPI.
 glm::vec2 dg::Window::GetSize() const {
   int x, y;
-#ifdef _OPENGL
+#if defined(_OPENGL)
   glfwGetWindowSize(glfwWindow, &x, &y);
 #elif defined _DIRECTX
   // TODO
@@ -275,7 +298,7 @@ void dg::Window::SetSize(glm::vec2 size) {
 #ifdef _WIN32
   size *= GetContentScale();
 #endif
-#ifdef _OPENGL
+#if defined(_OPENGL)
   glfwSetWindowSize(glfwWindow, (int)size.x, (int)size.y);
 #elif defined _DIRECTX
   // TODO
@@ -285,7 +308,7 @@ void dg::Window::SetSize(glm::vec2 size) {
 /// Gets the DPI scale for the window if it exists, or of the primary monitor if
 /// the window does not yet exist.
 glm::vec2 dg::Window::GetContentScale() const {
-#ifdef _OPENGL
+#if defined(_OPENGL)
   float x, y;
   if (glfwWindow == nullptr) {
     glfwGetMonitorContentScale(glfwGetPrimaryMonitor(), &x, &y);
@@ -304,14 +327,14 @@ float dg::Window::GetAspectRatio() const {
   return size.x / size.y;
 }
 
-#ifdef _OPENGL
+#if defined(_OPENGL)
 GLFWwindow *dg::Window::GetHandle() const {
   return glfwWindow;
 }
 #endif
 
 dg::Window::~Window() {
-#ifdef _OPENGL
+#if defined(_OPENGL)
   if (glfwWindow != nullptr) {
     windowMap.erase(glfwWindow);
     glfwDestroyWindow(glfwWindow);
@@ -331,8 +354,11 @@ void dg::swap(dg::Window& first, dg::Window& second) {
   swap(first.currentKeyStates, second.currentKeyStates);
   swap(first.lastMouseButtonStates, second.lastMouseButtonStates);
   swap(first.currentMouseButtonStates, second.currentMouseButtonStates);
-#ifdef _OPENGL
+#if defined(_OPENGL)
   swap(first.glfwWindow, second.glfwWindow);
+#elif defined(_DIRECTX)
+  swap(first.hInstance, second.hInstance);
+  swap(first.hWnd, second.hWnd);
 #endif
   swap(first.title, second.title);
   swap(first.hasInitialCursorPosition, second.hasInitialCursorPosition);
@@ -341,7 +367,7 @@ void dg::swap(dg::Window& first, dg::Window& second) {
 }
 
 void dg::Window::Open(int width, int height) {
-#ifdef _OPENGL
+#if defined(_OPENGL)
 
   assert(glfwWindow == nullptr);
 
@@ -365,16 +391,69 @@ void dg::Window::Open(int width, int height) {
 
 #elif defined _DIRECTX
 
-  // TODO
+  WNDCLASS wndClass = {};
+  wndClass.style = CS_HREDRAW | CS_VREDRAW;
+  wndClass.lpfnWndProc = ProcessMessage;
+  wndClass.cbClsExtra = 0;
+  wndClass.cbWndExtra = 0;
+  wndClass.hInstance = hInstance;
+  wndClass.hIcon = LoadIcon(NULL, IDI_APPLICATION);
+  wndClass.hCursor = LoadCursor(NULL, IDC_ARROW);
+  wndClass.hbrBackground = (HBRUSH)GetStockObject(BLACK_BRUSH);
+  wndClass.lpszMenuName = NULL;
+  wndClass.lpszClassName = "Direct3DWindowClass";
+
+  if (!RegisterClass(&wndClass)) {
+    DWORD error = GetLastError();
+    if (error != ERROR_CLASS_ALREADY_EXISTS) {
+      throw std::runtime_error(
+        "Failed to register Window class. (" + std::to_string(error) + ")");
+    }
+  }
+
+  RECT clientRect;
+  SetRect(&clientRect, 0, 0, width, height);
+  AdjustWindowRect(
+    &clientRect,
+    WS_OVERLAPPEDWINDOW, // Standard window buttons
+    false); // No menu bar
+
+  // Center the window.
+  RECT desktopRect;
+  GetClientRect(GetDesktopWindow(), &desktopRect);
+  int centeredX = (desktopRect.right / 2) - (clientRect.right / 2);
+  int centeredY = (desktopRect.bottom / 2) - (clientRect.bottom / 2);
+
+  hWnd = CreateWindow(wndClass.lpszClassName, title.c_str(),
+                      WS_OVERLAPPEDWINDOW, centeredX, centeredY,
+                      clientRect.right - clientRect.left,  // Calculated width
+                      clientRect.bottom - clientRect.top,  // Calculated height
+                      0,                                   // No parent window
+                      0,                                   // No menu
+                      hInstance,                           // The app's handle
+                      0);  // No other windows in our application
+
+  if (hWnd == NULL) {
+    throw std::runtime_error(
+      "Failed to create Window. (" + std::to_string(GetLastError()) + ")");
+  }
+
+  ShowWindow(hWnd, SW_SHOW);
 
 #endif
 }
 
 void dg::Window::UseContext() {
-#ifdef _OPENGL
+#if defined(_OPENGL)
   glfwMakeContextCurrent(glfwWindow);
-#elif defined _DIRECTX
-  // TODO
 #endif
 }
+
+#if defined(_DIRECTX)
+LRESULT dg::Window::ProcessMessage(
+    HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+  return DefWindowProc(hWnd, uMsg, wParam, lParam);
+}
+#endif
+
 

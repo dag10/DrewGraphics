@@ -282,9 +282,10 @@ void dg::PortalScene::Initialize() {
   AddChild(bluePortalModel);
 
   // Create portal stencil material.
-  portalStencilMaterial.SetLit(false);
-  portalStencilMaterial.SetDiffuse(backgroundColor);
-  portalStencilMaterial.SetInvPortal(glm::mat4x4(0));
+  portalStencilMaterial = std::make_shared<StandardMaterial>(
+    StandardMaterial::WithColor(backgroundColor));
+  portalStencilMaterial->SetLit(false);
+  portalStencilMaterial->SetInvPortal(glm::mat4x4(0));
 
   // Configure camera.
   mainCamera->transform.translation = glm::vec3(2.2f, 0.85f, 1);
@@ -459,9 +460,9 @@ void dg::PortalScene::RenderPortalStencil(dg::Transform xfPortal) {
   glStencilOp(GL_ZERO, GL_ZERO, GL_REPLACE);
   glClear(GL_STENCIL_BUFFER_BIT);
 
-  portalStencilMaterial.SetMatrixMVP(
+  portalStencilMaterial->SetMatrixMVP(
       projection * view * xfPortal * portalOpeningScale);
-  portalStencilMaterial.Use();
+  portalStencilMaterial->Use();
 
   Mesh::Quad->Draw();
 

@@ -66,7 +66,7 @@ namespace dg {
       std::shared_ptr<Light> outdoorCeilingLight;
       std::shared_ptr<SpotLight> spotLight;
       std::shared_ptr<SpotLight> flashlight;
-      StandardMaterial portalStencilMaterial;
+      std::shared_ptr<StandardMaterial> portalStencilMaterial;
       std::shared_ptr<Shader> depthResetShader;
 
   }; // class PortalScene

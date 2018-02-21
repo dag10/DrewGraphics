@@ -2,19 +2,17 @@
 //  main.cpp
 //
 
-#ifndef _OPENGL
-#ifndef _DIRECTX
+#if !defined(_OPENGL) & !defined(_DIRECTX)
 #error "No graphics platform specified. Define either _OPENGL or _DIRECTX."
 #endif
-#endif
 
-#ifdef _OPENGL
+#if defined(_OPENGL)
 #include <glad/glad.h>
 
 #include <GLFW/glfw3.h>
 #endif
 
-#ifdef _WIN32
+#if defined(_WIN32)
 #include <Windows.h>
 #endif
 
@@ -42,10 +40,7 @@
 #include <ostream>
 #include <sstream>
 
-#ifdef _MSC_VER
-  // This turns on memory leak detection on Windows.
-  #define _CRTDBG_MAP_ALLOC 1
-#endif
+using namespace dg;
 
 [[noreturn]] void terminateWithError(const char *error) {
   std::cerr << error << std::endl;
@@ -54,7 +49,7 @@
 #endif
   // If on Windows, make sure we show a minimized console window
   // and wait for the user to press enter before quitting.
-#ifdef _MSC_VER
+#if defined(_MSC_VER)
   ShowWindow(GetConsoleWindow(), SW_RESTORE);
   std::cerr << std::endl;
   system("pause");
@@ -62,8 +57,37 @@
   exit(-1);
 }
 
-int main(int argc, const char *argv[]) {
-  // Find intended scene.
+#if defined(_DIRECTX)
+void CreateConsoleWindow(int bufferLines, int bufferColumns, int windowLines,
+                         int windowColumns) {
+  CONSOLE_SCREEN_BUFFER_INFO coninfo;
+
+  AllocConsole();
+  GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &coninfo);
+  coninfo.dwSize.Y = bufferLines;
+  coninfo.dwSize.X = bufferColumns;
+  SetConsoleScreenBufferSize(GetStdHandle(STD_OUTPUT_HANDLE), coninfo.dwSize);
+
+  SMALL_RECT rect;
+  rect.Left = 0;
+  rect.Top = 0;
+  rect.Right = windowColumns;
+  rect.Bottom = windowLines;
+  SetConsoleWindowInfo(GetStdHandle(STD_OUTPUT_HANDLE), TRUE, &rect);
+
+  FILE* stream;
+  freopen_s(&stream, "CONIN$", "r", stdin);
+  freopen_s(&stream, "CONOUT$", "w", stdout);
+  freopen_s(&stream, "CONOUT$", "w", stderr);
+
+  // Prevent accidental console window closure.
+  HWND consoleHandle = GetConsoleWindow();
+  HMENU hmenu = GetSystemMenu(consoleHandle, FALSE);
+  EnableMenuItem(hmenu, SC_CLOSE, MF_GRAYED);
+}
+#endif
+
+std::unique_ptr<Scene> PromptForScene(const std::string& launchArg) {
   std::map<
     std::string,
     std::function<std::unique_ptr<dg::Scene>()>> constructors;
@@ -80,8 +104,8 @@ int main(int argc, const char *argv[]) {
   constructors["canvas"]     = dg::CanvasTestScene::Make;
   constructors["vr"]         = dg::VRScene::Make;
   std::string sceneName;
-  if (argc > 1) {
-    sceneName = argv[1];
+  if (!launchArg.empty()) {
+    sceneName = launchArg;
   } else {
 #ifdef DEFAULT_SCENE
     sceneName = DEFAULT_SCENE;
@@ -89,18 +113,51 @@ int main(int argc, const char *argv[]) {
   }
   while (constructors.find(sceneName) == constructors.end()) {
     if (!sceneName.empty()) {
-      std::cerr << "Unknown scene \"" << sceneName << "\"." << std::endl << std::endl;
+      std::cerr << "Unknown scene \"" << sceneName << "\"." << std::endl
+                << std::endl;
     }
     std::cout << "Available scenes:" << std::endl;
     for (auto iter = constructors.begin(); iter != constructors.end(); iter++) {
       std::cout << "\t" << iter->first << std::endl;
     }
-    std::cout << std::endl << "Choose a scene: ";
+    std::cout << "Type \"exit\" to exit." << std::endl
+              << std::endl
+              << std::endl
+              << "Choose a scene: ";
     std::cin >> sceneName;
-    if (std::cin.eof()) {
-      exit(0);
+    if (std::cin.eof() || sceneName == "exit") {
+      return nullptr;
     }
     std::cout << std::endl;
+  }
+  return constructors[sceneName]();
+}
+
+#if defined(_OPENGL)
+int main(int argc, const char* argv[]) {
+#elif defined(_DIRECTX)
+int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
+                   LPSTR lpCmdLine, int nCmdShow) {
+  CreateConsoleWindow(500, 120, 32, 120);
+# if defined(_MSC_VER) & defined(_DEBUG)
+  // Enable memory leak detection.
+  _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+# endif
+#endif
+
+  std::string sceneArg;
+#if defined(_OPENGL)
+  if (argc > 1) {
+    sceneArg = std::string(argv[1]);
+  }
+#elif defined(_DIRECTX)
+  sceneArg = std::string(lpCmdLine);
+#endif
+
+  // Find intended scene.
+  std::unique_ptr<Scene> scene = PromptForScene(sceneArg);
+  if (scene == nullptr) {
+    return 0;
   }
 
 #ifdef _OPENGL
@@ -124,7 +181,12 @@ int main(int argc, const char *argv[]) {
   // Create window.
   std::shared_ptr<dg::Window> window;
   try {
-    window = dg::Window::Open(800, 600, "Drew Graphics");
+    window = dg::Window::Open(
+      800, 600, "Drew Graphics"
+#if defined(_DIRECTX)
+      , hInstance
+#endif
+    );
   } catch (const std::exception& e) {
     terminateWithError(e.what());
   }
@@ -155,8 +217,7 @@ int main(int argc, const char *argv[]) {
   dg::Shader::SetFragmentHead("assets/shaders/includes/fragment_head.glsl");
   dg::Shader::AddFragmentSource("assets/shaders/includes/fragment_main.glsl");
 
-  // Create scene.
-  std::unique_ptr<dg::Scene> scene = constructors[sceneName]();
+  // Set up scene.
   try {
     scene->SetWindow(window);
     scene->Initialize();
@@ -210,7 +271,7 @@ int main(int argc, const char *argv[]) {
     if (dg::Time::Elapsed > lastWindowUpdateTime + titleUpdateFreq) {
       if (scene->AutomaticWindowTitle()) {
         window->SetTitle(((std::ostringstream&)(std::ostringstream()
-              << "Drew Graphics | " << sceneName << " | "
+              << "Drew Graphics | "
               << (int)(1.0 / dg::Time::Delta) << " FPS | "
               << dg::Time::AverageFrameRate << " average FPS")).str());
       }
@@ -229,4 +290,3 @@ int main(int argc, const char *argv[]) {
 
   return 0;
 }
-

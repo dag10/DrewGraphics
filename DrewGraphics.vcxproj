@@ -200,6 +200,7 @@ xcopy /d /e /y "$(ProjectDir)assets" "$(OutDir)\assets"</Command>
     <Link>
       <AdditionalDependencies>opengl32.lib;glfw3.lib;openvr_api.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <SubSystem>Windows</SubSystem>
     </Link>
     <PostBuildEvent>
       <Command>xcopy /d /y "$(ProjectDir)external\openvr\bin\win32\*.*" "$(OutDir)"
@@ -234,6 +235,7 @@ xcopy /d /e /y "$(ProjectDir)assets" "$(OutDir)\assets"</Command>
     <Link>
       <AdditionalDependencies>opengl32.lib;glfw3.lib;openvr_api.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <SubSystem>Windows</SubSystem>
     </Link>
     <PostBuildEvent>
       <Command>xcopy /d /y "$(ProjectDir)external\openvr\bin\win64\*.*" "$(OutDir)"

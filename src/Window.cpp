@@ -7,8 +7,11 @@
 
 #include <Window.h>
 
+#ifdef _OPENGL
 std::map<GLFWwindow*, std::weak_ptr<dg::Window>> dg::Window::windowMap;
+#endif
 
+#ifdef _OPENGL
 void dg::Window::glfwKeyCallback(
     GLFWwindow *glfwWindow, int key, int scancode, int action, int mods) {
   if (key < 0 || key >= (int)Key::LAST) return;
@@ -20,7 +23,9 @@ void dg::Window::glfwKeyCallback(
     window->HandleKey((Key)key, (InputState)action);
   }
 }
+#endif
 
+#ifdef _OPENGL
 void dg::Window::glfwMouseButtonCallback(
     GLFWwindow *glfwWindow, int button, int action, int mods) {
   if (button < 0 || button >= (int)MouseButton::LAST) return;
@@ -32,7 +37,9 @@ void dg::Window::glfwMouseButtonCallback(
     window->HandleMouseButton((MouseButton)button, (InputState)action);
   }
 }
+#endif
 
+#ifdef _OPENGL
 void dg::Window::glfwCursorPositionCallback(
     GLFWwindow *glfwWindow, double x, double y) {
   auto pair = windowMap.find(glfwWindow);
@@ -43,6 +50,7 @@ void dg::Window::glfwCursorPositionCallback(
     window->HandleCursorPosition(x, y);
   }
 }
+#endif
 
 void dg::Window::HandleKey(Key key, InputState action) {
   currentKeyStates[(int)key] = (InputState)action;
@@ -71,7 +79,9 @@ std::shared_ptr<dg::Window> dg::Window::Open(
   window->currentMouseButtonStates = std::vector<InputState>(
       (int)MouseButton::LAST + 1, InputState::RELEASE);
   window->Open(width, height);
+#ifdef _OPENGL
   windowMap[window->GetHandle()] = window;
+#endif
   return window;
 }
 
@@ -79,13 +89,20 @@ void dg::Window::PollEvents() {
   if (!hasInitialCursorPosition) {
     hasInitialCursorPosition = true;
     double x, y;
+#ifdef _OPENGL
     glfwGetCursorPos(glfwWindow, &x, &y);
+#elif defined _DIRECTX
+    // TODO: Get cursor position in DirectInput.
+    x = y = 0;
+#endif
     HandleCursorPosition(x, y);
   }
   lastCursorPosition = currentCursorPosition;
   lastKeyStates = currentKeyStates;
   lastMouseButtonStates = currentMouseButtonStates;
+#ifdef _OPENGL
   glfwPollEvents();
+#endif
 }
 
 bool dg::Window::IsKeyPressed(Key key) const {
@@ -109,21 +126,32 @@ bool dg::Window::IsMouseButtonJustPressed(MouseButton button) const {
 }
 
 void dg::Window::LockCursor() {
+#ifdef _OPENGL
   glfwSetInputMode(glfwWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+#elif defined _DIRECTX
+  // TODO
+#endif
 }
 
 void dg::Window::UnlockCursor() {
+#ifdef _OPENGL
   glfwSetInputMode(glfwWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+#elif defined _DIRECTX
+  // TODO
+#endif
 }
 
 bool dg::Window::IsCursorLocked() const {
+#ifdef _OPENGL
   return glfwGetInputMode(glfwWindow, GLFW_CURSOR) == GLFW_CURSOR_DISABLED;
+#elif defined _DIRECTX
+  // TODO
+  return false;
+#endif
 }
 
 glm::vec2 dg::Window::GetCursorPosition() const {
-  double x, y;
-  glfwGetCursorPos(glfwWindow, &x, &y);
-  glm::vec2 pos(x, y);
+  glm::vec2 pos = currentCursorPosition;
 #ifdef _WIN32
   pos /= GetContentScale();
 #endif
@@ -135,19 +163,36 @@ glm::vec2 dg::Window::GetCursorDelta() const {
 }
 
 void dg::Window::Hide() {
+#ifdef _OPENGL
   glfwHideWindow(glfwWindow);
+#elif defined _DIRECTX
+  // TODO
+#endif
 }
 
 void dg::Window::Show() {
+#ifdef _OPENGL
   glfwShowWindow(glfwWindow);
+#elif defined _DIRECTX
+  // TODO
+#endif
 }
 
 bool dg::Window::ShouldClose() const {
+#ifdef _OPENGL
   return glfwWindowShouldClose(glfwWindow);
+#elif defined _DIRECTX
+  // TODO
+  return false;
+#endif
 }
 
 void dg::Window::SetShouldClose(bool shouldClose) {
+#ifdef _OPENGL
   glfwSetWindowShouldClose(glfwWindow, shouldClose);
+#elif defined _DIRECTX
+  // TODO
+#endif
 }
 
 const std::string dg::Window::GetTitle() const {
@@ -156,27 +201,43 @@ const std::string dg::Window::GetTitle() const {
 
 void dg::Window::SetTitle(const std::string& title) {
   this->title = title;
+#ifdef _OPENGL
   glfwSetWindowTitle(glfwWindow, title.c_str());
+#elif defined _DIRECTX
+  // TODO
+#endif
 }
 
 void dg::Window::StartRender() {
+#ifdef _OPENGL
   assert(glfwWindow != nullptr);
+#endif
+
+  // TODO: DirectX
 
   UseContext();
   ResetViewport();
 }
 
 void dg::Window::FinishRender() {
+#ifdef _OPENGL
   assert(glfwWindow != nullptr);
   glfwSwapBuffers(glfwWindow);
+#endif
+
+  // TODO: DirectX
 }
 
 void dg::Window::ResetViewport() {
   // Get the latest true pixel dimension of the window. This
   // takes into account any DPIs or current window size.
+#ifdef _OPENGL
   int width, height;
   glfwGetFramebufferSize(glfwWindow, &width, &height);
   glViewport(0, 0, width, height);
+#elif defined _DIRECTX
+  // TODO
+#endif
 }
 
 dg::Window::Window(dg::Window&& other) {
@@ -194,7 +255,12 @@ float dg::Window::GetHeight() const {
 /// Returns the size of the window as if monitor is 1x DPI scale, even if it's high-DPI.
 glm::vec2 dg::Window::GetSize() const {
   int x, y;
+#ifdef _OPENGL
   glfwGetWindowSize(glfwWindow, &x, &y);
+#elif defined _DIRECTX
+  // TODO
+  x = y = 0;
+#endif
   glm::vec2 size(x, y);
   // Only Windows sets window sizes by pixel sizes. Mac automatically adjusts for DPI scale.
 #ifdef _WIN32
@@ -209,12 +275,17 @@ void dg::Window::SetSize(glm::vec2 size) {
 #ifdef _WIN32
   size *= GetContentScale();
 #endif
+#ifdef _OPENGL
   glfwSetWindowSize(glfwWindow, (int)size.x, (int)size.y);
+#elif defined _DIRECTX
+  // TODO
+#endif
 }
 
 /// Gets the DPI scale for the window if it exists, or of the primary monitor if
 /// the window does not yet exist.
 glm::vec2 dg::Window::GetContentScale() const {
+#ifdef _OPENGL
   float x, y;
   if (glfwWindow == nullptr) {
     glfwGetMonitorContentScale(glfwGetPrimaryMonitor(), &x, &y);
@@ -222,6 +293,10 @@ glm::vec2 dg::Window::GetContentScale() const {
     glfwGetWindowContentScale(glfwWindow, &x, &y);
   }
   return glm::vec2(x, y);
+#elif defined _DIRECTX
+  // TODO
+  return glm::vec2(1);
+#endif
 }
 
 float dg::Window::GetAspectRatio() const {
@@ -229,16 +304,20 @@ float dg::Window::GetAspectRatio() const {
   return size.x / size.y;
 }
 
+#ifdef _OPENGL
 GLFWwindow *dg::Window::GetHandle() const {
   return glfwWindow;
 }
+#endif
 
 dg::Window::~Window() {
+#ifdef _OPENGL
   if (glfwWindow != nullptr) {
     windowMap.erase(glfwWindow);
     glfwDestroyWindow(glfwWindow);
     glfwWindow = nullptr;
   }
+#endif
 }
 
 dg::Window& dg::Window::operator=(dg::Window&& other) {
@@ -252,7 +331,9 @@ void dg::swap(dg::Window& first, dg::Window& second) {
   swap(first.currentKeyStates, second.currentKeyStates);
   swap(first.lastMouseButtonStates, second.lastMouseButtonStates);
   swap(first.currentMouseButtonStates, second.currentMouseButtonStates);
+#ifdef _OPENGL
   swap(first.glfwWindow, second.glfwWindow);
+#endif
   swap(first.title, second.title);
   swap(first.hasInitialCursorPosition, second.hasInitialCursorPosition);
   swap(first.lastCursorPosition, second.lastCursorPosition);
@@ -260,14 +341,16 @@ void dg::swap(dg::Window& first, dg::Window& second) {
 }
 
 void dg::Window::Open(int width, int height) {
+#ifdef _OPENGL
+
   assert(glfwWindow == nullptr);
 
   // Only Windows sets window sizes by pixel sizes. Mac automatically adjusts for DPI scale.
-#ifdef _WIN32
+# ifdef _WIN32
   glm::vec2 scale = GetContentScale();
   width = (int)((float)width * scale.x);
   height = (int)((float)height * scale.y);
-#endif
+# endif
 
   glfwWindow = glfwCreateWindow(width, height, title.c_str(), NULL, NULL);
   if (glfwWindow == nullptr) {
@@ -279,9 +362,19 @@ void dg::Window::Open(int width, int height) {
   glfwSetCursorPosCallback(glfwWindow, glfwCursorPositionCallback);
 
   UseContext();
+
+#elif defined _DIRECTX
+
+  // TODO
+
+#endif
 }
 
 void dg::Window::UseContext() {
+#ifdef _OPENGL
   glfwMakeContextCurrent(glfwWindow);
+#elif defined _DIRECTX
+  // TODO
+#endif
 }
 

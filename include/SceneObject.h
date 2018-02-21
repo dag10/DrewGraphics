@@ -3,6 +3,8 @@
 //
 #pragma once
 
+#include <glad/glad.h>
+
 #include <Transform.h>
 #include <Behavior.h>
 #include <set>
@@ -10,7 +12,6 @@
 #include <memory>
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
-#include <glad/glad.h>
 
 namespace dg {
 

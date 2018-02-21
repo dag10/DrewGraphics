@@ -21,9 +21,11 @@ void dg::Scene::Initialize() {
     hiddenAreaMeshMaterial = std::make_shared<ScreenQuadMaterial>(
       glm::vec3(0), glm::vec2(2), glm::vec2(-1));
 
+#ifdef _OPENGL
     // Disable glfw vsync, since IVRComposer::WaitGetPoses() will wait for
     // "running start" in 90hz anyway.
     glfwSwapInterval(0);
+#endif
 
     // Create container for OpenVR behaviors and tracked devices.
     vrContainer = std::make_shared<SceneObject>();

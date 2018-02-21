@@ -49,7 +49,9 @@
 
 [[noreturn]] void terminateWithError(const char *error) {
   std::cerr << error << std::endl;
+#ifdef _OPENGL
   glfwTerminate();
+#endif
   // If on Windows, make sure we show a minimized console window
   // and wait for the user to press enter before quitting.
 #ifdef _MSC_VER
@@ -100,6 +102,7 @@ int main(int argc, const char *argv[]) {
     std::cout << std::endl;
   }
 
+#ifdef _OPENGL
   // Print GLFW errors to stderr.
   glfwSetErrorCallback([](int code, const char *desc) {
     std::cerr << "GLFW Error: " << desc << std::endl;
@@ -112,8 +115,9 @@ int main(int argc, const char *argv[]) {
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-#ifdef __APPLE__
+# ifdef __APPLE__
   glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+# endif
 #endif
 
   // Create window.
@@ -124,10 +128,19 @@ int main(int argc, const char *argv[]) {
     terminateWithError(e.what());
   }
 
+// TODO: TEMPORARY!
+#ifdef _DIRECTX
+  std::cout << "Hopefully a window is spawned!" << std::endl;
+  system("pause");
+  return 0;
+#endif
+
+#ifdef _OPENGL
   // Load GLAD procedures.
   if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
     terminateWithError("Failed to initialize GLAD.");
   }
+#endif
 
   // Create primitive meshes.
   dg::Mesh::CreatePrimitives();

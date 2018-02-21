@@ -35,7 +35,7 @@ namespace dg {
       virtual void Update();
 
       // Gets the SceneObject the behavior is attached to.
-      std::shared_ptr<SceneObject> SceneObject() const;
+      std::shared_ptr<SceneObject> GetSceneObject() const;
 
       // Whether Start() or Update() will be called.
       bool enabled = true;

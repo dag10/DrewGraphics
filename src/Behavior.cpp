@@ -26,7 +26,7 @@ void dg::Behavior::Update() {
   }
 }
 
-std::shared_ptr<dg::SceneObject> dg::Behavior::SceneObject() const {
+std::shared_ptr<dg::SceneObject> dg::Behavior::GetSceneObject() const {
   return sceneObject.lock();
 }
 

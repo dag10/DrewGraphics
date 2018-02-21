@@ -123,7 +123,7 @@ void dg::VRManager::UpdatePoses() {
     iter++) {
 
     auto trackedObject = *iter;
-    auto trackedSceneObject = trackedObject->SceneObject();
+    auto trackedSceneObject = trackedObject->GetSceneObject();
 
     if (trackedObject->role ==
       vr::ETrackedControllerRole::TrackedControllerRole_Invalid) {

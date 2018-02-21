@@ -24,7 +24,7 @@ void dg::KeyboardCameraController::Start() {
 void dg::KeyboardCameraController::Update() {
   Behavior::Update();
 
-  auto sceneObject = this->sceneObject.lock();
+  auto sceneObject = this->GetSceneObject();
   auto window = this->window.lock();
   if (!sceneObject || !window) return;
 

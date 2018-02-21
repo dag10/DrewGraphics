@@ -300,4 +300,9 @@ namespace dg {
 
 #endif
 
+  using T = std::underlying_type_t<Key>;
+  inline Key operator + (Key lhs, int rhs) {
+    return (Key)(static_cast<T>(lhs) + rhs);
+  };
+
 } // namespace dg

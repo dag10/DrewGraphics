@@ -25,7 +25,7 @@ namespace dg {
       Model(Model& other);
 
       std::shared_ptr<Mesh> mesh = nullptr;
-      std::shared_ptr<Material>  material = nullptr;
+      std::shared_ptr<Material> material = nullptr;
 
       void Draw(glm::mat4x4 view, glm::mat4x4 projection) const;
 

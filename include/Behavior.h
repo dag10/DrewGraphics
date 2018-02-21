@@ -15,14 +15,18 @@ namespace dg {
     public:
 
       // Attach a behavior to a scene object. This initializes the behavior.
-      static void Attach(
-          std::shared_ptr<SceneObject> object,
-          std::shared_ptr<Behavior> behavior);
+      // It returns the behavior being attached as its own type for
+      // convenience.
+      template <typename T>
+      static inline T Attach(std::shared_ptr<SceneObject> object, T behavior) {
+        Attach_Impl(object, behavior);
+        return behavior;
+      }
 
       Behavior() = default;
       virtual ~Behavior() = default;
 
-      // Called when the behavior is first created or copied, even if disabled.
+      // Called when the behavior is attached or copied, even if disabled.
       // Private initial values should be set in this method, not in the
       // constructor. This way, if copied, internal state values can be
       // reset, but the public fields will retain their values.
@@ -41,6 +45,10 @@ namespace dg {
       bool enabled = true;
 
     protected:
+
+      static void Attach_Impl(
+          std::shared_ptr<SceneObject> object,
+          std::shared_ptr<Behavior> behavior);
 
       // The SceneObject the behavior is attached to.
       std::weak_ptr<dg::SceneObject> sceneObject;

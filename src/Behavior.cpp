@@ -6,7 +6,7 @@
 #include <SceneObject.h>
 #include <stdexcept>
 
-void dg::Behavior::Attach(
+void dg::Behavior::Attach_Impl(
     std::shared_ptr<dg::SceneObject> object,
     std::shared_ptr<dg::Behavior> behavior) {
   if (behavior->sceneObject.lock() != nullptr) {

@@ -20,12 +20,14 @@ namespace dg {
     public:
 
       static std::unique_ptr<DeepCloningScene> Make();
+      static std::unique_ptr<DeepCloningScene> MakeVR();
 
-      DeepCloningScene();
 
       virtual void Initialize();
 
     private:
+
+      DeepCloningScene(bool enableVR);
 
       static std::shared_ptr<SceneObject> BuildWidget(
           std::shared_ptr<Window> window, Key key, glm::vec3 color);

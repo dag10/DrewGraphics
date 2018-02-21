@@ -24,10 +24,16 @@ using namespace dg::DeepCloning;
 #pragma region Scene
 
 std::unique_ptr<dg::DeepCloningScene> dg::DeepCloningScene::Make() {
-  return std::unique_ptr<dg::DeepCloningScene>(new dg::DeepCloningScene());
+  return std::unique_ptr<dg::DeepCloningScene>(new dg::DeepCloningScene(false));
 }
 
-dg::DeepCloningScene::DeepCloningScene() : Scene() {}
+std::unique_ptr<dg::DeepCloningScene> dg::DeepCloningScene::MakeVR() {
+  return std::unique_ptr<dg::DeepCloningScene>(new dg::DeepCloningScene(true));
+}
+
+dg::DeepCloningScene::DeepCloningScene(bool enableVR) : Scene() {
+  this->enableVR = enableVR;
+}
 
 void dg::DeepCloningScene::Initialize() {
   Scene::Initialize();

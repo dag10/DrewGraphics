@@ -97,8 +97,7 @@ namespace dg {
       };
 
 #if defined(_OPENGL)
-      static std::map<GLFWwindow*, std::weak_ptr<Window>> windowMap;
-
+      typedef GLFWwindow* window_map_key_type;
       static void glfwKeyCallback(
           GLFWwindow *glfwWindow, int key, int scancode, int action, int mods);
       static void glfwMouseButtonCallback(
@@ -106,9 +105,12 @@ namespace dg {
       static void glfwCursorPositionCallback(
           GLFWwindow *glfwWindow, double x, double y);
 #elif defined(_DIRECTX)
+      typedef HWND window_map_key_type;
       static LRESULT CALLBACK ProcessMessage(
           HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+      LRESULT CALLBACK ProcessMessage(UINT uMsg, WPARAM wParam, LPARAM lParam);
 #endif
+      static std::map<window_map_key_type, std::weak_ptr<Window>> windowMap;
 
       void HandleKey(Key key, InputState action);
       void HandleMouseButton(MouseButton button, InputState action);
@@ -116,12 +118,21 @@ namespace dg {
 
       void Open(int width, int height);
       void UseContext();
+#if defined(_DIRECTX)
+      POINT GetWindowCenterScreenSpace() const;
+#endif
 
 #if defined(_OPENGL)
       GLFWwindow *glfwWindow = nullptr;
 #elif defined(_DIRECTX)
       HINSTANCE hInstance = nullptr;
       HWND hWnd = nullptr;
+      unsigned int width;
+      unsigned int height;
+      bool shouldClose = false;
+      bool cursorIsLocked = false;
+      bool cursorWasLocked = false;
+      glm::vec2 cursorLockOffset;
 #endif
 
       std::vector<InputState> lastKeyStates;
@@ -132,6 +143,7 @@ namespace dg {
       bool hasInitialCursorPosition = false;
       glm::vec2 lastCursorPosition;
       glm::vec2 currentCursorPosition;
+      glm::vec2 cursorDelta;
   }; // class Window
 
 } // namespace dg

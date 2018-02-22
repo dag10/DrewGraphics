@@ -2,7 +2,7 @@
 //  main.cpp
 //
 
-#if !defined(_OPENGL) & !defined(_DIRECTX)
+#if !defined(_OPENGL) & defined(_OPENGL)
 #error "No graphics platform specified. Define either _OPENGL or _DIRECTX."
 #endif
 
@@ -120,8 +120,8 @@ std::unique_ptr<Scene> PromptForScene(const std::string& launchArg) {
     for (auto iter = constructors.begin(); iter != constructors.end(); iter++) {
       std::cout << "\t" << iter->first << std::endl;
     }
-    std::cout << "Type \"exit\" to exit." << std::endl
-              << std::endl
+    std::cout << std::endl
+              << "Type \"exit\" to exit." << std::endl
               << std::endl
               << "Choose a scene: ";
     std::cin >> sceneName;
@@ -191,13 +191,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
     terminateWithError(e.what());
   }
 
-// TODO: TEMPORARY!
-#ifdef _DIRECTX
-  std::cout << "Hopefully a window is spawned!" << std::endl;
-  system("pause");
-  return 0;
-#endif
-
 #ifdef _OPENGL
   // Load GLAD procedures.
   if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
@@ -205,22 +198,30 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
   }
 #endif
 
+#if defined(_OPENGL) // TODO
   // Create primitive meshes.
   dg::Mesh::CreatePrimitives();
+#endif
 
+#if defined(_OPENGL) // TODO
   // Staticially initialize shader class.
   dg::Shader::Initialize();
+#endif
 
+#if defined(_OPENGL)
   // Configure global includes for all shader files.
   dg::Shader::SetVertexHead("assets/shaders/includes/vertex_head.glsl");
   dg::Shader::AddVertexSource("assets/shaders/includes/vertex_main.glsl");
   dg::Shader::SetFragmentHead("assets/shaders/includes/fragment_head.glsl");
   dg::Shader::AddFragmentSource("assets/shaders/includes/fragment_main.glsl");
+#endif
 
   // Set up scene.
   try {
     scene->SetWindow(window);
+#if defined(_OPENGL) // TODO
     scene->Initialize();
+#endif
   } catch (const std::exception& e) {
     std::cerr << "Failed to initialize scene: ";
     terminateWithError(e.what());
@@ -243,7 +244,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
     dg::Time::Update();
     window->PollEvents();
     try {
+#if defined(_OPENGL) // TODO
       scene->Update();
+#endif
     } catch (const std::exception& e) {
       std::cerr << "Failed to update scene: ";
       terminateWithError(e.what());
@@ -280,7 +283,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 
     window->StartRender();
     try {
+#if defined(_OPENGL) // TODO
       scene->RenderFrame();
+#endif
     } catch (const std::exception& e) {
       std::cerr << "Failed to render scene: ";
       terminateWithError(e.what());

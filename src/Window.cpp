@@ -11,9 +11,8 @@
 #include <WindowsX.h>
 #endif
 
-#if defined(_OPENGL)
-std::map<GLFWwindow*, std::weak_ptr<dg::Window>> dg::Window::windowMap;
-#endif
+std::map<dg::Window::window_map_key_type, std::weak_ptr<dg::Window>>
+    dg::Window::windowMap;
 
 #if defined(_OPENGL)
 void dg::Window::glfwKeyCallback(
@@ -65,7 +64,28 @@ void dg::Window::HandleMouseButton(MouseButton button, InputState action) {
 }
 
 void dg::Window::HandleCursorPosition(double x, double y) {
-  currentCursorPosition = glm::vec2((float)x, (float)y);
+#if defined(_OPENGL)
+  currentCursorPosition = glm::vec2((float)(int)x, (float)(int)y);
+#elif defined(_DIRECTX)
+
+  if (cursorIsLocked) {
+    POINT point;
+    point.x = (long)x;
+    point.y = (long)y;
+
+    // Convert from client space to screen space.
+    ClientToScreen(hWnd, &point);
+
+    // Center of window in screen space coordinates.
+    POINT center_SS = GetWindowCenterScreenSpace();
+
+    currentCursorPosition += glm::vec2(
+      point.x - center_SS.x, point.y - center_SS.y);
+    SetCursorPos(center_SS.x, center_SS.y);
+  } else {
+    currentCursorPosition = glm::vec2((float)x, (float)y);
+  }
+#endif
 }
 
 // Opens a window with a title and size.
@@ -87,11 +107,15 @@ std::shared_ptr<dg::Window> dg::Window::Open(
 
 #if defined(_DIRECTX)
   window->hInstance = hInstance;
+  window->width = width;
+  window->height = height;
 #endif
   window->title = title;
   window->Open(width, height);
 #if defined(_OPENGL)
   windowMap[window->GetHandle()] = window;
+#elif defined(_DIRECTX)
+  windowMap[window->hWnd] = window;
 #endif
 
   return window;
@@ -109,23 +133,37 @@ dg::Window::Window() {
 }
 
 void dg::Window::PollEvents() {
+#if defined(_OPENGL)
   if (!hasInitialCursorPosition) {
     hasInitialCursorPosition = true;
     double x, y;
-#if defined(_OPENGL)
     glfwGetCursorPos(glfwWindow, &x, &y);
-#elif defined _DIRECTX
-    // TODO: Get cursor position in DirectInput.
-    x = y = 0;
-#endif
     HandleCursorPosition(x, y);
   }
+#endif
+
   lastCursorPosition = currentCursorPosition;
   lastKeyStates = currentKeyStates;
   lastMouseButtonStates = currentMouseButtonStates;
+
 #if defined(_OPENGL)
   glfwPollEvents();
+#elif defined(_DIRECTX)
+  MSG msg = {};
+  while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
+    TranslateMessage(&msg);
+    DispatchMessage(&msg);
+    if (msg.message == WM_QUIT) {
+      shouldClose = true;
+    }
+  }
 #endif
+
+#if defined(_DIRECTX)
+  cursorWasLocked = cursorIsLocked;
+#endif
+
+  cursorDelta = currentCursorPosition - lastCursorPosition;
 }
 
 bool dg::Window::IsKeyPressed(Key key) const {
@@ -151,53 +189,92 @@ bool dg::Window::IsMouseButtonJustPressed(MouseButton button) const {
 void dg::Window::LockCursor() {
 #if defined(_OPENGL)
   glfwSetInputMode(glfwWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-#elif defined _DIRECTX
-  // TODO
+#elif defined(_DIRECTX)
+  if (cursorIsLocked) {
+    return;
+  }
+  cursorIsLocked = true;
+  ShowCursor(false);
+  SetCapture(hWnd);
+  RECT rect;
+  GetWindowRect(hWnd, &rect);
+  ClipCursor(&rect);
+  cursorLockOffset.x = currentCursorPosition.x - (width / 2);
+  cursorLockOffset.y = currentCursorPosition.y - (height / 2);
+
+  lastCursorPosition -= cursorLockOffset * 2.f;
+  currentCursorPosition -= cursorLockOffset;
+
+  POINT center_SS = GetWindowCenterScreenSpace();
+  SetCursorPos(center_SS.x, center_SS.y);
 #endif
 }
 
 void dg::Window::UnlockCursor() {
 #if defined(_OPENGL)
   glfwSetInputMode(glfwWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-#elif defined _DIRECTX
-  // TODO
+#elif defined(_DIRECTX)
+  if (!cursorIsLocked) {
+    return;
+  }
+  cursorIsLocked = false;
+  POINT center_SS = GetWindowCenterScreenSpace();
+  SetCursorPos(
+    center_SS.x + cursorLockOffset.x,
+    center_SS.y + cursorLockOffset.y);
+  ShowCursor(true);
+  ReleaseCapture();
+  ClipCursor(NULL);
+
+  currentCursorPosition += cursorLockOffset;
+
+  cursorLockOffset = glm::vec2(0);
+
+  lastCursorPosition += cursorLockOffset;
 #endif
 }
 
 bool dg::Window::IsCursorLocked() const {
 #if defined(_OPENGL)
   return glfwGetInputMode(glfwWindow, GLFW_CURSOR) == GLFW_CURSOR_DISABLED;
-#elif defined _DIRECTX
-  // TODO
-  return false;
+#elif defined(_DIRECTX)
+  return (cursorIsLocked && GetCapture() == hWnd);
 #endif
 }
 
 glm::vec2 dg::Window::GetCursorPosition() const {
   glm::vec2 pos = currentCursorPosition;
-#ifdef _WIN32
+#if defined(_OPENGL)
+# if defined(_WIN32)
   pos /= GetContentScale();
+  pos.x = floor(pos.x);
+  pos.y = floor(pos.y);
+# endif
+#elif defined(_DIRECTX)
+  if (cursorIsLocked || cursorWasLocked) {
+    pos += cursorLockOffset;
+  }
 #endif
   return pos;
 }
 
 glm::vec2 dg::Window::GetCursorDelta() const {
-  return currentCursorPosition - lastCursorPosition;
+  return cursorDelta;
 }
 
 void dg::Window::Hide() {
 #if defined(_OPENGL)
   glfwHideWindow(glfwWindow);
-#elif defined _DIRECTX
-  // TODO
+#elif defined(_DIRECTX)
+  ShowWindow(hWnd, SW_MINIMIZE);
 #endif
 }
 
 void dg::Window::Show() {
 #if defined(_OPENGL)
   glfwShowWindow(glfwWindow);
-#elif defined _DIRECTX
-  // TODO
+#elif defined(_DIRECTX)
+  ShowWindow(hWnd, SW_SHOW);
 #endif
 }
 
@@ -205,8 +282,7 @@ bool dg::Window::ShouldClose() const {
 #if defined(_OPENGL)
   return glfwWindowShouldClose(glfwWindow);
 #elif defined _DIRECTX
-  // TODO
-  return false;
+  return shouldClose;
 #endif
 }
 
@@ -214,7 +290,9 @@ void dg::Window::SetShouldClose(bool shouldClose) {
 #if defined(_OPENGL)
   glfwSetWindowShouldClose(glfwWindow, shouldClose);
 #elif defined _DIRECTX
-  // TODO
+  if (shouldClose) {
+    PostQuitMessage(0);
+  }
 #endif
 }
 
@@ -226,8 +304,8 @@ void dg::Window::SetTitle(const std::string& title) {
   this->title = title;
 #if defined(_OPENGL)
   glfwSetWindowTitle(glfwWindow, title.c_str());
-#elif defined _DIRECTX
-  // TODO
+#elif defined(_DIRECTX)
+  SetWindowText(hWnd, title.c_str());
 #endif
 }
 
@@ -241,6 +319,16 @@ void dg::Window::StartRender() {
   UseContext();
   ResetViewport();
 }
+
+#if defined(_DIRECTX)
+POINT dg::Window::GetWindowCenterScreenSpace() const {
+  POINT clientCenter;
+  clientCenter.x = width / 2;
+  clientCenter.y = height / 2;
+  ClientToScreen(hWnd, &clientCenter);
+  return clientCenter;
+}
+#endif
 
 void dg::Window::FinishRender() {
 #if defined(_OPENGL)
@@ -359,11 +447,18 @@ void dg::swap(dg::Window& first, dg::Window& second) {
 #elif defined(_DIRECTX)
   swap(first.hInstance, second.hInstance);
   swap(first.hWnd, second.hWnd);
+  swap(first.width, second.width);
+  swap(first.height, second.height);
+  swap(first.shouldClose, second.shouldClose);
+  swap(first.cursorIsLocked, second.cursorIsLocked);
+  swap(first.cursorWasLocked, second.cursorWasLocked);
+  swap(first.cursorLockOffset, second.cursorLockOffset);
 #endif
   swap(first.title, second.title);
   swap(first.hasInitialCursorPosition, second.hasInitialCursorPosition);
   swap(first.lastCursorPosition, second.lastCursorPosition);
   swap(first.currentCursorPosition, second.currentCursorPosition);
+  swap(first.cursorDelta, second.cursorDelta);
 }
 
 void dg::Window::Open(int width, int height) {
@@ -389,7 +484,7 @@ void dg::Window::Open(int width, int height) {
 
   UseContext();
 
-#elif defined _DIRECTX
+#elif defined(_DIRECTX)
 
   WNDCLASS wndClass = {};
   wndClass.style = CS_HREDRAW | CS_VREDRAW;
@@ -452,6 +547,98 @@ void dg::Window::UseContext() {
 #if defined(_DIRECTX)
 LRESULT dg::Window::ProcessMessage(
     HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+  auto pair = windowMap.find(hWnd);
+  if (pair != windowMap.end()) {
+    if (auto window = pair->second.lock()) {
+      return window->ProcessMessage(uMsg, wParam, lParam);
+    }
+  }
+  return DefWindowProc(hWnd, uMsg, wParam, lParam);
+}
+
+LRESULT CALLBACK dg::Window::ProcessMessage(
+    UINT uMsg, WPARAM wParam, LPARAM lParam) {
+
+  switch (uMsg) {
+    // Window is closing.
+    case WM_DESTROY:
+      PostQuitMessage(0);
+      return 0;
+
+    // Prevent beeping when we "alt-enter" into fullscreen.
+    case WM_MENUCHAR:
+      return MAKELRESULT(0, MNC_CLOSE);
+
+    // Prevent the overall window from becoming too small.
+    case WM_GETMINMAXINFO:
+      ((MINMAXINFO*)lParam)->ptMinTrackSize.x = 200;
+      ((MINMAXINFO*)lParam)->ptMinTrackSize.y = 200;
+      return 0;
+
+    // Window size changes.
+    case WM_SIZE:
+      // If we're minimizing, we'll be going to a size of zero, so ignore.
+      if (wParam == SIZE_MINIMIZED) {
+        return 0;
+      }
+      width = LOWORD(lParam);
+      height = HIWORD(lParam);
+      // TODO: If DirectX is initialized, resize buffers.
+      return 0;
+
+    // Mouse button pressed (while over window).
+    case WM_LBUTTONDOWN:
+      HandleCursorPosition(
+          (double)GET_X_LPARAM(lParam), (double)GET_Y_LPARAM(lParam));
+      HandleMouseButton(BUTTON_LEFT, InputState::PRESS);
+      return 0;
+    case WM_MBUTTONDOWN:
+      HandleCursorPosition(
+          (double)GET_X_LPARAM(lParam), (double)GET_Y_LPARAM(lParam));
+      HandleMouseButton(BUTTON_MIDDLE, InputState::PRESS);
+      return 0;
+    case WM_RBUTTONDOWN:
+      HandleCursorPosition(
+          (double)GET_X_LPARAM(lParam), (double)GET_Y_LPARAM(lParam));
+      HandleMouseButton(BUTTON_RIGHT, InputState::PRESS);
+      return 0;
+
+    // Mouse button released (while over window).
+    case WM_LBUTTONUP:
+      HandleCursorPosition(
+          (double)GET_X_LPARAM(lParam), (double)GET_Y_LPARAM(lParam));
+      HandleMouseButton(BUTTON_LEFT, InputState::RELEASE);
+      return 0;
+    case WM_MBUTTONUP:
+      HandleCursorPosition(
+          (double)GET_X_LPARAM(lParam), (double)GET_Y_LPARAM(lParam));
+      HandleMouseButton(BUTTON_MIDDLE, InputState::RELEASE);
+      return 0;
+    case WM_RBUTTONUP:
+      HandleCursorPosition(
+          (double)GET_X_LPARAM(lParam), (double)GET_Y_LPARAM(lParam));
+      HandleMouseButton(BUTTON_RIGHT, InputState::RELEASE);
+      return 0;
+
+    // Cursor moves.
+    case WM_MOUSEMOVE:
+      HandleCursorPosition(
+          (double)GET_X_LPARAM(lParam), (double)GET_Y_LPARAM(lParam));
+      return 0;
+
+    // Key pressed.
+    case WM_KEYDOWN:
+      HandleKey((Key)wParam, InputState::PRESS);
+      return 0;
+
+    // Key released.
+    case WM_KEYUP:
+      HandleKey((Key)wParam, InputState::RELEASE);
+      return 0;
+
+    // TODO: Handle mouse wheel (WM_MOUSEWHEEL).
+  }
+
   return DefWindowProc(hWnd, uMsg, wParam, lParam);
 }
 #endif

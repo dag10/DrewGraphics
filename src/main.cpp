@@ -220,6 +220,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 
     window->StartRender();
     try {
+      // TODO: Just temporary!
+      Graphics::Instance->Clear(glm::vec3(0.4f, 0.6f, 0.75f));
+
 #if defined(_OPENGL) // TODO
       scene->RenderFrame();
 #endif

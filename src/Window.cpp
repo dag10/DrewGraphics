@@ -2,10 +2,11 @@
 //  Window.cpp
 //
 
-#include <string>
+#include <Graphics.h>
+#include <Window.h>
 #include <cassert>
 #include <iostream>
-#include <Window.h>
+#include <string>
 
 #if defined(_DIRECTX)
 #include <WindowsX.h>
@@ -65,15 +66,15 @@ dg::Window::Window(dg::Window&& other) {
 }
 
 float dg::Window::GetWidth() const {
-  return GetSize().x;
+  return GetContentSize().x;
 }
 
 float dg::Window::GetHeight() const {
-  return GetSize().y;
+  return GetContentSize().y;
 }
 
 float dg::Window::GetAspectRatio() const {
-  glm::vec2 size = GetSize();
+  glm::vec2 size = GetContentSize();
   return size.x / size.y;
 }
 
@@ -248,6 +249,10 @@ void dg::OpenGLWindow::PollEvents() {
   cursorDelta = currentCursorPosition - lastCursorPosition;
 }
 
+dg::Window::handle_type dg::OpenGLWindow::GetHandle() const {
+  return glfwWindow;
+}
+
 void dg::OpenGLWindow::LockCursor() {
   glfwSetInputMode(glfwWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 }
@@ -311,7 +316,7 @@ void dg::OpenGLWindow::ResetViewport() {
   glViewport(0, 0, width, height);
 }
 
-glm::vec2 dg::OpenGLWindow::GetSize() const {
+glm::vec2 dg::OpenGLWindow::GetContentSize() const {
   int x, y;
   glfwGetWindowSize(glfwWindow, &x, &y);
   glm::vec2 size(x, y);
@@ -323,7 +328,7 @@ glm::vec2 dg::OpenGLWindow::GetSize() const {
   return size;
 }
 
-void dg::OpenGLWindow::SetSize(glm::vec2 size) {
+void dg::OpenGLWindow::SetClientSize(glm::vec2 size) {
   // Only Windows sets window sizes by pixel sizes.
   // Mac automatically adjusts for DPI scale.
 #ifdef _WIN32
@@ -505,15 +510,18 @@ LRESULT CALLBACK dg::Win32Window::ProcessMessage(
       return 0;
 
     // Win32Window size changes.
-    case WM_SIZE:
+    case WM_SIZE: {
       // If we're minimizing, we'll be going to a size of zero, so ignore.
       if (wParam == SIZE_MINIMIZED) {
         return 0;
       }
-      width = LOWORD(lParam);
-      height = HIWORD(lParam);
+      RECT clientRect;
+      GetClientRect(hWnd, &clientRect);
+      width = clientRect.right - clientRect.left;
+      height = clientRect.bottom - clientRect.top;
       // TODO: If DirectX is initialized, resize buffers.
       return 0;
+    }
 
     // Mouse button pressed (while over window).
     case WM_LBUTTONDOWN:
@@ -617,6 +625,10 @@ void dg::Win32Window::PollEvents() {
   cursorDelta = currentCursorPosition - lastCursorPosition;
 }
 
+dg::Window::handle_type dg::Win32Window::GetHandle() const {
+  return hWnd;
+}
+
 void dg::Win32Window::LockCursor() {
   if (cursorIsLocked) {
     return;
@@ -692,24 +704,23 @@ void dg::Win32Window::SetTitle(const std::string& title) {
 
 void dg::Win32Window::StartRender() {
   assert(hWnd != NULL);
-
   ResetViewport();
 }
 
 void dg::Win32Window::FinishRender() {
-  // TODO: Swap buffer
+  assert(hWnd != nullptr);
+  Graphics::Instance->swapChain->Present(0, 0);
 }
 
 void dg::Win32Window::ResetViewport() {
   // TODO
 }
 
-glm::vec2 dg::Win32Window::GetSize() const {
-  // FIXME: This returns the window size, not the client size.
+glm::vec2 dg::Win32Window::GetContentSize() const {
   return glm::vec2(width, height);
 }
 
-void dg::Win32Window::SetSize(glm::vec2 size) {
+void dg::Win32Window::SetClientSize(glm::vec2 size) {
   // TODO: Set client size
 }
 

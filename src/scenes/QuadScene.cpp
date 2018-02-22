@@ -70,8 +70,8 @@ void dg::QuadScene::Update() {
 
   // Slightly rotate quad based on cursor position.
   glm::vec2 absoluteCursorPos =
-    window->GetCursorPosition() - (window->GetSize() / 2.f);
-  glm::vec2 relativeCursorPos = absoluteCursorPos / window->GetSize();
+    window->GetCursorPosition() - (window->GetContentSize() / 2.f);
+  glm::vec2 relativeCursorPos = absoluteCursorPos / window->GetContentSize();
   relativeCursorPos.x *= window->GetWidth() / window->GetHeight();
   glm::vec3 quadLookTarget = glm::vec3(
       sin(-relativeCursorPos.x),

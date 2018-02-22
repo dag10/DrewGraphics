@@ -27,6 +27,12 @@ namespace dg {
 
     public:
 
+#if defined(_OPENGL)
+      typedef GLFWwindow* handle_type;
+#elif defined(_DIRECTX)
+      typedef HWND handle_type;
+#endif
+
       // TODO: Make these protected :)
       Window(Window& other) = delete;
       Window(Window&& other);
@@ -36,6 +42,8 @@ namespace dg {
       friend void swap(Window& first, Window& second); // nothrow
 
       virtual void PollEvents() = 0;
+
+      virtual handle_type GetHandle() const = 0;
 
       bool IsKeyPressed(Key key) const;
       bool IsKeyJustPressed(Key key) const;
@@ -68,10 +76,10 @@ namespace dg {
 
       // Returns the size of the window as if monitor is 1x DPI scale,
       // even if it's high-DPI.
-      virtual glm::vec2 GetSize() const = 0;
+      virtual glm::vec2 GetContentSize() const = 0;
       // Sets the size of the window as if monitor is 1x DPI scale, even if
       // it's high-DPI.
-      virtual void SetSize(glm::vec2 size) = 0;
+      virtual void SetClientSize(glm::vec2 size) = 0;
 
       float GetAspectRatio() const;
 
@@ -128,6 +136,8 @@ namespace dg {
 
       virtual void PollEvents();
 
+      virtual handle_type GetHandle() const;
+
       virtual void LockCursor();
       virtual void UnlockCursor();
       virtual bool IsCursorLocked() const;
@@ -148,10 +158,10 @@ namespace dg {
 
       // Returns the size of the window as if monitor is 1x DPI scale,
       // even if it's high-DPI.
-      virtual glm::vec2 GetSize() const;
+      virtual glm::vec2 GetContentSize() const;
       // Sets the size of the window as if monitor is 1x DPI scale, even if
       // it's high-DPI.
-      virtual void SetSize(glm::vec2 size);
+      virtual void SetClientSize(glm::vec2 size);
 
     private:
 
@@ -205,6 +215,7 @@ namespace dg {
       friend void swap(Win32Window& first, Win32Window& second); // nothrow
 
       virtual void PollEvents();
+      virtual handle_type GetHandle() const;
 
       virtual void LockCursor();
       virtual void UnlockCursor();
@@ -226,10 +237,10 @@ namespace dg {
 
       // Returns the size of the window as if monitor is 1x DPI scale,
       // even if it's high-DPI.
-      virtual glm::vec2 GetSize() const;
+      virtual glm::vec2 GetContentSize() const;
       // Sets the size of the window as if monitor is 1x DPI scale, even if
       // it's high-DPI.
-      virtual void SetSize(glm::vec2 size);
+      virtual void SetClientSize(glm::vec2 size);
 
     private:
 

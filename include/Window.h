@@ -156,6 +156,8 @@ namespace dg {
     private:
 
       static std::map<GLFWwindow*, std::weak_ptr<OpenGLWindow>> windowMap;
+      static bool glfwIsInitialized;
+      static void InitializeGLFW();
 
       virtual void Open(int width, int height);
 
@@ -191,6 +193,9 @@ namespace dg {
       static std::shared_ptr<Window> Open(
           unsigned int width, unsigned int height, std::string title,
           HINSTANCE hInstance);
+
+      static void dg::Win32Window::CreateConsoleWindow(
+        int bufferLines, int bufferColumns, int windowLines, int windowColumns);
 
       Win32Window(Win32Window& other) = delete;
       Win32Window(Win32Window&& other);

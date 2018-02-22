@@ -4,7 +4,7 @@
 
 #include <string>
 #include <cassert>
-
+#include <iostream>
 #include <Window.h>
 
 #if defined(_DIRECTX)
@@ -102,6 +102,28 @@ void dg::swap(dg::Window& first, dg::Window& second) {
 std::map<GLFWwindow*, std::weak_ptr<dg::OpenGLWindow>>
     dg::OpenGLWindow::windowMap;
 
+bool dg::OpenGLWindow::glfwIsInitialized = false;
+
+void dg::OpenGLWindow::InitializeGLFW() {
+  // Print GLFW errors to stderr.
+  glfwSetErrorCallback([](int code, const char *desc) {
+    std::cerr << "GLFW Error: " << desc << std::endl;
+  });
+
+  if (!glfwInit()) {
+    throw std::runtime_error("Failed to initialize GLFW.");
+  }
+
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+  glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+#ifdef __APPLE__
+  glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+#endif
+
+  glfwIsInitialized = true;
+}
+
 dg::OpenGLWindow::OpenGLWindow() : Window() {}
 
 dg::OpenGLWindow::OpenGLWindow(dg::OpenGLWindow&& other) {
@@ -141,6 +163,10 @@ std::shared_ptr<dg::Window> dg::OpenGLWindow::Open(
 
 void dg::OpenGLWindow::Open(int width, int height) {
   assert(glfwWindow == nullptr);
+
+  if (!glfwIsInitialized) {
+    InitializeGLFW();
+  }
 
   // Only Windows sets window sizes by pixel sizes.
   // Mac automatically adjusts for DPI scale.
@@ -322,6 +348,34 @@ glm::vec2 dg::OpenGLWindow::GetContentScale() const {
 #if defined(_DIRECTX)
 
 std::map<HWND, std::weak_ptr<dg::Win32Window>> dg::Win32Window::windowMap;
+
+void dg::Win32Window::CreateConsoleWindow(
+    int bufferLines, int bufferColumns, int windowLines, int windowColumns) {
+  CONSOLE_SCREEN_BUFFER_INFO coninfo;
+
+  AllocConsole();
+  GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &coninfo);
+  coninfo.dwSize.Y = bufferLines;
+  coninfo.dwSize.X = bufferColumns;
+  SetConsoleScreenBufferSize(GetStdHandle(STD_OUTPUT_HANDLE), coninfo.dwSize);
+
+  SMALL_RECT rect;
+  rect.Left = 0;
+  rect.Top = 0;
+  rect.Right = windowColumns;
+  rect.Bottom = windowLines;
+  SetConsoleWindowInfo(GetStdHandle(STD_OUTPUT_HANDLE), TRUE, &rect);
+
+  FILE* stream;
+  freopen_s(&stream, "CONIN$", "r", stdin);
+  freopen_s(&stream, "CONOUT$", "w", stdout);
+  freopen_s(&stream, "CONOUT$", "w", stderr);
+
+  // Prevent accidental console window closure.
+  HWND consoleHandle = GetConsoleWindow();
+  HMENU hmenu = GetSystemMenu(consoleHandle, FALSE);
+  EnableMenuItem(hmenu, SC_CLOSE, MF_GRAYED);
+}
 
 dg::Win32Window::Win32Window() : Window() {}
 

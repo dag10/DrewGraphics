@@ -344,6 +344,7 @@ del /s $(OutDir)*.obj, $(OutDir)*.pdb, $(OutDir)*.ipdb, $(OutDir)*.iobj</Command
     <ClCompile Include="src\FileUtils.cpp" />
     <ClCompile Include="src\FrameBuffer.cpp" />
     <ClCompile Include="src\glad.c" />
+    <ClCompile Include="src\Graphics.cpp" />
     <ClCompile Include="src\Lights.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\Material.cpp" />
@@ -386,6 +387,7 @@ del /s $(OutDir)*.obj, $(OutDir)*.pdb, $(OutDir)*.ipdb, $(OutDir)*.iobj</Command
     <ClInclude Include="include\FileUtils.h" />
     <ClInclude Include="include\FrameBuffer.h" />
     <ClInclude Include="include\glad\glad.h" />
+    <ClInclude Include="include\Graphics.h" />
     <ClInclude Include="include\InputCodes.h" />
     <ClInclude Include="include\KHR\khrplatform.h" />
     <ClInclude Include="include\Lights.h" />

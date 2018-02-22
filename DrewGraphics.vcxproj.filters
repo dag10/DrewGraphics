@@ -165,6 +165,9 @@
     <ClCompile Include="src\scenes\DeepCloningScene.cpp">
       <Filter>Source Files\scenes</Filter>
     </ClCompile>
+    <ClCompile Include="src\Graphics.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Behavior.h">
@@ -289,6 +292,9 @@
     </ClInclude>
     <ClInclude Include="include\scenes\DeepCloningScene.h">
       <Filter>Header Files\scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Graphics.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -16,37 +16,31 @@
 #include <Windows.h>
 #endif
 
-#include <Camera.h>
 #include <EngineTime.h>
+#include <Graphics.h>
 #include <InputCodes.h>
-#include <Mesh.h>
-#include <Shader.h>
 #include <Window.h>
-#include <scenes/CanvasTestScene.h>
-#include <scenes/MeshesScene.h>
-#include <scenes/PortalScene.h>
-#include <scenes/QuadScene.h>
-#include <scenes/RobotScene.h>
-#include <scenes/TexturesScene.h>
-#include <scenes/TutorialScene.h>
-#include <scenes/DeepCloningScene.h>
-#include <scenes/VRScene.h>
 #include <functional>
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
 #include <iostream>
 #include <map>
 #include <memory>
 #include <ostream>
 #include <sstream>
 
+#include <scenes/CanvasTestScene.h>
+#include <scenes/DeepCloningScene.h>
+#include <scenes/MeshesScene.h>
+#include <scenes/PortalScene.h>
+#include <scenes/QuadScene.h>
+#include <scenes/RobotScene.h>
+#include <scenes/TexturesScene.h>
+#include <scenes/TutorialScene.h>
+#include <scenes/VRScene.h>
+
 using namespace dg;
 
-[[noreturn]] void terminateWithError(const char *error) {
+[[noreturn]] void terminateWithError(const std::string &error) {
   std::cerr << error << std::endl;
-#ifdef _OPENGL
-  glfwTerminate();
-#endif
   // If on Windows, make sure we show a minimized console window
   // and wait for the user to press enter before quitting.
 #if defined(_MSC_VER)
@@ -54,40 +48,12 @@ using namespace dg;
   std::cerr << std::endl;
   system("pause");
 #endif
+  Graphics::Shutdown();
   exit(-1);
 }
 
-#if defined(_DIRECTX)
-void CreateConsoleWindow(int bufferLines, int bufferColumns, int windowLines,
-                         int windowColumns) {
-  CONSOLE_SCREEN_BUFFER_INFO coninfo;
-
-  AllocConsole();
-  GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &coninfo);
-  coninfo.dwSize.Y = bufferLines;
-  coninfo.dwSize.X = bufferColumns;
-  SetConsoleScreenBufferSize(GetStdHandle(STD_OUTPUT_HANDLE), coninfo.dwSize);
-
-  SMALL_RECT rect;
-  rect.Left = 0;
-  rect.Top = 0;
-  rect.Right = windowColumns;
-  rect.Bottom = windowLines;
-  SetConsoleWindowInfo(GetStdHandle(STD_OUTPUT_HANDLE), TRUE, &rect);
-
-  FILE* stream;
-  freopen_s(&stream, "CONIN$", "r", stdin);
-  freopen_s(&stream, "CONOUT$", "w", stdout);
-  freopen_s(&stream, "CONOUT$", "w", stderr);
-
-  // Prevent accidental console window closure.
-  HWND consoleHandle = GetConsoleWindow();
-  HMENU hmenu = GetSystemMenu(consoleHandle, FALSE);
-  EnableMenuItem(hmenu, SC_CLOSE, MF_GRAYED);
-}
-#endif
-
-std::unique_ptr<Scene> PromptForScene(const std::string& launchArg) {
+std::unique_ptr<Scene> PromptForScene(
+  const std::string& launchArg, std::string *chosenName = nullptr) {
   std::map<
     std::string,
     std::function<std::unique_ptr<dg::Scene>()>> constructors;
@@ -126,10 +92,12 @@ std::unique_ptr<Scene> PromptForScene(const std::string& launchArg) {
               << "Choose a scene: ";
     std::cin >> sceneName;
     if (std::cin.eof() || sceneName == "exit") {
+      *chosenName = "";
       return nullptr;
     }
     std::cout << std::endl;
   }
+  *chosenName = sceneName;
   return constructors[sceneName]();
 }
 
@@ -138,45 +106,24 @@ int main(int argc, const char* argv[]) {
 #elif defined(_DIRECTX)
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
                    LPSTR lpCmdLine, int nCmdShow) {
-  CreateConsoleWindow(500, 120, 32, 120);
+  Win32Window::CreateConsoleWindow(500, 120, 32, 120);
 # if defined(_MSC_VER) & defined(_DEBUG)
   // Enable memory leak detection.
   _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 # endif
 #endif
 
-  std::string sceneArg;
-#if defined(_OPENGL)
-  if (argc > 1) {
-    sceneArg = std::string(argv[1]);
-  }
-#elif defined(_DIRECTX)
-  sceneArg = std::string(lpCmdLine);
-#endif
-
   // Find intended scene.
-  std::unique_ptr<Scene> scene = PromptForScene(sceneArg);
+  std::string sceneName;
+#if defined(_OPENGL)
+  std::string sceneArg = (argc > 1) ? std::string(argv[1]) : "";
+#elif defined(_DIRECTX)
+  std::string sceneArg = std::string(lpCmdLine);
+#endif
+  std::unique_ptr<Scene> scene = PromptForScene(sceneArg, &sceneName);
   if (scene == nullptr) {
     return 0;
   }
-
-#ifdef _OPENGL
-  // Print GLFW errors to stderr.
-  glfwSetErrorCallback([](int code, const char *desc) {
-    std::cerr << "GLFW Error: " << desc << std::endl;
-  });
-
-  if (!glfwInit()) {
-    terminateWithError("Failed to initialize GLFW.");
-  }
-
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-  glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-# ifdef __APPLE__
-  glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-# endif
-#endif
 
   // Create window.
   std::shared_ptr<dg::Window> window;
@@ -187,35 +134,19 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
     window = dg::Win32Window::Open(800, 600, "Drew Graphics", hInstance);
 #endif
   } catch (const std::exception& e) {
-    terminateWithError(e.what());
+    terminateWithError(
+        "Failed to open window: " + std::string(e.what()));
   }
 
-#ifdef _OPENGL
-  // Load GLAD procedures.
-  if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-    terminateWithError("Failed to initialize GLAD.");
+  // Initialize graphics.
+  try {
+    Graphics::Initialize(*window);
+  } catch (const std::exception& e) {
+    terminateWithError(
+        "Failed to initialize graphics: " + std::string(e.what()));
   }
-#endif
 
-#if defined(_OPENGL) // TODO
-  // Create primitive meshes.
-  dg::Mesh::CreatePrimitives();
-#endif
-
-#if defined(_OPENGL) // TODO
-  // Staticially initialize shader class.
-  dg::Shader::Initialize();
-#endif
-
-#if defined(_OPENGL)
-  // Configure global includes for all shader files.
-  dg::Shader::SetVertexHead("assets/shaders/includes/vertex_head.glsl");
-  dg::Shader::AddVertexSource("assets/shaders/includes/vertex_main.glsl");
-  dg::Shader::SetFragmentHead("assets/shaders/includes/fragment_head.glsl");
-  dg::Shader::AddFragmentSource("assets/shaders/includes/fragment_main.glsl");
-#endif
-
-  // Set up scene.
+  // Initialize scene.
   try {
     scene->SetWindow(window);
 #if defined(_OPENGL) // TODO
@@ -278,9 +209,11 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
         std::string platform = "DirectX";
 #endif
         window->SetTitle(((std::ostringstream&)(std::ostringstream()
-              << "Drew Graphics | " << platform << " | "
-              << (int)(1.0 / dg::Time::Delta) << " FPS | "
-              << dg::Time::AverageFrameRate << " average FPS")).str());
+          << "Drew Graphics | "
+          << platform << " | "
+          << sceneName << " | "
+          << (int)(1.0 / dg::Time::Delta) << " FPS | "
+          << dg::Time::AverageFrameRate << " average FPS")).str());
       }
       lastWindowUpdateTime = dg::Time::Elapsed;
     }
@@ -297,5 +230,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
     window->FinishRender();
   }
 
+  Graphics::Shutdown();
   return 0;
 }

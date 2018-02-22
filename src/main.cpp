@@ -181,12 +181,11 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
   // Create window.
   std::shared_ptr<dg::Window> window;
   try {
-    window = dg::Window::Open(
-      800, 600, "Drew Graphics"
-#if defined(_DIRECTX)
-      , hInstance
+#if defined(_OPENGL)
+    window = dg::OpenGLWindow::Open(800, 600, "Drew Graphics");
+#elif defined(_DIRECTX)
+    window = dg::Win32Window::Open(800, 600, "Drew Graphics", hInstance);
 #endif
-    );
   } catch (const std::exception& e) {
     terminateWithError(e.what());
   }
@@ -273,8 +272,13 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
     const float titleUpdateFreq = 0.1f;
     if (dg::Time::Elapsed > lastWindowUpdateTime + titleUpdateFreq) {
       if (scene->AutomaticWindowTitle()) {
+#if defined(_OPENGL)
+        std::string platform = "OpenGL";
+#elif defined(_DIRECTX)
+        std::string platform = "DirectX";
+#endif
         window->SetTitle(((std::ostringstream&)(std::ostringstream()
-              << "Drew Graphics | "
+              << "Drew Graphics | " << platform << " | "
               << (int)(1.0 / dg::Time::Delta) << " FPS | "
               << dg::Time::AverageFrameRate << " average FPS")).str());
       }

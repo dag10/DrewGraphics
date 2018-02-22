@@ -26,24 +26,16 @@ namespace dg {
   class Window {
 
     public:
-#if defined(_OPENGL)
-      static std::shared_ptr<Window> Open(
-          unsigned int width, unsigned int height, std::string title);
-#elif defined(_DIRECTX)
-      static std::shared_ptr<Window> Open(
-          unsigned int width, unsigned int height, std::string title,
-          HINSTANCE hInstance);
-#endif
 
-      Window();
+      // TODO: Make these protected :)
       Window(Window& other) = delete;
       Window(Window&& other);
-      ~Window();
+      virtual ~Window() = default;
       Window& operator=(Window& other) = delete;
       Window& operator=(Window&& other);
       friend void swap(Window& first, Window& second); // nothrow
 
-      void PollEvents();
+      virtual void PollEvents() = 0;
 
       bool IsKeyPressed(Key key) const;
       bool IsKeyJustPressed(Key key) const;
@@ -51,38 +43,41 @@ namespace dg {
       bool IsMouseButtonPressed(MouseButton button) const;
       bool IsMouseButtonJustPressed(MouseButton button) const;
 
-      void LockCursor();
-      void UnlockCursor();
-      bool IsCursorLocked() const;
-      glm::vec2 GetCursorPosition() const;
+      virtual void LockCursor() = 0;
+      virtual void UnlockCursor() = 0;
+      virtual bool IsCursorLocked() const = 0;
+      virtual glm::vec2 GetCursorPosition() const = 0;
       glm::vec2 GetCursorDelta() const;
 
-      void Hide();
-      void Show();
+      virtual void Hide() = 0;
+      virtual void Show() = 0;
 
-      bool ShouldClose() const;
-      void SetShouldClose(bool shouldClose);
+      virtual bool ShouldClose() const = 0;
+      virtual void SetShouldClose(bool shouldClose) = 0;
 
       const std::string GetTitle() const;
-      void SetTitle(const std::string& title);
+      virtual void SetTitle(const std::string& title) = 0;
 
-      void StartRender();
-      void FinishRender();
+      virtual void StartRender() = 0;
+      virtual void FinishRender() = 0;
 
-      void ResetViewport();
+      virtual void ResetViewport() = 0;
 
       float GetWidth() const;
       float GetHeight() const;
-      glm::vec2 GetSize() const;
-      void SetSize(glm::vec2 size);
-      glm::vec2 GetContentScale() const;
+
+      // Returns the size of the window as if monitor is 1x DPI scale,
+      // even if it's high-DPI.
+      virtual glm::vec2 GetSize() const = 0;
+      // Sets the size of the window as if monitor is 1x DPI scale, even if
+      // it's high-DPI.
+      virtual void SetSize(glm::vec2 size) = 0;
+
       float GetAspectRatio() const;
 
-#if defined(_OPENGL)
-      GLFWwindow *GetHandle() const;
-#endif
+    protected:
 
-    private:
+      Window();
 
       enum class InputState : int8_t {
 #if defined(_OPENGL)
@@ -96,44 +91,11 @@ namespace dg {
 #endif
       };
 
-#if defined(_OPENGL)
-      typedef GLFWwindow* window_map_key_type;
-      static void glfwKeyCallback(
-          GLFWwindow *glfwWindow, int key, int scancode, int action, int mods);
-      static void glfwMouseButtonCallback(
-          GLFWwindow *glfwWindow, int button, int action, int mods);
-      static void glfwCursorPositionCallback(
-          GLFWwindow *glfwWindow, double x, double y);
-#elif defined(_DIRECTX)
-      typedef HWND window_map_key_type;
-      static LRESULT CALLBACK ProcessMessage(
-          HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
-      LRESULT CALLBACK ProcessMessage(UINT uMsg, WPARAM wParam, LPARAM lParam);
-#endif
-      static std::map<window_map_key_type, std::weak_ptr<Window>> windowMap;
-
       void HandleKey(Key key, InputState action);
       void HandleMouseButton(MouseButton button, InputState action);
-      void HandleCursorPosition(double x, double y);
+      virtual void HandleCursorPosition(double x, double y) = 0;
 
-      void Open(int width, int height);
-      void UseContext();
-#if defined(_DIRECTX)
-      POINT GetWindowCenterScreenSpace() const;
-#endif
-
-#if defined(_OPENGL)
-      GLFWwindow *glfwWindow = nullptr;
-#elif defined(_DIRECTX)
-      HINSTANCE hInstance = nullptr;
-      HWND hWnd = nullptr;
-      unsigned int width;
-      unsigned int height;
-      bool shouldClose = false;
-      bool cursorIsLocked = false;
-      bool cursorWasLocked = false;
-      glm::vec2 cursorLockOffset;
-#endif
+      virtual void Open(int width, int height) = 0;
 
       std::vector<InputState> lastKeyStates;
       std::vector<InputState> currentKeyStates;
@@ -144,6 +106,151 @@ namespace dg {
       glm::vec2 lastCursorPosition;
       glm::vec2 currentCursorPosition;
       glm::vec2 cursorDelta;
+
   }; // class Window
+
+#if defined(_OPENGL)
+  class OpenGLWindow : public Window {
+
+    public:
+
+      // Opens a window with a title and size.
+      // Sizes are assuming 1x DPI scale, even if on a higher-DPI display.
+      static std::shared_ptr<Window> Open(
+          unsigned int width, unsigned int height, std::string title);
+
+      OpenGLWindow(OpenGLWindow& other) = delete;
+      OpenGLWindow(OpenGLWindow&& other);
+      virtual ~OpenGLWindow();
+      OpenGLWindow& operator=(OpenGLWindow& other) = delete;
+      OpenGLWindow& operator=(OpenGLWindow&& other);
+      friend void swap(OpenGLWindow& first, OpenGLWindow& second); // nothrow
+
+      virtual void PollEvents();
+
+      virtual void LockCursor();
+      virtual void UnlockCursor();
+      virtual bool IsCursorLocked() const;
+      virtual glm::vec2 GetCursorPosition() const;
+
+      virtual void Hide();
+      virtual void Show();
+
+      virtual bool ShouldClose() const;
+      virtual void SetShouldClose(bool shouldClose);
+
+      virtual void SetTitle(const std::string& title);
+
+      virtual void StartRender();
+      virtual void FinishRender();
+
+      virtual void ResetViewport();
+
+      // Returns the size of the window as if monitor is 1x DPI scale,
+      // even if it's high-DPI.
+      virtual glm::vec2 GetSize() const;
+      // Sets the size of the window as if monitor is 1x DPI scale, even if
+      // it's high-DPI.
+      virtual void SetSize(glm::vec2 size);
+
+    private:
+
+      static std::map<GLFWwindow*, std::weak_ptr<OpenGLWindow>> windowMap;
+
+      virtual void Open(int width, int height);
+
+      virtual void HandleCursorPosition(double x, double y);
+
+      static void glfwKeyCallback(
+          GLFWwindow *glfwWindow, int key, int scancode, int action, int mods);
+      static void glfwMouseButtonCallback(
+          GLFWwindow *glfwWindow, int button, int action, int mods);
+      static void glfwCursorPositionCallback(
+          GLFWwindow *glfwWindow, double x, double y);
+
+      OpenGLWindow();
+
+      void UseContext();
+
+      // Gets the DPI scale for the window if it exists, or of the primary
+      // monitor if the window does not yet exist.
+      glm::vec2 GetContentScale() const;
+
+      GLFWwindow *glfwWindow = nullptr;
+
+  }; // class OpenGLWindow
+#endif
+
+#if defined(_DIRECTX)
+  class Win32Window : public Window {
+
+    public:
+
+      // Opens a window with a title and size.
+      // Sizes are assuming 1x DPI scale, even if on a higher-DPI display.
+      static std::shared_ptr<Window> Open(
+          unsigned int width, unsigned int height, std::string title,
+          HINSTANCE hInstance);
+
+      Win32Window(Win32Window& other) = delete;
+      Win32Window(Win32Window&& other);
+      virtual ~Win32Window();
+      Win32Window& operator=(Win32Window& other) = delete;
+      Win32Window& operator=(Win32Window&& other);
+      friend void swap(Win32Window& first, Win32Window& second); // nothrow
+
+      virtual void PollEvents();
+
+      virtual void LockCursor();
+      virtual void UnlockCursor();
+      virtual bool IsCursorLocked() const;
+      virtual glm::vec2 GetCursorPosition() const;
+
+      virtual void Hide();
+      virtual void Show();
+
+      virtual bool ShouldClose() const;
+      virtual void SetShouldClose(bool shouldClose);
+
+      virtual void SetTitle(const std::string& title);
+
+      virtual void StartRender();
+      virtual void FinishRender();
+
+      virtual void ResetViewport();
+
+      // Returns the size of the window as if monitor is 1x DPI scale,
+      // even if it's high-DPI.
+      virtual glm::vec2 GetSize() const;
+      // Sets the size of the window as if monitor is 1x DPI scale, even if
+      // it's high-DPI.
+      virtual void SetSize(glm::vec2 size);
+
+    private:
+
+      static std::map<HWND, std::weak_ptr<Win32Window>> windowMap;
+
+      virtual void Open(int width, int height);
+
+      static LRESULT CALLBACK ProcessMessage(
+          HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+      LRESULT CALLBACK ProcessMessage(UINT uMsg, WPARAM wParam, LPARAM lParam);
+
+      Win32Window();
+
+      virtual void HandleCursorPosition(double x, double y);
+      POINT GetWindowCenterScreenSpace() const;
+
+      HINSTANCE hInstance = nullptr;
+      HWND hWnd = nullptr;
+      unsigned int width;
+      unsigned int height;
+      bool shouldClose = false;
+      bool cursorIsLocked = false;
+      bool cursorWasLocked = false;
+      glm::vec2 cursorLockOffset;
+
+  }; // class Win32Window
+#endif
 
 } // namespace dg

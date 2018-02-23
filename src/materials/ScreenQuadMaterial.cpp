@@ -8,9 +8,9 @@ std::shared_ptr<dg::Shader> dg::ScreenQuadMaterial::screenQuadShader = nullptr;
 
 dg::ScreenQuadMaterial::ScreenQuadMaterial() : Material() {
   if (screenQuadShader == nullptr) {
-    screenQuadShader = std::make_shared<Shader>(dg::Shader::FromFiles(
-          "assets/shaders/screenquad.v.glsl",
-          "assets/shaders/screenquad.f.glsl"));
+    screenQuadShader = dg::Shader::FromFiles(
+        "assets/shaders/screenquad.v.glsl",
+        "assets/shaders/screenquad.f.glsl");
   }
 
   shader = ScreenQuadMaterial::screenQuadShader;

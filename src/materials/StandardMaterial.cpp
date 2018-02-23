@@ -27,9 +27,9 @@ dg::StandardMaterial dg::StandardMaterial::WithTexture(
 
 dg::StandardMaterial::StandardMaterial() : Material() {
   if (standardShader == nullptr) {
-    standardShader = std::make_shared<Shader>(dg::Shader::FromFiles(
-          "assets/shaders/standard.v.glsl",
-          "assets/shaders/standard.f.glsl"));
+    standardShader = dg::Shader::FromFiles(
+        "assets/shaders/standard.v.glsl",
+        "assets/shaders/standard.f.glsl");
   }
 
   shader = StandardMaterial::standardShader;

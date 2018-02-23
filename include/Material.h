@@ -11,10 +11,40 @@
 
 namespace dg {
 
-  // Same as ShaderProperty, except it can own the texture.
+  enum class MaterialPropertyType {
+    NONE,
+
+    BOOL,
+    INT,
+    FLOAT,
+    VEC2,
+    VEC3,
+    VEC4,
+    MAT2X2,
+    MAT3X3,
+    MAT4X4,
+    TEXTURE,
+  };
+
+  union MaterialPropertyValue {
+    bool _bool;
+    int _int;
+    float _float;
+    glm::vec2 _vec2;
+    glm::vec3 _vec3;
+    glm::vec4 _vec4;
+    glm::mat2x2 _mat2x2;
+    glm::mat3x3 _mat3x3;
+    glm::mat4x4 _mat4x4;
+
+    MaterialPropertyValue() {
+      memset(this, 0, sizeof(MaterialPropertyValue));
+    }
+  };
+
   struct MaterialProperty {
-    ShaderPropertyType type = PROPERTY_NULL;
-    ShaderPropertyValue value;
+    MaterialPropertyType type = MaterialPropertyType::NONE;
+    MaterialPropertyValue value;
     std::shared_ptr<Texture> texture = nullptr;
     int texUnitHint = -1;
   };

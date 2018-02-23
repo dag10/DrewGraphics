@@ -12,83 +12,68 @@
 #include <memory>
 #include <glm/gtc/type_ptr.hpp>
 
-int dg::Shader::MAX_VERTEX_TEXTURE_UNITS = 0;
-int dg::Shader::MAX_GEOMETRY_TEXTURE_UNITS = 0;
-int dg::Shader::MAX_FRAGMENT_TEXTURE_UNITS = 0;
-int dg::Shader::MAX_COMBINED_TEXTURE_UNITS = 0;
+#pragma region Base Class
 
-void dg::Shader::Initialize() {
-  glGetIntegerv(GL_MAX_VERTEX_TEXTURE_IMAGE_UNITS, &MAX_VERTEX_TEXTURE_UNITS);
-  glGetIntegerv(
-      GL_MAX_GEOMETRY_TEXTURE_IMAGE_UNITS, &MAX_GEOMETRY_TEXTURE_UNITS);
-  glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &MAX_FRAGMENT_TEXTURE_UNITS);
-  glGetIntegerv(
-      GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, &MAX_COMBINED_TEXTURE_UNITS);
+std::shared_ptr<dg::Shader> dg::Shader::FromFiles(
+    const std::string& vertexPath, const std::string& fragmentPath) {
+#if defined(_OPENGL)
+  return std::static_pointer_cast<Shader>(
+    OpenGLShader::FromFiles(vertexPath, fragmentPath));
+#endif
 }
 
-std::string dg::Shader::vertexHead = "";
-std::string dg::Shader::fragmentHead = "";
+#pragma endregion
 
-std::vector<dg::ShaderSource> dg::Shader::vertexSources = \
+#if defined(_OPENGL)
+#pragma region OpenGL Shader
+
+std::string dg::OpenGLShader::vertexHead = "";
+std::string dg::OpenGLShader::fragmentHead = "";
+
+std::vector<dg::ShaderSource> dg::OpenGLShader::vertexSources = \
     std::vector<dg::ShaderSource>();
-std::vector<dg::ShaderSource> dg::Shader::fragmentSources = \
+std::vector<dg::ShaderSource> dg::OpenGLShader::fragmentSources = \
     std::vector<dg::ShaderSource>();
 
-dg::Shader dg::Shader::FromFiles(
+std::shared_ptr<dg::OpenGLShader> dg::OpenGLShader::FromFiles(
     const std::string& vertexPath, const std::string& fragmentPath) {
-  Shader shader;
-  shader.vertexPath = vertexPath;
-  shader.fragmentPath = fragmentPath;
-  shader.CreateProgram();
+  auto shader = std::make_shared<OpenGLShader>();
+  shader->vertexPath = vertexPath;
+  shader->fragmentPath = fragmentPath;
+  shader->CreateProgram();
   return shader;
 }
 
-void dg::Shader::SetVertexHead(const std::string& path) {
+void dg::OpenGLShader::SetVertexHead(const std::string& path) {
   vertexHead = dg::FileUtils::LoadFile(path);
 }
 
-void dg::Shader::SetFragmentHead(const std::string& path) {
+void dg::OpenGLShader::SetFragmentHead(const std::string& path) {
   fragmentHead = dg::FileUtils::LoadFile(path);
 }
 
-void dg::Shader::AddVertexSource(const std::string& path) {
+void dg::OpenGLShader::AddVertexSource(const std::string& path) {
   dg::ShaderSource shader = vertexHead.empty()
       ? dg::ShaderSource::FromFile(GL_VERTEX_SHADER, path)
       : dg::ShaderSource::FromFileWithHead(GL_VERTEX_SHADER, path, vertexHead);
   vertexSources.push_back(std::move(shader));
 }
 
-void dg::Shader::AddFragmentSource(const std::string& path) {
+void dg::OpenGLShader::AddFragmentSource(const std::string& path) {
   dg::ShaderSource shader = fragmentHead.empty()
       ? dg::ShaderSource::FromFile(GL_FRAGMENT_SHADER, path)
       : dg::ShaderSource::FromFileWithHead(GL_FRAGMENT_SHADER, path, fragmentHead);
   fragmentSources.push_back(std::move(shader));
 }
 
-dg::Shader::Shader(dg::Shader&& other) {
-  *this = std::move(other);
-}
-
-dg::Shader::~Shader() {
+dg::OpenGLShader::~OpenGLShader() {
   if (programHandle != 0) {
     glDeleteProgram(programHandle);
     programHandle = 0;
   }
 }
 
-dg::Shader& dg::Shader::operator=(dg::Shader&& other) {
-  swap(*this, other);
-  return *this;
-}
-
-void dg::swap(Shader& first, Shader& second) {
-  using std::swap;
-  swap(first.vertexPath, second.vertexPath);
-  swap(first.fragmentPath, second.fragmentPath);
-  swap(first.programHandle, second.programHandle);
-}
-
-void dg::Shader::CreateProgram() {
+void dg::OpenGLShader::CreateProgram() {
   assert(programHandle == 0);
 
   dg::ShaderSource vertexShader = vertexHead.empty()
@@ -119,7 +104,7 @@ void dg::Shader::CreateProgram() {
   CheckLinkErrors();
 }
 
-void dg::Shader::CheckLinkErrors() {
+void dg::OpenGLShader::CheckLinkErrors() {
   GLint success;
   GLchar log[1024];
   glGetProgramiv(programHandle, GL_LINK_STATUS, &success);
@@ -129,66 +114,66 @@ void dg::Shader::CheckLinkErrors() {
   }
 }
 
-void dg::Shader::Use() {
+void dg::OpenGLShader::Use() {
   glUseProgram(programHandle);
 }
 
-GLint dg::Shader::GetUniformLocation(const std::string& name) const {
+GLint dg::OpenGLShader::GetUniformLocation(const std::string& name) const {
   return glGetUniformLocation(programHandle, name.c_str());
 }
 
-GLint dg::Shader::GetAttributeLocation(const std::string& name) const {
+GLint dg::OpenGLShader::GetAttributeLocation(const std::string& name) const {
   return glGetAttribLocation(programHandle, name.c_str());
 }
 
-void dg::Shader::SetBool(const std::string& name, bool value) {
+void dg::OpenGLShader::SetBool(const std::string& name, bool value) {
   glUniform1i(GetUniformLocation(name), (int)value);
 }
 
-void dg::Shader::SetInt(const std::string& name, int value) {
+void dg::OpenGLShader::SetInt(const std::string& name, int value) {
   glUniform1i(GetUniformLocation(name), (int)value);
 }
 
-void dg::Shader::SetFloat(const std::string& name, float value) {
+void dg::OpenGLShader::SetFloat(const std::string& name, float value) {
   glUniform1f(GetUniformLocation(name), value);
 }
 
-void dg::Shader::SetVec2(
+void dg::OpenGLShader::SetVec2(
     const std::string& name, const glm::vec2& value) {
   glUniform2fv(GetUniformLocation(name), 1, glm::value_ptr(value));
 }
 
-void dg::Shader::SetVec3(
+void dg::OpenGLShader::SetVec3(
     const std::string& name, const glm::vec3& value) {
   glUniform3fv(GetUniformLocation(name), 1, glm::value_ptr(value));
 }
 
-void dg::Shader::SetVec4(const std::string& name, const glm::vec4& value) {
+void dg::OpenGLShader::SetVec4(const std::string& name, const glm::vec4& value) {
   glUniform4fv(GetUniformLocation(name), 1, glm::value_ptr(value));
 }
 
-void dg::Shader::SetMat2(const std::string& name, const glm::mat2& mat) {
+void dg::OpenGLShader::SetMat2(const std::string& name, const glm::mat2& mat) {
   glUniformMatrix2fv(
       GetUniformLocation(name), 1, GL_FALSE, glm::value_ptr(mat));
 }
 
-void dg::Shader::SetMat3(const std::string& name, const glm::mat3& mat) {
+void dg::OpenGLShader::SetMat3(const std::string& name, const glm::mat3& mat) {
   glUniformMatrix3fv(
       GetUniformLocation(name), 1, GL_FALSE, glm::value_ptr(mat));
 }
 
-void dg::Shader::SetMat4(const std::string& name, const glm::mat4& mat) {
+void dg::OpenGLShader::SetMat4(const std::string& name, const glm::mat4& mat) {
   glUniformMatrix4fv(
       GetUniformLocation(name), 1, GL_FALSE, glm::value_ptr(mat));
 }
 
-void dg::Shader::SetMat4(
+void dg::OpenGLShader::SetMat4(
     const std::string& name, const dg::Transform& xf) {
   glm::mat4x4 mat = xf.ToMat4();
   SetMat4(name, mat);
 }
 
-void dg::Shader::SetTexture(
+void dg::OpenGLShader::SetTexture(
     unsigned int textureUnit, const std::string& name, Texture *texture) {
   assert(texture != nullptr);
 
@@ -197,3 +182,5 @@ void dg::Shader::SetTexture(
   glUniform1i(GetUniformLocation(name), textureUnit);
 }
 
+#pragma endregion
+#endif

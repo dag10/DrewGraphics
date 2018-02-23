@@ -5,6 +5,7 @@
 #pragma once
 
 #include <vector>
+#include <memory>
 #include <unordered_map>
 #include <string>
 #include <glm/glm.hpp>
@@ -15,93 +16,90 @@
 
 namespace dg {
 
-  enum ShaderPropertyType {
-    PROPERTY_NULL,
+  class OpenGLShader;
 
-    PROPERTY_BOOL,
-    PROPERTY_INT,
-    PROPERTY_FLOAT,
-    PROPERTY_VEC2,
-    PROPERTY_VEC3,
-    PROPERTY_VEC4,
-    PROPERTY_MAT2X2,
-    PROPERTY_MAT3X3,
-    PROPERTY_MAT4X4,
-    PROPERTY_TEXTURE,
-
-    PROPERTY_MAX,
-  };
-
-  union ShaderPropertyValue {
-    bool _bool;
-    int _int;
-    float _float;
-    glm::vec2 _vec2;
-    glm::vec3 _vec3;
-    glm::vec4 _vec4;
-    glm::mat2x2 _mat2x2;
-    glm::mat3x3 _mat3x3;
-    glm::mat4x4 _mat4x4;
-
-    ShaderPropertyValue() {
-      memset(this, 0, sizeof(ShaderPropertyValue));
-    }
-  };
-
-  struct ShaderProperty {
-    ShaderPropertyType type = PROPERTY_NULL;
-	ShaderPropertyValue value;
-    Texture *texture; // Weak non-owning pointer.
-  };
-
-  // Copy is disabled, only moves are allowed. This prevents us
-  // from leaking or redeleting the openGL shader program resource.
+  // Copy is disabled. This prevents us from leaking or redeleting
+  // OpenGL/DirectX resources.
   class Shader {
 
     public:
-      static int MAX_VERTEX_TEXTURE_UNITS;
-      static int MAX_GEOMETRY_TEXTURE_UNITS;
-      static int MAX_FRAGMENT_TEXTURE_UNITS;
-      static int MAX_COMBINED_TEXTURE_UNITS;
 
-      static void Initialize();
+#if defined(_OPENGL)
+      typedef OpenGLShader shader_class;
+#endif
 
-      static Shader FromFiles(
+      static std::shared_ptr<Shader> FromFiles(
           const std::string& vertexPath, const std::string& fragmentPath);
 
+      Shader() = default;
+      virtual ~Shader() = default;
+
+      Shader(Shader& other) = delete;
+      Shader& operator=(Shader& other) = delete;
+
+      virtual void Use() = 0;
+
+      virtual void SetBool(const std::string& name, bool value) = 0;
+      virtual void SetInt(const std::string& name, int value) = 0;
+      virtual void SetFloat(const std::string& name, float value) = 0;
+      virtual void SetVec2(const std::string& name, const glm::vec2& value) = 0;
+      virtual void SetVec3(const std::string& name, const glm::vec3& value) = 0;
+      virtual void SetVec4(const std::string& name, const glm::vec4& value) = 0;
+      virtual void SetMat2(const std::string& name, const glm::mat2& mat) = 0;
+      virtual void SetMat3(const std::string& name, const glm::mat3& mat) = 0;
+      virtual void SetMat4(const std::string& name, const glm::mat4& mat) = 0;
+      virtual void SetMat4(const std::string& name, const Transform& xf) = 0;
+      virtual void SetTexture(
+          unsigned int textureUnit, const std::string& name,
+          Texture *texture) = 0;
+
+    protected:
+
+      std::string vertexPath = std::string();
+      std::string fragmentPath = std::string();
+
+  }; // class Shader
+
+#if defined(_OPENGL)
+  class OpenGLShader : public Shader {
+    friend class Shader;
+
+    public:
       static void SetVertexHead(const std::string& path);
       static void SetFragmentHead(const std::string& path);
 
       static void AddVertexSource(const std::string& path);
       static void AddFragmentSource(const std::string& path);
 
-      Shader() = default;
-      Shader(Shader& other) = delete;
-      Shader(Shader&& other);
-      ~Shader();
-      Shader& operator=(Shader& other) = delete;
-      Shader& operator=(Shader&& other);
-      friend void swap(Shader& first, Shader& second); // nothrow
+      OpenGLShader() = default;
+      virtual ~OpenGLShader();
 
-      void Use();
-      
+      OpenGLShader(OpenGLShader& other) = delete;
+      OpenGLShader& operator=(OpenGLShader& other) = delete;
+
+      virtual void Use();
+
       GLint GetUniformLocation(const std::string& name) const;
       GLint GetAttributeLocation(const std::string& name) const;
 
-      void SetBool(const std::string& name, bool value);
-      void SetInt(const std::string& name, int value);
-      void SetFloat(const std::string& name, float value);
-      void SetVec2(const std::string& name, const glm::vec2& value);
-      void SetVec3(const std::string& name, const glm::vec3& value);
-      void SetVec4(const std::string& name, const glm::vec4& value);
-      void SetMat2(const std::string& name, const glm::mat2& mat);
-      void SetMat3(const std::string& name, const glm::mat3& mat);
-      void SetMat4(const std::string& name, const glm::mat4& mat);
-      void SetMat4(const std::string& name, const Transform& xf);
-      void SetTexture(
+      virtual void SetBool(const std::string& name, bool value);
+      virtual void SetInt(const std::string& name, int value);
+      virtual void SetFloat(const std::string& name, float value);
+      virtual void SetVec2(const std::string& name, const glm::vec2& value);
+      virtual void SetVec3(const std::string& name, const glm::vec3& value);
+      virtual void SetVec4(const std::string& name, const glm::vec4& value);
+      virtual void SetMat2(const std::string& name, const glm::mat2& mat);
+      virtual void SetMat3(const std::string& name, const glm::mat3& mat);
+      virtual void SetMat4(const std::string& name, const glm::mat4& mat);
+      virtual void SetMat4(const std::string& name, const Transform& xf);
+      virtual void SetTexture(
           unsigned int textureUnit, const std::string& name, Texture *texture);
 
     private:
+
+      static std::shared_ptr<OpenGLShader>FromFiles(
+          const std::string& vertexPath, const std::string& fragmentPath);
+
       // Code to be included at top of shaders, includes global types.
       static std::string vertexHead;
       static std::string fragmentHead;
@@ -113,11 +111,9 @@ namespace dg {
       void CreateProgram();
       void CheckLinkErrors();
 
-      std::string vertexPath = std::string();
-      std::string fragmentPath = std::string();
-
       GLuint programHandle = 0;
 
-  }; // class Shader
+  }; // class OpenGLShader
+#endif
 
 } // namespace dg

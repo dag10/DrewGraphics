@@ -30,11 +30,6 @@ void dg::Graphics::InitializeResources() {
   // Create primitive meshes.
   dg::Mesh::CreatePrimitives();
 #endif
-
-#if defined(_OPENGL) // TODO: Remove ifdef once Shader supports DirectX.
-  // Staticially initialize shader class.
-  dg::Shader::Initialize();
-#endif
 }
 
 void dg::Graphics::Shutdown() {
@@ -57,10 +52,10 @@ dg::OpenGLGraphics::OpenGLGraphics(const Window& window) {
   InitializeResources();
 
   // Configure global includes for all shader files.
-  dg::Shader::SetVertexHead("assets/shaders/includes/vertex_head.glsl");
-  dg::Shader::AddVertexSource("assets/shaders/includes/vertex_main.glsl");
-  dg::Shader::SetFragmentHead("assets/shaders/includes/fragment_head.glsl");
-  dg::Shader::AddFragmentSource("assets/shaders/includes/fragment_main.glsl");
+  dg::OpenGLShader::SetVertexHead("assets/shaders/includes/vertex_head.glsl");
+  dg::OpenGLShader::AddVertexSource("assets/shaders/includes/vertex_main.glsl");
+  dg::OpenGLShader::SetFragmentHead("assets/shaders/includes/fragment_head.glsl");
+  dg::OpenGLShader::AddFragmentSource("assets/shaders/includes/fragment_main.glsl");
 }
 
 dg::OpenGLGraphics::~OpenGLGraphics() {

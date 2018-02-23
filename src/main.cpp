@@ -33,6 +33,7 @@
 #include <scenes/PortalScene.h>
 #include <scenes/QuadScene.h>
 #include <scenes/RobotScene.h>
+#include <scenes/SimpleScene.h>
 #include <scenes/TexturesScene.h>
 #include <scenes/TutorialScene.h>
 #include <scenes/VRScene.h>
@@ -59,6 +60,7 @@ std::unique_ptr<Scene> PromptForScene(
     std::function<std::unique_ptr<dg::Scene>()>> constructors;
   constructors["portal"]     = dg::PortalScene::Make;
   constructors["tutorial"]   = dg::TutorialScene::Make;
+  constructors["simple"]     = dg::SimpleScene::Make;
   constructors["cloning"]    = dg::DeepCloningScene::Make;
   constructors["cloning-vr"] = dg::DeepCloningScene::MakeVR;
   constructors["textures"]   = dg::TexturesScene::Make;
@@ -149,9 +151,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
   // Initialize scene.
   try {
     scene->SetWindow(window);
-#if defined(_OPENGL) // TODO
     scene->Initialize();
-#endif
   } catch (const std::exception& e) {
     std::cerr << "Failed to initialize scene: ";
     terminateWithError(e.what());
@@ -174,9 +174,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
     dg::Time::Update();
     window->PollEvents();
     try {
-#if defined(_OPENGL) // TODO
       scene->Update();
-#endif
     } catch (const std::exception& e) {
       std::cerr << "Failed to update scene: ";
       terminateWithError(e.what());
@@ -220,12 +218,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 
     window->StartRender();
     try {
-      // TODO: Just temporary!
-      Graphics::Instance->Clear(glm::vec3(0.4f, 0.6f, 0.75f));
-
-#if defined(_OPENGL) // TODO
       scene->RenderFrame();
-#endif
     } catch (const std::exception& e) {
       std::cerr << "Failed to render scene: ";
       terminateWithError(e.what());

@@ -89,9 +89,9 @@ void dg::PortalScene::Initialize() {
   window->LockCursor();
 
   // Create shaders.
-  depthResetShader = std::make_shared<Shader>(dg::Shader::FromFiles(
+  depthResetShader = dg::Shader::FromFiles(
       "assets/shaders/depthreset.v.glsl",
-      "assets/shaders/depthreset.f.glsl"));
+      "assets/shaders/depthreset.f.glsl");
 
   // Create textures.
   std::shared_ptr<Texture> crateTexture = std::make_shared<Texture>(

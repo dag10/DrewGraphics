@@ -33,63 +33,63 @@ void dg::swap(Material& first, Material& second) {
 
 void dg::Material::SetProperty(const std::string& name, bool value) {
   MaterialProperty prop;
-  prop.type = PROPERTY_BOOL;
+  prop.type = MaterialPropertyType::BOOL;
   prop.value._bool = value;
   properties.insert_or_assign(name, prop);
 }
 
 void dg::Material::SetProperty(const std::string& name, int value) {
   MaterialProperty prop;
-  prop.type = PROPERTY_INT;
+  prop.type = MaterialPropertyType::INT;
   prop.value._int = value;
   properties.insert_or_assign(name, prop);
 }
 
 void dg::Material::SetProperty(const std::string& name, float value) {
   MaterialProperty prop;
-  prop.type = PROPERTY_FLOAT;
+  prop.type = MaterialPropertyType::FLOAT;
   prop.value._float = value;
   properties.insert_or_assign(name, prop);
 }
 
 void dg::Material::SetProperty(const std::string& name, glm::vec2 value) {
   MaterialProperty prop;
-  prop.type = PROPERTY_VEC2;
+  prop.type = MaterialPropertyType::VEC2;
   prop.value._vec2 = value;
   properties.insert_or_assign(name, prop);
 }
 
 void dg::Material::SetProperty(const std::string& name, glm::vec3 value) {
   MaterialProperty prop;
-  prop.type = PROPERTY_VEC3;
+  prop.type = MaterialPropertyType::VEC3;
   prop.value._vec3 = value;
   properties.insert_or_assign(name, prop);
 }
 
 void dg::Material::SetProperty(const std::string& name, glm::vec4 value) {
   MaterialProperty prop;
-  prop.type = PROPERTY_VEC4;
+  prop.type = MaterialPropertyType::VEC4;
   prop.value._vec4 = value;
   properties.insert_or_assign(name, prop);
 }
 
 void dg::Material::SetProperty(const std::string& name, glm::mat2x2 value) {
   MaterialProperty prop;
-  prop.type = PROPERTY_MAT2X2;
+  prop.type = MaterialPropertyType::MAT2X2;
   prop.value._mat2x2 = value;
   properties.insert_or_assign(name, prop);
 }
 
 void dg::Material::SetProperty(const std::string& name, glm::mat3x3 value) {
   MaterialProperty prop;
-  prop.type = PROPERTY_MAT3X3;
+  prop.type = MaterialPropertyType::MAT3X3;
   prop.value._mat3x3 = value;
   properties.insert_or_assign(name, prop);
 }
 
 void dg::Material::SetProperty(const std::string& name, glm::mat4x4 value) {
   MaterialProperty prop;
-  prop.type = PROPERTY_MAT4X4;
+  prop.type = MaterialPropertyType::MAT4X4;
   prop.value._mat4x4 = value;
   properties.insert_or_assign(name, prop);
 }
@@ -103,7 +103,7 @@ void dg::Material::SetProperty(
     const std::string& name, std::shared_ptr<Texture> value,
     int texUnitHint) {
   MaterialProperty prop;
-  prop.type = PROPERTY_TEXTURE;
+  prop.type = MaterialPropertyType::TEXTURE;
   prop.texture = value;
   prop.texUnitHint = texUnitHint;
   if (texUnitHint > (int)highestTexUnitHint) {
@@ -176,34 +176,34 @@ void dg::Material::Use() const {
   unsigned int textureUnit = highestTexUnitHint + 1;
   for (auto it = properties.begin(); it != properties.end(); it++) {
     switch (it->second.type) {
-      case PROPERTY_BOOL:
+      case MaterialPropertyType::BOOL:
         shader->SetBool(it->first, it->second.value._bool);
         break;
-      case PROPERTY_INT:
+      case MaterialPropertyType::INT:
         shader->SetInt(it->first, it->second.value._int);
         break;
-      case PROPERTY_FLOAT:
+      case MaterialPropertyType::FLOAT:
         shader->SetFloat(it->first, it->second.value._float);
         break;
-      case PROPERTY_VEC2:
+      case MaterialPropertyType::VEC2:
         shader->SetVec2(it->first, it->second.value._vec2);
         break;
-      case PROPERTY_VEC3:
+      case MaterialPropertyType::VEC3:
         shader->SetVec3(it->first, it->second.value._vec3);
         break;
-      case PROPERTY_VEC4:
+      case MaterialPropertyType::VEC4:
         shader->SetVec4(it->first, it->second.value._vec4);
         break;
-      case PROPERTY_MAT2X2:
+      case MaterialPropertyType::MAT2X2:
         shader->SetMat2(it->first, it->second.value._mat2x2);
         break;
-      case PROPERTY_MAT3X3:
+      case MaterialPropertyType::MAT3X3:
         shader->SetMat3(it->first, it->second.value._mat3x3);
         break;
-      case PROPERTY_MAT4X4:
+      case MaterialPropertyType::MAT4X4:
         shader->SetMat4(it->first, it->second.value._mat4x4);
         break;
-      case PROPERTY_TEXTURE:
+      case MaterialPropertyType::TEXTURE:
         if (it->second.texUnitHint >= 0) {
           shader->SetTexture(
               it->second.texUnitHint, it->first, it->second.texture.get());

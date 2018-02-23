@@ -168,6 +168,9 @@
     <ClCompile Include="src\Graphics.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\scenes\SimpleScene.cpp">
+      <Filter>Source Files\scenes</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Behavior.h">
@@ -295,6 +298,9 @@
     </ClInclude>
     <ClInclude Include="include\Graphics.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\scenes\SimpleScene.h">
+      <Filter>Header Files\scenes</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

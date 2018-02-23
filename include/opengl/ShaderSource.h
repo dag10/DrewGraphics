@@ -1,5 +1,5 @@
 //
-//  ShaderSource.h
+//  opengl/ShaderSource.h
 //
 
 #pragma once

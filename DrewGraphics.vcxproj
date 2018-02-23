@@ -354,6 +354,7 @@ del /s $(OutDir)*.obj, $(OutDir)*.pdb, $(OutDir)*.ipdb, $(OutDir)*.iobj</Command
     <ClCompile Include="src\MathUtils.cpp" />
     <ClCompile Include="src\Mesh.cpp" />
     <ClCompile Include="src\Model.cpp" />
+    <ClCompile Include="src\opengl\ShaderSource.cpp" />
     <ClCompile Include="src\Scene.cpp" />
     <ClCompile Include="src\Behavior.cpp" />
     <ClCompile Include="src\SceneObject.cpp" />
@@ -368,7 +369,6 @@ del /s $(OutDir)*.obj, $(OutDir)*.pdb, $(OutDir)*.ipdb, $(OutDir)*.iobj</Command
     <ClCompile Include="src\scenes\RobotScene.cpp" />
     <ClCompile Include="src\scenes\VRScene.cpp" />
     <ClCompile Include="src\Shader.cpp" />
-    <ClCompile Include="src\ShaderSource.cpp" />
     <ClCompile Include="src\Skybox.cpp" />
     <ClCompile Include="src\Texture.cpp" />
     <ClCompile Include="src\Transform.cpp" />
@@ -399,6 +399,7 @@ del /s $(OutDir)*.obj, $(OutDir)*.pdb, $(OutDir)*.ipdb, $(OutDir)*.iobj</Command
     <ClInclude Include="include\MathUtils.h" />
     <ClInclude Include="include\Mesh.h" />
     <ClInclude Include="include\Model.h" />
+    <ClInclude Include="include\opengl\ShaderSource.h" />
     <ClInclude Include="include\Scene.h" />
     <ClInclude Include="include\SceneObject.h" />
     <ClInclude Include="include\scenes\CanvasTestScene.h" />
@@ -412,7 +413,6 @@ del /s $(OutDir)*.obj, $(OutDir)*.pdb, $(OutDir)*.ipdb, $(OutDir)*.iobj</Command
     <ClInclude Include="include\scenes\RobotScene.h" />
     <ClInclude Include="include\scenes\VRScene.h" />
     <ClInclude Include="include\Shader.h" />
-    <ClInclude Include="include\ShaderSource.h" />
     <ClInclude Include="include\Skybox.h" />
     <ClInclude Include="include\stb_image.h" />
     <ClInclude Include="include\Texture.h" />

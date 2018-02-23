@@ -49,6 +49,12 @@
     <Filter Include="Source Files\vr">
       <UniqueIdentifier>{7a7146b2-8404-41fd-8171-72f7711d9eef}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\opengl">
+      <UniqueIdentifier>{4be5b1fa-3209-4e11-b0ff-58ee3599c4d0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\opengl">
+      <UniqueIdentifier>{b16af9f4-c38a-4828-86ce-e2dbd7e9041f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Behavior.cpp">
@@ -88,9 +94,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Shader.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\ShaderSource.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Skybox.cpp">
@@ -171,6 +174,9 @@
     <ClCompile Include="src\scenes\SimpleScene.cpp">
       <Filter>Source Files\scenes</Filter>
     </ClCompile>
+    <ClCompile Include="src\opengl\ShaderSource.cpp">
+      <Filter>Source Files\opengl</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Behavior.h">
@@ -207,9 +213,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Shader.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\ShaderSource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Skybox.h">
@@ -301,6 +304,9 @@
     </ClInclude>
     <ClInclude Include="include\scenes\SimpleScene.h">
       <Filter>Header Files\scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="include\opengl\ShaderSource.h">
+      <Filter>Header Files\opengl</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

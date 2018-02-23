@@ -1,8 +1,8 @@
 //
-//  ShaderSource.cpp
+//  opengl/ShaderSource.cpp
 //
 
-#include <ShaderSource.h>
+#include <opengl/ShaderSource.h>
 #include <FileUtils.h>
 #include <Exceptions.h>
 

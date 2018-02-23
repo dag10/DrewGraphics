@@ -6,7 +6,7 @@
 #include <Shader.h>
 #include <Exceptions.h>
 #include <FileUtils.h>
-#include <ShaderSource.h>
+#include <opengl/ShaderSource.h>
 
 #include <cassert>
 #include <memory>

@@ -11,7 +11,7 @@
 #include <glm/glm.hpp>
 #include <Texture.h>
 #include <Transform.h>
-#include <ShaderSource.h>
+#include <opengl/ShaderSource.h>
 #include <glad/glad.h>
 
 namespace dg {

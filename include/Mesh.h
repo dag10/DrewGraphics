@@ -13,6 +13,8 @@
 
 namespace dg {
 
+  class OpenGLMesh;
+
   struct Vertex {
     typedef std::size_t hash_type;
 
@@ -78,12 +80,15 @@ namespace dg {
     }
   };
 
-
-  // Copy is disabled, only moves are allowed. This prevents us
-  // from leaking or redeleting the openGL resources.
+  // Copy is disabled. This prevents us from leaking or redeleting
+  // OpenGL/DirectX resources.
   class Mesh {
 
     public:
+
+#if defined(_OPENGL)
+      typedef OpenGLMesh mesh_class;
+#endif
 
       enum class Winding { CW, CCW };
 
@@ -100,24 +105,24 @@ namespace dg {
 
       static void CreatePrimitives();
 
+      static std::shared_ptr<Mesh> Create();
       static std::shared_ptr<Mesh> LoadOBJ(const char *filename);
 
-      Mesh() = default;
+      virtual ~Mesh() = default;
+
       Mesh(Mesh& other) = delete;
-      Mesh(Mesh&& other);
-      ~Mesh();
       Mesh& operator=(Mesh& other) = delete;
-      Mesh& operator=(Mesh&& other);
-      friend void swap(Mesh& first, Mesh& second); // nothrow
 
       void AddQuad(
           Vertex v1, Vertex v2, Vertex v3, Vertex v4, Winding winding);
       void AddTriangle(Vertex v1, Vertex v2, Vertex v3, Winding winding);
-      void FinishBuilding();
+      virtual void FinishBuilding() = 0;
 
-      void Draw() const;
+      virtual void Draw() const = 0;
 
-    private:
+    protected:
+
+      Mesh() = default;
 
       // Ordered list of vertexes, broken down into lists of their individual
       // attributes. These lists will be the same size, and the same element
@@ -135,21 +140,45 @@ namespace dg {
       // Map of hash of vertex to index of vertex already in vertex list.
       std::unordered_map<Vertex::hash_type, unsigned int> vertexMap;
 
-      static std::unique_ptr<Mesh> CreateCube();
-      static std::unique_ptr<Mesh> CreateMappedCube();
-      static std::unique_ptr<Mesh> CreateQuad();
-      static std::unique_ptr<Mesh> CreateCylinder(
+      static std::shared_ptr<Mesh> CreateCube();
+      static std::shared_ptr<Mesh> CreateMappedCube();
+      static std::shared_ptr<Mesh> CreateQuad();
+      static std::shared_ptr<Mesh> CreateCylinder(
           int radialDivisions, int heightDivisions);
-      static std::unique_ptr<Mesh> CreateSphere(int subdivisions);
+      static std::shared_ptr<Mesh> CreateSphere(int subdivisions);
 
       static Mesh *lastDrawnMesh;
       static std::unordered_map<std::string, std::weak_ptr<Mesh>> fileMap;
+
+  }; // class Mesh
+
+#if defined(_OPENGL)
+
+  class OpenGLMesh : public Mesh {
+    friend class Mesh;
+
+    public:
+
+      virtual ~OpenGLMesh();
+
+      OpenGLMesh(OpenGLMesh& other) = delete;
+      OpenGLMesh& operator=(OpenGLMesh& other) = delete;
+
+      virtual void FinishBuilding();
+
+      virtual void Draw() const;
+
+    private:
+
+      OpenGLMesh() = default;
 
       GLuint VAO = 0;
       GLuint VBO = 0;
       GLuint EBO = 0;
 
-  }; // class Mesh
+  }; // class OpenGLMesh
+
+#endif
 
 } // namespace dg
 

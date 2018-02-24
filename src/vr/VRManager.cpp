@@ -183,7 +183,7 @@ std::shared_ptr<dg::Mesh> dg::VRManager::GetHiddenAreaMesh(vr::EVREye eye) {
     : &rightHiddenAreaMesh;
 
   if (*hiddenAreaMesh == nullptr) {
-    *hiddenAreaMesh = std::make_shared<Mesh>();
+    *hiddenAreaMesh = Mesh::Create();
     vr::HiddenAreaMesh_t mesh = vrSystem->GetHiddenAreaMesh(eye);
     for (unsigned int i = 0; i < mesh.unTriangleCount; i++) {
       int offset = i * 3;

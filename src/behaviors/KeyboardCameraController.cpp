@@ -78,8 +78,13 @@ void dg::KeyboardCameraController::Update() {
   if (window->IsKeyPressed(Key::D)) {
     movementDir += RIGHT;
   }
-  float speedMultiplier =
-    (window->IsKeyPressed(Key::LEFT_SHIFT)) ? 2.f : 1.f;
+  float speedMultiplier = 1.0f;
+  if (window->IsKeyPressed(Key::LEFT_SHIFT)) {
+    speedMultiplier *= 3.0f;
+  }
+  if (window->IsKeyPressed(Key::LEFT_CONTROL)) {
+    speedMultiplier *= 0.5f;
+  }
   dg::Transform xfDelta = dg::Transform::T(
       movementDir * speed * speedMultiplier * (float)Time::Delta);
 

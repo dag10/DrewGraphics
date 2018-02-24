@@ -4,7 +4,12 @@
 
 #pragma once
 
+#if defined(_OPENGL)
 #include <glad/glad.h>
+#elif defined(_DIRECTX)
+#include <d3d11.h>
+#endif
+
 #include <glm/glm.hpp>
 #include <glm/gtx/hash.hpp>
 #include <memory>
@@ -14,6 +19,7 @@
 namespace dg {
 
   class OpenGLMesh;
+  class DirectXMesh;
 
   struct Vertex {
     typedef std::size_t hash_type;
@@ -29,25 +35,20 @@ namespace dg {
     };
     static const int NumAttrs = 4;
 
-    glm::vec3 position;
-    glm::vec3 normal;
-    glm::vec2 texCoord;
-    glm::vec3 tangent;
+    struct Data {
+      glm::vec3 position;
+      glm::vec3 normal;
+      glm::vec2 texCoord;
+      glm::vec3 tangent;
+    };
+
+    Data data;
     AttrFlag attributes = AttrFlag::NONE;
 
-    Vertex(glm::vec3 position)
-      : position(position), attributes(AttrFlag::POSITION) {};
-    Vertex(
-        glm::vec3 position, glm::vec3 normal, glm::vec2 texCoord)
-      : position(position), normal(normal), texCoord(texCoord),
-      attributes(AttrFlag::POSITION | AttrFlag::NORMAL | AttrFlag::TEXCOORD) {};
-    Vertex(
-        glm::vec3 position, glm::vec3 normal, glm::vec2 texCoord,
-        glm::vec3 tangent)
-      : position(position), normal(normal), texCoord(texCoord),
-      tangent(tangent), attributes(
-          AttrFlag::POSITION | AttrFlag::NORMAL |
-          AttrFlag::TEXCOORD | AttrFlag::TANGENT) {};
+    Vertex(glm::vec3 position);
+    Vertex(glm::vec3 position, glm::vec3 normal, glm::vec2 texCoord);
+    Vertex(glm::vec3 position, glm::vec3 normal, glm::vec2 texCoord,
+           glm::vec3 tangent);
 
     bool HasAllAttr(AttrFlag flags) const {
       return (this->attributes & flags) == flags;
@@ -88,6 +89,8 @@ namespace dg {
 
 #if defined(_OPENGL)
       typedef OpenGLMesh mesh_class;
+#elif defined(_DIRECTX)
+      typedef DirectXMesh mesh_class;
 #endif
 
       enum class Winding { CW, CCW };
@@ -117,6 +120,8 @@ namespace dg {
           Vertex v1, Vertex v2, Vertex v3, Vertex v4, Winding winding);
       void AddTriangle(Vertex v1, Vertex v2, Vertex v3, Winding winding);
       virtual void FinishBuilding() = 0;
+
+      const Vertex GetVertex(int i) const;
 
       virtual void Draw() const = 0;
 
@@ -178,6 +183,32 @@ namespace dg {
 
   }; // class OpenGLMesh
 
+#elif defined(_DIRECTX)
+
+  class DirectXMesh : public Mesh {
+    friend class Mesh;
+
+    public:
+
+      virtual ~DirectXMesh();
+
+      DirectXMesh(DirectXMesh& other) = delete;
+      DirectXMesh& operator=(DirectXMesh& other) = delete;
+
+      virtual void FinishBuilding();
+
+      virtual void Draw() const;
+
+    private:
+
+      DirectXMesh() = default;
+
+      // Handles to DirectX buffers holding the vertices and indices in the GPU.
+      ID3D11Buffer *vertexBuffer = nullptr;
+      ID3D11Buffer *indexBuffer = nullptr;
+
+  }; // class DirectXMesh
+
 #endif
 
 } // namespace dg
@@ -189,16 +220,16 @@ namespace std {
     result_type operator()(argument_type const& v) const noexcept {
       result_type h = 0;
       if (v.HasAllAttr(dg::Vertex::AttrFlag::POSITION)) {
-        h ^= std::hash<glm::vec3>{}(v.position);
+        h ^= std::hash<glm::vec3>{}(v.data.position);
       }
       if (v.HasAllAttr(dg::Vertex::AttrFlag::NORMAL)) {
-        h ^= std::hash<glm::vec3>{}(v.normal) << 1;
+        h ^= std::hash<glm::vec3>{}(v.data.normal) << 1;
       }
       if (v.HasAllAttr(dg::Vertex::AttrFlag::TEXCOORD)) {
-        h ^= std::hash<glm::vec2>{}(v.texCoord) << 2;
+        h ^= std::hash<glm::vec2>{}(v.data.texCoord) << 2;
       }
       if (v.HasAllAttr(dg::Vertex::AttrFlag::TANGENT)) {
-        h ^= std::hash<glm::vec3>{}(v.tangent) << 3;
+        h ^= std::hash<glm::vec3>{}(v.data.tangent) << 3;
       }
       return h;
     }

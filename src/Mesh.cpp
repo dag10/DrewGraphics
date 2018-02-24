@@ -2,9 +2,9 @@
 //  Mesh.cpp
 //
 
-#include <glad/glad.h>
 #include <Mesh.h>
 #include <Exceptions.h>
+#include <Graphics.h>
 #include <iostream>
 #include <fstream>
 #include <cassert>
@@ -16,6 +16,32 @@
 #define sscanf sscanf_s
 #endif
 
+#pragma region Vertex
+
+dg::Vertex::Vertex(glm::vec3 position) {
+  data.position = position;
+  attributes = AttrFlag::POSITION;
+}
+
+dg::Vertex::Vertex(glm::vec3 position, glm::vec3 normal, glm::vec2 texCoord) {
+  data.position = position;
+  data.normal = normal;
+  data.texCoord = texCoord;
+  attributes = AttrFlag::POSITION | AttrFlag::NORMAL | AttrFlag::TEXCOORD;
+}
+
+dg::Vertex::Vertex(
+    glm::vec3 position, glm::vec3 normal, glm::vec2 texCoord,
+    glm::vec3 tangent) {
+  data.position = position;
+  data.normal = normal;
+  data.texCoord = texCoord;
+  data.tangent = tangent;
+  attributes = AttrFlag::POSITION | AttrFlag::NORMAL | AttrFlag::TEXCOORD |
+               AttrFlag::TANGENT;
+}
+
+#pragma endregion
 #pragma region Base Class
 
 dg::Mesh *dg::Mesh::lastDrawnMesh = nullptr;
@@ -72,17 +98,17 @@ void dg::Mesh::AddTriangle(Vertex v1, Vertex v2, Vertex v3, Winding winding) {
   if (!!(v1.attributes & (Flag::POSITION | Flag::TEXCOORD)) &&
       !(v1.attributes & Flag::TANGENT)) {
 
-    float x1 = v2.position.x - v1.position.x;
-    float x2 = v3.position.x - v1.position.x;
-    float y1 = v2.position.y - v1.position.y;
-    float y2 = v3.position.y - v1.position.y;
-    float z1 = v2.position.z - v1.position.z;
-    float z2 = v3.position.z - v1.position.z;
+    float x1 = v2.data.position.x - v1.data.position.x;
+    float x2 = v3.data.position.x - v1.data.position.x;
+    float y1 = v2.data.position.y - v1.data.position.y;
+    float y2 = v3.data.position.y - v1.data.position.y;
+    float z1 = v2.data.position.z - v1.data.position.z;
+    float z2 = v3.data.position.z - v1.data.position.z;
 
-    float s1 = v2.texCoord.x - v1.texCoord.x;
-    float s2 = v3.texCoord.x - v1.texCoord.x;
-    float t1 = v2.texCoord.y - v1.texCoord.y;
-    float t2 = v3.texCoord.y - v1.texCoord.y;
+    float s1 = v2.data.texCoord.x - v1.data.texCoord.x;
+    float s2 = v3.data.texCoord.x - v1.data.texCoord.x;
+    float t1 = v2.data.texCoord.y - v1.data.texCoord.y;
+    float t2 = v3.data.texCoord.y - v1.data.texCoord.y;
 
     float r = 1.0F / (s1 * t2 - s2 * t1);
     glm::vec3 sdir((t2 * x1 - t1 * x2) * r, (t2 * y1 - t1 * y2) * r,
@@ -91,11 +117,11 @@ void dg::Mesh::AddTriangle(Vertex v1, Vertex v2, Vertex v3, Winding winding) {
         (s1 * z2 - s2 * z1) * r);
 
     for (long i = 0; i < 3; i++) {
-      const glm::vec3& n = v[i]->normal;
+      const glm::vec3& n = v[i]->data.normal;
       const glm::vec3& t = sdir;
 
       // Gram-Schmidt orthogonalize
-      v[i]->tangent = glm::normalize(t - n * glm::dot(n, t));
+      v[i]->data.tangent = glm::normalize(t - n * glm::dot(n, t));
       v[i]->attributes |= Vertex::AttrFlag::TANGENT;
     }
   }
@@ -113,16 +139,16 @@ void dg::Mesh::AddTriangle(Vertex v1, Vertex v2, Vertex v3, Winding winding) {
     unsigned int index = -1;
     if (pair == vertexMap.end()) {
       if (!!(attributes & Flag::POSITION)) {
-        vertexPositions.push_back(v[i]->position);
+        vertexPositions.push_back(v[i]->data.position);
       }
       if (!!(attributes & Flag::NORMAL)) {
-        vertexNormals.push_back(v[i]->normal);
+        vertexNormals.push_back(v[i]->data.normal);
       }
       if (!!(attributes & Flag::TEXCOORD)) {
-        vertexTexCoords.push_back(v[i]->texCoord);
+        vertexTexCoords.push_back(v[i]->data.texCoord);
       }
       if (!!(attributes & Flag::TANGENT)) {
-        vertexTangents.push_back(v[i]->tangent);
+        vertexTangents.push_back(v[i]->data.tangent);
       }
       index = vertexPositions.size() - 1;
       vertexMap[hash] = index;
@@ -132,6 +158,21 @@ void dg::Mesh::AddTriangle(Vertex v1, Vertex v2, Vertex v3, Winding winding) {
 
     indices.push_back(index);
   }
+}
+
+const dg::Vertex dg::Mesh::GetVertex(int i) const {
+  Vertex vertex(vertexPositions[i]);
+  if (!!(attributes & Vertex::AttrFlag::NORMAL)) {
+    vertex.data.normal = vertexNormals[i];
+  }
+  if (!!(attributes & Vertex::AttrFlag::TEXCOORD)) {
+    vertex.data.texCoord = vertexTexCoords[i];
+  }
+  if (!!(attributes & Vertex::AttrFlag::TANGENT)) {
+    vertex.data.tangent = vertexTangents[i];
+  }
+  vertex.attributes = attributes;
+  return vertex;
 }
 
 std::shared_ptr<dg::Mesh> dg::Mesh::CreateCube() {
@@ -550,7 +591,7 @@ std::shared_ptr<dg::Mesh> dg::Mesh::Create() {
 #if defined(_OPENGL)
   return std::shared_ptr<Mesh>(new OpenGLMesh());
 #elif defined(_DIRECTX)
-  return nullptr; // TODO
+  return std::shared_ptr<Mesh>(new DirectXMesh());
 #endif
 }
 
@@ -678,10 +719,10 @@ dg::OpenGLMesh::~OpenGLMesh() {
 void dg::OpenGLMesh::FinishBuilding() {
   assert(VAO == 0 && VBO == 0 && EBO == 0);
 
-  const size_t positionSize = sizeof(Vertex::position);
-  const size_t normalSize = sizeof(Vertex::normal);
-  const size_t texCoordSize = sizeof(Vertex::texCoord);
-  const size_t tangentSize = sizeof(Vertex::tangent);
+  const size_t positionSize = sizeof(Vertex::Data::position);
+  const size_t normalSize = sizeof(Vertex::Data::normal);
+  const size_t texCoordSize = sizeof(Vertex::Data::texCoord);
+  const size_t tangentSize = sizeof(Vertex::Data::tangent);
 
   const size_t stride =
     (static_cast<bool>(attributes & Vertex::AttrFlag::POSITION)
@@ -770,6 +811,77 @@ void dg::OpenGLMesh::Draw() const {
     lastDrawnMesh = (Mesh*)this; // Although we're const, we'll allow this.
   }
   glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, (void*)0);
+}
+
+#endif
+#pragma endregion
+#pragma region DirectX Mesh
+#if defined(_DIRECTX)
+
+dg::DirectXMesh::~DirectXMesh() {
+  if (vertexBuffer != nullptr) {
+    vertexBuffer->Release();
+    vertexBuffer = nullptr;
+  }
+  if (indexBuffer != nullptr) {
+    indexBuffer->Release();
+    indexBuffer = nullptr;
+  }
+
+}
+
+void dg::DirectXMesh::FinishBuilding() {
+  // Ensure that we haven't built the mesh's buffers yet.
+  assert(vertexBuffer == nullptr);
+  assert(indexBuffer == nullptr);
+
+  std::vector<Vertex::Data> vertices(vertexPositions.size());
+  int numVertices = (int)vertexPositions.size();
+  for (int i = 0; i < numVertices; i++) {
+    vertices[i] = GetVertex(i).data;
+  }
+
+  D3D11_BUFFER_DESC vbd;
+  vbd.Usage = D3D11_USAGE_IMMUTABLE;
+  vbd.ByteWidth = (unsigned int)(sizeof(Vertex::Data) * numVertices);
+  vbd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+  vbd.CPUAccessFlags = 0;
+  vbd.MiscFlags = 0;
+  vbd.StructureByteStride = 0;
+
+  D3D11_SUBRESOURCE_DATA initialVertexData;
+  initialVertexData.pSysMem = vertices.data();
+
+  Graphics::Instance->device->CreateBuffer(&vbd, &initialVertexData, &vertexBuffer);
+
+  D3D11_BUFFER_DESC ibd;
+  ibd.Usage = D3D11_USAGE_IMMUTABLE;
+  ibd.ByteWidth = (unsigned int)(sizeof(int) * indices.size());
+  ibd.BindFlags = D3D11_BIND_INDEX_BUFFER;
+  ibd.CPUAccessFlags = 0;
+  ibd.MiscFlags = 0;
+  ibd.StructureByteStride = 0;
+
+  D3D11_SUBRESOURCE_DATA initialIndexData;
+  initialIndexData.pSysMem = indices.data();
+
+  Graphics::Instance->device->CreateBuffer(&ibd, &initialIndexData, &indexBuffer);
+
+  vertexMap.clear();
+}
+
+void dg::DirectXMesh::Draw() const {
+  assert(vertexBuffer != nullptr);
+  assert(indexBuffer != nullptr);
+
+  UINT stride = sizeof(Vertex);
+  UINT offset = 0;
+  Graphics::Instance->context->IASetVertexBuffers(
+    0, 1, &vertexBuffer, &stride, &offset);
+  Graphics::Instance->context->IASetIndexBuffer(
+    indexBuffer, DXGI_FORMAT_R32_UINT, 0);
+
+  Graphics::Instance->context->DrawIndexed(indices.size(), 0, 0);
 }
 
 #endif

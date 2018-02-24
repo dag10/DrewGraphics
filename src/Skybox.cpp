@@ -49,8 +49,7 @@ void dg::Skybox::Draw(const Camera& camera, glm::mat4x4 projection) {
     camera.transform.translation, glm::vec3(5)).ToMat4();
   glm::mat4x4 view = camera.GetViewMatrix();
 
-  material.SetMatrixNormal(
-      glm::mat3x3(glm::transpose(glm::inverse(model))));
+  material.SetMatrixNormal(glm::transpose(glm::inverse(model)));
   material.SetMatrixM(model);
   material.SetMatrixMVP(projection * view * model);
 

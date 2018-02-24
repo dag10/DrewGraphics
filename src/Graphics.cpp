@@ -23,13 +23,13 @@ std::unique_ptr<dg::Graphics::graphics_class> dg::Graphics::Instance;
 void dg::Graphics::Initialize(const Window& window) {
   assert(Instance == nullptr);
   Instance = std::unique_ptr<graphics_class>(new graphics_class(window));
+  Instance->InitializeGraphics();
+  Instance->InitializeResources();
 }
 
 void dg::Graphics::InitializeResources() {
-#if defined(_OPENGL) // TODO: Remove ifdef once Mesh supports DirectX.
   // Create primitive meshes.
   dg::Mesh::CreatePrimitives();
-#endif
 }
 
 void dg::Graphics::Shutdown() {
@@ -43,13 +43,17 @@ void dg::Graphics::Shutdown() {
 #pragma region OpenGL Graphics
 #if defined(_OPENGL)
 
-dg::OpenGLGraphics::OpenGLGraphics(const Window& window) {
+dg::OpenGLGraphics::OpenGLGraphics(const Window& window) {}
+
+void dg::OpenGLGraphics::InitializeGraphics() {
   // Load GLAD procedures.
   if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
     throw std::runtime_error("Failed to initialize GLAD.");
   }
+}
 
-  InitializeResources();
+void dg::OpenGLGraphics::InitializeResources() {
+  Graphics::InitializeResources();
 
   // Configure global includes for all shader files.
   dg::OpenGLShader::SetVertexHead("assets/shaders/includes/vertex_head.glsl");
@@ -74,7 +78,9 @@ void dg::OpenGLGraphics::Clear(glm::vec3 color) {
 #pragma region DirectX Graphics
 #if defined(_DIRECTX)
 
-dg::DirectXGraphics::DirectXGraphics(const Window& window) {
+dg::DirectXGraphics::DirectXGraphics(const Window& window) : window(window) {}
+
+void dg::DirectXGraphics::InitializeGraphics() {
   unsigned int deviceFlags = 0;
 
 #if defined(DEBUG) || defined(_DEBUG)
@@ -85,8 +91,8 @@ dg::DirectXGraphics::DirectXGraphics(const Window& window) {
 
   DXGI_SWAP_CHAIN_DESC swapDesc = {};
   swapDesc.BufferCount = 1;
-  swapDesc.BufferDesc.Width = contentSize.x;
-  swapDesc.BufferDesc.Height = contentSize.y;
+  swapDesc.BufferDesc.Width = (unsigned int)contentSize.x;
+  swapDesc.BufferDesc.Height = (unsigned int)contentSize.y;
   swapDesc.BufferDesc.RefreshRate.Numerator = 60;
   swapDesc.BufferDesc.RefreshRate.Denominator = 1;
   swapDesc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
@@ -135,8 +141,8 @@ dg::DirectXGraphics::DirectXGraphics(const Window& window) {
 
   // Set up the description of the texture to use for the depth buffer
   D3D11_TEXTURE2D_DESC depthStencilDesc = {};
-  depthStencilDesc.Width = contentSize.x;
-  depthStencilDesc.Height = contentSize.y;
+  depthStencilDesc.Width = (unsigned int)contentSize.x;
+  depthStencilDesc.Height = (unsigned int)contentSize.y;
   depthStencilDesc.MipLevels = 1;
   depthStencilDesc.ArraySize = 1;
   depthStencilDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
@@ -168,8 +174,6 @@ dg::DirectXGraphics::DirectXGraphics(const Window& window) {
   viewport.MinDepth = 0.0f;
   viewport.MaxDepth = 1.0f;
   context->RSSetViewports(1, &viewport);
-
-  InitializeResources();
 }
 
 dg::DirectXGraphics::~DirectXGraphics() {

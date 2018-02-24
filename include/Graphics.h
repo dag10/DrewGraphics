@@ -39,12 +39,14 @@ namespace dg {
 
     protected:
 
-      void InitializeResources();
+      virtual void InitializeGraphics() = 0;
+      virtual void InitializeResources();
 
   }; // class Graphics
 
 #if defined(_OPENGL)
   class OpenGLGraphics : public Graphics {
+    friend class Graphics;
 
     public:
 
@@ -53,11 +55,17 @@ namespace dg {
 
       virtual void Clear(glm::vec3 color);
 
+    protected:
+
+      virtual void InitializeGraphics();
+      virtual void InitializeResources();
+
   }; // class OpenGLGraphics
 #endif
 
 #if defined(_DIRECTX)
   class DirectXGraphics : public Graphics {
+    friend class Graphics;
 
     public:
 
@@ -73,6 +81,14 @@ namespace dg {
 
       ID3D11RenderTargetView *backBufferRTV;
       ID3D11DepthStencilView *depthStencilView;
+
+    protected:
+
+      virtual void InitializeGraphics();
+
+    private:
+
+      const Window& window;
 
   }; // class OpenGLGraphics
 #endif

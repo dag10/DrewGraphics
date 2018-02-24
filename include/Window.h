@@ -264,6 +264,7 @@ namespace dg {
       bool cursorIsLocked = false;
       bool cursorWasLocked = false;
       glm::vec2 cursorLockOffset;
+      unsigned int dpi;
 
   }; // class Win32Window
 #endif

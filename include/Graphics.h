@@ -35,6 +35,8 @@ namespace dg {
 
       virtual ~Graphics() = default;
 
+      virtual void OnWindowResize(const Window& window) {};
+
       virtual void Clear(glm::vec3 color) = 0;
 
     protected:
@@ -72,6 +74,8 @@ namespace dg {
       DirectXGraphics(const Window& window);
       virtual ~DirectXGraphics();
 
+      virtual void OnWindowResize(const Window& window);
+
       virtual void Clear(glm::vec3 color);
 
       ID3D11Device *device;
@@ -89,6 +93,7 @@ namespace dg {
     private:
 
       const Window& window;
+      glm::vec2 contentSize;
 
   }; // class OpenGLGraphics
 #endif

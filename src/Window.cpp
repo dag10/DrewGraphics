@@ -423,6 +423,7 @@ std::shared_ptr<dg::Window> dg::Win32Window::Open(
   return window;
 }
 
+#include <iostream>
 void dg::Win32Window::Open(int width, int height) {
 
   WNDCLASS wndClass = {};
@@ -515,7 +516,9 @@ LRESULT CALLBACK dg::Win32Window::ProcessMessage(
       GetClientRect(hWnd, &clientRect);
       width = clientRect.right - clientRect.left;
       height = clientRect.bottom - clientRect.top;
-      // TODO: If DirectX is initialized, resize buffers.
+      if (Graphics::Instance != nullptr) {
+        Graphics::Instance->OnWindowResize(*this);
+      }
       return 0;
     }
 

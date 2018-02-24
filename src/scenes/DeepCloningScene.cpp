@@ -50,6 +50,7 @@ void dg::DeepCloningScene::Initialize() {
 
   // Create floor material.
   const int floorSize = 500;
+#if defined(_OPENGL)
   StandardMaterial floorMaterial = StandardMaterial::WithTexture(
       std::make_shared<Texture>(Texture::FromPath(
           "assets/textures/Flooring_Stone_001/Flooring_Stone_001_COLOR.png")));
@@ -59,6 +60,9 @@ void dg::DeepCloningScene::Initialize() {
   floorMaterial.SetSpecular(
       std::make_shared<Texture>(Texture::FromPath(
           "assets/textures/Flooring_Stone_001/Flooring_Stone_001_SPEC.png")));
+#elif defined(_DIRECTX)
+  StandardMaterial floorMaterial = StandardMaterial::WithColor(glm::vec3(0.5f));
+#endif
   floorMaterial.SetShininess(9);
   floorMaterial.SetUVScale(glm::vec2((float)floorSize));
   floorMaterial.SetLit(true);
@@ -97,10 +101,49 @@ void dg::DeepCloningScene::Initialize() {
     widget->GetBehavior<WidgetBehavior>()->SetLight(false);
     AddChild(widget);
   }
+
+  // Momentary buttons to show left, agnostic, and right key states for SHIFT
+  // and CONTROL keys.
+  {
+    auto widget = BuildWidget(window, Key::LEFT_SHIFT, glm::vec3(0.4f), true);
+    widget->transform = Transform::T({ -2, 0, 2 });
+    widget->GetBehavior<WidgetBehavior>()->SetLight(false);
+    AddChild(widget);
+  }
+  {
+    auto widget = BuildWidget(window, Key::LEFT_CONTROL, glm::vec3(0.4f), true);
+    widget->transform = Transform::T({ -2, 0, 3 });
+    widget->GetBehavior<WidgetBehavior>()->SetLight(false);
+    AddChild(widget);
+  }
+  {
+    auto widget = BuildWidget(window, Key::SHIFT, glm::vec3(0.4f), true);
+    widget->transform = Transform::T({ 0, 0, 2 });
+    widget->GetBehavior<WidgetBehavior>()->SetLight(false);
+    AddChild(widget);
+  }
+  {
+    auto widget = BuildWidget(window, Key::CONTROL, glm::vec3(0.4f), true);
+    widget->transform = Transform::T({ 0, 0, 3 });
+    widget->GetBehavior<WidgetBehavior>()->SetLight(false);
+    AddChild(widget);
+  }
+  {
+    auto widget = BuildWidget(window, Key::RIGHT_SHIFT, glm::vec3(0.4f), true);
+    widget->transform = Transform::T({ 2, 0, 2 });
+    widget->GetBehavior<WidgetBehavior>()->SetLight(false);
+    AddChild(widget);
+  }
+  {
+    auto widget = BuildWidget(window, Key::RIGHT_CONTROL, glm::vec3(0.4f), true);
+    widget->transform = Transform::T({ 2, 0, 3 });
+    widget->GetBehavior<WidgetBehavior>()->SetLight(false);
+    AddChild(widget);
+  }
 }
 
 std::shared_ptr<dg::SceneObject> dg::DeepCloningScene::BuildWidget(
-    std::shared_ptr<Window> window, Key key, glm::vec3 color) {
+    std::shared_ptr<Window> window, Key key, glm::vec3 color, bool momentary) {
   auto widget = std::make_shared<SceneObject>();
 
   static std::shared_ptr<StandardMaterial> baseMaterial =
@@ -139,6 +182,7 @@ std::shared_ptr<dg::SceneObject> dg::DeepCloningScene::BuildWidget(
       std::make_shared<WidgetBehavior>(window, button, light));
   logic->key = key;
   logic->color = color;
+  logic->momentary = momentary;
 
   return widget;
 }
@@ -169,9 +213,12 @@ void WidgetBehavior::Update() {
   std::shared_ptr<Light> light = this->light.lock();
   if (!window || !button || !light) return;
 
-  if (window->IsKeyJustPressed(key)) {
+  if (momentary) {
+    light->enabled = window->IsKeyPressed(key);
+  } else if (window->IsKeyJustPressed(key)) {
     light->enabled = !light->enabled;
   }
+
 
   if (window->IsKeyPressed(key)) {
     button->transform.translation = originalButtonPos - (0.06f * UP);

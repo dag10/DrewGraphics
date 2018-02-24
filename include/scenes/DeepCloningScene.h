@@ -30,7 +30,8 @@ namespace dg {
       DeepCloningScene(bool enableVR);
 
       static std::shared_ptr<SceneObject> BuildWidget(
-          std::shared_ptr<Window> window, Key key, glm::vec3 color);
+          std::shared_ptr<Window> window, Key key, glm::vec3 color,
+          bool momentary = false);
 
   }; // class DeepCloningScene
 
@@ -46,6 +47,7 @@ namespace dg {
 
         Key key;
         glm::vec3 color;
+        bool momentary = false;
 
         virtual void Start();
         virtual void Update();

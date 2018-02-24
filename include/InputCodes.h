@@ -137,6 +137,9 @@ namespace dg {
     RIGHT_SUPER = 347,
     MENU = 348,
 
+    SHIFT,   // Set manually
+    CONTROL, // Set manually
+
     LAST, // Bookend
   };
 
@@ -283,6 +286,9 @@ namespace dg {
     RIGHT_ALT = -1, // Implemented as a syskey
     RIGHT_SUPER = VK_RWIN,
     MENU = VK_MENU,
+
+    SHIFT = VK_SHIFT,
+    CONTROL = VK_CONTROL,
 
     LAST = 0xFF, // Bookend
   };

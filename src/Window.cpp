@@ -196,8 +196,32 @@ void dg::OpenGLWindow::glfwKeyCallback(
   if (pair == windowMap.end()) {
     return;
   }
-  if (auto window = pair->second.lock()) {
-    window->HandleKey((Key)key, (InputState)action);
+  auto window = pair->second.lock();
+  if (!window) return;
+
+  window->HandleKey((Key)key, (InputState)action);
+
+  if ((InputState)action == InputState::PRESS) {
+    if ((Key)key == Key::LEFT_SHIFT || (Key)key == Key::RIGHT_SHIFT) {
+      window->HandleKey(Key::SHIFT, InputState::PRESS);
+    } else if ((Key)key == Key::LEFT_CONTROL ||
+               (Key)key == Key::RIGHT_CONTROL) {
+      window->HandleKey(Key::CONTROL, InputState::PRESS);
+    }
+  } else if ((InputState)action == InputState::RELEASE) {
+    if ((Key)key == Key::LEFT_SHIFT &&
+        !window->IsKeyPressed(Key::RIGHT_SHIFT)) {
+      window->HandleKey(Key::SHIFT, InputState::RELEASE);
+    } else if ((Key)key == Key::RIGHT_SHIFT &&
+               !window->IsKeyPressed(Key::LEFT_SHIFT)) {
+      window->HandleKey(Key::SHIFT, InputState::RELEASE);
+    } else if ((Key)key == Key::LEFT_CONTROL &&
+               !window->IsKeyPressed(Key::RIGHT_CONTROL)) {
+      window->HandleKey(Key::CONTROL, InputState::RELEASE);
+    } else if ((Key)key == Key::RIGHT_CONTROL &&
+               !window->IsKeyPressed(Key::LEFT_CONTROL)) {
+      window->HandleKey(Key::CONTROL, InputState::RELEASE);
+    }
   }
 }
 
@@ -219,9 +243,10 @@ void dg::OpenGLWindow::glfwCursorPositionCallback(
   if (pair == windowMap.end()) {
     return;
   }
-  if (auto window = pair->second.lock()) {
-    window->HandleCursorPosition(x, y);
-  }
+  auto window = pair->second.lock();
+  if (!window) return;
+
+  window->HandleCursorPosition(x, y);
 }
 
 void dg::OpenGLWindow::UseContext() {
@@ -563,16 +588,60 @@ LRESULT CALLBACK dg::Win32Window::ProcessMessage(
       return 0;
 
     // Key pressed.
-    case WM_KEYDOWN:
+    case WM_KEYDOWN: {
       HandleKey((Key)wParam, InputState::PRESS);
+      if ((Key)wParam == Key::SHIFT) {
+        if (GetAsyncKeyState((SHORT)Key::LEFT_SHIFT)) {
+          HandleKey(Key::LEFT_SHIFT, InputState::PRESS);
+        }
+        if (GetAsyncKeyState((SHORT)Key::RIGHT_SHIFT)) {
+          HandleKey(Key::RIGHT_SHIFT, InputState::PRESS);
+        }
+      } else if ((Key)wParam == Key::CONTROL) {
+        if (GetAsyncKeyState((SHORT)Key::LEFT_CONTROL)) {
+          HandleKey(Key::LEFT_CONTROL, InputState::PRESS);
+        }
+        if (GetAsyncKeyState((SHORT)Key::RIGHT_CONTROL)) {
+          HandleKey(Key::RIGHT_CONTROL, InputState::PRESS);
+        }
+      }
       return 0;
+    }
 
     // Key released.
-    case WM_KEYUP:
-      HandleKey((Key)wParam, InputState::RELEASE);
-      return 0;
+    case WM_KEYUP: {
+      if ((Key)wParam == Key::SHIFT) {
+        if (IsKeyPressed(Key::LEFT_SHIFT) &&
+            !GetAsyncKeyState((int)Key::LEFT_SHIFT)) {
+          HandleKey(Key::LEFT_SHIFT, InputState::RELEASE);
+        } else if (IsKeyPressed(Key::RIGHT_SHIFT) &&
+                   !GetAsyncKeyState((int)Key::RIGHT_SHIFT)) {
+          HandleKey(Key::RIGHT_SHIFT, InputState::RELEASE);
+        }
 
-    // TODO: Handle mouse wheel (WM_MOUSEWHEEL).
+        if (!IsKeyPressed(Key::LEFT_SHIFT) && !IsKeyPressed(Key::RIGHT_SHIFT)) {
+          HandleKey(Key::SHIFT, InputState::RELEASE);
+        }
+      } else if ((Key)wParam == Key::CONTROL) {
+        if (IsKeyPressed(Key::LEFT_CONTROL) &&
+            !GetAsyncKeyState((int)Key::LEFT_CONTROL)) {
+          HandleKey(Key::LEFT_CONTROL, InputState::RELEASE);
+        } else if (IsKeyPressed(Key::RIGHT_CONTROL) &&
+                   !GetAsyncKeyState((int)Key::RIGHT_CONTROL)) {
+          HandleKey(Key::RIGHT_CONTROL, InputState::RELEASE);
+        }
+
+        if (!IsKeyPressed(Key::LEFT_CONTROL) &&
+            !IsKeyPressed(Key::RIGHT_CONTROL)) {
+          HandleKey(Key::CONTROL, InputState::RELEASE);
+        }
+      } else {
+        HandleKey((Key)wParam, InputState::RELEASE);
+      }
+      return 0;
+    }
+
+      // TODO: Handle mouse wheel (WM_MOUSEWHEEL).
   }
 
   return DefWindowProc(hWnd, uMsg, wParam, lParam);

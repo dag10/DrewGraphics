@@ -4,14 +4,15 @@
 
 #include <scenes/RobotScene.h>
 
-#include <glm/glm.hpp>
 #include <EngineTime.h>
-#include <materials/StandardMaterial.h>
-#include <materials/UVMaterial.h>
-#include <behaviors/KeyboardCameraController.h>
+#include <Graphics.h>
+#include <Lights.h>
 #include <Mesh.h>
 #include <Model.h>
-#include <Lights.h>
+#include <behaviors/KeyboardCameraController.h>
+#include <materials/StandardMaterial.h>
+#include <materials/UVMaterial.h>
+#include <glm/glm.hpp>
 
 std::unique_ptr<dg::RobotScene> dg::RobotScene::Make() {
   return std::unique_ptr<dg::RobotScene>(new dg::RobotScene(false));
@@ -406,7 +407,6 @@ void dg::RobotScene::Update() {
 }
 
 void dg::RobotScene::ClearBuffer() {
-  glClearColor(26.f / 255, 37.f / 255, 43.f / 255, 1.f);
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+  Graphics::Instance->Clear(glm::vec3(26.f, 37.f, 43.f) / 255.f);
 }
 

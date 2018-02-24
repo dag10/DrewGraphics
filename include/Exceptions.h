@@ -11,52 +11,57 @@
 
 namespace dg {
 
-class OpenVRError : public std::runtime_error {
+class EngineError : public std::runtime_error {
   public:
-    OpenVRError(vr::EVRInitError error) : std::runtime_error(
+    EngineError(const std::string& msg) : std::runtime_error(msg) {}
+};
+
+class OpenVRError : public EngineError {
+  public:
+    OpenVRError(vr::EVRInitError error) : EngineError(
       VR_GetVRInitErrorAsSymbol(error)) { };
 };
 
-class ShaderCompileError : public std::runtime_error {
+class ShaderCompileError : public EngineError {
   public:
     ShaderCompileError(const std::string& path, const std::string& error)
-        : std::runtime_error(
+        : EngineError(
             "Unable to compile shader \"" + path + "\":\n" + error) { };
 };
 
-class ShaderLinkError : public std::runtime_error {
+class ShaderLoadException : public EngineError {
+public:
+  ShaderLoadException(const std::string& path)
+    : EngineError("Failed to load shader \"" + path + "\"") {}
+};
+
+class ShaderLinkError : public EngineError {
   public:
     ShaderLinkError(const std::string& error)
-        : std::runtime_error("Unable to link shader:\n" + error) { };
+        : EngineError("Unable to link shader:\n" + error) { };
 };
 
-class FileNotFoundException : public std::runtime_error {
+class FileNotFoundException : public EngineError {
   public:
     FileNotFoundException(const std::string& path)
-        : std::runtime_error("Unable to open \"" + path + "\"") { };
+        : EngineError("Unable to open \"" + path + "\"") { };
 };
 
-class ResourceLoadException : public std::runtime_error {
+class ResourceLoadException : public EngineError {
   public:
-    ResourceLoadException(const std::string& str) : std::runtime_error(str) {}
+    ResourceLoadException(const std::string& str) : EngineError(str) {}
 };
 
-class FrameBufferException : public std::runtime_error {
+class FrameBufferException : public EngineError {
   public:
-    FrameBufferException(const GLuint status) : std::runtime_error(
+    FrameBufferException(const GLuint status) : EngineError(
         "FrameBuffer error. Status: " + std::to_string(status)) {}
 };
 
-class STBLoadError : public std::exception {
+class STBLoadError : public EngineError {
   public:
-    STBLoadError(const std::string& path, const std::string& str) {
-      reason = "Failed to load \"" + path + "\": " + str;
-    }
-    virtual const char* what() const noexcept {
-      return reason.c_str();
-    }
-  private:
-    std::string reason;
+    STBLoadError(const std::string& path, const std::string& str)
+      : EngineError("Failed to load \"" + path + "\": " + str) {}
 };
 
 } // namespace dg

@@ -27,9 +27,14 @@ dg::StandardMaterial dg::StandardMaterial::WithTexture(
 
 dg::StandardMaterial::StandardMaterial() : Material() {
   if (standardShader == nullptr) {
+#if defined(_OPENGL)
     standardShader = dg::Shader::FromFiles(
         "assets/shaders/standard.v.glsl",
         "assets/shaders/standard.f.glsl");
+#elif defined(_DIRECTX)
+    standardShader = dg::Shader::FromFiles("StandardVertexShader.cso",
+                                           "StandardPixelShader.cso");
+#endif
   }
 
   shader = StandardMaterial::standardShader;
@@ -70,11 +75,19 @@ void dg::StandardMaterial::Use() const {
 }
 
 void dg::StandardMaterial::SetUVScale(glm::vec2 scale) {
+#if defined(_OPENGL)
   SetProperty("_UVScale", scale);
+#elif defined(_DIRECTX)
+  SetProperty("uvScale", scale);
+#endif
 }
 
 void dg::StandardMaterial::SetLit(bool lit) {
+#if defined(_OPENGL)
   SetProperty("_Material.lit", lit);
+#elif defined(_DIRECTX)
+  SetProperty("lit", lit);
+#endif
 }
 
 void dg::StandardMaterial::SetDiffuse(float diffuse) {
@@ -82,11 +95,17 @@ void dg::StandardMaterial::SetDiffuse(float diffuse) {
 }
 
 void dg::StandardMaterial::SetDiffuse(glm::vec3 diffuse) {
+#if defined(_OPENGL)
   SetProperty("_Material.useDiffuseMap", false);
   SetProperty("_Material.diffuse", diffuse);
+#elif defined(_DIRECTX)
+  SetProperty("diffuse", diffuse);
+  // TODO
+#endif
 }
 
 void dg::StandardMaterial::SetDiffuse(std::shared_ptr<Texture> diffuseMap) {
+#if defined(_OPENGL)
   if (diffuseMap == nullptr) {
     SetProperty("_Material.useDiffuseMap", false);
     ClearProperty("_Material.diffuseMap");
@@ -94,6 +113,9 @@ void dg::StandardMaterial::SetDiffuse(std::shared_ptr<Texture> diffuseMap) {
     SetProperty("_Material.useDiffuseMap", true);
     SetProperty("_Material.diffuseMap", diffuseMap, TEX_UNIT_HINT_DIFFUSE);
   }
+#elif defined(_DIRECTX)
+  // TODO
+#endif
 }
 
 void dg::StandardMaterial::SetSpecular(float specular) {
@@ -101,12 +123,17 @@ void dg::StandardMaterial::SetSpecular(float specular) {
 }
 
 void dg::StandardMaterial::SetSpecular(glm::vec3 specular) {
+#if defined(_OPENGL)
   SetProperty("_Material.useSpecularMap", false);
   SetProperty("_Material.specular", specular);
   ClearProperty("_Material.specularMap");
+#elif defined(_DIRECTX)
+  SetProperty("specular", specular);
+#endif
 }
 
 void dg::StandardMaterial::SetSpecular(std::shared_ptr<Texture> specularMap) {
+#if defined(_OPENGL)
   if (specularMap == nullptr) {
     SetProperty("_Material.useSpecularMap", false);
     ClearProperty("_Material.specularMap");
@@ -114,9 +141,13 @@ void dg::StandardMaterial::SetSpecular(std::shared_ptr<Texture> specularMap) {
     SetProperty("_Material.useSpecularMap", true);
     SetProperty("_Material.specularMap", specularMap, TEX_UNIT_HINT_SPECULAR);
   }
+#elif defined(_DIRECTX)
+  // TODO
+#endif
 }
 
 void dg::StandardMaterial::SetNormalMap(std::shared_ptr<Texture> normalMap) {
+#if defined(_OPENGL)
   if (normalMap == nullptr) {
     SetProperty("_Material.useNormalMap", false);
     ClearProperty("_Material.normalMap");
@@ -124,9 +155,16 @@ void dg::StandardMaterial::SetNormalMap(std::shared_ptr<Texture> normalMap) {
     SetProperty("_Material.useNormalMap", true);
     SetProperty("_Material.normalMap", normalMap, TEX_UNIT_HINT_NORMAL);
   }
+#elif defined(_DIRECTX)
+  // TODO
+#endif
 }
 
 void dg::StandardMaterial::SetShininess(float shininess) {
+#if defined(_OPENGL)
   SetProperty("_Material.shininess", shininess);
+#elif defined(_DIRECTX)
+  SetProperty("shininess", shininess);
+#endif
 }
 

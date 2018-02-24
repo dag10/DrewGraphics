@@ -63,6 +63,7 @@ namespace dg {
   }; // class BaseScene
 
 #if defined(_OPENGL)
+
   class OpenGLScene : public BaseScene {
 
     protected:
@@ -77,6 +78,24 @@ namespace dg {
   }; // class OpenGLScene
 
   using Scene = OpenGLScene;
+
+#elif defined(_DIRECTX)
+
+  class DirectXScene : public BaseScene {
+
+    protected:
+
+      virtual void PrepareModelForDraw(
+          const Model& model, glm::vec3 cameraPosition, glm::mat4x4 view,
+          glm::mat4x4 projection,
+          const std::forward_list<Light*>& lights) const;
+      virtual void DrawHiddenAreaMesh(vr::EVREye eye);
+      virtual void ConfigureBuffer();
+
+  }; // class DirectXScene
+
+  using Scene = DirectXScene;
+
 #endif
 
 } // namespace dg

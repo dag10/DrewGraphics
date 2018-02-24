@@ -209,7 +209,6 @@ namespace dg {
 
       Win32Window(Win32Window& other) = delete;
       Win32Window(Win32Window&& other);
-      virtual ~Win32Window();
       Win32Window& operator=(Win32Window& other) = delete;
       Win32Window& operator=(Win32Window&& other);
       friend void swap(Win32Window& first, Win32Window& second); // nothrow

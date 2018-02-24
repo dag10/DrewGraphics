@@ -26,7 +26,7 @@ dg::Vertex::Vertex(glm::vec3 position) {
 dg::Vertex::Vertex(glm::vec3 position, glm::vec3 normal, glm::vec2 texCoord) {
   data.position = position;
   data.normal = normal;
-  data.texCoord = texCoord;
+  data.texCoord = { texCoord.x, texCoord.y, 0 };
   attributes = AttrFlag::POSITION | AttrFlag::NORMAL | AttrFlag::TEXCOORD;
 }
 
@@ -35,7 +35,7 @@ dg::Vertex::Vertex(
     glm::vec3 tangent) {
   data.position = position;
   data.normal = normal;
-  data.texCoord = texCoord;
+  data.texCoord = { texCoord.x, texCoord.y, 0 };
   data.tangent = tangent;
   attributes = AttrFlag::POSITION | AttrFlag::NORMAL | AttrFlag::TEXCOORD |
                AttrFlag::TANGENT;
@@ -85,7 +85,15 @@ void dg::Mesh::AddTriangle(Vertex v1, Vertex v2, Vertex v3, Winding winding) {
         "attributes.");
   }
 
-  if (winding == Winding::CCW) {
+  // TODO: Don't change winding here, but actually switch the rasterizer
+  //       state to accept CCW winding.
+#if defined(_OPENGL)
+  Winding desiredWinding = Winding::CW;
+#elif defined(_DIRECTX)
+  Winding desiredWinding = Winding::CCW;
+#endif
+
+  if (winding != desiredWinding) {
     std::swap(v1, v2);
   }
 
@@ -166,7 +174,7 @@ const dg::Vertex dg::Mesh::GetVertex(int i) const {
     vertex.data.normal = vertexNormals[i];
   }
   if (!!(attributes & Vertex::AttrFlag::TEXCOORD)) {
-    vertex.data.texCoord = vertexTexCoords[i];
+    vertex.data.texCoord = { vertexTexCoords[i].x, vertexTexCoords[i].y, 0 };
   }
   if (!!(attributes & Vertex::AttrFlag::TANGENT)) {
     vertex.data.tangent = vertexTangents[i];
@@ -830,9 +838,10 @@ dg::DirectXMesh::~DirectXMesh() {
 }
 
 void dg::DirectXMesh::FinishBuilding() {
-  // Ensure that we haven't built the mesh's buffers yet.
   assert(vertexBuffer == nullptr);
   assert(indexBuffer == nullptr);
+
+  // TODO: Create separate buffers for each attribute.
 
   std::vector<Vertex::Data> vertices(vertexPositions.size());
   int numVertices = (int)vertexPositions.size();
@@ -873,7 +882,7 @@ void dg::DirectXMesh::Draw() const {
   assert(vertexBuffer != nullptr);
   assert(indexBuffer != nullptr);
 
-  UINT stride = sizeof(Vertex);
+  UINT stride = sizeof(Vertex::Data);
   UINT offset = 0;
   Graphics::Instance->context->IASetVertexBuffers(
     0, 1, &vertexBuffer, &stride, &offset);

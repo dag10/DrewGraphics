@@ -388,10 +388,6 @@ dg::Win32Window::Win32Window(dg::Win32Window&& other) {
   *this = std::move(other);
 }
 
-dg::Win32Window::~Win32Window() {
-  DestroyWindow(hWnd);
-}
-
 dg::Win32Window& dg::Win32Window::operator=(dg::Win32Window&& other) {
   swap(*this, other);
   return *this;

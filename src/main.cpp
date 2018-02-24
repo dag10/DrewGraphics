@@ -17,6 +17,7 @@
 #endif
 
 #include <EngineTime.h>
+#include <Exceptions.h>
 #include <Graphics.h>
 #include <InputCodes.h>
 #include <Window.h>
@@ -40,8 +41,13 @@
 
 using namespace dg;
 
+static std::shared_ptr<dg::Window> window;
+
 [[noreturn]] void terminateWithError(const std::string &error) {
   std::cerr << error << std::endl;
+  if (window != nullptr) {
+    window->Hide();
+  }
   // If on Windows, make sure we show a minimized console window
   // and wait for the user to press enter before quitting.
 #if defined(_MSC_VER)
@@ -103,6 +109,20 @@ std::unique_ptr<Scene> PromptForScene(
   return constructors[sceneName]();
 }
 
+#if defined(_WIN32)
+static void FixCurrentDirectory() {
+  // Get the real, full path to this executable, end the string before
+  // the filename itself and then set that as the current directory
+  char currentDir[1024] = {};
+  GetModuleFileName(0, currentDir, 1024);
+  char* lastSlash = strrchr(currentDir, '\\');
+  if (lastSlash) {
+    *lastSlash = '\0';
+    SetCurrentDirectory(currentDir);
+  }
+}
+#endif
+
 #if defined(_OPENGL)
 int main(int argc, const char* argv[]) {
 #elif defined(_DIRECTX)
@@ -113,6 +133,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
   // Enable memory leak detection.
   _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 # endif
+#endif
+
+#if defined(_WIN32)
+  FixCurrentDirectory();
 #endif
 
   // Find intended scene.
@@ -128,14 +152,13 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
   }
 
   // Create window.
-  std::shared_ptr<dg::Window> window;
   try {
 #if defined(_OPENGL)
     window = dg::OpenGLWindow::Open(800, 600, "Drew Graphics");
 #elif defined(_DIRECTX)
     window = dg::Win32Window::Open(800, 600, "Drew Graphics", hInstance);
 #endif
-  } catch (const std::exception& e) {
+  } catch (const EngineError& e) {
     terminateWithError(
         "Failed to open window: " + std::string(e.what()));
   }
@@ -143,7 +166,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
   // Initialize graphics.
   try {
     Graphics::Initialize(*window);
-  } catch (const std::exception& e) {
+  } catch (const EngineError& e) {
     terminateWithError(
         "Failed to initialize graphics: " + std::string(e.what()));
   }
@@ -152,7 +175,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
   try {
     scene->SetWindow(window);
     scene->Initialize();
-  } catch (const std::exception& e) {
+  } catch (const EngineError& e) {
     std::cerr << "Failed to initialize scene: ";
     terminateWithError(e.what());
   }
@@ -175,7 +198,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
     window->PollEvents();
     try {
       scene->Update();
-    } catch (const std::exception& e) {
+    } catch (const EngineError& e) {
       std::cerr << "Failed to update scene: ";
       terminateWithError(e.what());
     }
@@ -219,7 +242,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
     window->StartRender();
     try {
       scene->RenderFrame();
-    } catch (const std::exception& e) {
+    } catch (const EngineError& e) {
       std::cerr << "Failed to render scene: ";
       terminateWithError(e.what());
     }
@@ -227,5 +250,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
   }
 
   Graphics::Shutdown();
+  window = nullptr;
   return 0;
 }

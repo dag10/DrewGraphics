@@ -5,6 +5,7 @@
 #include <Exceptions.h>
 #include <FileUtils.h>
 #include <Shader.h>
+#include <Utils.h>
 #include <cassert>
 #include <glm/gtc/type_ptr.hpp>
 #include <memory>
@@ -192,6 +193,19 @@ std::shared_ptr<dg::DirectXShader> dg::DirectXShader::FromFiles(
   auto shader = std::make_shared<DirectXShader>();
   shader->vertexPath = vertexPath;
   shader->fragmentPath = fragmentPath;
+
+  shader->vertexShader = std::make_shared<SimpleVertexShader>();
+  auto wVertexPath = ToLPCWSTR(vertexPath);
+  if (!shader->vertexShader->LoadShaderFile(wVertexPath.data())) {
+    throw ShaderLoadException(vertexPath);
+  }
+
+  shader->pixelShader = std::make_shared<SimplePixelShader>();
+  auto wPixelPath = ToLPCWSTR(fragmentPath);
+  if (!shader->pixelShader->LoadShaderFile(wPixelPath.data())) {
+    throw ShaderLoadException(fragmentPath);
+  }
+
   return shader;
 }
 

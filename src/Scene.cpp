@@ -220,3 +220,41 @@ void dg::OpenGLScene::ConfigureBuffer() {
 
 #endif
 #pragma endregion
+#pragma region DirectX Scene
+#if defined(_DIRECTX)
+
+void dg::DirectXScene::PrepareModelForDraw(
+    const Model& model,
+    glm::vec3 cameraPosition,
+    glm::mat4x4 view,
+    glm::mat4x4 projection,
+    const std::forward_list<Light*>& lights) const {
+
+  BaseScene::PrepareModelForDraw(
+    model, cameraPosition, view, projection, lights);
+
+  model.material->ClearLights();
+  int lightIndex = 0;
+  for (auto light = lights.begin(); light != lights.end(); light++) {
+    if (lightIndex >= Light::MAX_LIGHTS) {
+      break;
+    }
+    model.material->SetLight(lightIndex, (*light)->GetShaderData());
+    lightIndex++;
+  }
+}
+
+void dg::DirectXScene::DrawHiddenAreaMesh(vr::EVREye eye) {
+  // TODO
+}
+
+void dg::DirectXScene::ConfigureBuffer() {
+  //glEnable(GL_DEPTH_TEST);
+  //glDepthFunc(GL_LESS);
+  //glDepthMask(GL_TRUE);
+  //glEnable(GL_CULL_FACE);
+  //glCullFace(GL_BACK);
+}
+
+#endif
+#pragma endregion

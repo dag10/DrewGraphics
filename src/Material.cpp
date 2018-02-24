@@ -157,8 +157,6 @@ void dg::Material::SetInvPortal(glm::mat4x4 invPortal) {
 }
 
 void dg::Material::Use() const {
-  shader->Use();
-
   unsigned int textureUnit = highestTexUnitHint + 1;
   for (auto it = properties.begin(); it != properties.end(); it++) {
     switch (it->second.type) {
@@ -196,5 +194,7 @@ void dg::Material::Use() const {
         break;
     }
   }
+
+  shader->Use();
 }
 

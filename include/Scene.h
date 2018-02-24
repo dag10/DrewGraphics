@@ -19,12 +19,12 @@ namespace dg {
   class FrameBuffer;
   class ScreenQuadMaterial;
 
-  class Scene : public SceneObject {
+  class BaseScene : public SceneObject {
 
     public:
 
-      Scene();
-      virtual ~Scene();
+      BaseScene();
+      virtual ~BaseScene();
 
       virtual void Initialize();
       virtual void Update();
@@ -41,17 +41,15 @@ namespace dg {
       // Pipeline functions for overriding in special cases.
       virtual void RenderFrame(vr::EVREye eye);
       virtual void DrawScene(
-        const Camera& camera, bool renderForVR = false,
-        vr::EVREye eye = vr::EVREye::Eye_Left);
+          const Camera& camera, bool renderForVR = false,
+          vr::EVREye eye = vr::EVREye::Eye_Left);
       virtual void PrepareModelForDraw(
-          const Model& model,
-          glm::vec3 cameraPosition,
-          glm::mat4x4 view,
+          const Model& model, glm::vec3 cameraPosition, glm::mat4x4 view,
           glm::mat4x4 projection,
           const std::forward_list<Light*>& lights) const;
       virtual void ClearBuffer();
-      virtual void DrawHiddenAreaMesh(vr::EVREye eye);
-      virtual void ConfigureBuffer();
+      virtual void DrawHiddenAreaMesh(vr::EVREye eye) = 0;
+      virtual void ConfigureBuffer() = 0;
 
       std::shared_ptr<Camera> mainCamera;
       std::shared_ptr<Window> window = nullptr;
@@ -60,11 +58,25 @@ namespace dg {
       // Virtual reality
       bool enableVR = false;
       std::shared_ptr<SceneObject> vrContainer;
-
-  private:
-
       std::shared_ptr<ScreenQuadMaterial> hiddenAreaMeshMaterial = nullptr;
 
-  }; // class Scene
+  }; // class BaseScene
+
+#if defined(_OPENGL)
+  class OpenGLScene : public BaseScene {
+
+    protected:
+
+      virtual void PrepareModelForDraw(
+          const Model& model, glm::vec3 cameraPosition, glm::mat4x4 view,
+          glm::mat4x4 projection,
+          const std::forward_list<Light*>& lights) const;
+      virtual void DrawHiddenAreaMesh(vr::EVREye eye);
+      virtual void ConfigureBuffer();
+
+  }; // class OpenGLScene
+
+  using Scene = OpenGLScene;
+#endif
 
 } // namespace dg

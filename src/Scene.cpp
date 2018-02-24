@@ -2,21 +2,24 @@
 //  Scene.cpp
 //
 
+#include <Camera.h>
+#include <FrameBuffer.h>
+#include <Graphics.h>
+#include <Lights.h>
+#include <Model.h>
 #include <Scene.h>
 #include <Skybox.h>
-#include <Model.h>
-#include <Camera.h>
+#include <Window.h>
+#include <materials/ScreenQuadMaterial.h>
 #include <vr/VRManager.h>
 #include <vr/VRTrackedObject.h>
-#include <Window.h>
-#include <Lights.h>
-#include <FrameBuffer.h>
-#include <materials/ScreenQuadMaterial.h>
 
-dg::Scene::Scene() : SceneObject() {}
-dg::Scene::~Scene() {}
+#pragma region Base Class
 
-void dg::Scene::Initialize() {
+dg::BaseScene::BaseScene() : SceneObject() {}
+dg::BaseScene::~BaseScene() {}
+
+void dg::BaseScene::Initialize() {
   if (enableVR) {
     hiddenAreaMeshMaterial = std::make_shared<ScreenQuadMaterial>(
       glm::vec3(0), glm::vec2(2), glm::vec2(-1));
@@ -46,7 +49,7 @@ void dg::Scene::Initialize() {
   }
 }
 
-void dg::Scene::Update() {
+void dg::BaseScene::Update() {
   // Traverse the scene hierarchy and update all behaviors on all objects.
   std::forward_list<SceneObject*> remainingObjects;
   remainingObjects.push_front((SceneObject*)this);
@@ -63,28 +66,11 @@ void dg::Scene::Update() {
   }
 }
 
-void dg::Scene::ClearBuffer() {
-  glClearColor(0, 0, 0, 1);
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+void dg::BaseScene::ClearBuffer() {
+  Graphics::Instance->Clear(glm::vec3(0));
 }
 
-void dg::Scene::DrawHiddenAreaMesh(vr::EVREye eye) {
-  glEnable(GL_DEPTH_TEST);
-  glDepthFunc(GL_ALWAYS);
-  glDisable(GL_CULL_FACE);
-  hiddenAreaMeshMaterial->Use();
-  VRManager::Instance->GetHiddenAreaMesh(eye)->Draw();
-}
-
-void dg::Scene::ConfigureBuffer() {
-  glEnable(GL_DEPTH_TEST);
-  glDepthFunc(GL_LESS);
-  glDepthMask(GL_TRUE);
-  glEnable(GL_CULL_FACE);
-  glCullFace(GL_BACK);
-}
-
-void dg::Scene::RenderFrame() {
+void dg::BaseScene::RenderFrame() {
   if (enableVR) {
     // Wait for "running start", and get latest poses.
     VRManager::Instance->ReadyToRender();
@@ -104,7 +90,7 @@ void dg::Scene::RenderFrame() {
   }
 }
 
-void dg::Scene::RenderFrame(vr::EVREye eye) {
+void dg::BaseScene::RenderFrame(vr::EVREye eye) {
   std::shared_ptr<FrameBuffer> framebuffer =
     VRManager::Instance->GetFramebuffer(eye);
   framebuffer->Bind();
@@ -121,7 +107,7 @@ void dg::Scene::RenderFrame(vr::EVREye eye) {
   window->ResetViewport();
 }
 
-void dg::Scene::DrawScene(
+void dg::BaseScene::DrawScene(
   const Camera& camera, bool renderForVR, vr::EVREye eye) {
 
   // Render skybox.
@@ -177,13 +163,34 @@ void dg::Scene::DrawScene(
   }
 }
 
-void dg::Scene::PrepareModelForDraw(
+void dg::BaseScene::PrepareModelForDraw(
     const Model& model,
     glm::vec3 cameraPosition,
     glm::mat4x4 view,
     glm::mat4x4 projection,
     const std::forward_list<Light*>& lights) const {
   model.material->SetCameraPosition(cameraPosition);
+  model.material->ClearLights();
+}
+
+bool dg::BaseScene::AutomaticWindowTitle() const {
+  return true;
+}
+
+#pragma endregion
+#pragma region OpenGL Scene
+#if defined(_OPENGL)
+
+void dg::OpenGLScene::PrepareModelForDraw(
+    const Model& model,
+    glm::vec3 cameraPosition,
+    glm::mat4x4 view,
+    glm::mat4x4 projection,
+    const std::forward_list<Light*>& lights) const {
+
+  BaseScene::PrepareModelForDraw(
+    model, cameraPosition, view, projection, lights);
+
   model.material->ClearLights();
   int lightIndex = 0;
   for (auto light = lights.begin(); light != lights.end(); light++) {
@@ -195,7 +202,21 @@ void dg::Scene::PrepareModelForDraw(
   }
 }
 
-bool dg::Scene::AutomaticWindowTitle() const {
-  return true;
+void dg::OpenGLScene::DrawHiddenAreaMesh(vr::EVREye eye) {
+  glEnable(GL_DEPTH_TEST);
+  glDepthFunc(GL_ALWAYS);
+  glDisable(GL_CULL_FACE);
+  hiddenAreaMeshMaterial->Use();
+  VRManager::Instance->GetHiddenAreaMesh(eye)->Draw();
 }
 
+void dg::OpenGLScene::ConfigureBuffer() {
+  glEnable(GL_DEPTH_TEST);
+  glDepthFunc(GL_LESS);
+  glDepthMask(GL_TRUE);
+  glEnable(GL_CULL_FACE);
+  glCullFace(GL_BACK);
+}
+
+#endif
+#pragma endregion

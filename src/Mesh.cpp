@@ -827,7 +827,6 @@ dg::DirectXMesh::~DirectXMesh() {
     indexBuffer->Release();
     indexBuffer = nullptr;
   }
-
 }
 
 void dg::DirectXMesh::FinishBuilding() {

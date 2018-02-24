@@ -28,7 +28,7 @@ void dg::SimpleScene::Initialize() {
   Scene::Initialize();
 
   // Lock window cursor to center.
-  window->LockCursor();
+  //window->LockCursor();
 
   // Create textures.
   //std::shared_ptr<Texture> crateTexture = std::make_shared<Texture>(

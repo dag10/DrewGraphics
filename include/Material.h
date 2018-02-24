@@ -74,11 +74,12 @@ namespace dg {
 
       void ClearProperty(const std::string& name);
 
-      void SetCameraPosition(glm::vec3 position);
-      void SetMatrixMVP(glm::mat4x4 mvp);
-      void SetMatrixM(glm::mat4x4 m);
-      void SetMatrixNormal(glm::mat4x4 normal);
-      void SetLight(int index, const Light::ShaderData& data);
+      void SendCameraPosition(glm::vec3 position);
+      void SendMatrixMVP(glm::mat4x4 mvp);
+      void SendMatrixM(glm::mat4x4 m);
+      void SendMatrixNormal(glm::mat4x4 normal);
+      void SendLight(int index, const Light::ShaderData& data);
+      void SendLights(const Light::ShaderData(&lights)[Light::MAX_LIGHTS]);
       void ClearLights();
       void ClearLight(int index);
 

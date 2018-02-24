@@ -62,7 +62,7 @@ namespace dg {
       virtual void SetData(const std::string& name, void *data, size_t size) = 0;
       template <typename T>
       void SetData(const std::string& name, const T& data) {
-        SetData(name, &data, sizeof(data));
+        SetData(name, (void*)&data, sizeof(data));
       }
 
     protected:

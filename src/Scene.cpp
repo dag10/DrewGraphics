@@ -154,23 +154,32 @@ void dg::BaseScene::DrawScene(
     projection = camera.GetProjectionMatrix(window->GetAspectRatio());
   }
 
+  // Prepare light data.
+  Light::ShaderData lightArray[Light::MAX_LIGHTS];
+  int lightIdx = 0;
+  for (auto light = lights.begin(); light != lights.end(); light++) {
+    if (lightIdx >= Light::MAX_LIGHTS) {
+      break;
+    }
+    lightArray[lightIdx++] = (*light)->GetShaderData();
+  }
+
   // Render models.
   Transform camera_SS = camera.SceneSpace();
   for (auto model = models.begin(); model != models.end(); model++) {
     PrepareModelForDraw(
-        **model, camera_SS.translation, view, projection, lights);
+        **model, camera_SS.translation, view, projection, lightArray);
     (*model)->Draw(view, projection);
   }
 }
 
 void dg::BaseScene::PrepareModelForDraw(
-    const Model& model,
-    glm::vec3 cameraPosition,
-    glm::mat4x4 view,
+    const Model& model, glm::vec3 cameraPosition, glm::mat4x4 view,
     glm::mat4x4 projection,
-    const std::forward_list<Light*>& lights) const {
-  model.material->SetCameraPosition(cameraPosition);
-  model.material->ClearLights();
+    const Light::ShaderData (&lights)[Light::MAX_LIGHTS]) const {
+
+  model.material->SendCameraPosition(cameraPosition);
+  model.material->SendLights(lights);
 }
 
 bool dg::BaseScene::AutomaticWindowTitle() const {
@@ -180,27 +189,6 @@ bool dg::BaseScene::AutomaticWindowTitle() const {
 #pragma endregion
 #pragma region OpenGL Scene
 #if defined(_OPENGL)
-
-void dg::OpenGLScene::PrepareModelForDraw(
-    const Model& model,
-    glm::vec3 cameraPosition,
-    glm::mat4x4 view,
-    glm::mat4x4 projection,
-    const std::forward_list<Light*>& lights) const {
-
-  BaseScene::PrepareModelForDraw(
-    model, cameraPosition, view, projection, lights);
-
-  model.material->ClearLights();
-  int lightIndex = 0;
-  for (auto light = lights.begin(); light != lights.end(); light++) {
-    if (lightIndex >= Light::MAX_LIGHTS) {
-      break;
-    }
-    model.material->SetLight(lightIndex, (*light)->GetShaderData());
-    lightIndex++;
-  }
-}
 
 void dg::OpenGLScene::DrawHiddenAreaMesh(vr::EVREye eye) {
   glEnable(GL_DEPTH_TEST);
@@ -222,27 +210,6 @@ void dg::OpenGLScene::ConfigureBuffer() {
 #pragma endregion
 #pragma region DirectX Scene
 #if defined(_DIRECTX)
-
-void dg::DirectXScene::PrepareModelForDraw(
-    const Model& model,
-    glm::vec3 cameraPosition,
-    glm::mat4x4 view,
-    glm::mat4x4 projection,
-    const std::forward_list<Light*>& lights) const {
-
-  BaseScene::PrepareModelForDraw(
-    model, cameraPosition, view, projection, lights);
-
-  model.material->ClearLights();
-  int lightIndex = 0;
-  for (auto light = lights.begin(); light != lights.end(); light++) {
-    if (lightIndex >= Light::MAX_LIGHTS) {
-      break;
-    }
-    model.material->SetLight(lightIndex, (*light)->GetShaderData());
-    lightIndex++;
-  }
-}
 
 void dg::DirectXScene::DrawHiddenAreaMesh(vr::EVREye eye) {
   // TODO

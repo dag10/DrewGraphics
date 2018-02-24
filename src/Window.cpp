@@ -630,7 +630,7 @@ void dg::Win32Window::LockCursor() {
     return;
   }
   cursorIsLocked = true;
-  ShowCursor(false);
+  while (ShowCursor(false) > 0) continue;
   SetCapture(hWnd);
   RECT rect;
   GetWindowRect(hWnd, &rect);

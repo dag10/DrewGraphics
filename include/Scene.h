@@ -4,10 +4,11 @@
 
 #pragma once
 
-#include <forward_list>
-#include <memory>
+#include <Lights.h>
 #include <SceneObject.h>
 #include <openvr.h>
+#include <forward_list>
+#include <memory>
 
 namespace dg {
 
@@ -46,7 +47,7 @@ namespace dg {
       virtual void PrepareModelForDraw(
           const Model& model, glm::vec3 cameraPosition, glm::mat4x4 view,
           glm::mat4x4 projection,
-          const std::forward_list<Light*>& lights) const;
+          const Light::ShaderData (&lights)[Light::MAX_LIGHTS]) const;
       virtual void ClearBuffer();
       virtual void DrawHiddenAreaMesh(vr::EVREye eye) = 0;
       virtual void ConfigureBuffer() = 0;
@@ -68,10 +69,6 @@ namespace dg {
 
     protected:
 
-      virtual void PrepareModelForDraw(
-          const Model& model, glm::vec3 cameraPosition, glm::mat4x4 view,
-          glm::mat4x4 projection,
-          const std::forward_list<Light*>& lights) const;
       virtual void DrawHiddenAreaMesh(vr::EVREye eye);
       virtual void ConfigureBuffer();
 
@@ -85,12 +82,8 @@ namespace dg {
 
     protected:
 
-      virtual void PrepareModelForDraw(
-          const Model& model, glm::vec3 cameraPosition, glm::mat4x4 view,
-          glm::mat4x4 projection,
-          const std::forward_list<Light*>& lights) const;
-      virtual void DrawHiddenAreaMesh(vr::EVREye eye);
-      virtual void ConfigureBuffer();
+     virtual void DrawHiddenAreaMesh(vr::EVREye eye);
+     virtual void ConfigureBuffer();
 
   }; // class DirectXScene
 

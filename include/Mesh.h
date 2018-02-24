@@ -35,10 +35,13 @@ namespace dg {
     };
     static const int NumAttrs = 4;
 
+    // NOTE: Keep this struct consistent with:
+    //       -> assets/shaders/vertex_head.glsl
+    //       -> assets/shaders/StandardPixelShader.hlsl.
     struct Data {
       glm::vec3 position;
       glm::vec3 normal;
-      glm::vec3 texCoord;
+      glm::vec2 texCoord;
       glm::vec3 tangent;
     };
 
@@ -226,7 +229,7 @@ namespace std {
         h ^= std::hash<glm::vec3>{}(v.data.normal) << 1;
       }
       if (v.HasAllAttr(dg::Vertex::AttrFlag::TEXCOORD)) {
-        h ^= std::hash<glm::vec3>{}(v.data.texCoord) << 2;
+        h ^= std::hash<glm::vec2>{}(v.data.texCoord) << 2;
       }
       if (v.HasAllAttr(dg::Vertex::AttrFlag::TANGENT)) {
         h ^= std::hash<glm::vec3>{}(v.data.tangent) << 3;

@@ -15,11 +15,15 @@ namespace dg {
 
     public:
 
+      // NOTE: Keep these values consistent with:
+      //       -> assets/shaders/fragment_head.glsl
+      //       -> assets/shaders/StandardPixelShader.hlsl.
       static const char *LIGHTS_ARRAY_NAME;
-      static const int MAX_LIGHTS;
+      static const int MAX_LIGHTS = 8;
 
-      // NOTE: Keep this struct consistent with
-      //       assets/shaders/fragment_head.glsl
+      // NOTE: Keep this struct consistent with:
+      //       -> assets/shaders/fragment_head.glsl
+      //       -> assets/shaders/StandardPixelShader.hlsl.
       enum class LightType : uint32_t {
         NONE        = 0,
         POINT       = 1,
@@ -27,13 +31,13 @@ namespace dg {
         DIRECTIONAL = 3,
       };
 
-      // There is a fork of this codebase that targets DirectX. These
-      // struct-packing restrictions only apply to DirectX. I'm keeping these
-      // changes upstream of the DirectX port for simplicity.
-      //
       // Struct size must be a multiple of 16 bytes, and vectors cannot
       // cross 16-byte boundaries. Hence the confusing order and 3 bytes of
       // padding.
+      //
+      // NOTE: Keep this struct consistent with:
+      //       -> assets/shaders/fragment_head.glsl
+      //       -> assets/shaders/StandardPixelShader.hlsl.
       struct ShaderData {
         glm::vec3 diffuse;
         LightType type = LightType::NONE;

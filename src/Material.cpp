@@ -102,34 +102,48 @@ void dg::Material::ClearProperty(const std::string& name) {
   properties.erase(name);
 }
 
-void dg::Material::SetCameraPosition(glm::vec3 position) {
-  SetProperty("_CameraPosition", position);
+void dg::Material::SendCameraPosition(glm::vec3 position) {
+  shader->SetVec3("_CameraPosition", position);
 }
 
-void dg::Material::SetMatrixMVP(glm::mat4x4 mvp) {
-  SetProperty("_Matrix_MVP", mvp);
+void dg::Material::SendMatrixMVP(glm::mat4x4 mvp) {
+  shader->SetMat4("_Matrix_MVP", mvp);
 }
 
-void dg::Material::SetMatrixM(glm::mat4x4 m) {
-  SetProperty("_Matrix_M", m);
+void dg::Material::SendMatrixM(glm::mat4x4 m) {
+  shader->SetMat4("_Matrix_M", m);
 }
 
-void dg::Material::SetMatrixNormal(glm::mat4x4 normal) {
-  SetProperty("_Matrix_Normal", normal);
+void dg::Material::SendMatrixNormal(glm::mat4x4 normal) {
+  shader->SetMat4("_Matrix_Normal", normal);
 }
 
-void dg::Material::SetLight(int index, const Light::ShaderData& data) {
-  SetProperty(LightProperty(index, "diffuse"), data.diffuse);
-  SetProperty(LightProperty(index, "type"), (int)data.type);
-  SetProperty(LightProperty(index, "ambient"), data.ambient);
-  SetProperty(LightProperty(index, "innerCutoff"), data.innerCutoff);
-  SetProperty(LightProperty(index, "specular"), data.specular);
-  SetProperty(LightProperty(index, "outerCutoff"), data.outerCutoff);
-  SetProperty(LightProperty(index, "position"), data.position);
-  SetProperty(LightProperty(index, "constantCoeff"), data.constantCoeff);
-  SetProperty(LightProperty(index, "direction"), data.direction);
-  SetProperty(LightProperty(index, "linearCoeff"), data.linearCoeff);
-  SetProperty(LightProperty(index, "quadraticCoeff"), data.quadraticCoeff);
+void dg::Material::SendLight(int index, const Light::ShaderData& data) {
+  shader->SetVec3(LightProperty(index, "diffuse"), data.diffuse);
+  shader->SetInt(LightProperty(index, "type"), (int)data.type);
+  shader->SetVec3(LightProperty(index, "ambient"), data.ambient);
+  shader->SetFloat(LightProperty(index, "innerCutoff"), data.innerCutoff);
+  shader->SetVec3(LightProperty(index, "specular"), data.specular);
+  shader->SetFloat(LightProperty(index, "outerCutoff"), data.outerCutoff);
+  shader->SetVec3(LightProperty(index, "position"), data.position);
+  shader->SetFloat(LightProperty(index, "constantCoeff"), data.constantCoeff);
+  shader->SetVec3(LightProperty(index, "direction"), data.direction);
+  shader->SetFloat(LightProperty(index, "linearCoeff"), data.linearCoeff);
+  shader->SetFloat(LightProperty(index, "quadraticCoeff"), data.quadraticCoeff);
+}
+
+void dg::Material::SendLights(
+    const Light::ShaderData (&lights)[Light::MAX_LIGHTS]) {
+#if defined(_OPENGL)
+  ClearLights();
+  for (int i = 0; i < Light::MAX_LIGHTS; i++) {
+    if (lights[i].type != Light::LightType::NONE) {
+      SendLight(i, lights[i]);
+    }
+  }
+#elif defined(_DIRECTX)
+  shader->SetData(Light::LIGHTS_ARRAY_NAME, lights);
+#endif
 }
 
 void dg::Material::ClearLights() {
@@ -139,7 +153,7 @@ void dg::Material::ClearLights() {
 }
 
 void dg::Material::ClearLight(int index) {
-  SetProperty(LightProperty(index, "type"), (int)Light::LightType::NONE);
+  shader->SetInt(LightProperty(index, "type"), (int)Light::LightType::NONE);
 }
 
 const std::string dg::Material::LightProperty(

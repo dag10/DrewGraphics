@@ -26,7 +26,7 @@ dg::Vertex::Vertex(glm::vec3 position) {
 dg::Vertex::Vertex(glm::vec3 position, glm::vec3 normal, glm::vec2 texCoord) {
   data.position = position;
   data.normal = normal;
-  data.texCoord = { texCoord.x, texCoord.y, 0 };
+  data.texCoord = texCoord;
   attributes = AttrFlag::POSITION | AttrFlag::NORMAL | AttrFlag::TEXCOORD;
 }
 
@@ -35,7 +35,7 @@ dg::Vertex::Vertex(
     glm::vec3 tangent) {
   data.position = position;
   data.normal = normal;
-  data.texCoord = { texCoord.x, texCoord.y, 0 };
+  data.texCoord = texCoord;
   data.tangent = tangent;
   attributes = AttrFlag::POSITION | AttrFlag::NORMAL | AttrFlag::TEXCOORD |
                AttrFlag::TANGENT;
@@ -174,7 +174,7 @@ const dg::Vertex dg::Mesh::GetVertex(int i) const {
     vertex.data.normal = vertexNormals[i];
   }
   if (!!(attributes & Vertex::AttrFlag::TEXCOORD)) {
-    vertex.data.texCoord = { vertexTexCoords[i].x, vertexTexCoords[i].y, 0 };
+    vertex.data.texCoord = vertexTexCoords[i];
   }
   if (!!(attributes & Vertex::AttrFlag::TANGENT)) {
     vertex.data.tangent = vertexTangents[i];

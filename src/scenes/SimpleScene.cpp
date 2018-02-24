@@ -48,7 +48,7 @@ void dg::SimpleScene::Initialize() {
       glm::vec3(1.0f, 0.93f, 0.86f),
       0.732f, 0.399f, 0.968f);
   ceilingLight->transform.translation = glm::vec3(0.8f, 1.2f, -0.2f);
-  //AddChild(ceilingLight);
+  AddChild(ceilingLight);
 
   // Create light sphere material.
   StandardMaterial lightMaterial = StandardMaterial::WithColor(
@@ -60,7 +60,7 @@ void dg::SimpleScene::Initialize() {
       dg::Mesh::Sphere,
       std::make_shared<StandardMaterial>(lightMaterial),
       Transform::S(glm::vec3(0.05f)));
-  //ceilingLight->AddChild(lightModel, false);
+  ceilingLight->AddChild(lightModel, false);
 
   // Create wooden cube material.
   StandardMaterial cubeMaterial = StandardMaterial::WithColor(
@@ -68,7 +68,7 @@ void dg::SimpleScene::Initialize() {
   //StandardMaterial cubeMaterial = StandardMaterial::WithTexture(crateTexture);
   //cubeMaterial.SetSpecular(crateSpecularTexture);
   cubeMaterial.SetShininess(64);
-  cubeMaterial.SetLit(false);
+  //cubeMaterial.SetLit(false);
 
   // Create test sphere in front of camera.
   //AddChild(std::make_shared<Model>(

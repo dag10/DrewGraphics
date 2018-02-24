@@ -1,4 +1,4 @@
-#define MAX_LIGHTS 4
+#define MAX_LIGHTS 8
 
 #define LIGHT_TYPE_NULL 0
 #define LIGHT_TYPE_POINT 1
@@ -94,19 +94,19 @@ float3 calculateLight(Light light, VertexToPixel input) {
 }
 
 float4 main(VertexToPixel input) : SV_TARGET {
-  if (input.position.z < 0.5) {
-    return float4(0, 0, 0, 1);
+  //if (input.position.z < 0.5) {
+  //  return float4(0, 0, 0, 1);
+  //}
+  //return float4(diffuse, 1.0);
+
+  if (!lit) {
+    return float4(diffuse, 1.0);
   }
-  return float4(diffuse, 1.0);
 
-  //if (!lit) {
-  //  return float4(diffuse, 1.0);
-  //}
+  float3 cumulative = float3(0, 0, 0);
+  for (int i = 0; i < MAX_LIGHTS; i++) {
+    cumulative += calculateLight(lights[i], input);
+  }
 
-  //float3 cumulative = float3(0, 0, 0);
-  //for (int i = 0; i < MAX_LIGHTS; i++) {
-  //  cumulative += calculateLight(lights[i], input);
-  //}
-
-  //return float4(cumulative, 1.0);
+  return float4(cumulative, 1.0);
 }

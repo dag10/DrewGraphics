@@ -433,7 +433,7 @@ void dg::PortalScene::PrepareModelForDraw(
     glm::vec3 cameraPosition,
     glm::mat4x4 view,
     glm::mat4x4 projection,
-    const std::forward_list<Light*>& lights) const {
+    const Light::ShaderData(&lights)[Light::MAX_LIGHTS]) const {
   Scene::PrepareModelForDraw(model, cameraPosition, view, projection, lights);
   model.material->SetInvPortal(invPortal);
 }
@@ -460,7 +460,7 @@ void dg::PortalScene::RenderPortalStencil(dg::Transform xfPortal) {
   glStencilOp(GL_ZERO, GL_ZERO, GL_REPLACE);
   glClear(GL_STENCIL_BUFFER_BIT);
 
-  portalStencilMaterial->SetMatrixMVP(
+  portalStencilMaterial->SendMatrixMVP(
       projection * view * xfPortal * portalOpeningScale);
   portalStencilMaterial->Use();
 

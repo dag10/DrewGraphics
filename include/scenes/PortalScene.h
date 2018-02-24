@@ -54,7 +54,7 @@ namespace dg {
           glm::vec3 cameraPosition,
           glm::mat4x4 view,
           glm::mat4x4 projection,
-          const std::forward_list<Light*>& lights) const;
+          const Light::ShaderData (&lights)[Light::MAX_LIGHTS]) const;
 
       bool animatingLight;
       LightingType lightingType;

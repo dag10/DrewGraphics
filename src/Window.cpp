@@ -618,7 +618,10 @@ void dg::Win32Window::PollEvents() {
   }
 
   cursorWasLocked = cursorIsLocked;
-  cursorDelta = currentCursorPosition - lastCursorPosition;
+  if (hasInitialCursorPosition) {
+    cursorDelta = currentCursorPosition - lastCursorPosition;
+  }
+  hasInitialCursorPosition = true;
 }
 
 dg::Window::handle_type dg::Win32Window::GetHandle() const {

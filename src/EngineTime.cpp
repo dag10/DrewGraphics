@@ -30,6 +30,12 @@ void dg::Time::Reset() {
   __int64 perfFreq;
   QueryPerformanceFrequency((LARGE_INTEGER*)&perfFreq);
   perfCounterSeconds = 1.0 / (double)perfFreq;
+
+  __int64 now;
+  QueryPerformanceCounter((LARGE_INTEGER*)&now);
+  startTime = now;
+  currentTime = now;
+  previousTime = now;
 #endif
 }
 
@@ -41,8 +47,8 @@ void dg::Time::Update() {
   glfwSetTime(0);
 #elif defined(_DIRECTX)
   QueryPerformanceCounter((LARGE_INTEGER*)&currentTime);
-  Delta = max((double)((currentTime - previousTime) * perfCounterSeconds), 0.0);
-  Elapsed = (double)((currentTime - startTime) * perfCounterSeconds);
+  Delta = max(((double)(currentTime - previousTime) * perfCounterSeconds), 0.0);
+  Elapsed = ((double)(currentTime - startTime) * perfCounterSeconds);
   previousTime = currentTime;
 #endif
 

@@ -340,6 +340,7 @@ del /s $(OutDir)*.obj, $(OutDir)*.pdb, $(OutDir)*.ipdb, $(OutDir)*.iobj</Command
     <ClCompile Include="src\Camera.cpp" />
     <ClCompile Include="src\Canvas.cpp" />
     <ClCompile Include="src\CanvasScene.cpp" />
+    <ClCompile Include="src\directx\SimpleShader.cpp" />
     <ClCompile Include="src\EngineTime.cpp" />
     <ClCompile Include="src\FileUtils.cpp" />
     <ClCompile Include="src\FrameBuffer.cpp" />
@@ -383,6 +384,7 @@ del /s $(OutDir)*.obj, $(OutDir)*.pdb, $(OutDir)*.ipdb, $(OutDir)*.iobj</Command
     <ClInclude Include="include\Camera.h" />
     <ClInclude Include="include\Canvas.h" />
     <ClInclude Include="include\CanvasScene.h" />
+    <ClInclude Include="include\directx\SimpleShader.h" />
     <ClInclude Include="include\EngineTime.h" />
     <ClInclude Include="include\Exceptions.h" />
     <ClInclude Include="include\FileUtils.h" />

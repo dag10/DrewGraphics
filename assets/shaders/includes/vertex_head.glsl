@@ -5,7 +5,7 @@
 uniform mat4 _Matrix_MVP;
 uniform mat4 _Matrix_M;
 
-uniform mat3 _Matrix_Normal;
+uniform mat4 _Matrix_Normal;
 
 layout (location = 0) in vec3 in_Position;
 layout (location = 1) in vec3 in_Normal;

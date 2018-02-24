@@ -509,7 +509,7 @@ void dg::PortalScene::RenderFrame() {
 
   // Render immediate scene.
   invPortal = glm::mat4x4(0);
-  RenderScene(*mainCamera);
+  DrawScene(*mainCamera);
 
   // Render first (red) portal stencil.
   RenderPortalStencil(portalTransforms[0]);
@@ -520,7 +520,7 @@ void dg::PortalScene::RenderFrame() {
   glStencilFunc(GL_EQUAL, 1, 0xFF);
   ClearDepth(); // Clear depth buffer only within stencil.
   invPortal = portalTransforms[1].Inverse().ToMat4();
-  RenderScene(CameraForPortal(portalTransforms[0], portalTransforms[1]));
+  DrawScene(CameraForPortal(portalTransforms[0], portalTransforms[1]));
   glDisable(GL_STENCIL_TEST);
 
   // Render first (red) portal stencil.
@@ -532,11 +532,11 @@ void dg::PortalScene::RenderFrame() {
   glStencilFunc(GL_EQUAL, 1, 0xFF);
   ClearDepth(); // Clear depth buffer only within stencil.
   invPortal = portalTransforms[0].Inverse().ToMat4();
-  RenderScene(CameraForPortal(portalTransforms[1], portalTransforms[0]));
+  DrawScene(CameraForPortal(portalTransforms[1], portalTransforms[0]));
   glDisable(GL_STENCIL_TEST);
 }
 
-void dg::PortalScene::RenderScene(
+void dg::PortalScene::DrawScene(
   const Camera& camera, bool renderForVR, vr::EVREye eye) {
   // Move the flash light to the camera we're rendering from.
   // TODO: Don't do this, it feels very computationally heavy.
@@ -545,7 +545,7 @@ void dg::PortalScene::RenderScene(
     camera.SceneSpace() * mainCamera->SceneSpace().Inverse() *
     flashlight->SceneSpace());
 
-  Scene::RenderScene(camera, renderForVR, eye);
+  Scene::DrawScene(camera, renderForVR, eye);
 
   // Attach the flashlight back to the original camera.
   flashlight->transform = xfFlashlightOriginal;

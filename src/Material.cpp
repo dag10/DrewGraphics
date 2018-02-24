@@ -73,20 +73,6 @@ void dg::Material::SetProperty(const std::string& name, glm::vec4 value) {
   properties.insert_or_assign(name, prop);
 }
 
-void dg::Material::SetProperty(const std::string& name, glm::mat2x2 value) {
-  MaterialProperty prop;
-  prop.type = MaterialPropertyType::MAT2X2;
-  prop.value._mat2x2 = value;
-  properties.insert_or_assign(name, prop);
-}
-
-void dg::Material::SetProperty(const std::string& name, glm::mat3x3 value) {
-  MaterialProperty prop;
-  prop.type = MaterialPropertyType::MAT3X3;
-  prop.value._mat3x3 = value;
-  properties.insert_or_assign(name, prop);
-}
-
 void dg::Material::SetProperty(const std::string& name, glm::mat4x4 value) {
   MaterialProperty prop;
   prop.type = MaterialPropertyType::MAT4X4;
@@ -128,7 +114,7 @@ void dg::Material::SetMatrixM(glm::mat4x4 m) {
   SetProperty("_Matrix_M", m);
 }
 
-void dg::Material::SetMatrixNormal(glm::mat3x3 normal) {
+void dg::Material::SetMatrixNormal(glm::mat4x4 normal) {
   SetProperty("_Matrix_Normal", normal);
 }
 
@@ -193,12 +179,6 @@ void dg::Material::Use() const {
         break;
       case MaterialPropertyType::VEC4:
         shader->SetVec4(it->first, it->second.value._vec4);
-        break;
-      case MaterialPropertyType::MAT2X2:
-        shader->SetMat2(it->first, it->second.value._mat2x2);
-        break;
-      case MaterialPropertyType::MAT3X3:
-        shader->SetMat3(it->first, it->second.value._mat3x3);
         break;
       case MaterialPropertyType::MAT4X4:
         shader->SetMat4(it->first, it->second.value._mat4x4);

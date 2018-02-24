@@ -97,7 +97,7 @@ void dg::Scene::RenderFrame() {
   // TODO: If VR, just render a quad of the left eye instead.
   ClearBuffer();
   ConfigureBuffer();
-  RenderScene(*mainCamera);
+  DrawScene(*mainCamera);
 
   if (enableVR) {
     VRManager::Instance->RenderFinished();
@@ -113,7 +113,7 @@ void dg::Scene::RenderFrame(vr::EVREye eye) {
   DrawHiddenAreaMesh(eye);
   ConfigureBuffer();
 
-  RenderScene(*mainCamera, true, eye);
+  DrawScene(*mainCamera, true, eye);
 
   VRManager::Instance->SubmitFrame(eye);
 
@@ -121,7 +121,7 @@ void dg::Scene::RenderFrame(vr::EVREye eye) {
   window->ResetViewport();
 }
 
-void dg::Scene::RenderScene(
+void dg::Scene::DrawScene(
   const Camera& camera, bool renderForVR, vr::EVREye eye) {
 
   // Render skybox.

@@ -19,15 +19,13 @@ dg::Model::Model(Model& other) : SceneObject(other) {
 }
 
 void dg::Model::Draw(glm::mat4x4 view, glm::mat4x4 projection) const {
-  Transform xf = SceneSpace();
+  glm::mat4x4 xfMat = SceneSpace().ToMat4();
 
-  material->SetMatrixNormal(
-      glm::mat3x3(glm::transpose(xf.Inverse().ToMat4())));
-  material->SetMatrixM(xf.ToMat4());
-  material->SetMatrixMVP(projection * view * xf);
+  material->SetMatrixNormal(glm::transpose(glm::inverse(xfMat)));
+  material->SetMatrixM(xfMat);
+  material->SetMatrixMVP(projection * view * xfMat);
 
   material->Use();
-
   mesh->Draw();
 }
 

@@ -2,15 +2,17 @@
 //  Shader.cpp
 //
 
-#include <glad/glad.h>
-#include <Shader.h>
 #include <Exceptions.h>
 #include <FileUtils.h>
-#include <opengl/ShaderSource.h>
-
+#include <Shader.h>
 #include <cassert>
-#include <memory>
 #include <glm/gtc/type_ptr.hpp>
+#include <memory>
+
+#if defined(_DIRECTX)
+// For the DirectX Math library
+using namespace DirectX;
+#endif
 
 #pragma region Base Class
 
@@ -19,6 +21,9 @@ std::shared_ptr<dg::Shader> dg::Shader::FromFiles(
 #if defined(_OPENGL)
   return std::static_pointer_cast<Shader>(
     OpenGLShader::FromFiles(vertexPath, fragmentPath));
+#elif defined(_DIRECTX)
+  return std::static_pointer_cast<Shader>(
+    DirectXShader::FromFiles(vertexPath, fragmentPath));
 #endif
 }
 
@@ -152,16 +157,6 @@ void dg::OpenGLShader::SetVec4(const std::string& name, const glm::vec4& value) 
   glUniform4fv(GetUniformLocation(name), 1, glm::value_ptr(value));
 }
 
-void dg::OpenGLShader::SetMat2(const std::string& name, const glm::mat2& mat) {
-  glUniformMatrix2fv(
-      GetUniformLocation(name), 1, GL_FALSE, glm::value_ptr(mat));
-}
-
-void dg::OpenGLShader::SetMat3(const std::string& name, const glm::mat3& mat) {
-  glUniformMatrix3fv(
-      GetUniformLocation(name), 1, GL_FALSE, glm::value_ptr(mat));
-}
-
 void dg::OpenGLShader::SetMat4(const std::string& name, const glm::mat4& mat) {
   glUniformMatrix4fv(
       GetUniformLocation(name), 1, GL_FALSE, glm::value_ptr(mat));
@@ -180,6 +175,85 @@ void dg::OpenGLShader::SetTexture(
   glActiveTexture(GL_TEXTURE0 + textureUnit);
   glBindTexture(GL_TEXTURE_2D, texture->GetHandle());
   glUniform1i(GetUniformLocation(name), textureUnit);
+}
+
+void dg::OpenGLShader::SetData(
+    const std::string& name, void *data, size_t size) {
+  throw std::runtime_error("OpenGLShader::SetData() not implemented.");
+}
+
+#pragma endregion
+#endif
+#pragma region DirectX Shader
+#if defined(_DIRECTX)
+
+std::shared_ptr<dg::DirectXShader> dg::DirectXShader::FromFiles(
+    const std::string& vertexPath, const std::string& fragmentPath) {
+  auto shader = std::make_shared<DirectXShader>();
+  shader->vertexPath = vertexPath;
+  shader->fragmentPath = fragmentPath;
+  return shader;
+}
+
+void dg::DirectXShader::Use() {
+  vertexShader->SetShader();
+  pixelShader->SetShader();
+  vertexShader->CopyAllBufferData();
+  pixelShader->CopyAllBufferData();
+}
+
+void dg::DirectXShader::SetBool(const std::string& name, bool value) {
+  vertexShader->SetInt(name, value);
+  pixelShader->SetInt(name, value);
+}
+
+void dg::DirectXShader::SetInt(const std::string& name, int value) {
+  vertexShader->SetInt(name, value);
+  pixelShader->SetInt(name, value);
+}
+
+void dg::DirectXShader::SetFloat(const std::string& name, float value) {
+  vertexShader->SetFloat(name, value);
+  pixelShader->SetFloat(name, value);
+}
+
+void dg::DirectXShader::SetVec2(
+  const std::string& name, const glm::vec2& value) {
+  vertexShader->SetFloat2(name, (XMFLOAT2&)value);
+  pixelShader->SetFloat2(name, (XMFLOAT2&)value);
+}
+
+void dg::DirectXShader::SetVec3(
+  const std::string& name, const glm::vec3& value) {
+  vertexShader->SetFloat3(name, (XMFLOAT3&)value);
+  pixelShader->SetFloat3(name, (XMFLOAT3&)value);
+}
+
+void dg::DirectXShader::SetVec4(const std::string& name, const glm::vec4& value) {
+  vertexShader->SetFloat4(name, (XMFLOAT4&)value);
+  pixelShader->SetFloat4(name, (XMFLOAT4&)value);
+}
+
+void dg::DirectXShader::SetMat4(const std::string& name, const glm::mat4& mat) {
+  vertexShader->SetMatrix4x4(name, glm::value_ptr(mat));
+  pixelShader->SetMatrix4x4(name, glm::value_ptr(mat));
+}
+
+void dg::DirectXShader::SetMat4(
+  const std::string& name, const dg::Transform& xf) {
+  SetMat4(name, xf.ToMat4());
+}
+
+void dg::DirectXShader::SetTexture(
+    unsigned int textureUnit, const std::string& name, Texture *texture) {
+  assert(texture != nullptr);
+  // TODO
+}
+
+void dg::DirectXShader::SetData(
+    const std::string& name, void *data, size_t size) {
+  vertexShader->SetData(name, data, size);
+  pixelShader->SetData(name, data, size);
 }
 
 #pragma endregion

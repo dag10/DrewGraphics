@@ -40,7 +40,7 @@ namespace dg {
 
       // Pipeline functions for overriding in special cases.
       virtual void RenderFrame(vr::EVREye eye);
-      virtual void RenderScene(
+      virtual void DrawScene(
         const Camera& camera, bool renderForVR = false,
         vr::EVREye eye = vr::EVREye::Eye_Left);
       virtual void PrepareModelForDraw(

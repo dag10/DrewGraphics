@@ -221,7 +221,7 @@ void dg::TexturesScene::RenderFrame() {
   glCullFace(GL_BACK);
   renderQuads->enabled = false;
   dummyRenderQuads->enabled = true;
-  RenderScene(*virtualCamera);
+  DrawScene(*virtualCamera);
   dummyRenderQuads->enabled = false;
   renderQuads->enabled = true;
   framebuffer->Unbind();
@@ -238,6 +238,6 @@ void dg::TexturesScene::RenderFrame() {
   glCullFace(GL_BACK);
 
   // Render scene for real.
-  RenderScene(*mainCamera);
+  DrawScene(*mainCamera);
 }
 

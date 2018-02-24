@@ -20,8 +20,6 @@ namespace dg {
     VEC2,
     VEC3,
     VEC4,
-    MAT2X2,
-    MAT3X3,
     MAT4X4,
     TEXTURE,
   };
@@ -33,8 +31,6 @@ namespace dg {
     glm::vec2 _vec2;
     glm::vec3 _vec3;
     glm::vec4 _vec4;
-    glm::mat2x2 _mat2x2;
-    glm::mat3x3 _mat3x3;
     glm::mat4x4 _mat4x4;
 
     MaterialPropertyValue() {
@@ -69,8 +65,6 @@ namespace dg {
       void SetProperty(const std::string& name, glm::vec2 value);
       void SetProperty(const std::string& name, glm::vec3 value);
       void SetProperty(const std::string& name, glm::vec4 value);
-      void SetProperty(const std::string& name, glm::mat2x2 value);
-      void SetProperty(const std::string& name, glm::mat3x3 value);
       void SetProperty(const std::string& name, glm::mat4x4 value);
       void SetProperty(
           const std::string& name, std::shared_ptr<Texture> value);
@@ -83,7 +77,7 @@ namespace dg {
       void SetCameraPosition(glm::vec3 position);
       void SetMatrixMVP(glm::mat4x4 mvp);
       void SetMatrixM(glm::mat4x4 m);
-      void SetMatrixNormal(glm::mat3x3 normal);
+      void SetMatrixNormal(glm::mat4x4 normal);
       void SetLight(int index, const Light::ShaderData& data);
       void ClearLights();
       void ClearLight(int index);

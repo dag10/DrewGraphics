@@ -218,7 +218,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 
     window->StartRender();
     try {
+#if defined(_OPENGL)
       scene->RenderFrame();
+#endif
     } catch (const std::exception& e) {
       std::cerr << "Failed to render scene: ";
       terminateWithError(e.what());

@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include <Behavior.h>
+#include "Behavior.h"
 #include <openvr.h>
 
 namespace dg {

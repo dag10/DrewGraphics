@@ -5,9 +5,9 @@
 
 #include <memory>
 #include <unordered_map>
-#include <Shader.h>
-#include <Texture.h>
-#include <Lights.h>
+#include "Shader.h"
+#include "Texture.h"
+#include "Lights.h"
 
 namespace dg {
 

@@ -5,8 +5,8 @@
 #pragma once
 
 #include <memory>
-#include <Scene.h>
-#include <materials/StandardMaterial.h>
+#include "Scene.h"
+#include "materials/StandardMaterial.h"
 
 namespace dg {
 

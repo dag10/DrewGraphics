@@ -4,9 +4,9 @@
 
 #pragma once
 
-#include <memory>
-#include <Scene.h>
 #include <openvr.h>
+#include <memory>
+#include "Scene.h"
 
 namespace dg {
 

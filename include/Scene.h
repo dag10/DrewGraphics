@@ -4,8 +4,8 @@
 
 #pragma once
 
-#include <Lights.h>
-#include <SceneObject.h>
+#include "Lights.h"
+#include "SceneObject.h"
 #include <openvr.h>
 #include <forward_list>
 #include <memory>

@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include <SceneObject.h>
+#include "SceneObject.h"
 #include <glm/vec3.hpp>
 
 namespace dg {

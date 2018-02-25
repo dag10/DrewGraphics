@@ -5,8 +5,8 @@
 
 #include <glad/glad.h>
 
-#include <Transform.h>
-#include <Behavior.h>
+#include "Transform.h"
+#include "Behavior.h"
 #include <set>
 #include <vector>
 #include <memory>

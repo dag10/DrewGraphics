@@ -3,9 +3,14 @@
 //
 #pragma once
 
+#if defined(_OPENGL)
+#include <glad/glad.h>
+#elif defined(_DIRECTX)
+#include <d3d11.h>
+#endif
+
 #include <memory>
 #include <string>
-#include <glad/glad.h>
 
 namespace dg {
 
@@ -48,18 +53,28 @@ namespace dg {
     unsigned int width;
     unsigned int height;
 
+#if defined(_OPENGL)
     GLenum GetOpenGLWrap() const;
     GLenum GetOpenGLMinFilter() const;
     GLenum GetOpenGLMagFilter() const;
     GLenum GetOpenGLInternalFormat() const;
     GLenum GetOpenGLExternalFormat() const;
     GLenum GetOpenGLType() const;
+#elif defined(_DIRECTX)
+    DXGI_FORMAT GetDirectXFormat() const;
+    unsigned int GetDirectXBitsPerPixel() const;
+#endif
   };
 
 #pragma endregion
 
   class OpenGLTexture;
+  class DirectXTexture;
+#if defined(_OPENGL)
   using Texture = OpenGLTexture;
+#elif defined(_DIRECTX)
+  using Texture = DirectXTexture;
+#endif
 
   // Copy is disabled. This prevents us from leaking or redeleting
   // OpenGL/DirectX resources.
@@ -113,6 +128,25 @@ namespace dg {
       GLuint textureHandle = 0;
 
   }; // class OpenGLTexture
+
+#elif defined(_DIRECTX)
+
+  class DirectXTexture : public BaseTexture {
+    friend class BaseTexture;
+
+    public:
+
+      virtual ~DirectXTexture();
+
+    private:
+
+      DirectXTexture(TextureOptions options);
+
+      virtual void GenerateImage(void *pixels = nullptr);
+
+      ID3D11Texture2D *texture = nullptr;
+
+  }; // class DirectXTexture
 
 #endif
 

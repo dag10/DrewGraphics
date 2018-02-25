@@ -12,8 +12,8 @@
 #include <directx/SimpleShader.h>
 #endif
 
-#include <Texture.h>
-#include <Transform.h>
+#include "Texture.h"
+#include "Transform.h"
 #include <glm/glm.hpp>
 #include <memory>
 #include <string>

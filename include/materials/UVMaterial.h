@@ -4,9 +4,9 @@
 #pragma once
 
 #include <memory>
-#include <Material.h>
-#include <Shader.h>
-#include <Texture.h>
+#include "Material.h"
+#include "Shader.h"
+#include "Texture.h"
 
 namespace dg {
 

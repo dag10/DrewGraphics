@@ -4,9 +4,9 @@
 
 #pragma once
 
-#include <Behavior.h>
-#include <Camera.h>
-#include <Window.h>
+#include "Behavior.h"
+#include "Camera.h"
+#include "Window.h"
 #include <memory>
 
 namespace dg {

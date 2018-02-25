@@ -4,10 +4,10 @@
 #pragma once
 
 #include <memory>
-#include <Texture.h>
-#include <Camera.h>
-#include <Window.h>
-#include <materials/StandardMaterial.h>
+#include "Texture.h"
+#include "Camera.h"
+#include "Window.h"
+#include "materials/StandardMaterial.h"
 #include <openvr.h>
 
 namespace dg {

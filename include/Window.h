@@ -12,7 +12,7 @@
 #include <Windows.h>
 #endif
 
-#include <InputCodes.h>
+#include "InputCodes.h"
 #include <memory>
 #include <string>
 #include <vector>

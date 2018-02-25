@@ -5,9 +5,9 @@
 #pragma once
 
 #include <memory>
-#include <Behavior.h>
-#include <Scene.h>
-#include <InputCodes.h>
+#include "Behavior.h"
+#include "Scene.h"
+#include "InputCodes.h"
 
 namespace dg {
 

@@ -2,8 +2,8 @@
 //  behaviors/KeyboardCameraController.cpp
 //
 
-#include <behaviors/KeyboardCameraController.h>
-#include <EngineTime.h>
+#include "dg/behaviors/KeyboardCameraController.h"
+#include "dg/EngineTime.h"
 #include <iostream>
 
 dg::KeyboardCameraController::KeyboardCameraController(

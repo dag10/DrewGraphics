@@ -2,7 +2,7 @@
 //  materials/ScreenQuadMaterial.cpp
 //
 
-#include <materials/ScreenQuadMaterial.h>
+#include "dg/materials/ScreenQuadMaterial.h"
 
 std::shared_ptr<dg::Shader> dg::ScreenQuadMaterial::screenQuadShader = nullptr;
 

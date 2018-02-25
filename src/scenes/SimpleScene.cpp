@@ -2,19 +2,19 @@
 //  scenes/SimpleScene.cpp
 //
 
-#include <scenes/SimpleScene.h>
+#include "dg/scenes/SimpleScene.h"
 
-#include <Camera.h>
-#include <Graphics.h>
-#include <Lights.h>
-#include <Mesh.h>
-#include <Model.h>
-#include <Shader.h>
-#include <Skybox.h>
-#include <Texture.h>
-#include <Window.h>
-#include <behaviors/KeyboardCameraController.h>
-#include <materials/StandardMaterial.h>
+#include "dg/Camera.h"
+#include "dg/Graphics.h"
+#include "dg/Lights.h"
+#include "dg/Mesh.h"
+#include "dg/Model.h"
+#include "dg/Shader.h"
+#include "dg/Skybox.h"
+#include "dg/Texture.h"
+#include "dg/Window.h"
+#include "dg/behaviors/KeyboardCameraController.h"
+#include "dg/materials/StandardMaterial.h"
 #include <forward_list>
 #include <glm/glm.hpp>
 

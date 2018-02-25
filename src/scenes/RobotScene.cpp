@@ -2,16 +2,16 @@
 //  scenes/RobotScene.cpp
 //
 
-#include <scenes/RobotScene.h>
+#include "dg/scenes/RobotScene.h"
 
-#include <EngineTime.h>
-#include <Graphics.h>
-#include <Lights.h>
-#include <Mesh.h>
-#include <Model.h>
-#include <behaviors/KeyboardCameraController.h>
-#include <materials/StandardMaterial.h>
-#include <materials/UVMaterial.h>
+#include "dg/EngineTime.h"
+#include "dg/Graphics.h"
+#include "dg/Lights.h"
+#include "dg/Mesh.h"
+#include "dg/Model.h"
+#include "dg/behaviors/KeyboardCameraController.h"
+#include "dg/materials/StandardMaterial.h"
+#include "dg/materials/UVMaterial.h"
 #include <glm/glm.hpp>
 
 std::unique_ptr<dg::RobotScene> dg::RobotScene::Make() {

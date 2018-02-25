@@ -2,12 +2,12 @@
 //  vr/VRManager.cpp
 //
 
-#include <vr/VRManager.h>
-#include <vr/VRTrackedObject.h>
-#include <Exceptions.h>
-#include <Mesh.h>
-#include <SceneObject.h>
-#include <MathUtils.h>
+#include "dg/vr/VRManager.h"
+#include "dg/Exceptions.h"
+#include "dg/MathUtils.h"
+#include "dg/Mesh.h"
+#include "dg/SceneObject.h"
+#include "dg/vr/VRTrackedObject.h"
 
 dg::VRManager *dg::VRManager::Instance = nullptr;
 
@@ -168,6 +168,7 @@ std::shared_ptr<dg::FrameBuffer> dg::VRManager::GetFramebuffer(
 }
 
 void dg::VRManager::SubmitFrame(vr::EVREye eye) {
+#if defined(_OPENGL)
   vr::Texture_t frameTexture;
   frameTexture.eColorSpace = vr::EColorSpace::ColorSpace_Auto;
   frameTexture.eType = vr::ETextureType::TextureType_OpenGL;
@@ -175,6 +176,9 @@ void dg::VRManager::SubmitFrame(vr::EVREye eye) {
     (void *)(long)GetFramebuffer(eye)->GetColorTexture()->GetHandle();
   vrCompositor->Submit(
     eye, &frameTexture, nullptr, vr::EVRSubmitFlags::Submit_Default);
+#elif defined(_DIRECTX)
+  // TODO
+#endif
 }
 
 std::shared_ptr<dg::Mesh> dg::VRManager::GetHiddenAreaMesh(vr::EVREye eye) {

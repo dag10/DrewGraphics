@@ -2,7 +2,8 @@
 //  Canvas.cpp
 //
 
-#include <Canvas.h>
+#include "dg/Canvas.h"
+#include <iostream>
 
 dg::Canvas::Canvas(unsigned int width, unsigned int height) {
   TextureOptions texOpts;
@@ -64,6 +65,7 @@ void dg::Canvas::SetPixel(
 }
 
 void dg::Canvas::Submit() {
+#if defined(_OPENGL)
   glBindTexture(GL_TEXTURE_2D, texture->GetHandle());
   glTexSubImage2D(
       GL_TEXTURE_2D,
@@ -75,5 +77,8 @@ void dg::Canvas::Submit() {
       texture->GetOptions().GetOpenGLInternalFormat(),
       texture->GetOptions().GetOpenGLType(),
       pixels);
+#elif defined(_DIRECTX)
+  // TODO
+#endif
 }
 

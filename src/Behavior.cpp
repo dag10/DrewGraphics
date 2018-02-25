@@ -2,9 +2,9 @@
 //  Behavior.cpp
 //
 
-#include <Behavior.h>
-#include <SceneObject.h>
+#include "dg/Behavior.h"
 #include <stdexcept>
+#include "dg/SceneObject.h"
 
 void dg::Behavior::Attach_Impl(
     std::shared_ptr<dg::SceneObject> object,

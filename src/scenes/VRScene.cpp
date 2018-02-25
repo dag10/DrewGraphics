@@ -2,27 +2,26 @@
 //  scenes/VRScene.cpp
 //
 
-#include <scenes/VRScene.h>
+#include "dg/scenes/VRScene.h"
 
-#include <memory>
 #include <glm/glm.hpp>
-#include <EngineTime.h>
-#include <Exceptions.h>
-#include <Texture.h>
-#include <Mesh.h>
-#include <Transform.h>
 #include <iostream>
-#include <behaviors/KeyboardLightController.h>
-#include <vr/VRManager.h>
-#include <vr/VRTrackedObject.h>
-#include <Camera.h>
-#include <Shader.h>
-#include <Transform.h>
-#include <Model.h>
-#include <Skybox.h>
-#include <materials/StandardMaterial.h>
-#include <Lights.h>
-#include <FrameBuffer.h>
+#include <memory>
+#include "dg/Camera.h"
+#include "dg/EngineTime.h"
+#include "dg/Exceptions.h"
+#include "dg/FrameBuffer.h"
+#include "dg/Lights.h"
+#include "dg/Mesh.h"
+#include "dg/Model.h"
+#include "dg/Shader.h"
+#include "dg/Skybox.h"
+#include "dg/Texture.h"
+#include "dg/Transform.h"
+#include "dg/behaviors/KeyboardLightController.h"
+#include "dg/materials/StandardMaterial.h"
+#include "dg/vr/VRManager.h"
+#include "dg/vr/VRTrackedObject.h"
 
 std::unique_ptr<dg::VRScene> dg::VRScene::Make() {
   return std::unique_ptr<dg::VRScene>(new dg::VRScene());

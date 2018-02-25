@@ -2,8 +2,8 @@
 //  Window.cpp
 //
 
-#include <Graphics.h>
-#include <Window.h>
+#include "dg/Graphics.h"
+#include "dg/Window.h"
 #include <cassert>
 #include <iostream>
 #include <string>

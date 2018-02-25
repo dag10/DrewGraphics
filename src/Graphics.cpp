@@ -2,14 +2,14 @@
 //  Graphics.cpp
 //
 
-#include <Graphics.h>
-#include <Window.h>
-#include <Mesh.h>
-#include <Shader.h>
+#include "dg/Graphics.h"
 #include <cassert>
+#include "dg/Mesh.h"
+#include "dg/Shader.h"
+#include "dg/Window.h"
 
 #if defined(_OPENGL)
-#include <glad/glad.h>
+#include "dg/glad/glad.h"
 
 #include <GLFW/glfw3.h>
 #elif defined(_DIRECTX)

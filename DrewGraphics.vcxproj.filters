@@ -16,9 +16,6 @@
     <Filter Include="Source Files\behaviors">
       <UniqueIdentifier>{1cdd3e62-ebc3-4262-96e1-1d72a515fe31}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\lights">
-      <UniqueIdentifier>{c1ebce7f-f12e-4558-893e-6b274ec7610c}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\materials">
       <UniqueIdentifier>{cb75e25b-2fb3-4d82-94bf-5bc81a8ffa47}</UniqueIdentifier>
     </Filter>
@@ -33,9 +30,6 @@
     </Filter>
     <Filter Include="Header Files\KHR">
       <UniqueIdentifier>{1fb0c7be-1c4c-454d-bd10-8243e4e3e67b}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\lights">
-      <UniqueIdentifier>{e1270a7e-9c5f-41b1-a830-7c4355d7b356}</UniqueIdentifier>
     </Filter>
     <Filter Include="Header Files\materials">
       <UniqueIdentifier>{5ee19998-370e-4a1a-a768-91b25cb48f40}</UniqueIdentifier>
@@ -203,139 +197,139 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\Behavior.h">
+    <ClInclude Include="include\dg\Behavior.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Camera.h">
+    <ClInclude Include="include\dg\Camera.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\EngineTime.h">
+    <ClInclude Include="include\dg\EngineTime.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Exceptions.h">
+    <ClInclude Include="include\dg\Exceptions.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\FileUtils.h">
+    <ClInclude Include="include\dg\FileUtils.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Lights.h">
+    <ClInclude Include="include\dg\Lights.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Material.h">
+    <ClInclude Include="include\dg\Material.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Mesh.h">
+    <ClInclude Include="include\dg\Mesh.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Model.h">
+    <ClInclude Include="include\dg\Model.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Scene.h">
+    <ClInclude Include="include\dg\Scene.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\SceneObject.h">
+    <ClInclude Include="include\dg\SceneObject.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Shader.h">
+    <ClInclude Include="include\dg\Shader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Skybox.h">
+    <ClInclude Include="include\dg\Skybox.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\stb_image.h">
+    <ClInclude Include="include\dg\stb_image.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Texture.h">
+    <ClInclude Include="include\dg\Texture.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Transform.h">
+    <ClInclude Include="include\dg\Transform.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Window.h">
+    <ClInclude Include="include\dg\Window.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\behaviors\KeyboardCameraController.h">
+    <ClInclude Include="include\dg\behaviors\KeyboardCameraController.h">
       <Filter>Header Files\behaviors</Filter>
     </ClInclude>
-    <ClInclude Include="include\glad\glad.h">
+    <ClInclude Include="include\dg\glad\glad.h">
       <Filter>Header Files\glad</Filter>
     </ClInclude>
-    <ClInclude Include="include\KHR\khrplatform.h">
+    <ClInclude Include="include\dg\KHR\khrplatform.h">
       <Filter>Header Files\KHR</Filter>
     </ClInclude>
-    <ClInclude Include="include\materials\StandardMaterial.h">
+    <ClInclude Include="include\dg\materials\StandardMaterial.h">
       <Filter>Header Files\materials</Filter>
     </ClInclude>
-    <ClInclude Include="include\scenes\PortalScene.h">
+    <ClInclude Include="include\dg\scenes\PortalScene.h">
       <Filter>Header Files\scenes</Filter>
     </ClInclude>
-    <ClInclude Include="include\scenes\QuadScene.h">
+    <ClInclude Include="include\dg\scenes\QuadScene.h">
       <Filter>Header Files\scenes</Filter>
     </ClInclude>
-    <ClInclude Include="include\scenes\TutorialScene.h">
+    <ClInclude Include="include\dg\scenes\TutorialScene.h">
       <Filter>Header Files\scenes</Filter>
     </ClInclude>
-    <ClInclude Include="include\scenes\VRScene.h">
+    <ClInclude Include="include\dg\scenes\VRScene.h">
       <Filter>Header Files\scenes</Filter>
     </ClInclude>
-    <ClInclude Include="include\materials\UVMaterial.h">
+    <ClInclude Include="include\dg\materials\UVMaterial.h">
       <Filter>Header Files\materials</Filter>
     </ClInclude>
-    <ClInclude Include="include\scenes\MeshesScene.h">
+    <ClInclude Include="include\dg\scenes\MeshesScene.h">
       <Filter>Header Files\scenes</Filter>
     </ClInclude>
-    <ClInclude Include="include\scenes\RobotScene.h">
+    <ClInclude Include="include\dg\scenes\RobotScene.h">
       <Filter>Header Files\scenes</Filter>
     </ClInclude>
-    <ClInclude Include="include\FrameBuffer.h">
+    <ClInclude Include="include\dg\FrameBuffer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\MathUtils.h">
+    <ClInclude Include="include\dg\MathUtils.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\vr\VRManager.h">
+    <ClInclude Include="include\dg\vr\VRManager.h">
       <Filter>Header Files\vr</Filter>
     </ClInclude>
-    <ClInclude Include="include\vr\VRTrackedObject.h">
+    <ClInclude Include="include\dg\vr\VRTrackedObject.h">
       <Filter>Header Files\vr</Filter>
     </ClInclude>
-    <ClInclude Include="include\behaviors\KeyboardLightController.h">
+    <ClInclude Include="include\dg\behaviors\KeyboardLightController.h">
       <Filter>Header Files\behaviors</Filter>
     </ClInclude>
-    <ClInclude Include="include\materials\ScreenQuadMaterial.h">
+    <ClInclude Include="include\dg\materials\ScreenQuadMaterial.h">
       <Filter>Header Files\materials</Filter>
     </ClInclude>
-    <ClInclude Include="include\CanvasScene.h">
+    <ClInclude Include="include\dg\CanvasScene.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\scenes\CanvasTestScene.h">
+    <ClInclude Include="include\dg\scenes\CanvasTestScene.h">
       <Filter>Header Files\scenes</Filter>
     </ClInclude>
-    <ClInclude Include="include\Canvas.h">
+    <ClInclude Include="include\dg\Canvas.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\scenes\TexturesScene.h">
+    <ClInclude Include="include\dg\scenes\TexturesScene.h">
       <Filter>Header Files\scenes</Filter>
     </ClInclude>
-    <ClInclude Include="include\InputCodes.h">
+    <ClInclude Include="include\dg\InputCodes.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\scenes\DeepCloningScene.h">
+    <ClInclude Include="include\dg\scenes\DeepCloningScene.h">
       <Filter>Header Files\scenes</Filter>
     </ClInclude>
-    <ClInclude Include="include\Graphics.h">
+    <ClInclude Include="include\dg\Graphics.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\scenes\SimpleScene.h">
+    <ClInclude Include="include\dg\scenes\SimpleScene.h">
       <Filter>Header Files\scenes</Filter>
     </ClInclude>
-    <ClInclude Include="include\opengl\ShaderSource.h">
+    <ClInclude Include="include\dg\opengl\ShaderSource.h">
       <Filter>Header Files\opengl</Filter>
     </ClInclude>
-    <ClInclude Include="include\directx\SimpleShader.h">
+    <ClInclude Include="include\dg\directx\SimpleShader.h">
       <Filter>Header Files\directx</Filter>
     </ClInclude>
-    <ClInclude Include="include\Utils.h">
+    <ClInclude Include="include\dg\Utils.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -390,5 +384,6 @@
     <None Include="assets\shaders\includes\vertex_main.glsl">
       <Filter>Shaders\OpenGL\Includes</Filter>
     </None>
+    <None Include="packages.config" />
   </ItemGroup>
 </Project>

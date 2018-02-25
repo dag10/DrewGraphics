@@ -2,7 +2,7 @@
 //  Model.cpp
 //
 
-#include <Model.h>
+#include "dg/Model.h"
 
 dg::Model::Model() : SceneObject() {}
 

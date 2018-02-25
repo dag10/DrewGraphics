@@ -2,9 +2,9 @@
 //  opengl/ShaderSource.cpp
 //
 
-#include <opengl/ShaderSource.h>
-#include <FileUtils.h>
-#include <Exceptions.h>
+#include "dg/opengl/ShaderSource.h"
+#include "dg/FileUtils.h"
+#include "dg/Exceptions.h"
 
 dg::ShaderSource dg::ShaderSource::FromFile(
     GLenum type, const std::string& path) {

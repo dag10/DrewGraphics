@@ -2,11 +2,11 @@
 //  behaviors/KeyboardLightController.cpp
 //
 
-#include <behaviors/KeyboardLightController.h>
-#include <EngineTime.h>
-#include <Lights.h>
-#include <Window.h>
-#include <InputCodes.h>
+#include "dg/behaviors/KeyboardLightController.h"
+#include "dg/EngineTime.h"
+#include "dg/Lights.h"
+#include "dg/Window.h"
+#include "dg/InputCodes.h"
 #include <iostream>
 
 dg::KeyboardLightController::KeyboardLightController(

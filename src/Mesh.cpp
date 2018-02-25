@@ -2,15 +2,15 @@
 //  Mesh.cpp
 //
 
-#include <Mesh.h>
-#include <Exceptions.h>
-#include <Graphics.h>
-#include <iostream>
-#include <fstream>
+#include "dg/Mesh.h"
 #include <cassert>
-#include <memory>
-#include <Transform.h>
+#include <fstream>
 #include <glm/gtc/type_ptr.hpp>
+#include <iostream>
+#include <memory>
+#include "dg/Exceptions.h"
+#include "dg/Graphics.h"
+#include "dg/Transform.h"
 
 #ifdef _WIN32
 #define sscanf sscanf_s

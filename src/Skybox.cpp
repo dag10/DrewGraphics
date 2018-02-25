@@ -2,9 +2,9 @@
 //  Skybox.cpp
 //
 
-#include <Skybox.h>
-#include <Mesh.h>
-#include <materials/StandardMaterial.h>
+#include "dg/Skybox.h"
+#include "dg/Mesh.h"
+#include "dg/materials/StandardMaterial.h"
 
 dg::Skybox::Skybox(std::shared_ptr<Texture> texture) {
   material = StandardMaterial::WithTexture(texture);
@@ -55,8 +55,12 @@ void dg::Skybox::Draw(const Camera& camera, glm::mat4x4 projection) {
 
   material.Use();
 
+#if defined(_OPENGL)
   glCullFace(GL_FRONT);
   glDepthMask(GL_FALSE);
+#elif defined(_DIRECTX)
+  // TODO
+#endif
   Mesh::MappedCube->Draw();
 }
 

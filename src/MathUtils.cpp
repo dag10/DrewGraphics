@@ -2,7 +2,7 @@
 //  MathUtils.cpp
 //
 
-#include <MathUtils.h>
+#include "dg/MathUtils.h"
 
 #if defined(_DIRECTX)
 // For the DirectX Math library

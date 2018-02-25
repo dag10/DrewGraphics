@@ -235,8 +235,8 @@ xcopy /d /e /y "$(ProjectDir)assets" "$(OutDir)\assets"</Command>
       <SDLCheck>true</SDLCheck>
       <LanguageStandard>stdcpp14</LanguageStandard>
       <PreprocessorDefinitions>_DIRECTX</PreprocessorDefinitions>
-      <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <MinimalRebuild>false</MinimalRebuild>
+      <MultiProcessorCompilation>false</MultiProcessorCompilation>
+      <MinimalRebuild>true</MinimalRebuild>
     </ClCompile>
     <Link />
     <Link>
@@ -274,7 +274,8 @@ xcopy /d /e /y "$(ProjectDir)assets" "$(OutDir)\assets"</Command>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DIRECTX</PreprocessorDefinitions>
-      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <MultiProcessorCompilation>false</MultiProcessorCompilation>
+      <MinimalRebuild>true</MinimalRebuild>
     </ClCompile>
     <Link>
       <AdditionalDependencies>openvr_api.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -471,51 +472,51 @@ del /s $(OutDir)*.obj, $(OutDir)*.pdb, $(OutDir)*.ipdb, $(OutDir)*.iobj</Command
     <ClCompile Include="src\Window.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\Behavior.h" />
-    <ClInclude Include="include\behaviors\KeyboardCameraController.h" />
-    <ClInclude Include="include\behaviors\KeyboardLightController.h" />
-    <ClInclude Include="include\Camera.h" />
-    <ClInclude Include="include\Canvas.h" />
-    <ClInclude Include="include\CanvasScene.h" />
-    <ClInclude Include="include\directx\SimpleShader.h" />
-    <ClInclude Include="include\EngineTime.h" />
-    <ClInclude Include="include\Exceptions.h" />
-    <ClInclude Include="include\FileUtils.h" />
-    <ClInclude Include="include\FrameBuffer.h" />
-    <ClInclude Include="include\glad\glad.h" />
-    <ClInclude Include="include\Graphics.h" />
-    <ClInclude Include="include\InputCodes.h" />
-    <ClInclude Include="include\KHR\khrplatform.h" />
-    <ClInclude Include="include\Lights.h" />
-    <ClInclude Include="include\Material.h" />
-    <ClInclude Include="include\materials\ScreenQuadMaterial.h" />
-    <ClInclude Include="include\materials\StandardMaterial.h" />
-    <ClInclude Include="include\materials\UVMaterial.h" />
-    <ClInclude Include="include\MathUtils.h" />
-    <ClInclude Include="include\Mesh.h" />
-    <ClInclude Include="include\Model.h" />
-    <ClInclude Include="include\opengl\ShaderSource.h" />
-    <ClInclude Include="include\Scene.h" />
-    <ClInclude Include="include\SceneObject.h" />
-    <ClInclude Include="include\scenes\CanvasTestScene.h" />
-    <ClInclude Include="include\scenes\DeepCloningScene.h" />
-    <ClInclude Include="include\scenes\PortalScene.h" />
-    <ClInclude Include="include\scenes\QuadScene.h" />
-    <ClInclude Include="include\scenes\SimpleScene.h" />
-    <ClInclude Include="include\scenes\TexturesScene.h" />
-    <ClInclude Include="include\scenes\TutorialScene.h" />
-    <ClInclude Include="include\scenes\MeshesScene.h" />
-    <ClInclude Include="include\scenes\RobotScene.h" />
-    <ClInclude Include="include\scenes\VRScene.h" />
-    <ClInclude Include="include\Shader.h" />
-    <ClInclude Include="include\Skybox.h" />
-    <ClInclude Include="include\stb_image.h" />
-    <ClInclude Include="include\Texture.h" />
-    <ClInclude Include="include\Transform.h" />
-    <ClInclude Include="include\Utils.h" />
-    <ClInclude Include="include\vr\VRManager.h" />
-    <ClInclude Include="include\vr\VRTrackedObject.h" />
-    <ClInclude Include="include\Window.h" />
+    <ClInclude Include="include\dg\Behavior.h" />
+    <ClInclude Include="include\dg\behaviors\KeyboardCameraController.h" />
+    <ClInclude Include="include\dg\behaviors\KeyboardLightController.h" />
+    <ClInclude Include="include\dg\Camera.h" />
+    <ClInclude Include="include\dg\Canvas.h" />
+    <ClInclude Include="include\dg\CanvasScene.h" />
+    <ClInclude Include="include\dg\directx\SimpleShader.h" />
+    <ClInclude Include="include\dg\EngineTime.h" />
+    <ClInclude Include="include\dg\Exceptions.h" />
+    <ClInclude Include="include\dg\FileUtils.h" />
+    <ClInclude Include="include\dg\FrameBuffer.h" />
+    <ClInclude Include="include\dg\glad\glad.h" />
+    <ClInclude Include="include\dg\Graphics.h" />
+    <ClInclude Include="include\dg\InputCodes.h" />
+    <ClInclude Include="include\dg\KHR\khrplatform.h" />
+    <ClInclude Include="include\dg\Lights.h" />
+    <ClInclude Include="include\dg\Material.h" />
+    <ClInclude Include="include\dg\materials\ScreenQuadMaterial.h" />
+    <ClInclude Include="include\dg\materials\StandardMaterial.h" />
+    <ClInclude Include="include\dg\materials\UVMaterial.h" />
+    <ClInclude Include="include\dg\MathUtils.h" />
+    <ClInclude Include="include\dg\Mesh.h" />
+    <ClInclude Include="include\dg\Model.h" />
+    <ClInclude Include="include\dg\opengl\ShaderSource.h" />
+    <ClInclude Include="include\dg\Scene.h" />
+    <ClInclude Include="include\dg\SceneObject.h" />
+    <ClInclude Include="include\dg\scenes\CanvasTestScene.h" />
+    <ClInclude Include="include\dg\scenes\DeepCloningScene.h" />
+    <ClInclude Include="include\dg\scenes\PortalScene.h" />
+    <ClInclude Include="include\dg\scenes\QuadScene.h" />
+    <ClInclude Include="include\dg\scenes\SimpleScene.h" />
+    <ClInclude Include="include\dg\scenes\TexturesScene.h" />
+    <ClInclude Include="include\dg\scenes\TutorialScene.h" />
+    <ClInclude Include="include\dg\scenes\MeshesScene.h" />
+    <ClInclude Include="include\dg\scenes\RobotScene.h" />
+    <ClInclude Include="include\dg\scenes\VRScene.h" />
+    <ClInclude Include="include\dg\Shader.h" />
+    <ClInclude Include="include\dg\Skybox.h" />
+    <ClInclude Include="include\dg\stb_image.h" />
+    <ClInclude Include="include\dg\Texture.h" />
+    <ClInclude Include="include\dg\Transform.h" />
+    <ClInclude Include="include\dg\Utils.h" />
+    <ClInclude Include="include\dg\vr\VRManager.h" />
+    <ClInclude Include="include\dg\vr\VRTrackedObject.h" />
+    <ClInclude Include="include\dg\Window.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="assets\shaders\StandardPixelShader.hlsl">
@@ -728,8 +729,16 @@ del /s $(OutDir)*.obj, $(OutDir)*.pdb, $(OutDir)*.ipdb, $(OutDir)*.iobj</Command
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_DirectX|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='VRDemo|x64'">true</ExcludedFromBuild>
     </None>
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
+    <Import Project="packages\directxtk_desktop_2015.2017.12.13.1\build\native\directxtk_desktop_2015.targets" Condition="Exists('packages\directxtk_desktop_2015.2017.12.13.1\build\native\directxtk_desktop_2015.targets')" />
   </ImportGroup>
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('packages\directxtk_desktop_2015.2017.12.13.1\build\native\directxtk_desktop_2015.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\directxtk_desktop_2015.2017.12.13.1\build\native\directxtk_desktop_2015.targets'))" />
+  </Target>
 </Project>

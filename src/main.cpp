@@ -7,7 +7,7 @@
 #endif
 
 #if defined(_OPENGL)
-#include <glad/glad.h>
+#include "dg/glad/glad.h"
 
 #include <GLFW/glfw3.h>
 #endif
@@ -16,28 +16,36 @@
 #include <Windows.h>
 #endif
 
-#include <EngineTime.h>
-#include <Exceptions.h>
-#include <Graphics.h>
-#include <InputCodes.h>
-#include <Window.h>
+#if defined(_DIRECTX)
+#include <Windows.Foundation.h>
+#include <wrl\wrappers\corewrappers.h>
+#include <wrl\client.h>
+#include <stdio.h>
+#pragma comment(lib, "runtimeobject.lib")
+#endif
+
 #include <functional>
 #include <iostream>
 #include <map>
 #include <memory>
 #include <ostream>
 #include <sstream>
+#include "dg/EngineTime.h"
+#include "dg/Exceptions.h"
+#include "dg/Graphics.h"
+#include "dg/InputCodes.h"
+#include "dg/Window.h"
 
-#include <scenes/CanvasTestScene.h>
-#include <scenes/DeepCloningScene.h>
-#include <scenes/MeshesScene.h>
-#include <scenes/PortalScene.h>
-#include <scenes/QuadScene.h>
-#include <scenes/RobotScene.h>
-#include <scenes/SimpleScene.h>
-#include <scenes/TexturesScene.h>
-#include <scenes/TutorialScene.h>
-#include <scenes/VRScene.h>
+#include "dg/scenes/CanvasTestScene.h"
+#include "dg/scenes/DeepCloningScene.h"
+#include "dg/scenes/MeshesScene.h"
+#include "dg/scenes/PortalScene.h"
+#include "dg/scenes/QuadScene.h"
+#include "dg/scenes/RobotScene.h"
+#include "dg/scenes/SimpleScene.h"
+#include "dg/scenes/TexturesScene.h"
+#include "dg/scenes/TutorialScene.h"
+#include "dg/scenes/VRScene.h"
 
 using namespace dg;
 
@@ -123,6 +131,23 @@ static void FixCurrentDirectory() {
 }
 #endif
 
+#if defined(_DIRECTX)
+static void InitializeWRL() {
+# if (_WIN32_WINNT >= 0x0A00 /*_WIN32_WINNT_WIN10*/)
+  Microsoft::WRL::Wrappers::RoInitializeWrapper initialize(
+      RO_INIT_MULTITHREADED);
+  if (FAILED(initialize)) {
+    terminateWithError("Failed to initialize Windows runtime.");
+  }
+# else
+  HRESULT hr = CoInitializeEx(nullptr, COINITBASE_MULTITHREADED);
+  if (FAILED(hr)) {
+    terminateWithError("Failed to initialize Windows runtime.");
+  }
+# endif
+}
+#endif
+
 #if defined(_OPENGL)
 int main(int argc, const char* argv[]) {
 #elif defined(_DIRECTX)
@@ -137,6 +162,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 
 #if defined(_WIN32)
   FixCurrentDirectory();
+#endif
+
+#if defined(_DIRECTX)
+  InitializeWRL();
 #endif
 
   // Find intended scene.

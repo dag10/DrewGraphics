@@ -2,9 +2,9 @@
 //  vr/VRTrackedObject.cpp
 //
 
-#include <vr/VRTrackedObject.h>
-#include <vr/VRManager.h>
+#include "dg/vr/VRTrackedObject.h"
 #include <iostream>
+#include "dg/vr/VRManager.h"
 
 dg::VRTrackedObject::VRTrackedObject(vr::ETrackedControllerRole role)
   : role(role), Behavior() {}

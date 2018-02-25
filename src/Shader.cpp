@@ -2,13 +2,13 @@
 //  Shader.cpp
 //
 
-#include <Exceptions.h>
-#include <FileUtils.h>
-#include <Shader.h>
-#include <Utils.h>
+#include "dg/Shader.h"
 #include <cassert>
 #include <glm/gtc/type_ptr.hpp>
 #include <memory>
+#include "dg/Exceptions.h"
+#include "dg/FileUtils.h"
+#include "dg/Utils.h"
 
 #if defined(_DIRECTX)
 // For the DirectX Math library

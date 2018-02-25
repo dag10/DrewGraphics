@@ -2,13 +2,19 @@
 //  Texture.cpp
 //
 
-#include <string>
-#include <cassert>
-#define STB_IMAGE_IMPLEMENTATION
-#include <stb_image.h>
+#if defined(_DIRECTX)
+#include <DDSTextureLoader.h>
+#endif
 
-#include <Texture.h>
-#include <Exceptions.h>
+#include <cassert>
+#include <iostream>
+#include <string>
+#define STB_IMAGE_IMPLEMENTATION
+#include "dg/stb_image.h"
+
+#include "dg/Exceptions.h"
+#include "dg/Graphics.h"
+#include "dg/Texture.h"
 
 #pragma region Texture Base Class
 
@@ -41,7 +47,12 @@ std::shared_ptr<dg::Texture> dg::BaseTexture::FromPath(const std::string& path) 
 
 std::shared_ptr<dg::Texture> dg::BaseTexture::Generate(TextureOptions options) {
   auto texture = std::shared_ptr<Texture>(new Texture(options));
+#if defined(_OPENGL)
   texture->GenerateImage(nullptr);
+#elif defined(_DIRECTX)
+  std::cerr << "WARNING: Blank textures not yet implemented for DirectX."
+            << std::endl;
+#endif
   return texture;
 }
 
@@ -128,8 +139,119 @@ void dg::OpenGLTexture::GenerateImage(void *pixels) {
 
 #endif
 #pragma endregion
+#pragma region DirectX Texture
+#if defined(_DIRECTX)
+
+dg::DirectXTexture::DirectXTexture(TextureOptions options)
+    : BaseTexture(options) {}
+
+dg::DirectXTexture::~DirectXTexture() {
+  if (texture != nullptr) {
+    texture->Release();
+    texture = nullptr;
+  }
+  if (srv != nullptr) {
+    srv->Release();
+    srv = nullptr;
+  }
+}
+
+void dg::DirectXTexture::GenerateImage(void *pixels) {
+  assert(texture == nullptr);
+
+  size_t pixelBytes;
+  switch (options.format) {
+    case TexturePixelFormat::RGB:
+      pixelBytes = 3;
+      break;
+    case TexturePixelFormat::RGBA:
+      pixelBytes = 4;
+      break;
+    default:
+      pixelBytes = 4;
+      break;
+  }
+
+  //ID3D11Resource *textureResource;
+  //ID3D11ShaderResourceView *srv;
+
+  size_t size = options.width * options.height * pixelBytes;
+
+  //HRESULT hr = DirectX::CreateWICTextureFromMemory(
+  //  Graphics::Instance->device,
+  //  Graphics::Instance->context,
+  //  (const uint8_t*)pixels,
+  //  size,
+  //  nullptr,
+  //  &srv,
+  //  NULL);
+
+  //HRESULT hr = DirectX::CreateDDSTextureFromMemory(
+  //  Graphics::Instance->device,
+  //  Graphics::Instance->context,
+  //  (const uint8_t*)pixels,
+  //  size,
+  //  nullptr,
+  //  &srv
+  //);
+
+
+  unsigned int bpp = options.GetDirectXBitsPerPixel();
+
+  //D3D11_TEXTURE2D_DESC desc;
+  //desc.Width = options.width;
+  //desc.Height = options.height;
+  //desc.MipLevels = desc.ArraySize = 1;
+  //desc.Format = options.GetDirectXFormat();
+  //desc.SampleDesc.Count = 1;
+  //desc.Usage = D3D11_USAGE_IMMUTABLE;
+  //desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+  //desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+  //desc.MiscFlags = 0;
+
+  size_t rowPitch = (options.width * bpp + 7) / 8;
+  size_t imageSize = rowPitch * options.height;
+
+  D3D11_SUBRESOURCE_DATA initData;
+  initData.pSysMem = pixels;
+  initData.SysMemPitch = rowPitch;
+  initData.SysMemSlicePitch = imageSize;
+
+  //HRESULT hr =
+  //    Graphics::Instance->device->CreateTexture2D(&desc, &initData, &texture);
+
+  D3D11_TEXTURE2D_DESC desc = {};
+  desc.Width = desc.Height = desc.MipLevels = desc.ArraySize = 1;
+  desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+  desc.SampleDesc.Count = 1;
+  desc.Usage = D3D11_USAGE_IMMUTABLE;
+  desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+
+  //ID3D11Texture2D *tex;
+  HRESULT hr =
+      Graphics::Instance->device->CreateTexture2D(&desc, &initData, &texture);
+
+  if (SUCCEEDED(hr)) {
+    D3D11_SHADER_RESOURCE_VIEW_DESC SRVDesc = {};
+    SRVDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+    SRVDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+    SRVDesc.Texture2D.MipLevels = 1;
+
+    hr = Graphics::Instance->device->CreateShaderResourceView(
+        texture, &SRVDesc, &srv);
+  }
+
+  if (FAILED(hr)) {
+    throw EngineError("Failed to load texture.");
+  }
+}
+
+#endif
+#pragma endregion
 
 #pragma region TextureOptions
+
+#if defined(_OPENGL)
 
 GLenum dg::TextureOptions::GetOpenGLWrap() const {
   switch (wrap) {
@@ -209,6 +331,56 @@ GLenum dg::TextureOptions::GetOpenGLType() const {
   }
   return GL_NONE;
 }
+
+#elif defined(_DIRECTX)
+
+DXGI_FORMAT dg::TextureOptions::GetDirectXFormat() const {
+  switch (format) {
+    case TexturePixelFormat::RGB: {
+      switch (type) {
+        case TexturePixelType::BYTE:
+          return DXGI_FORMAT_R8G8B8A8_UINT; // 24 bits per pixel isn't an option
+        case TexturePixelType::INT:
+          return DXGI_FORMAT_R32G32B32_UINT;
+        case TexturePixelType::FLOAT:
+          return DXGI_FORMAT_R32G32B32_FLOAT;
+      }
+    }
+    case TexturePixelFormat::RGBA: {
+      switch (type) {
+        case TexturePixelType::BYTE:
+          return DXGI_FORMAT_R8G8B8A8_UINT;
+        case TexturePixelType::INT:
+          return DXGI_FORMAT_R32G32B32A32_UINT;
+        case TexturePixelType::FLOAT:
+          return DXGI_FORMAT_R32G32B32A32_FLOAT;
+      }
+    }
+    case TexturePixelFormat::DEPTH:
+    case TexturePixelFormat::DEPTH_STENCIL:
+      break;
+  }
+
+  throw std::runtime_error(
+      "Depth texture format not implemented for DirectX build.");
+}
+
+unsigned int dg::TextureOptions::GetDirectXBitsPerPixel() const {
+  DXGI_FORMAT format = GetDirectXFormat();
+  switch (format) {
+    case DXGI_FORMAT_R8G8B8A8_UINT:
+      return 8 * 4;
+    case DXGI_FORMAT_R32G32B32_UINT:
+    case DXGI_FORMAT_R32G32B32_FLOAT:
+      return 32 * 3;
+    case DXGI_FORMAT_R32G32B32A32_UINT:
+    case DXGI_FORMAT_R32G32B32A32_FLOAT:
+      return 32 * 4;
+  }
+  throw EngineError("Can't determine bits per pixel for unknown format.");
+}
+
+#endif
 
 #pragma endregion
 

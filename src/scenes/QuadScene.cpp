@@ -2,14 +2,14 @@
 //  scenes/QuadScene.h
 //
 
-#include <scenes/QuadScene.h>
+#include "dg/scenes/QuadScene.h"
 
 #include <glm/glm.hpp>
-#include <materials/StandardMaterial.h>
-#include <Mesh.h>
-#include <Model.h>
-#include <Lights.h>
-#include <Skybox.h>
+#include "dg/Lights.h"
+#include "dg/Mesh.h"
+#include "dg/Model.h"
+#include "dg/Skybox.h"
+#include "dg/materials/StandardMaterial.h"
 
 std::unique_ptr<dg::QuadScene> dg::QuadScene::Make() {
   return std::unique_ptr<dg::QuadScene>(new dg::QuadScene());

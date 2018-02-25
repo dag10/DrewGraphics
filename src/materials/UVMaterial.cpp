@@ -2,7 +2,7 @@
 //  materials/UVMaterial.cpp
 //
 
-#include <materials/UVMaterial.h>
+#include "dg/materials/UVMaterial.h"
 
 std::shared_ptr<dg::Shader> dg::UVMaterial::uvShader = nullptr;
 

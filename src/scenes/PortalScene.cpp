@@ -2,26 +2,24 @@
 //  scenes/PortalScene.h
 //
 
-#include <scenes/PortalScene.h>
+#include "dg/scenes/PortalScene.h"
 
+#include <forward_list>
+#include <glm/glm.hpp>
 #include <iostream>
 #include <memory>
-#include <glm/glm.hpp>
-#include <EngineTime.h>
-#include <Texture.h>
-#include <Mesh.h>
-#include <Skybox.h>
-#include <Transform.h>
-#include <forward_list>
-#include <iostream>
-#include <behaviors/KeyboardCameraController.h>
-#include <behaviors/KeyboardLightController.h>
-#include <Camera.h>
-#include <Shader.h>
-#include <Transform.h>
-#include <Model.h>
-#include <materials/StandardMaterial.h>
-#include <Lights.h>
+#include "dg/Camera.h"
+#include "dg/EngineTime.h"
+#include "dg/Lights.h"
+#include "dg/Mesh.h"
+#include "dg/Model.h"
+#include "dg/Shader.h"
+#include "dg/Skybox.h"
+#include "dg/Texture.h"
+#include "dg/Transform.h"
+#include "dg/behaviors/KeyboardCameraController.h"
+#include "dg/behaviors/KeyboardLightController.h"
+#include "dg/materials/StandardMaterial.h"
 
 static const glm::vec3 cubePositions[] = {
   glm::vec3(  0.0f,  0.25f,  0.0f ),

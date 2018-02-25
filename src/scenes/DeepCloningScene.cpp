@@ -2,22 +2,22 @@
 //  scenes/DeepCloningScene.cpp
 //
 
-#include <scenes/DeepCloningScene.h>
+#include "dg/scenes/DeepCloningScene.h"
 
-#include <glm/glm.hpp>
-#include <EngineTime.h>
 #include <forward_list>
-#include <materials/StandardMaterial.h>
-#include <behaviors/KeyboardCameraController.h>
-#include <behaviors/KeyboardLightController.h>
-#include <Lights.h>
-#include <SceneObject.h>
-#include <Window.h>
-#include <Camera.h>
-#include <Shader.h>
-#include <Texture.h>
-#include <Mesh.h>
-#include <Model.h>
+#include <glm/glm.hpp>
+#include "dg/Camera.h"
+#include "dg/EngineTime.h"
+#include "dg/Lights.h"
+#include "dg/Mesh.h"
+#include "dg/Model.h"
+#include "dg/SceneObject.h"
+#include "dg/Shader.h"
+#include "dg/Texture.h"
+#include "dg/Window.h"
+#include "dg/behaviors/KeyboardCameraController.h"
+#include "dg/behaviors/KeyboardLightController.h"
+#include "dg/materials/StandardMaterial.h"
 
 using namespace dg::DeepCloning;
 

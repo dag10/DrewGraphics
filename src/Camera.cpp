@@ -2,13 +2,13 @@
 //  Camera.cpp
 //
 
-#include <Camera.h>
+#include "dg/Camera.h"
 
 #include <glm/gtc/matrix_transform.hpp>
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/quaternion.hpp>
 #include <glm/gtc/constants.hpp>
-#include <MathUtils.h>
+#include "dg/MathUtils.h"
 
 #if defined(_DIRECTX)
 #include <DirectXMath.h>

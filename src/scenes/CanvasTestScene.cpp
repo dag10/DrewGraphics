@@ -2,8 +2,8 @@
 //  scenes/CanvasTestScene.h
 //
 
-#include <scenes/CanvasTestScene.h>
-#include <Canvas.h>
+#include "dg/scenes/CanvasTestScene.h"
+#include "dg/Canvas.h"
 
 std::unique_ptr<dg::CanvasTestScene> dg::CanvasTestScene::Make() {
   return std::unique_ptr<dg::CanvasTestScene>(new dg::CanvasTestScene());

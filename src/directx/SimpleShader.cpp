@@ -5,11 +5,13 @@
 
 #if defined(_DIRECTX)
 
-#include <Graphics.h>
-#include <directx/SimpleShader.h>
+#include "dg/directx/SimpleShader.h"
+#include <algorithm>
 #include <memory>
+#include "dg/Graphics.h"
 
 using namespace dg;
+using namespace std;
 
 ///////////////////////////////////////////////////////////////////////////////
 // ------ BASE SIMPLE SHADER --------------------------------------------------
@@ -1487,9 +1489,9 @@ void SimpleComputeShader::DispatchByThreads(unsigned int threadsX,
                                             unsigned int threadsY,
                                             unsigned int threadsZ) {
   deviceContext->Dispatch(
-      max((unsigned int)ceil((float)threadsX / this->threadsX), 1),
-      max((unsigned int)ceil((float)threadsY / this->threadsY), 1),
-      max((unsigned int)ceil((float)threadsZ / this->threadsZ), 1));
+      max((unsigned int)ceil((float)threadsX / this->threadsX), (unsigned int)1),
+      max((unsigned int)ceil((float)threadsY / this->threadsY), (unsigned int)1),
+      max((unsigned int)ceil((float)threadsZ / this->threadsZ), (unsigned int)1));
 }
 
 // --------------------------------------------------------

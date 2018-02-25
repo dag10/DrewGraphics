@@ -2,8 +2,8 @@
 //  Lights.cpp
 //
 
-#include <Lights.h>
-#include <Material.h>
+#include "dg/Lights.h"
+#include "dg/Material.h"
 
 // NOTE: Keep these consistent with MAX_LIGHTS in
 //       -> assets/shaders/includes/fragment_head.glsl.

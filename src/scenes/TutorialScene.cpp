@@ -2,21 +2,21 @@
 //  scenes/TutorialScene.cpp
 //
 
-#include <scenes/TutorialScene.h>
+#include "dg/scenes/TutorialScene.h"
 
-#include <glm/glm.hpp>
-#include <EngineTime.h>
 #include <forward_list>
-#include <materials/StandardMaterial.h>
-#include <behaviors/KeyboardCameraController.h>
-#include <Lights.h>
-#include <Window.h>
-#include <Camera.h>
-#include <Shader.h>
-#include <Texture.h>
-#include <Mesh.h>
-#include <Model.h>
-#include <Skybox.h>
+#include <glm/glm.hpp>
+#include "dg/Camera.h"
+#include "dg/EngineTime.h"
+#include "dg/Lights.h"
+#include "dg/Mesh.h"
+#include "dg/Model.h"
+#include "dg/Shader.h"
+#include "dg/Skybox.h"
+#include "dg/Texture.h"
+#include "dg/Window.h"
+#include "dg/behaviors/KeyboardCameraController.h"
+#include "dg/materials/StandardMaterial.h"
 
 std::unique_ptr<dg::TutorialScene> dg::TutorialScene::Make() {
   return std::unique_ptr<dg::TutorialScene>(new dg::TutorialScene());

@@ -2,17 +2,17 @@
 //  Scene.cpp
 //
 
-#include <Camera.h>
-#include <FrameBuffer.h>
-#include <Graphics.h>
-#include <Lights.h>
-#include <Model.h>
-#include <Scene.h>
-#include <Skybox.h>
-#include <Window.h>
-#include <materials/ScreenQuadMaterial.h>
-#include <vr/VRManager.h>
-#include <vr/VRTrackedObject.h>
+#include "dg/Scene.h"
+#include "dg/Camera.h"
+#include "dg/FrameBuffer.h"
+#include "dg/Graphics.h"
+#include "dg/Lights.h"
+#include "dg/Model.h"
+#include "dg/Skybox.h"
+#include "dg/Window.h"
+#include "dg/materials/ScreenQuadMaterial.h"
+#include "dg/vr/VRManager.h"
+#include "dg/vr/VRTrackedObject.h"
 
 #pragma region Base Class
 

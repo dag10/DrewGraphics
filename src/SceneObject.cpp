@@ -2,7 +2,7 @@
 //  SceneObject.cpp
 //
 
-#include <SceneObject.h>
+#include "dg/SceneObject.h"
 
 #include <glm/gtc/matrix_transform.hpp>
 #define GLM_ENABLE_EXPERIMENTAL

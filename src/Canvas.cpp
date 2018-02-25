@@ -12,7 +12,7 @@ dg::Canvas::Canvas(unsigned int width, unsigned int height) {
   texOpts.format = TexturePixelFormat::RGBA;
   texOpts.wrap = TextureWrap::CLAMP_EDGE;
   texOpts.type = TexturePixelType::BYTE;
-  texture = std::make_shared<Texture>(texOpts);
+  texture = Texture::Generate(texOpts);
 
   pixels = new Pixel[width * height]();
   Submit();

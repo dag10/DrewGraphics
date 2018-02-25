@@ -61,10 +61,10 @@ void dg::MeshesScene::Initialize() {
   }
 
   // Create textures.
-  std::shared_ptr<Texture> hardwoodTexture = std::make_shared<Texture>(
-      Texture::FromPath("assets/textures/hardwood.jpg"));
-  std::shared_ptr<Texture> skyboxTexture = std::make_shared<Texture>(
-      Texture::FromPath("assets/textures/skybox_daylight.png"));
+  std::shared_ptr<Texture> hardwoodTexture =
+      Texture::FromPath("assets/textures/hardwood.jpg");
+  std::shared_ptr<Texture> skyboxTexture =
+      Texture::FromPath("assets/textures/skybox_daylight.png");
 
   // Create skybox.
   skybox = std::make_shared<Skybox>(skyboxTexture);
@@ -112,10 +112,9 @@ void dg::MeshesScene::Initialize() {
 
   // Create shiny brick material.
   StandardMaterial brickMaterial = StandardMaterial::WithTexture(
-      std::make_shared<Texture>(
-        Texture::FromPath("assets/textures/brickwall.jpg")));
-  brickMaterial.SetNormalMap(std::make_shared<Texture>(
-      Texture::FromPath("assets/textures/brickwall_normal.jpg")));
+      Texture::FromPath("assets/textures/brickwall.jpg"));
+  brickMaterial.SetNormalMap(
+      Texture::FromPath("assets/textures/brickwall_normal.jpg"));
   brickMaterial.SetSpecular(0.6f);
   brickMaterial.SetShininess(64);
 

@@ -94,20 +94,20 @@ void dg::PortalScene::Initialize() {
       "assets/shaders/depthreset.f.glsl");
 
   // Create textures.
-  std::shared_ptr<Texture> crateTexture = std::make_shared<Texture>(
-      Texture::FromPath("assets/textures/container2.png"));
-  std::shared_ptr<Texture> crateSpecularTexture = std::make_shared<Texture>(
-      Texture::FromPath("assets/textures/container2_specular.png"));
-  std::shared_ptr<Texture> brickTexture = std::make_shared<Texture>(
-      Texture::FromPath("assets/textures/brickwall.jpg"));
-  std::shared_ptr<Texture> brickNormalTexture = std::make_shared<Texture>(
-      Texture::FromPath("assets/textures/brickwall_normal.jpg"));
-  std::shared_ptr<Texture> hardwoodTexture = std::make_shared<Texture>(
-      Texture::FromPath("assets/textures/hardwood.jpg"));
-  std::shared_ptr<Texture> rustyPlateTexture = std::make_shared<Texture>(
-      Texture::FromPath("assets/textures/rustyplate.jpg"));
-  std::shared_ptr<Texture> skyboxTexture = std::make_shared<Texture>(
-      Texture::FromPath("assets/textures/skybox_daylight.png"));
+  std::shared_ptr<Texture> crateTexture =
+      Texture::FromPath("assets/textures/container2.png");
+  std::shared_ptr<Texture> crateSpecularTexture =
+      Texture::FromPath("assets/textures/container2_specular.png");
+  std::shared_ptr<Texture> brickTexture =
+      Texture::FromPath("assets/textures/brickwall.jpg");
+  std::shared_ptr<Texture> brickNormalTexture =
+      Texture::FromPath("assets/textures/brickwall_normal.jpg");
+  std::shared_ptr<Texture> hardwoodTexture =
+      Texture::FromPath("assets/textures/hardwood.jpg");
+  std::shared_ptr<Texture> rustyPlateTexture =
+      Texture::FromPath("assets/textures/rustyplate.jpg");
+  std::shared_ptr<Texture> skyboxTexture =
+      Texture::FromPath("assets/textures/skybox_daylight.png");
 
   // Create skybox.
   skybox = std::make_shared<Skybox>(skyboxTexture);
@@ -219,15 +219,13 @@ void dg::PortalScene::Initialize() {
   AddChild(rightWall);
 
   // Create floor material.
-  StandardMaterial floorMaterial = StandardMaterial::WithTexture(
-      std::make_shared<Texture>(Texture::FromPath(
-          "assets/textures/Flooring_Stone_001/Flooring_Stone_001_COLOR.png")));
-  floorMaterial.SetNormalMap(
-      std::make_shared<Texture>(Texture::FromPath(
-          "assets/textures/Flooring_Stone_001/Flooring_Stone_001_NRM.png")));
-  floorMaterial.SetSpecular(
-      std::make_shared<Texture>(Texture::FromPath(
-          "assets/textures/Flooring_Stone_001/Flooring_Stone_001_SPEC.png")));
+  StandardMaterial floorMaterial =
+      StandardMaterial::WithTexture(Texture::FromPath(
+          "assets/textures/Flooring_Stone_001/Flooring_Stone_001_COLOR.png"));
+  floorMaterial.SetNormalMap(Texture::FromPath(
+      "assets/textures/Flooring_Stone_001/Flooring_Stone_001_NRM.png"));
+  floorMaterial.SetSpecular(Texture::FromPath(
+      "assets/textures/Flooring_Stone_001/Flooring_Stone_001_SPEC.png"));
   floorMaterial.SetShininess(9);
   floorMaterial.SetUVScale(glm::vec2(5, 3) * 2.f);
   floorMaterial.SetLit(true);

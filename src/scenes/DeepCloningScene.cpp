@@ -51,15 +51,13 @@ void dg::DeepCloningScene::Initialize() {
   // Create floor material.
   const int floorSize = 500;
 #if defined(_OPENGL)
-  StandardMaterial floorMaterial = StandardMaterial::WithTexture(
-      std::make_shared<Texture>(Texture::FromPath(
-          "assets/textures/Flooring_Stone_001/Flooring_Stone_001_COLOR.png")));
-  floorMaterial.SetNormalMap(
-      std::make_shared<Texture>(Texture::FromPath(
-          "assets/textures/Flooring_Stone_001/Flooring_Stone_001_NRM.png")));
-  floorMaterial.SetSpecular(
-      std::make_shared<Texture>(Texture::FromPath(
-          "assets/textures/Flooring_Stone_001/Flooring_Stone_001_SPEC.png")));
+  StandardMaterial floorMaterial =
+      StandardMaterial::WithTexture(Texture::FromPath(
+          "assets/textures/Flooring_Stone_001/Flooring_Stone_001_COLOR.png"));
+  floorMaterial.SetNormalMap(Texture::FromPath(
+      "assets/textures/Flooring_Stone_001/Flooring_Stone_001_NRM.png"));
+  floorMaterial.SetSpecular(Texture::FromPath(
+      "assets/textures/Flooring_Stone_001/Flooring_Stone_001_SPEC.png"));
 #elif defined(_DIRECTX)
   StandardMaterial floorMaterial = StandardMaterial::WithColor(glm::vec3(0.5f));
 #endif

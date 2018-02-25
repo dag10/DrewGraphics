@@ -10,9 +10,9 @@
 #include <Texture.h>
 #include <Exceptions.h>
 
-#pragma region Texture
+#pragma region Texture Base Class
 
-dg::Texture dg::Texture::FromPath(const std::string& path) {
+std::shared_ptr<dg::Texture> dg::BaseTexture::FromPath(const std::string& path) {
   int nrChannels;
   int width;
   int height;
@@ -34,13 +34,19 @@ dg::Texture dg::Texture::FromPath(const std::string& path) {
   texOpts.type = TexturePixelType::BYTE;
   texOpts.mipmap = true;
 
-  Texture tex(texOpts, false);
-  tex.GenerateImage(pixels.get());
-  return tex;
+  auto texture = std::shared_ptr<Texture>(new Texture(texOpts));
+  texture->GenerateImage(pixels.get());
+  return texture;
 }
 
-dg::Texture dg::Texture::DepthTexture(
-  unsigned int width, unsigned int height, bool allowStencil) {
+std::shared_ptr<dg::Texture> dg::BaseTexture::Generate(TextureOptions options) {
+  auto texture = std::shared_ptr<Texture>(new Texture(options));
+  texture->GenerateImage(nullptr);
+  return texture;
+}
+
+std::shared_ptr<dg::Texture> dg::BaseTexture::DepthTexture(
+    unsigned int width, unsigned int height, bool allowStencil) {
 
   TextureOptions texOpts;
   texOpts.width = width;
@@ -52,56 +58,41 @@ dg::Texture dg::Texture::DepthTexture(
   texOpts.wrap = TextureWrap::CLAMP_EDGE;
   texOpts.mipmap = false;
 
-  return Texture(texOpts);
+  return Generate(texOpts);
 }
 
-dg::Texture::Texture(TextureOptions options) : Texture(options, true) {}
+dg::BaseTexture::BaseTexture(TextureOptions options) : options(options) {}
 
-dg::Texture::Texture(TextureOptions options, bool generate) : options(options) {
-  if (generate) {
-    GenerateImage();
-  }
-}
-
-GLuint dg::Texture::GetHandle() const {
-  return textureHandle;
-}
-
-const dg::TextureOptions dg::Texture::GetOptions() const {
+const dg::TextureOptions dg::BaseTexture::GetOptions() const {
   return options;
 }
 
-unsigned int dg::Texture::GetWidth() const {
+unsigned int dg::BaseTexture::GetWidth() const {
   return options.width;
 }
 
-unsigned int dg::Texture::GetHeight() const {
+unsigned int dg::BaseTexture::GetHeight() const {
   return options.height;
 }
 
-dg::Texture::Texture(dg::Texture&& other) : options() {
-  *this = std::move(other);
-}
+#pragma endregion
 
-dg::Texture::~Texture() {
+#pragma region OpenGL Texture
+#if defined(_OPENGL)
+
+dg::OpenGLTexture::OpenGLTexture(TextureOptions options)
+    : BaseTexture(options) {}
+
+GLuint dg::OpenGLTexture::GetHandle() const { return textureHandle; }
+
+dg::OpenGLTexture::~OpenGLTexture() {
   if (textureHandle != 0) {
     glDeleteTextures(1, &textureHandle);
     textureHandle = 0;
   }
 }
 
-dg::Texture& dg::Texture::operator=(dg::Texture&& other) {
-  swap(*this, other);
-  return *this;
-}
-
-void dg::swap(Texture& first, Texture& second) {
-  using std::swap;
-  swap(first.textureHandle, second.textureHandle);
-  swap((TextureOptions&)first.options, (TextureOptions&)second.options);
-}
-
-void dg::Texture::GenerateImage(void *pixels) {
+void dg::OpenGLTexture::GenerateImage(void *pixels) {
   assert(textureHandle == 0);
 
   glGenTextures(1, &textureHandle);
@@ -135,6 +126,7 @@ void dg::Texture::GenerateImage(void *pixels) {
   glBindTexture(GL_TEXTURE_2D, 0);
 }
 
+#endif
 #pragma endregion
 
 #pragma region TextureOptions

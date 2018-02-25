@@ -68,15 +68,13 @@ dg::FrameBuffer::FrameBuffer(
   texOpts.width = width;
   texOpts.height = height;
   texOpts.wrap = TextureWrap::CLAMP_EDGE;
-  AttachColorTexture(std::make_shared<Texture>(texOpts));
+  AttachColorTexture(Texture::Generate(texOpts));
 
   if (depthReadable) {
     if (allowStencil) {
-      AttachDepthTexture(std::make_shared<Texture>(
-        Texture::DepthTexture(width, height, true)), true);
+      AttachDepthTexture(Texture::DepthTexture(width, height, true), true);
     } else {
-      AttachDepthTexture(std::make_shared<Texture>(
-        Texture::DepthTexture(width, height, false)), false);
+      AttachDepthTexture(Texture::DepthTexture(width, height, false), false);
     }
   } else {
     if (allowStencil) {

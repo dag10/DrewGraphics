@@ -31,14 +31,14 @@ void dg::TutorialScene::Initialize() {
   window->LockCursor();
 
   // Create textures.
-  std::shared_ptr<Texture> crateTexture = std::make_shared<Texture>(
-      Texture::FromPath("assets/textures/container2.png"));
-  std::shared_ptr<Texture> crateSpecularTexture = std::make_shared<Texture>(
-      Texture::FromPath("assets/textures/container2_specular.png"));
-  std::shared_ptr<Texture> hardwoodTexture = std::make_shared<Texture>(
-      Texture::FromPath("assets/textures/hardwood.jpg"));
-  std::shared_ptr<Texture> skyboxTexture = std::make_shared<Texture>(
-      Texture::FromPath("assets/textures/skybox_daylight.png"));
+  std::shared_ptr<Texture> crateTexture =
+      Texture::FromPath("assets/textures/container2.png");
+  std::shared_ptr<Texture> crateSpecularTexture =
+      Texture::FromPath("assets/textures/container2_specular.png");
+  std::shared_ptr<Texture> hardwoodTexture =
+      Texture::FromPath("assets/textures/hardwood.jpg");
+  std::shared_ptr<Texture> skyboxTexture =
+      Texture::FromPath("assets/textures/skybox_daylight.png");
 
   // Create skybox.
   skybox = std::make_shared<Skybox>(skyboxTexture);

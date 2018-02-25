@@ -9,6 +9,8 @@
 
 namespace dg {
 
+#pragma region Texture Options
+
   enum class TextureWrap {
     REPEAT,
     CLAMP_EDGE,
@@ -38,6 +40,7 @@ namespace dg {
   // to make the engine more API agnostic.
   struct TextureOptions {
     TextureWrap wrap = TextureWrap::REPEAT;
+
     TextureInterpolation interpolation = TextureInterpolation::LINEAR;
     TexturePixelFormat format = TexturePixelFormat::RGBA;
     TexturePixelType type = TexturePixelType::BYTE;
@@ -53,39 +56,64 @@ namespace dg {
     GLenum GetOpenGLType() const;
   };
 
-  // Copy is disabled, only moves are allowed. This prevents us
-  // from leaking or redeleting the openGL texture resource.
-  class Texture {
+#pragma endregion
+
+  class OpenGLTexture;
+  using Texture = OpenGLTexture;
+
+  // Copy is disabled. This prevents us from leaking or redeleting
+  // OpenGL/DirectX resources.
+  class BaseTexture {
 
     public:
 
-      static Texture FromPath(const std::string& path);
-      static Texture DepthTexture(
-        unsigned int width, unsigned int height, bool allowStencil);
+      static std::shared_ptr<Texture> FromPath(const std::string& path);
+      static std::shared_ptr<Texture> Generate(TextureOptions options);
+      static std::shared_ptr<Texture> DepthTexture(
+          unsigned int width, unsigned int height, bool allowStencil);
 
-      Texture(TextureOptions options);
-      Texture(Texture& other) = delete;
-      Texture(Texture&& other);
-      Texture() = delete;
-      virtual ~Texture();
-      Texture& operator=(Texture& other) = delete;
-      Texture& operator=(Texture&& other);
-      friend void swap(Texture& first, Texture& second); // nothrow
+      BaseTexture() = delete;
 
-      GLuint GetHandle() const;
+      virtual ~BaseTexture() = default;
+
+      BaseTexture(BaseTexture& other) = delete;
+      BaseTexture& operator=(BaseTexture& other) = delete;
+
       const TextureOptions GetOptions() const;
       unsigned int GetWidth() const;
       unsigned int GetHeight() const;
 
-    private:
+    protected:
 
-      Texture(TextureOptions options, bool generate);
+      BaseTexture(TextureOptions options);
 
-      void GenerateImage(void *pixels = nullptr);
+      virtual void GenerateImage(void *pixels = nullptr) = 0;
 
-      GLuint textureHandle = 0;
       const TextureOptions options;
 
-  }; // class Texture
+  }; // class BaseTexture
+
+#if defined(_OPENGL)
+
+  class OpenGLTexture : public BaseTexture {
+    friend class BaseTexture;
+
+    public:
+
+      virtual ~OpenGLTexture();
+
+      GLuint GetHandle() const;
+
+    private:
+
+      OpenGLTexture(TextureOptions options);
+
+      virtual void GenerateImage(void *pixels = nullptr);
+
+      GLuint textureHandle = 0;
+
+  }; // class OpenGLTexture
+
+#endif
 
 } // namespace dg

@@ -87,9 +87,11 @@ void dg::PortalScene::Initialize() {
   window->LockCursor();
 
   // Create shaders.
+#if defined(_OPENGL)
   depthResetShader = dg::Shader::FromFiles(
       "assets/shaders/depthreset.v.glsl",
       "assets/shaders/depthreset.f.glsl");
+#endif
 
   // Create textures.
   std::shared_ptr<Texture> crateTexture =
@@ -446,6 +448,7 @@ void dg::PortalScene::UpdateLightingConfiguration() {
 }
 
 void dg::PortalScene::RenderPortalStencil(dg::Transform xfPortal) {
+#if defined(_OPENGL)
   glm::mat4x4 view = mainCamera->GetViewMatrix();
   glm::mat4x4 projection = mainCamera->GetProjectionMatrix(
     window->GetAspectRatio());
@@ -463,9 +466,11 @@ void dg::PortalScene::RenderPortalStencil(dg::Transform xfPortal) {
   Mesh::Quad->Draw();
 
   glDisable(GL_STENCIL_TEST);
+#endif
 }
 
 void dg::PortalScene::ClearDepth() {
+#if defined(_OPENGL)
   glDepthFunc(GL_ALWAYS);
   glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
 
@@ -474,6 +479,7 @@ void dg::PortalScene::ClearDepth() {
 
   glDepthFunc(GL_LESS);
   glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+#endif
 }
 
 dg::Camera dg::PortalScene::CameraForPortal(
@@ -492,6 +498,7 @@ dg::Camera dg::PortalScene::CameraForPortal(
   return camera;
 }
 
+#if defined(_OPENGL)
 void dg::PortalScene::RenderFrame() {
   // Clear back buffer.
   glClearColor(
@@ -531,6 +538,7 @@ void dg::PortalScene::RenderFrame() {
   DrawScene(CameraForPortal(portalTransforms[1], portalTransforms[0]));
   glDisable(GL_STENCIL_TEST);
 }
+#endif
 
 void dg::PortalScene::DrawScene(
   const Camera& camera, bool renderForVR, vr::EVREye eye) {

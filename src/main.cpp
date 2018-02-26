@@ -2,11 +2,6 @@
 //  main.cpp
 //
 
-#if !defined(_OPENGL) & defined(_OPENGL)
-#error "No graphics platform specified. Define either _OPENGL or _DIRECTX."
-#endif
-
-
 #if defined(_WIN32)
 #include <Windows.h>
 #endif
@@ -28,17 +23,7 @@
 #include "dg/Graphics.h"
 #include "dg/InputCodes.h"
 #include "dg/Window.h"
-
-#include "dg/scenes/CanvasTestScene.h"
-#include "dg/scenes/DeepCloningScene.h"
-#include "dg/scenes/MeshesScene.h"
-#include "dg/scenes/PortalScene.h"
-#include "dg/scenes/QuadScene.h"
 #include "dg/scenes/RobotScene.h"
-#include "dg/scenes/SimpleScene.h"
-#include "dg/scenes/TexturesScene.h"
-#include "dg/scenes/TutorialScene.h"
-#include "dg/scenes/VRScene.h"
 
 using namespace dg;
 
@@ -58,56 +43,6 @@ static std::shared_ptr<dg::Window> window;
 #endif
   Graphics::Shutdown();
   exit(-1);
-}
-
-std::unique_ptr<Scene> PromptForScene(
-  const std::string& launchArg, std::string *chosenName = nullptr) {
-  std::map<
-    std::string,
-    std::function<std::unique_ptr<dg::Scene>()>> constructors;
-  constructors["portal"]     = dg::PortalScene::Make;
-  constructors["tutorial"]   = dg::TutorialScene::Make;
-  constructors["simple"]     = dg::SimpleScene::Make;
-  constructors["cloning"]    = dg::DeepCloningScene::Make;
-  constructors["cloning-vr"] = dg::DeepCloningScene::MakeVR;
-  constructors["textures"]   = dg::TexturesScene::Make;
-  constructors["meshes"]     = dg::MeshesScene::Make;
-  constructors["meshes-vr"]  = dg::MeshesScene::MakeVR;
-  constructors["robot"]      = dg::RobotScene::Make;
-  constructors["robot-vr"]   = dg::RobotScene::MakeVR;
-  constructors["quad"]       = dg::QuadScene::Make;
-  constructors["canvas"]     = dg::CanvasTestScene::Make;
-  constructors["vr"]         = dg::VRScene::Make;
-  std::string sceneName;
-  if (!launchArg.empty()) {
-    sceneName = launchArg;
-  } else {
-#ifdef DEFAULT_SCENE
-    sceneName = DEFAULT_SCENE;
-#endif
-  }
-  while (constructors.find(sceneName) == constructors.end()) {
-    if (!sceneName.empty()) {
-      std::cerr << "Unknown scene \"" << sceneName << "\"." << std::endl
-                << std::endl;
-    }
-    std::cout << "Available scenes:" << std::endl;
-    for (auto iter = constructors.begin(); iter != constructors.end(); iter++) {
-      std::cout << "\t" << iter->first << std::endl;
-    }
-    std::cout << std::endl
-              << "Type \"exit\" to exit." << std::endl
-              << std::endl
-              << "Choose a scene: ";
-    std::cin >> sceneName;
-    if (std::cin.eof() || sceneName == "exit") {
-      *chosenName = "";
-      return nullptr;
-    }
-    std::cout << std::endl;
-  }
-  *chosenName = sceneName;
-  return constructors[sceneName]();
 }
 
 #if defined(_WIN32)
@@ -153,13 +88,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 
   InitializeWRL();
 
-  // Find intended scene.
-  std::string sceneName;
-  std::string sceneArg = std::string(lpCmdLine);
-  std::unique_ptr<Scene> scene = PromptForScene(sceneArg, &sceneName);
-  if (scene == nullptr) {
-    return 0;
-  }
+  // Create scene.
+  std::string sceneName = "Waving Robot";
+  std::unique_ptr<Scene> scene = RobotScene::Make();
 
   // Create window.
   try {
@@ -185,13 +116,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
     std::cerr << "Failed to initialize scene: ";
     terminateWithError(e.what());
   }
-
-  // Minimize the console window on Windows.
-#ifdef _MSC_VER
-#ifndef DEFAULT_SCENE
-  ShowWindow(GetConsoleWindow(), SW_MINIMIZE);
-#endif
-#endif
 
   // Set up timing.
   dg::Time::Reset();
@@ -252,6 +176,5 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
   }
 
   Graphics::Shutdown();
-  window = nullptr;
   return 0;
 }

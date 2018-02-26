@@ -19,7 +19,9 @@ namespace dg {
 
       virtual void Initialize();
 
-    private:
+    protected:
+
+      virtual void ClearBuffer();
 
   }; // class TutorialScene
 

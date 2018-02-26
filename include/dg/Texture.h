@@ -28,7 +28,6 @@ namespace dg {
   };
 
   enum class TexturePixelFormat {
-    RGB,
     RGBA,
     DEPTH,
     DEPTH_STENCIL,
@@ -62,6 +61,8 @@ namespace dg {
     GLenum GetOpenGLType() const;
 #elif defined(_DIRECTX)
     DXGI_FORMAT GetDirectXFormat() const;
+    D3D11_TEXTURE_ADDRESS_MODE GetDirectXAddressMode() const;
+    D3D11_FILTER GetDirectXFilter() const;
     unsigned int GetDirectXBitsPerPixel() const;
 #endif
   };
@@ -94,6 +95,8 @@ namespace dg {
       BaseTexture(BaseTexture& other) = delete;
       BaseTexture& operator=(BaseTexture& other) = delete;
 
+      virtual void UpdateData(const void *pixels, bool genMipMap = true) = 0;
+
       const TextureOptions GetOptions() const;
       unsigned int GetWidth() const;
       unsigned int GetHeight() const;
@@ -117,13 +120,15 @@ namespace dg {
 
       virtual ~OpenGLTexture();
 
+      virtual void UpdateData(const void *pixels, bool genMipMap = true);
+
       GLuint GetHandle() const;
 
     private:
 
       OpenGLTexture(TextureOptions options);
 
-      virtual void GenerateImage(void *pixels = nullptr);
+      virtual void GenerateImage(void *pixels);
 
       GLuint textureHandle = 0;
 
@@ -138,6 +143,12 @@ namespace dg {
 
       virtual ~DirectXTexture();
 
+      virtual void UpdateData(const void *pixels, bool genMipMap = true);
+
+      ID3D11ShaderResourceView *GetShaderResourceView() const;
+      ID3D11SamplerState *GetSamplerState() const;
+      ID3D11Texture2D *GetTexture() const;
+
     private:
 
       DirectXTexture(TextureOptions options);
@@ -146,6 +157,7 @@ namespace dg {
 
       ID3D11ShaderResourceView *srv = nullptr;
       ID3D11Texture2D *texture = nullptr;
+      ID3D11SamplerState *sampler = nullptr;
 
   }; // class DirectXTexture
 

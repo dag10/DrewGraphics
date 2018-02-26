@@ -8,6 +8,7 @@
 #include <glm/glm.hpp>
 #include "dg/Camera.h"
 #include "dg/EngineTime.h"
+#include "dg/Graphics.h"
 #include "dg/Lights.h"
 #include "dg/Mesh.h"
 #include "dg/Model.h"
@@ -98,5 +99,9 @@ void dg::TutorialScene::Initialize() {
   Behavior::Attach(
       mainCamera,
       std::make_shared<KeyboardCameraController>(window));
+}
+
+void dg::TutorialScene::ClearBuffer() {
+  Graphics::Instance->Clear(glm::vec3(26.f, 37.f, 43.f) / 255.f);
 }
 

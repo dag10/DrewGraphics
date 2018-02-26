@@ -25,7 +25,7 @@ std::shared_ptr<dg::Texture> dg::BaseTexture::FromPath(const std::string& path) 
 
   stbi_set_flip_vertically_on_load(true);
   std::unique_ptr<stbi_uc[]> pixels = std::unique_ptr<stbi_uc[]>(stbi_load(
-    path.c_str(), &width, &height, &nrChannels, 0));
+    path.c_str(), &width, &height, &nrChannels, 4));
 
   if (pixels == nullptr) {
     throw dg::STBLoadError(path, stbi_failure_reason());
@@ -34,9 +34,7 @@ std::shared_ptr<dg::Texture> dg::BaseTexture::FromPath(const std::string& path) 
   TextureOptions texOpts;
   texOpts.width = (unsigned int)width;
   texOpts.height = (unsigned int)height;
-  texOpts.format = (nrChannels == 3) \
-      ? TexturePixelFormat::RGB
-      : TexturePixelFormat::RGBA;
+  texOpts.format = TexturePixelFormat::RGBA;
   texOpts.type = TexturePixelType::BYTE;
   texOpts.mipmap = true;
 
@@ -47,12 +45,7 @@ std::shared_ptr<dg::Texture> dg::BaseTexture::FromPath(const std::string& path) 
 
 std::shared_ptr<dg::Texture> dg::BaseTexture::Generate(TextureOptions options) {
   auto texture = std::shared_ptr<Texture>(new Texture(options));
-#if defined(_OPENGL)
   texture->GenerateImage(nullptr);
-#elif defined(_DIRECTX)
-  std::cerr << "WARNING: Blank textures not yet implemented for DirectX."
-            << std::endl;
-#endif
   return texture;
 }
 
@@ -103,6 +96,24 @@ dg::OpenGLTexture::~OpenGLTexture() {
   }
 }
 
+void dg::OpenGLTexture::UpdateData(const void *pixels, bool genMipMap) {
+  glBindTexture(GL_TEXTURE_2D, textureHandle);
+  glTexSubImage2D(
+      GL_TEXTURE_2D,
+      0,
+      0,
+      0,
+      GetWidth(),
+      GetHeight(),
+      options.GetOpenGLInternalFormat(),
+      options.GetOpenGLType(),
+      pixels);
+  if (options.mipmap && genMipMap) {
+    glGenerateMipmap(GL_TEXTURE_2D);
+  }
+  glBindTexture(GL_TEXTURE_2D, 0);
+}
+
 void dg::OpenGLTexture::GenerateImage(void *pixels) {
   assert(textureHandle == 0);
 
@@ -130,7 +141,7 @@ void dg::OpenGLTexture::GenerateImage(void *pixels) {
       pixels
       );
 
-  if (options.mipmap) {
+  if (pixels != nullptr && options.mipmap) {
     glGenerateMipmap(GL_TEXTURE_2D);
   }
 
@@ -154,95 +165,88 @@ dg::DirectXTexture::~DirectXTexture() {
     srv->Release();
     srv = nullptr;
   }
+  if (sampler != nullptr) {
+    sampler->Release();
+    sampler = nullptr;
+  }
+}
+
+void dg::DirectXTexture::UpdateData(const void *pixels, bool genMipMap) {
+  size_t rowPitch = (options.width * options.GetDirectXBitsPerPixel() + 7) / 8;
+  Graphics::Instance->context->UpdateSubresource(texture, 0, NULL, pixels,
+                                                 rowPitch, 0);
+  if (options.mipmap && genMipMap) {
+    Graphics::Instance->context->GenerateMips(srv);
+  }
+}
+
+ID3D11ShaderResourceView *dg::DirectXTexture::GetShaderResourceView() const {
+  return srv;
+}
+
+ID3D11SamplerState *dg::DirectXTexture::GetSamplerState() const {
+  return sampler;
+}
+
+ID3D11Texture2D *dg::DirectXTexture::GetTexture() const {
+  return texture;
 }
 
 void dg::DirectXTexture::GenerateImage(void *pixels) {
   assert(texture == nullptr);
 
-  size_t pixelBytes;
-  switch (options.format) {
-    case TexturePixelFormat::RGB:
-      pixelBytes = 3;
-      break;
-    case TexturePixelFormat::RGBA:
-      pixelBytes = 4;
-      break;
-    default:
-      pixelBytes = 4;
-      break;
-  }
-
-  //ID3D11Resource *textureResource;
-  //ID3D11ShaderResourceView *srv;
-
-  size_t size = options.width * options.height * pixelBytes;
-
-  //HRESULT hr = DirectX::CreateWICTextureFromMemory(
-  //  Graphics::Instance->device,
-  //  Graphics::Instance->context,
-  //  (const uint8_t*)pixels,
-  //  size,
-  //  nullptr,
-  //  &srv,
-  //  NULL);
-
-  //HRESULT hr = DirectX::CreateDDSTextureFromMemory(
-  //  Graphics::Instance->device,
-  //  Graphics::Instance->context,
-  //  (const uint8_t*)pixels,
-  //  size,
-  //  nullptr,
-  //  &srv
-  //);
-
-
-  unsigned int bpp = options.GetDirectXBitsPerPixel();
-
-  //D3D11_TEXTURE2D_DESC desc;
-  //desc.Width = options.width;
-  //desc.Height = options.height;
-  //desc.MipLevels = desc.ArraySize = 1;
-  //desc.Format = options.GetDirectXFormat();
-  //desc.SampleDesc.Count = 1;
-  //desc.Usage = D3D11_USAGE_IMMUTABLE;
-  //desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
-  //desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-  //desc.MiscFlags = 0;
-
-  size_t rowPitch = (options.width * bpp + 7) / 8;
-  size_t imageSize = rowPitch * options.height;
-
-  D3D11_SUBRESOURCE_DATA initData;
-  initData.pSysMem = pixels;
-  initData.SysMemPitch = rowPitch;
-  initData.SysMemSlicePitch = imageSize;
-
-  //HRESULT hr =
-  //    Graphics::Instance->device->CreateTexture2D(&desc, &initData, &texture);
+  auto format = options.GetDirectXFormat();
 
   D3D11_TEXTURE2D_DESC desc = {};
-  desc.Width = desc.Height = desc.MipLevels = desc.ArraySize = 1;
-  desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+  desc.Width = options.width;
+  desc.Height = options.height;
+  desc.MipLevels = options.mipmap ? 0 : 1;
+  desc.ArraySize = 1;
+  desc.Format = format;
   desc.SampleDesc.Count = 1;
-  desc.Usage = D3D11_USAGE_IMMUTABLE;
-  desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
-
-  //ID3D11Texture2D *tex;
-  HRESULT hr =
-      Graphics::Instance->device->CreateTexture2D(&desc, &initData, &texture);
-
-  if (SUCCEEDED(hr)) {
-    D3D11_SHADER_RESOURCE_VIEW_DESC SRVDesc = {};
-    SRVDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-    SRVDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
-    SRVDesc.Texture2D.MipLevels = 1;
-
-    hr = Graphics::Instance->device->CreateShaderResourceView(
-        texture, &SRVDesc, &srv);
+  desc.Usage = D3D11_USAGE_DEFAULT;
+  desc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_RENDER_TARGET;
+  if (options.mipmap) {
+    desc.MiscFlags |= D3D11_RESOURCE_MISC_GENERATE_MIPS;
   }
+
+  HRESULT hr =
+      Graphics::Instance->device->CreateTexture2D(&desc, nullptr, &texture);
 
   if (FAILED(hr)) {
     throw EngineError("Failed to load texture.");
+  }
+
+  if (pixels != nullptr) {
+    UpdateData(pixels, false);
+  }
+
+  D3D11_SHADER_RESOURCE_VIEW_DESC SRVDesc = {};
+  SRVDesc.Format = format;
+  SRVDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+  SRVDesc.Texture2D.MipLevels = -1;
+
+  hr = Graphics::Instance->device->CreateShaderResourceView(texture, &SRVDesc,
+                                                            &srv);
+
+  if (FAILED(hr)) {
+    throw EngineError("Failed to create shader resource view.");
+  }
+
+  D3D11_SAMPLER_DESC samplerDesc = {};
+  samplerDesc.AddressU = options.GetDirectXAddressMode();
+  samplerDesc.AddressV = options.GetDirectXAddressMode();
+  samplerDesc.AddressW = options.GetDirectXAddressMode();
+  samplerDesc.Filter = options.GetDirectXFilter();
+  samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
+  hr = Graphics::Instance->device->CreateSamplerState(&samplerDesc, &sampler);
+
+  if (FAILED(hr)) {
+    throw EngineError("Failed to create sampler.");
+  }
+
+  if (options.mipmap) {
+    Graphics::Instance->context->GenerateMips(srv);
   }
 }
 
@@ -285,7 +289,7 @@ GLenum dg::TextureOptions::GetOpenGLMinFilter() const {
 GLenum dg::TextureOptions::GetOpenGLMagFilter() const {
   switch (interpolation) {
     case TextureInterpolation::NEAREST:
-      return  GL_NEAREST;
+      return GL_NEAREST;
     case TextureInterpolation::LINEAR:
       return GL_LINEAR;
   }
@@ -294,8 +298,6 @@ GLenum dg::TextureOptions::GetOpenGLMagFilter() const {
 
 GLenum dg::TextureOptions::GetOpenGLInternalFormat() const {
   switch (format) {
-    case TexturePixelFormat::RGB:
-      return GL_RGB;
     case TexturePixelFormat::RGBA:
       return GL_RGBA;
     case TexturePixelFormat::DEPTH:
@@ -336,20 +338,10 @@ GLenum dg::TextureOptions::GetOpenGLType() const {
 
 DXGI_FORMAT dg::TextureOptions::GetDirectXFormat() const {
   switch (format) {
-    case TexturePixelFormat::RGB: {
-      switch (type) {
-        case TexturePixelType::BYTE:
-          return DXGI_FORMAT_R8G8B8A8_UINT; // 24 bits per pixel isn't an option
-        case TexturePixelType::INT:
-          return DXGI_FORMAT_R32G32B32_UINT;
-        case TexturePixelType::FLOAT:
-          return DXGI_FORMAT_R32G32B32_FLOAT;
-      }
-    }
     case TexturePixelFormat::RGBA: {
       switch (type) {
         case TexturePixelType::BYTE:
-          return DXGI_FORMAT_R8G8B8A8_UINT;
+          return DXGI_FORMAT_R8G8B8A8_UNORM;
         case TexturePixelType::INT:
           return DXGI_FORMAT_R32G32B32A32_UINT;
         case TexturePixelType::FLOAT:
@@ -365,10 +357,33 @@ DXGI_FORMAT dg::TextureOptions::GetDirectXFormat() const {
       "Depth texture format not implemented for DirectX build.");
 }
 
+D3D11_TEXTURE_ADDRESS_MODE dg::TextureOptions::GetDirectXAddressMode() const {
+  switch (wrap) {
+    case TextureWrap::REPEAT:
+      return D3D11_TEXTURE_ADDRESS_WRAP;
+    case TextureWrap::CLAMP_EDGE:
+      return D3D11_TEXTURE_ADDRESS_CLAMP;
+    case TextureWrap::CLAMP_BORDER:
+      return D3D11_TEXTURE_ADDRESS_BORDER;
+  }
+}
+
+D3D11_FILTER dg::TextureOptions::GetDirectXFilter() const {
+  switch (interpolation) {
+    case TextureInterpolation::NEAREST: {
+      return D3D11_FILTER_MIN_MAG_POINT_MIP_LINEAR;
+    }
+    case TextureInterpolation::LINEAR: {
+      return D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+    }
+  }
+}
+
 unsigned int dg::TextureOptions::GetDirectXBitsPerPixel() const {
   DXGI_FORMAT format = GetDirectXFormat();
   switch (format) {
     case DXGI_FORMAT_R8G8B8A8_UINT:
+    case DXGI_FORMAT_R8G8B8A8_UNORM:
       return 8 * 4;
     case DXGI_FORMAT_R32G32B32_UINT:
     case DXGI_FORMAT_R32G32B32_FLOAT:

@@ -149,13 +149,23 @@ void dg::TexturesScene::Initialize() {
       quadSize * glm::vec3(1, 1 / window->GetAspectRatio(), 1))), false);
 
   // Create custom texture using a Canvas.
-  Canvas canvas(1, 6);
-  canvas.SetPixel(0, 5, 75, 0, 130);
-  canvas.SetPixel(0, 4, 0, 0, 255);
-  canvas.SetPixel(0, 3, 0, 255, 0);
-  canvas.SetPixel(0, 2, 255, 255, 0);
-  canvas.SetPixel(0, 1, 255, 127, 0);
-  canvas.SetPixel(0, 0, 255, 0, 0);
+  //Canvas canvas(1, 6);
+  //canvas.SetPixel(0, 5, 75, 0, 130);
+  //canvas.SetPixel(0, 4, 0, 0, 255);
+  //canvas.SetPixel(0, 3, 0, 255, 0);
+  //canvas.SetPixel(0, 2, 255, 255, 0);
+  //canvas.SetPixel(0, 1, 255, 127, 0);
+  //canvas.SetPixel(0, 0, 255, 0, 0);
+  Canvas canvas(128, 128);
+  for (int i = 0; i < canvas.GetWidth(); i++) {
+    for (int j = 0; j < canvas.GetHeight(); j++) {
+      if ((i + j) % 2 == 0) {
+        canvas.SetPixel(i, j, 0, 0, 0);
+      } else {
+        canvas.SetPixel(i, j, 255, 255, 255);
+      }
+    }
+  }
   canvas.Submit();
 
   // Create a quad to show the custom canvas.
@@ -211,6 +221,7 @@ void dg::TexturesScene::Update() {
 }
 
 void dg::TexturesScene::RenderFrame() {
+#if defined(_OPENGL)
   // Render scene for framebuffer.
   framebuffer->Bind();
   glViewport(0, 0, framebuffer->GetWidth(), framebuffer->GetHeight());
@@ -227,15 +238,10 @@ void dg::TexturesScene::RenderFrame() {
   framebuffer->Unbind();
   glViewport(
     0, 0, (GLsizei)window->GetWidth() * 2, (GLsizei)window->GetHeight() * 2);
+#endif
 
-  // Clear back buffer.
-  glClearColor(0, 0, 0, 1);
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-
-  // Render params.
-  glEnable(GL_DEPTH_TEST);
-  glEnable(GL_CULL_FACE);
-  glCullFace(GL_BACK);
+  ClearBuffer();
+  ConfigureBuffer();
 
   // Render scene for real.
   DrawScene(*mainCamera);

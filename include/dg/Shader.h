@@ -58,7 +58,7 @@ namespace dg {
       virtual void SetMat4(const std::string& name, const Transform& xf) = 0;
       virtual void SetTexture(
           unsigned int textureUnit, const std::string& name,
-          Texture *texture) = 0;
+          const Texture *texture) = 0;
       virtual void SetData(const std::string& name, void *data, size_t size) = 0;
       template <typename T>
       void SetData(const std::string& name, const T& data) {
@@ -105,7 +105,8 @@ namespace dg {
       virtual void SetMat4(const std::string& name, const glm::mat4& mat);
       virtual void SetMat4(const std::string& name, const Transform& xf);
       virtual void SetTexture(
-          unsigned int textureUnit, const std::string& name, Texture *texture);
+          unsigned int textureUnit, const std::string& name,
+          const Texture *texture);
       virtual void SetData(const std::string& name, void *data, size_t size);
 
     private:
@@ -152,7 +153,8 @@ namespace dg {
       virtual void SetMat4(const std::string& name, const glm::mat4& mat);
       virtual void SetMat4(const std::string& name, const Transform& xf);
       virtual void SetTexture(
-          unsigned int textureUnit, const std::string& name, Texture *texture);
+          unsigned int textureUnit, const std::string& name,
+          const Texture *texture);
       virtual void SetData(const std::string& name, void *data, size_t size);
 
     private:

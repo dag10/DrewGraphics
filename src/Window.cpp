@@ -739,7 +739,7 @@ void dg::Win32Window::UnlockCursor() {
 }
 
 bool dg::Win32Window::IsCursorLocked() const {
-  return (cursorIsLocked && GetCapture() == hWnd);
+  return cursorIsLocked;
 }
 
 glm::vec2 dg::Win32Window::GetCursorPosition() const {

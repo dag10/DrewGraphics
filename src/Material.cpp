@@ -118,6 +118,7 @@ void dg::Material::SendMatrixNormal(glm::mat4x4 normal) {
   shader->SetMat4("_Matrix_Normal", normal);
 }
 
+#if defined(_OPENGL)
 void dg::Material::SendLight(int index, const Light::ShaderData& data) {
   shader->SetVec3(LightProperty(index, "diffuse"), data.diffuse);
   shader->SetInt(LightProperty(index, "type"), (int)data.type);
@@ -132,6 +133,17 @@ void dg::Material::SendLight(int index, const Light::ShaderData& data) {
   shader->SetFloat(LightProperty(index, "quadraticCoeff"), data.quadraticCoeff);
 }
 
+void dg::Material::ClearLights() {
+  for (int i = 0; i < Light::MAX_LIGHTS; i++) {
+    ClearLight(i);
+  }
+}
+
+void dg::Material::ClearLight(int index) {
+  shader->SetInt(LightProperty(index, "type"), (int)Light::LightType::NONE);
+}
+#endif
+
 void dg::Material::SendLights(
     const Light::ShaderData (&lights)[Light::MAX_LIGHTS]) {
 #if defined(_OPENGL)
@@ -144,16 +156,6 @@ void dg::Material::SendLights(
 #elif defined(_DIRECTX)
   shader->SetData(Light::LIGHTS_ARRAY_NAME, lights);
 #endif
-}
-
-void dg::Material::ClearLights() {
-  for (int i = 0; i < Light::MAX_LIGHTS; i++) {
-    ClearLight(i);
-  }
-}
-
-void dg::Material::ClearLight(int index) {
-  shader->SetInt(LightProperty(index, "type"), (int)Light::LightType::NONE);
 }
 
 const std::string dg::Material::LightProperty(

@@ -50,7 +50,6 @@ void dg::DeepCloningScene::Initialize() {
 
   // Create floor material.
   const int floorSize = 500;
-#if defined(_OPENGL)
   StandardMaterial floorMaterial =
       StandardMaterial::WithTexture(Texture::FromPath(
           "assets/textures/Flooring_Stone_001/Flooring_Stone_001_COLOR.png"));
@@ -58,9 +57,6 @@ void dg::DeepCloningScene::Initialize() {
       "assets/textures/Flooring_Stone_001/Flooring_Stone_001_NRM.png"));
   floorMaterial.SetSpecular(Texture::FromPath(
       "assets/textures/Flooring_Stone_001/Flooring_Stone_001_SPEC.png"));
-#elif defined(_DIRECTX)
-  StandardMaterial floorMaterial = StandardMaterial::WithColor(glm::vec3(0.5f));
-#endif
   floorMaterial.SetShininess(9);
   floorMaterial.SetUVScale(glm::vec2((float)floorSize));
   floorMaterial.SetLit(true);

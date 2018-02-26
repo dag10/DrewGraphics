@@ -32,19 +32,32 @@ cbuffer Camera : register(b1) { float3 _CameraPosition; }
 cbuffer Material : register(b2) {
   int lit;
   float3 diffuse;
+  bool useDiffuseMap;
   float3 specular;
-  float shininess;
+  bool useSpecularMap;
   float2 uvScale;
+  float shininess;
+  bool useNormalMap;
 };
+
+Texture2D diffuseTexture : register(t0);
+SamplerState diffuseTextureSampler : register(s0);
+Texture2D specularTexture : register(t1);
+SamplerState specularTextureSampler : register(s1);
+Texture2D normalTexture : register(t2);
+SamplerState normalTextureSampler : register(s2);
 
 struct VertexToPixel {
   float4 position : SV_POSITION;
   float4 scenePos : POSITION;
   float4 normal : NORMAL;
+  float4 tangent : TANGENT;
+  float4 bitangent : BITANGENT;
   float2 texCoord : TEXCOORD;
 };
 
-float3 calculateLight(Light light, VertexToPixel input) {
+float3 calculateLight(Light light, VertexToPixel input, float3 normal,
+                      float3 diffuse, float3 specular) {
   if (light.type == LIGHT_TYPE_NULL) {
     return float3(0, 0, 0);
   }
@@ -53,7 +66,7 @@ float3 calculateLight(Light light, VertexToPixel input) {
   float3 ambientComponent = light.ambient * diffuse;
 
   // Diffuse
-  float3 norm = normalize(input.normal);
+  float3 norm = normalize(normal);
   float3 lightDir;
   if (light.type == LIGHT_TYPE_POINT || light.type == LIGHT_TYPE_SPOT) {
     lightDir = normalize(light.position - input.scenePos.xyz);
@@ -94,18 +107,37 @@ float3 calculateLight(Light light, VertexToPixel input) {
 }
 
 float4 main(VertexToPixel input) : SV_TARGET {
-  //if (input.position.z < 0.5) {
-  //  return float4(0, 0, 0, 1);
-  //}
-  //return float4(diffuse, 1.0);
+  float2 texCoord = input.texCoord.xy * uvScale;
+
+  float3 diffuseColor =
+      useDiffuseMap ? diffuseTexture.Sample(diffuseTextureSampler, texCoord).rgb
+                    : diffuse;
 
   if (!lit) {
-    return float4(diffuse, 1.0);
+    return float4(diffuseColor, 1);
+  }
+
+  float3 specularColor =
+      useSpecularMap
+          ? specularTexture.Sample(specularTextureSampler, texCoord).rgb
+          : specular;
+
+  float3 normal = input.normal.xyz;
+  if (useNormalMap) {
+    normal = normalize(
+        normalTexture.Sample(normalTextureSampler, texCoord).rgb * 2.0 - 1.0);
+
+    // Transform normal from tangent space (which is what the normal map is)
+    // to world space by left-multiplying the world-space basis vectors of
+    // this fragment's tangent space.
+    //v_TBN = mat3(T, B, v_Normal);
+    normal = normalize(
+        mul(float3x4(input.tangent, input.bitangent, input.normal), normal));
   }
 
   float3 cumulative = float3(0, 0, 0);
   for (int i = 0; i < MAX_LIGHTS; i++) {
-    cumulative += calculateLight(lights[i], input);
+    cumulative += calculateLight(lights[i], input, normal, diffuseColor, specularColor);
   }
 
   return float4(cumulative, 1.0);

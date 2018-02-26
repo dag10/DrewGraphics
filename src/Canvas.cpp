@@ -4,6 +4,7 @@
 
 #include "dg/Canvas.h"
 #include <iostream>
+#include "dg/Graphics.h"
 
 dg::Canvas::Canvas(unsigned int width, unsigned int height) {
   TextureOptions texOpts;
@@ -13,6 +14,7 @@ dg::Canvas::Canvas(unsigned int width, unsigned int height) {
   texOpts.format = TexturePixelFormat::RGBA;
   texOpts.wrap = TextureWrap::CLAMP_EDGE;
   texOpts.type = TexturePixelType::BYTE;
+  texOpts.mipmap = true;
   texture = Texture::Generate(texOpts);
 
   pixels = new Pixel[width * height]();
@@ -65,20 +67,6 @@ void dg::Canvas::SetPixel(
 }
 
 void dg::Canvas::Submit() {
-#if defined(_OPENGL)
-  glBindTexture(GL_TEXTURE_2D, texture->GetHandle());
-  glTexSubImage2D(
-      GL_TEXTURE_2D,
-      0,
-      0,
-      0,
-      GetWidth(),
-      GetHeight(),
-      texture->GetOptions().GetOpenGLInternalFormat(),
-      texture->GetOptions().GetOpenGLType(),
-      pixels);
-#elif defined(_DIRECTX)
-  // TODO
-#endif
+  texture->UpdateData(pixels);
 }
 

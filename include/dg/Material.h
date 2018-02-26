@@ -78,10 +78,7 @@ namespace dg {
       void SendMatrixMVP(glm::mat4x4 mvp);
       void SendMatrixM(glm::mat4x4 m);
       void SendMatrixNormal(glm::mat4x4 normal);
-      void SendLight(int index, const Light::ShaderData& data);
       void SendLights(const Light::ShaderData(&lights)[Light::MAX_LIGHTS]);
-      void ClearLights();
-      void ClearLight(int index);
 
       // Portal world-to-local transform, for back-of-portal fragment culling.
       // Set this if we're currently rendering "through" a portal, and set
@@ -94,6 +91,12 @@ namespace dg {
 
       static const std::string LightProperty(
           int index, const std::string& property);
+
+#if defined(_OPENGL)
+      void SendLight(int index, const Light::ShaderData& data);
+      void ClearLights();
+      void ClearLight(int index);
+#endif
 
     private:
 

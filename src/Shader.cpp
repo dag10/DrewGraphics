@@ -170,7 +170,7 @@ void dg::OpenGLShader::SetMat4(
 }
 
 void dg::OpenGLShader::SetTexture(
-    unsigned int textureUnit, const std::string& name, Texture *texture) {
+    unsigned int textureUnit, const std::string& name, const Texture *texture) {
   assert(texture != nullptr);
 
   glActiveTexture(GL_TEXTURE0 + textureUnit);
@@ -259,9 +259,12 @@ void dg::DirectXShader::SetMat4(
 }
 
 void dg::DirectXShader::SetTexture(
-    unsigned int textureUnit, const std::string& name, Texture *texture) {
+    unsigned int textureUnit, const std::string& name,
+    const Texture *texture) {
   assert(texture != nullptr);
-  // TODO
+  bool a = pixelShader->SetSamplerState(name + "Sampler", texture->GetSamplerState());
+  bool b = pixelShader->SetShaderResourceView(name,
+                                     texture->GetShaderResourceView());
 }
 
 void dg::DirectXShader::SetData(

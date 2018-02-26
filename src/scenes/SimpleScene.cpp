@@ -67,6 +67,7 @@ void dg::SimpleScene::Initialize() {
     glm::vec3(1.f, 0.5f, 0.5f));
   //StandardMaterial cubeMaterial = StandardMaterial::WithTexture(crateTexture);
   //cubeMaterial.SetSpecular(crateSpecularTexture);
+  cubeMaterial.SetSpecular(glm::vec3(1));
   cubeMaterial.SetShininess(64);
   //cubeMaterial.SetLit(false);
 
@@ -90,7 +91,9 @@ void dg::SimpleScene::Initialize() {
   StandardMaterial floorMaterial = StandardMaterial::WithColor(
       glm::vec3(0.2f));
   floorMaterial.SetUVScale(glm::vec2((float)floorSize));
-  floorMaterial.SetLit(false);
+  floorMaterial.SetSpecular(glm::vec3(1));
+  floorMaterial.SetShininess(64);
+  //floorMaterial.SetLit(false);
 
   // Create floor plane.
   AddChild(std::make_shared<Model>(

@@ -130,9 +130,8 @@ float4 main(VertexToPixel input) : SV_TARGET {
     // Transform normal from tangent space (which is what the normal map is)
     // to world space by left-multiplying the world-space basis vectors of
     // this fragment's tangent space.
-    //v_TBN = mat3(T, B, v_Normal);
     normal = normalize(
-        mul(float3x4(input.tangent, input.bitangent, input.normal), normal));
+        mul(normal, float3x4(input.tangent, input.bitangent, input.normal)));
   }
 
   float3 cumulative = float3(0, 0, 0);

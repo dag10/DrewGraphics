@@ -1,11 +1,3 @@
 [submodule "external/glm"]
 	path = external/glm
 	url = https://github.com/g-truc/glm
-[submodule "external/glfw"]
-	path = external/glfw
-	url = https://github.com/glfw/glfw
-	ignore = dirty
-[submodule "external/openvr"]
-	path = external/openvr
-	url = https://github.com/ValveSoftware/openvr
-	ignore = dirty

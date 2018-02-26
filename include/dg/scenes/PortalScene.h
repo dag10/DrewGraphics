@@ -26,9 +26,6 @@ namespace dg {
 
       virtual void Initialize();
       virtual void Update();
-#if defined(_OPENGL)
-      virtual void RenderFrame();
-#endif
 
     protected:
       virtual void DrawScene(

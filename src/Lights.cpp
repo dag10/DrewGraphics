@@ -8,11 +8,7 @@
 // NOTE: Keep these consistent with MAX_LIGHTS in
 //       -> assets/shaders/includes/fragment_head.glsl.
 //       -> assets/shaders/StandardPixelShader.hlsl.
-#if defined(_OPENGL)
-const char *dg::Light::LIGHTS_ARRAY_NAME = "_Lights";
-#elif defined(_DIRECTX)
 const char *dg::Light::LIGHTS_ARRAY_NAME = "lights";
-#endif
 const int dg::Light::MAX_LIGHTS;
 
 #pragma region Light

@@ -87,11 +87,7 @@ void dg::Mesh::AddTriangle(Vertex v1, Vertex v2, Vertex v3, Winding winding) {
 
   // TODO: Don't change winding here, but actually switch the rasterizer
   //       state to accept CCW winding.
-#if defined(_OPENGL)
-  Winding desiredWinding = Winding::CW;
-#elif defined(_DIRECTX)
   Winding desiredWinding = Winding::CCW;
-#endif
 
   if (winding != desiredWinding) {
     std::swap(v1, v2);
@@ -596,11 +592,7 @@ std::shared_ptr<dg::Mesh> dg::Mesh::CreateSphere(int subdivisions) {
 }
 
 std::shared_ptr<dg::Mesh> dg::Mesh::Create() {
-#if defined(_OPENGL)
-  return std::shared_ptr<Mesh>(new OpenGLMesh());
-#elif defined(_DIRECTX)
   return std::shared_ptr<Mesh>(new DirectXMesh());
-#endif
 }
 
 std::shared_ptr<dg::Mesh> dg::Mesh::LoadOBJ(const char *filename) {
@@ -705,126 +697,8 @@ std::shared_ptr<dg::Mesh> dg::Mesh::LoadOBJ(const char *filename) {
 #pragma endregion
 
 #pragma region OpenGL Mesh
-#if defined(_OPENGL)
-
-dg::OpenGLMesh::~OpenGLMesh() {
-  if (VAO != 0) {
-    glDeleteVertexArrays(1, &VAO);
-    VAO = 0;
-  }
-
-  if (VBO != 0) {
-    glDeleteBuffers(1, &VBO);
-    VBO = 0;
-  }
-
-  if (EBO != 0) {
-    glDeleteBuffers(1, &EBO);
-    EBO = 0;
-  }
-}
-
-void dg::OpenGLMesh::FinishBuilding() {
-  assert(VAO == 0 && VBO == 0 && EBO == 0);
-
-  const size_t positionSize = sizeof(Vertex::Data::position);
-  const size_t normalSize = sizeof(Vertex::Data::normal);
-  const size_t texCoordSize = sizeof(Vertex::Data::texCoord);
-  const size_t tangentSize = sizeof(Vertex::Data::tangent);
-
-  const size_t stride =
-    (static_cast<bool>(attributes & Vertex::AttrFlag::POSITION)
-      ? positionSize : 0) +
-    (static_cast<bool>(attributes & Vertex::AttrFlag::NORMAL)
-      ? normalSize : 0) +
-    (static_cast<bool>(attributes & Vertex::AttrFlag::TEXCOORD)
-      ? texCoordSize : 0) +
-    (static_cast<bool>(attributes & Vertex::AttrFlag::TANGENT)
-      ? tangentSize : 0);
-  const int numVertices = vertexPositions.size();
-  const size_t totalSize = numVertices * stride;
-
-  glGenVertexArrays(1, &VAO);
-  glBindVertexArray(VAO);
-
-  glGenBuffers(1, &EBO);
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-  glBufferData(
-    GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int),
-    indices.data(), GL_STATIC_DRAW);
-
-  glGenBuffers(1, &VBO);
-  glBindBuffer(GL_ARRAY_BUFFER, VBO);
-  glBufferData(GL_ARRAY_BUFFER, totalSize, nullptr, GL_STATIC_DRAW);
-
-  size_t offset = 0;
-
-  if (!!(attributes & Vertex::AttrFlag::POSITION)) {
-    const size_t attribSize = positionSize;
-    const size_t arraySize = numVertices * attribSize;
-    glBufferSubData(GL_ARRAY_BUFFER, offset, arraySize, vertexPositions.data());
-    glVertexAttribPointer(
-        Vertex::AttrFlagToIndex(Vertex::AttrFlag::POSITION),
-        attribSize / sizeof(float), GL_FLOAT, GL_FALSE, attribSize,
-        (void*)offset);
-    offset += arraySize;
-  }
-
-  if (!!(attributes & Vertex::AttrFlag::NORMAL)) {
-    const size_t attribSize = normalSize;
-    const size_t arraySize = numVertices * attribSize;
-    glBufferSubData(GL_ARRAY_BUFFER, offset, arraySize, vertexNormals.data());
-    glVertexAttribPointer(
-        Vertex::AttrFlagToIndex(Vertex::AttrFlag::NORMAL),
-        attribSize / sizeof(float), GL_FLOAT, GL_FALSE, attribSize,
-        (void*)offset);
-    offset += arraySize;
-  }
-
-  if (!!(attributes & Vertex::AttrFlag::TEXCOORD)) {
-    const size_t attribSize = texCoordSize;
-    const size_t arraySize = numVertices * attribSize;
-    glBufferSubData(GL_ARRAY_BUFFER, offset, arraySize, vertexTexCoords.data());
-    glVertexAttribPointer(
-        Vertex::AttrFlagToIndex(Vertex::AttrFlag::TEXCOORD),
-        attribSize / sizeof(float), GL_FLOAT, GL_FALSE, attribSize,
-        (void*)offset);
-    offset += arraySize;
-  }
-
-  if (!!(attributes & Vertex::AttrFlag::TANGENT)) {
-    const size_t attribSize = tangentSize;
-    const size_t arraySize = numVertices * attribSize;
-    glBufferSubData(GL_ARRAY_BUFFER, offset, arraySize, vertexTangents.data());
-    glVertexAttribPointer(
-        Vertex::AttrFlagToIndex(Vertex::AttrFlag::TANGENT),
-        attribSize / sizeof(float), GL_FLOAT, GL_FALSE, attribSize,
-        (void*)offset);
-    offset += arraySize;
-  }
-
-  vertexMap.clear();
-}
-
-void dg::OpenGLMesh::Draw() const {
-  glBindVertexArray(VAO);
-  if (lastDrawnMesh != this) {
-    for (int i = 0; i < Vertex::NumAttrs; i++) {
-      if (static_cast<bool>(attributes & (Vertex::AttrFlag)(1 << i))) {
-        glEnableVertexAttribArray(i);
-      } else {
-        glDisableVertexAttribArray(i);
-      }
-    }
-    lastDrawnMesh = (Mesh*)this; // Although we're const, we'll allow this.
-  }
-  glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, (void*)0);
-}
-
-#endif
 #pragma endregion
 #pragma region DirectX Mesh
-#if defined(_DIRECTX)
 
 dg::DirectXMesh::~DirectXMesh() {
   if (vertexBuffer != nullptr) {
@@ -892,6 +766,5 @@ void dg::DirectXMesh::Draw() const {
   Graphics::Instance->context->DrawIndexed(indices.size(), 0, 0);
 }
 
-#endif
 #pragma endregion
 

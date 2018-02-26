@@ -55,12 +55,7 @@ void dg::Skybox::Draw(const Camera& camera, glm::mat4x4 projection) {
 
   material.Use();
 
-#if defined(_OPENGL)
-  glCullFace(GL_FRONT);
-  glDepthMask(GL_FALSE);
-#elif defined(_DIRECTX)
   // TODO
-#endif
   Mesh::MappedCube->Draw();
 }
 

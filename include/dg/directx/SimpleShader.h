@@ -3,7 +3,6 @@
 //
 //  Author: Chris Cascioli
 
-#if defined(_DIRECTX)
 
 #pragma once
 #pragma comment(lib, "dxguid.lib")
@@ -311,4 +310,3 @@ class SimpleComputeShader : public ISimpleShader {
 
 } // namespace dg
 
-#endif

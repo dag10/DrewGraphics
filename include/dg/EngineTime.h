@@ -19,12 +19,10 @@ namespace dg {
 
   private:
 
-#if defined(_DIRECTX)
     static double perfCounterSeconds;
     static __int64 startTime;
     static __int64 currentTime;
     static __int64 previousTime;
-#endif
 
   }; // class Time
 

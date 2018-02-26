@@ -92,11 +92,6 @@ namespace dg {
       static const std::string LightProperty(
           int index, const std::string& property);
 
-#if defined(_OPENGL)
-      void SendLight(int index, const Light::ShaderData& data);
-      void ClearLights();
-      void ClearLight(int index);
-#endif
 
     private:
 

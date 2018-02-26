@@ -24,11 +24,6 @@ void dg::BaseScene::Initialize() {
     hiddenAreaMeshMaterial = std::make_shared<ScreenQuadMaterial>(
       glm::vec3(0), glm::vec2(2), glm::vec2(-1));
 
-#ifdef _OPENGL
-    // Disable glfw vsync, since IVRComposer::WaitGetPoses() will wait for
-    // "running start" in 90hz anyway.
-    glfwSwapInterval(0);
-#endif
 
     // Create container for OpenVR behaviors and tracked devices.
     vrContainer = std::make_shared<SceneObject>();
@@ -188,28 +183,8 @@ bool dg::BaseScene::AutomaticWindowTitle() const {
 
 #pragma endregion
 #pragma region OpenGL Scene
-#if defined(_OPENGL)
-
-void dg::OpenGLScene::DrawHiddenAreaMesh(vr::EVREye eye) {
-  glEnable(GL_DEPTH_TEST);
-  glDepthFunc(GL_ALWAYS);
-  glDisable(GL_CULL_FACE);
-  hiddenAreaMeshMaterial->Use();
-  VRManager::Instance->GetHiddenAreaMesh(eye)->Draw();
-}
-
-void dg::OpenGLScene::ConfigureBuffer() {
-  glEnable(GL_DEPTH_TEST);
-  glDepthFunc(GL_LESS);
-  glDepthMask(GL_TRUE);
-  glEnable(GL_CULL_FACE);
-  glCullFace(GL_BACK);
-}
-
-#endif
 #pragma endregion
 #pragma region DirectX Scene
-#if defined(_DIRECTX)
 
 void dg::DirectXScene::DrawHiddenAreaMesh(vr::EVREye eye) {
   // TODO
@@ -223,5 +198,4 @@ void dg::DirectXScene::ConfigureBuffer() {
   //glCullFace(GL_BACK);
 }
 
-#endif
 #pragma endregion

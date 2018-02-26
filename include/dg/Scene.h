@@ -63,20 +63,6 @@ namespace dg {
 
   }; // class BaseScene
 
-#if defined(_OPENGL)
-
-  class OpenGLScene : public BaseScene {
-
-    protected:
-
-      virtual void DrawHiddenAreaMesh(vr::EVREye eye);
-      virtual void ConfigureBuffer();
-
-  }; // class OpenGLScene
-
-  using Scene = OpenGLScene;
-
-#elif defined(_DIRECTX)
 
   class DirectXScene : public BaseScene {
 
@@ -89,6 +75,5 @@ namespace dg {
 
   using Scene = DirectXScene;
 
-#endif
 
 } // namespace dg

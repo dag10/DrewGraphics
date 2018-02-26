@@ -3,11 +3,7 @@
 //
 #pragma once
 
-#if defined(_OPENGL)
-#include "dg/glad/glad.h"
-#elif defined(_DIRECTX)
 #include <d3d11.h>
-#endif
 
 #include <memory>
 #include <string>
@@ -52,30 +48,17 @@ namespace dg {
     unsigned int width;
     unsigned int height;
 
-#if defined(_OPENGL)
-    GLenum GetOpenGLWrap() const;
-    GLenum GetOpenGLMinFilter() const;
-    GLenum GetOpenGLMagFilter() const;
-    GLenum GetOpenGLInternalFormat() const;
-    GLenum GetOpenGLExternalFormat() const;
-    GLenum GetOpenGLType() const;
-#elif defined(_DIRECTX)
     DXGI_FORMAT GetDirectXFormat() const;
     D3D11_TEXTURE_ADDRESS_MODE GetDirectXAddressMode() const;
     D3D11_FILTER GetDirectXFilter() const;
     unsigned int GetDirectXBitsPerPixel() const;
-#endif
   };
 
 #pragma endregion
 
   class OpenGLTexture;
   class DirectXTexture;
-#if defined(_OPENGL)
-  using Texture = OpenGLTexture;
-#elif defined(_DIRECTX)
   using Texture = DirectXTexture;
-#endif
 
   // Copy is disabled. This prevents us from leaking or redeleting
   // OpenGL/DirectX resources.
@@ -111,30 +94,6 @@ namespace dg {
 
   }; // class BaseTexture
 
-#if defined(_OPENGL)
-
-  class OpenGLTexture : public BaseTexture {
-    friend class BaseTexture;
-
-    public:
-
-      virtual ~OpenGLTexture();
-
-      virtual void UpdateData(const void *pixels, bool genMipMap = true);
-
-      GLuint GetHandle() const;
-
-    private:
-
-      OpenGLTexture(TextureOptions options);
-
-      virtual void GenerateImage(void *pixels);
-
-      GLuint textureHandle = 0;
-
-  }; // class OpenGLTexture
-
-#elif defined(_DIRECTX)
 
   class DirectXTexture : public BaseTexture {
     friend class BaseTexture;
@@ -161,6 +120,5 @@ namespace dg {
 
   }; // class DirectXTexture
 
-#endif
 
 } // namespace dg

@@ -10,12 +10,10 @@
 #include <glm/gtc/constants.hpp>
 #include "dg/MathUtils.h"
 
-#if defined(_DIRECTX)
 #include <DirectXMath.h>
 
 // For the DirectX Math library
 using namespace DirectX;
-#endif
 
 
 dg::Camera::Camera() : SceneObject() {}
@@ -31,14 +29,10 @@ glm::mat4x4 dg::Camera::GetViewMatrix(vr::EVREye eye) const {
 }
 
 glm::mat4x4 dg::Camera::GetProjectionMatrix(float aspectRatio) const {
-#if defined(_OPENGL)
-  return glm::perspective(glm::radians(fov), aspectRatio, nearClip, farClip);
-#elif defined(_DIRECTX)
   XMFLOAT4X4 ret;
   XMStoreFloat4x4(&ret, XMMatrixPerspectiveFovRH(
     glm::radians(fov), aspectRatio, nearClip, farClip));
   return glm::transpose(FLOAT4X4toMAT4X4(ret));
-#endif
 }
 
 glm::mat4x4 dg::Camera::GetProjectionMatrix(vr::EVREye eye) const {

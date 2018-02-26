@@ -4,13 +4,7 @@
 
 #pragma once
 
-#if defined(_OPENGL)
-#include "dg/glad/glad.h"
-
-#include <GLFW/glfw3.h>
-#elif defined(_DIRECTX)
 #include <Windows.h>
-#endif
 
 #include "dg/InputCodes.h"
 #include <memory>
@@ -27,11 +21,7 @@ namespace dg {
 
     public:
 
-#if defined(_OPENGL)
-      typedef GLFWwindow* handle_type;
-#elif defined(_DIRECTX)
       typedef HWND handle_type;
-#endif
 
       // TODO: Make these protected :)
       Window(Window& other) = delete;
@@ -88,15 +78,9 @@ namespace dg {
       Window();
 
       enum class InputState : int8_t {
-#if defined(_OPENGL)
-        PRESS   = GLFW_PRESS,
-        RELEASE = GLFW_RELEASE,
-        REPEAT  = GLFW_REPEAT,
-#elif defined _DIRECTX
         PRESS,
         RELEASE,
         REPEAT,
-#endif
       };
 
       void HandleKey(Key key, InputState action);
@@ -117,83 +101,7 @@ namespace dg {
 
   }; // class Window
 
-#if defined(_OPENGL)
-  class OpenGLWindow : public Window {
 
-    public:
-
-      // Opens a window with a title and size.
-      // Sizes are assuming 1x DPI scale, even if on a higher-DPI display.
-      static std::shared_ptr<Window> Open(
-          unsigned int width, unsigned int height, std::string title);
-
-      OpenGLWindow(OpenGLWindow& other) = delete;
-      OpenGLWindow(OpenGLWindow&& other);
-      virtual ~OpenGLWindow();
-      OpenGLWindow& operator=(OpenGLWindow& other) = delete;
-      OpenGLWindow& operator=(OpenGLWindow&& other);
-      friend void swap(OpenGLWindow& first, OpenGLWindow& second); // nothrow
-
-      virtual void PollEvents();
-
-      virtual handle_type GetHandle() const;
-
-      virtual void LockCursor();
-      virtual void UnlockCursor();
-      virtual bool IsCursorLocked() const;
-      virtual glm::vec2 GetCursorPosition() const;
-
-      virtual void Hide();
-      virtual void Show();
-
-      virtual bool ShouldClose() const;
-      virtual void SetShouldClose(bool shouldClose);
-
-      virtual void SetTitle(const std::string& title);
-
-      virtual void StartRender();
-      virtual void FinishRender();
-
-      virtual void ResetViewport();
-
-      // Returns the size of the window as if monitor is 1x DPI scale,
-      // even if it's high-DPI.
-      virtual glm::vec2 GetContentSize() const;
-      // Sets the size of the window as if monitor is 1x DPI scale, even if
-      // it's high-DPI.
-      virtual void SetClientSize(glm::vec2 size);
-
-    private:
-
-      static std::map<GLFWwindow*, std::weak_ptr<OpenGLWindow>> windowMap;
-      static bool glfwIsInitialized;
-      static void InitializeGLFW();
-
-      virtual void Open(int width, int height);
-
-      virtual void HandleCursorPosition(double x, double y);
-
-      static void glfwKeyCallback(
-          GLFWwindow *glfwWindow, int key, int scancode, int action, int mods);
-      static void glfwMouseButtonCallback(
-          GLFWwindow *glfwWindow, int button, int action, int mods);
-      static void glfwCursorPositionCallback(
-          GLFWwindow *glfwWindow, double x, double y);
-
-      OpenGLWindow();
-
-      void UseContext();
-
-      // Gets the DPI scale for the window if it exists, or of the primary
-      // monitor if the window does not yet exist.
-      glm::vec2 GetContentScale() const;
-
-      GLFWwindow *glfwWindow = nullptr;
-
-  }; // class OpenGLWindow
-#endif
-
-#if defined(_DIRECTX)
   class Win32Window : public Window {
 
     public:
@@ -267,6 +175,5 @@ namespace dg {
       unsigned int dpi;
 
   }; // class Win32Window
-#endif
 
 } // namespace dg

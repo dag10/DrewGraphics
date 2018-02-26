@@ -8,13 +8,7 @@
 #include "dg/Shader.h"
 #include "dg/Window.h"
 
-#if defined(_OPENGL)
-#include "dg/glad/glad.h"
-
-#include <GLFW/glfw3.h>
-#elif defined(_DIRECTX)
 #include <WindowsX.h>
-#endif
 
 #pragma region Base Class
 
@@ -41,42 +35,8 @@ void dg::Graphics::Shutdown() {
 #pragma endregion
 
 #pragma region OpenGL Graphics
-#if defined(_OPENGL)
-
-dg::OpenGLGraphics::OpenGLGraphics(const Window& window) {}
-
-void dg::OpenGLGraphics::InitializeGraphics() {
-  // Load GLAD procedures.
-  if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-    throw std::runtime_error("Failed to initialize GLAD.");
-  }
-}
-
-void dg::OpenGLGraphics::InitializeResources() {
-  Graphics::InitializeResources();
-
-  // Configure global includes for all shader files.
-  dg::OpenGLShader::SetVertexHead("assets/shaders/includes/vertex_head.glsl");
-  dg::OpenGLShader::AddVertexSource("assets/shaders/includes/vertex_main.glsl");
-  dg::OpenGLShader::SetFragmentHead("assets/shaders/includes/fragment_head.glsl");
-  dg::OpenGLShader::AddFragmentSource("assets/shaders/includes/fragment_main.glsl");
-}
-
-dg::OpenGLGraphics::~OpenGLGraphics() {
-  // Even though GLFW is initialized in OpenGLWindow::InitializeGLFW(), we'll
-  // shut down here because this is called at final termination of the program.
-  glfwTerminate();
-}
-
-void dg::OpenGLGraphics::Clear(glm::vec3 color) {
-  glClearColor(color.x, color.y, color.z, 1);
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-}
-
-#endif
 #pragma endregion
 #pragma region DirectX Graphics
-#if defined(_DIRECTX)
 
 dg::DirectXGraphics::DirectXGraphics(const Window& window) : window(window) {}
 
@@ -262,5 +222,4 @@ void dg::DirectXGraphics::Clear(glm::vec3 color) {
       depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 }
 
-#endif
 #pragma endregion

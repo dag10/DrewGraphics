@@ -87,11 +87,6 @@ void dg::PortalScene::Initialize() {
   window->LockCursor();
 
   // Create shaders.
-#if defined(_OPENGL)
-  depthResetShader = dg::Shader::FromFiles(
-      "assets/shaders/depthreset.v.glsl",
-      "assets/shaders/depthreset.f.glsl");
-#endif
 
   // Create textures.
   std::shared_ptr<Texture> crateTexture =
@@ -448,38 +443,9 @@ void dg::PortalScene::UpdateLightingConfiguration() {
 }
 
 void dg::PortalScene::RenderPortalStencil(dg::Transform xfPortal) {
-#if defined(_OPENGL)
-  glm::mat4x4 view = mainCamera->GetViewMatrix();
-  glm::mat4x4 projection = mainCamera->GetProjectionMatrix(
-    window->GetAspectRatio());
-
-  glEnable(GL_STENCIL_TEST);
-  glStencilFunc(GL_ALWAYS, 1, 0xFF);
-  glDepthFunc(GL_LEQUAL);
-  glStencilOp(GL_ZERO, GL_ZERO, GL_REPLACE);
-  glClear(GL_STENCIL_BUFFER_BIT);
-
-  portalStencilMaterial->SendMatrixMVP(
-      projection * view * xfPortal * portalOpeningScale);
-  portalStencilMaterial->Use();
-
-  Mesh::Quad->Draw();
-
-  glDisable(GL_STENCIL_TEST);
-#endif
 }
 
 void dg::PortalScene::ClearDepth() {
-#if defined(_OPENGL)
-  glDepthFunc(GL_ALWAYS);
-  glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
-
-  depthResetShader->Use();
-  Mesh::Quad->Draw();
-
-  glDepthFunc(GL_LESS);
-  glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
-#endif
 }
 
 dg::Camera dg::PortalScene::CameraForPortal(
@@ -498,47 +464,6 @@ dg::Camera dg::PortalScene::CameraForPortal(
   return camera;
 }
 
-#if defined(_OPENGL)
-void dg::PortalScene::RenderFrame() {
-  // Clear back buffer.
-  glClearColor(
-      backgroundColor.x, backgroundColor.y, backgroundColor.z, 1);
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-
-  // Render params.
-  glEnable(GL_DEPTH_TEST);
-  glEnable(GL_CULL_FACE);
-  glCullFace(GL_BACK);
-
-  // Render immediate scene.
-  invPortal = glm::mat4x4(0);
-  DrawScene(*mainCamera);
-
-  // Render first (red) portal stencil.
-  RenderPortalStencil(portalTransforms[0]);
-
-  // Render scene through first (red) portal.
-  glEnable(GL_STENCIL_TEST);
-  glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
-  glStencilFunc(GL_EQUAL, 1, 0xFF);
-  ClearDepth(); // Clear depth buffer only within stencil.
-  invPortal = portalTransforms[1].Inverse().ToMat4();
-  DrawScene(CameraForPortal(portalTransforms[0], portalTransforms[1]));
-  glDisable(GL_STENCIL_TEST);
-
-  // Render first (red) portal stencil.
-  RenderPortalStencil(portalTransforms[1]);
-
-  // Render scene through second (blue) portal.
-  glEnable(GL_STENCIL_TEST);
-  glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
-  glStencilFunc(GL_EQUAL, 1, 0xFF);
-  ClearDepth(); // Clear depth buffer only within stencil.
-  invPortal = portalTransforms[0].Inverse().ToMat4();
-  DrawScene(CameraForPortal(portalTransforms[1], portalTransforms[0]));
-  glDisable(GL_STENCIL_TEST);
-}
-#endif
 
 void dg::PortalScene::DrawScene(
   const Camera& camera, bool renderForVR, vr::EVREye eye) {

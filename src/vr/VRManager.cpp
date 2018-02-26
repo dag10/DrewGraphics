@@ -168,17 +168,7 @@ std::shared_ptr<dg::FrameBuffer> dg::VRManager::GetFramebuffer(
 }
 
 void dg::VRManager::SubmitFrame(vr::EVREye eye) {
-#if defined(_OPENGL)
-  vr::Texture_t frameTexture;
-  frameTexture.eColorSpace = vr::EColorSpace::ColorSpace_Auto;
-  frameTexture.eType = vr::ETextureType::TextureType_OpenGL;
-  frameTexture.handle =
-    (void *)(long)GetFramebuffer(eye)->GetColorTexture()->GetHandle();
-  vrCompositor->Submit(
-    eye, &frameTexture, nullptr, vr::EVRSubmitFlags::Submit_Default);
-#elif defined(_DIRECTX)
   // TODO
-#endif
 }
 
 std::shared_ptr<dg::Mesh> dg::VRManager::GetHiddenAreaMesh(vr::EVREye eye) {

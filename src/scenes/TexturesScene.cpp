@@ -157,8 +157,8 @@ void dg::TexturesScene::Initialize() {
   //canvas.SetPixel(0, 1, 255, 127, 0);
   //canvas.SetPixel(0, 0, 255, 0, 0);
   Canvas canvas(128, 128);
-  for (int i = 0; i < canvas.GetWidth(); i++) {
-    for (int j = 0; j < canvas.GetHeight(); j++) {
+  for (int i = 0; i < (int)canvas.GetWidth(); i++) {
+    for (int j = 0; j < (int)canvas.GetHeight(); j++) {
       if ((i + j) % 2 == 0) {
         canvas.SetPixel(i, j, 0, 0, 0);
       } else {
@@ -221,24 +221,6 @@ void dg::TexturesScene::Update() {
 }
 
 void dg::TexturesScene::RenderFrame() {
-#if defined(_OPENGL)
-  // Render scene for framebuffer.
-  framebuffer->Bind();
-  glViewport(0, 0, framebuffer->GetWidth(), framebuffer->GetHeight());
-  glClearColor(0, 1, 1, 1);
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-  glEnable(GL_DEPTH_TEST);
-  glEnable(GL_CULL_FACE);
-  glCullFace(GL_BACK);
-  renderQuads->enabled = false;
-  dummyRenderQuads->enabled = true;
-  DrawScene(*virtualCamera);
-  dummyRenderQuads->enabled = false;
-  renderQuads->enabled = true;
-  framebuffer->Unbind();
-  glViewport(
-    0, 0, (GLsizei)window->GetWidth() * 2, (GLsizei)window->GetHeight() * 2);
-#endif
 
   ClearBuffer();
   ConfigureBuffer();

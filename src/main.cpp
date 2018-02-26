@@ -6,23 +6,16 @@
 #error "No graphics platform specified. Define either _OPENGL or _DIRECTX."
 #endif
 
-#if defined(_OPENGL)
-#include "dg/glad/glad.h"
-
-#include <GLFW/glfw3.h>
-#endif
 
 #if defined(_WIN32)
 #include <Windows.h>
 #endif
 
-#if defined(_DIRECTX)
 #include <Windows.Foundation.h>
 #include <wrl\wrappers\corewrappers.h>
 #include <wrl\client.h>
 #include <stdio.h>
 #pragma comment(lib, "runtimeobject.lib")
-#endif
 
 #include <functional>
 #include <iostream>
@@ -131,7 +124,6 @@ static void FixCurrentDirectory() {
 }
 #endif
 
-#if defined(_DIRECTX)
 static void InitializeWRL() {
 # if (_WIN32_WINNT >= 0x0A00 /*_WIN32_WINNT_WIN10*/)
   Microsoft::WRL::Wrappers::RoInitializeWrapper initialize(
@@ -146,11 +138,7 @@ static void InitializeWRL() {
   }
 # endif
 }
-#endif
 
-#if defined(_OPENGL)
-int main(int argc, const char* argv[]) {
-#elif defined(_DIRECTX)
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
                    LPSTR lpCmdLine, int nCmdShow) {
   Win32Window::CreateConsoleWindow(500, 120, 32, 120);
@@ -158,23 +146,16 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
   // Enable memory leak detection.
   _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 # endif
-#endif
 
 #if defined(_WIN32)
   FixCurrentDirectory();
 #endif
 
-#if defined(_DIRECTX)
   InitializeWRL();
-#endif
 
   // Find intended scene.
   std::string sceneName;
-#if defined(_OPENGL)
-  std::string sceneArg = (argc > 1) ? std::string(argv[1]) : "";
-#elif defined(_DIRECTX)
   std::string sceneArg = std::string(lpCmdLine);
-#endif
   std::unique_ptr<Scene> scene = PromptForScene(sceneArg, &sceneName);
   if (scene == nullptr) {
     return 0;
@@ -182,11 +163,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 
   // Create window.
   try {
-#if defined(_OPENGL)
-    window = dg::OpenGLWindow::Open(800, 600, "Drew Graphics");
-#elif defined(_DIRECTX)
     window = dg::Win32Window::Open(800, 600, "Drew Graphics", hInstance);
-#endif
   } catch (const EngineError& e) {
     terminateWithError(
         "Failed to open window: " + std::string(e.what()));
@@ -253,11 +230,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
     const float titleUpdateFreq = 0.1f;
     if (dg::Time::Elapsed > lastWindowUpdateTime + titleUpdateFreq) {
       if (scene->AutomaticWindowTitle()) {
-#if defined(_OPENGL)
-        std::string platform = "OpenGL";
-#elif defined(_DIRECTX)
         std::string platform = "DirectX";
-#endif
         window->SetTitle(((std::ostringstream&)(std::ostringstream()
           << "Drew Graphics | "
           << platform << " | "

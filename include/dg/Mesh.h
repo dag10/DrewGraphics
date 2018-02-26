@@ -4,11 +4,7 @@
 
 #pragma once
 
-#if defined(_OPENGL)
-#include "dg/glad/glad.h"
-#elif defined(_DIRECTX)
 #include <d3d11.h>
-#endif
 
 #include <glm/glm.hpp>
 #include <glm/gtx/hash.hpp>
@@ -90,11 +86,7 @@ namespace dg {
 
     public:
 
-#if defined(_OPENGL)
-      typedef OpenGLMesh mesh_class;
-#elif defined(_DIRECTX)
       typedef DirectXMesh mesh_class;
-#endif
 
       enum class Winding { CW, CCW };
 
@@ -160,33 +152,6 @@ namespace dg {
 
   }; // class Mesh
 
-#if defined(_OPENGL)
-
-  class OpenGLMesh : public Mesh {
-    friend class Mesh;
-
-    public:
-
-      virtual ~OpenGLMesh();
-
-      OpenGLMesh(OpenGLMesh& other) = delete;
-      OpenGLMesh& operator=(OpenGLMesh& other) = delete;
-
-      virtual void FinishBuilding();
-
-      virtual void Draw() const;
-
-    private:
-
-      OpenGLMesh() = default;
-
-      GLuint VAO = 0;
-      GLuint VBO = 0;
-      GLuint EBO = 0;
-
-  }; // class OpenGLMesh
-
-#elif defined(_DIRECTX)
 
   class DirectXMesh : public Mesh {
     friend class Mesh;
@@ -212,7 +177,6 @@ namespace dg {
 
   }; // class DirectXMesh
 
-#endif
 
 } // namespace dg
 

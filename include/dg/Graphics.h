@@ -7,10 +7,8 @@
 #include <memory>
 #include <glm/glm.hpp>
 
-#if defined(_DIRECTX)
 #include <d3d11.h>
 #pragma comment(lib, "d3d11.lib")
-#endif
 
 namespace dg {
 
@@ -22,11 +20,7 @@ namespace dg {
 
     public:
 
-#if defined(_OPENGL)
-      typedef OpenGLGraphics graphics_class;
-#elif defined(_DIRECTX)
       typedef DirectXGraphics graphics_class;
-#endif
 
       static std::unique_ptr<graphics_class> Instance;
 
@@ -46,26 +40,7 @@ namespace dg {
 
   }; // class Graphics
 
-#if defined(_OPENGL)
-  class OpenGLGraphics : public Graphics {
-    friend class Graphics;
 
-    public:
-
-      OpenGLGraphics(const Window& window);
-      virtual ~OpenGLGraphics();
-
-      virtual void Clear(glm::vec3 color);
-
-    protected:
-
-      virtual void InitializeGraphics();
-      virtual void InitializeResources();
-
-  }; // class OpenGLGraphics
-#endif
-
-#if defined(_DIRECTX)
   class DirectXGraphics : public Graphics {
     friend class Graphics;
 
@@ -96,6 +71,5 @@ namespace dg {
       glm::vec2 contentSize;
 
   }; // class OpenGLGraphics
-#endif
 
 } // namespace dg

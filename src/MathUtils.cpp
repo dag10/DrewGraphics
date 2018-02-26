@@ -4,10 +4,8 @@
 
 #include "dg/MathUtils.h"
 
-#if defined(_DIRECTX)
 // For the DirectX Math library
 using namespace DirectX;
-#endif
 
 glm::mat4x4 dg::HmdMat2Glm(vr::HmdMatrix44_t hmdMat) {
   return glm::mat4x4(
@@ -25,7 +23,6 @@ glm::mat4x4 dg::HmdMat2Glm(vr::HmdMatrix34_t hmdMat) {
     hmdMat.m[0][3], hmdMat.m[1][3], hmdMat.m[2][3], 1);
 }
 
-#if defined(_DIRECTX)
 // Converts an XMFLOAT4X4 to a glm::mat4x4.
 // Input is row-major, output is column-major.
 glm::mat4x4 dg::FLOAT4X4toMAT4X4(XMFLOAT4X4 float4x4) {
@@ -41,5 +38,4 @@ XMFLOAT4X4 dg::MAT4X4toFLOAT4X4(glm::mat4x4 mat4x4) {
   memcpy(&ret, glm::value_ptr(transposed), sizeof(ret));
   return ret;
 }
-#endif
 

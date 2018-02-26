@@ -118,44 +118,10 @@ void dg::Material::SendMatrixNormal(glm::mat4x4 normal) {
   shader->SetMat4("_Matrix_Normal", normal);
 }
 
-#if defined(_OPENGL)
-void dg::Material::SendLight(int index, const Light::ShaderData& data) {
-  shader->SetVec3(LightProperty(index, "diffuse"), data.diffuse);
-  shader->SetInt(LightProperty(index, "type"), (int)data.type);
-  shader->SetVec3(LightProperty(index, "ambient"), data.ambient);
-  shader->SetFloat(LightProperty(index, "innerCutoff"), data.innerCutoff);
-  shader->SetVec3(LightProperty(index, "specular"), data.specular);
-  shader->SetFloat(LightProperty(index, "outerCutoff"), data.outerCutoff);
-  shader->SetVec3(LightProperty(index, "position"), data.position);
-  shader->SetFloat(LightProperty(index, "constantCoeff"), data.constantCoeff);
-  shader->SetVec3(LightProperty(index, "direction"), data.direction);
-  shader->SetFloat(LightProperty(index, "linearCoeff"), data.linearCoeff);
-  shader->SetFloat(LightProperty(index, "quadraticCoeff"), data.quadraticCoeff);
-}
-
-void dg::Material::ClearLights() {
-  for (int i = 0; i < Light::MAX_LIGHTS; i++) {
-    ClearLight(i);
-  }
-}
-
-void dg::Material::ClearLight(int index) {
-  shader->SetInt(LightProperty(index, "type"), (int)Light::LightType::NONE);
-}
-#endif
 
 void dg::Material::SendLights(
     const Light::ShaderData (&lights)[Light::MAX_LIGHTS]) {
-#if defined(_OPENGL)
-  ClearLights();
-  for (int i = 0; i < Light::MAX_LIGHTS; i++) {
-    if (lights[i].type != Light::LightType::NONE) {
-      SendLight(i, lights[i]);
-    }
-  }
-#elif defined(_DIRECTX)
   shader->SetData(Light::LIGHTS_ARRAY_NAME, lights);
-#endif
 }
 
 const std::string dg::Material::LightProperty(

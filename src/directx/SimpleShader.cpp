@@ -3,7 +3,6 @@
 //
 //  Author: Chris Cascioli
 
-#if defined(_DIRECTX)
 
 #include "dg/directx/SimpleShader.h"
 #include <algorithm>
@@ -1575,4 +1574,3 @@ int SimpleComputeShader::GetUnorderedAccessViewIndex(std::string name) {
   return result->second;
 }
 
-#endif

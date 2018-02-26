@@ -7,7 +7,6 @@
 #include <stdexcept>
 #include <string>
 #include <openvr.h>
-#include "dg/glad/glad.h"
 
 namespace dg {
 
@@ -50,12 +49,6 @@ class FileNotFoundException : public EngineError {
 class ResourceLoadException : public EngineError {
   public:
     ResourceLoadException(const std::string& str) : EngineError(str) {}
-};
-
-class FrameBufferException : public EngineError {
-  public:
-    FrameBufferException(const GLuint status) : EngineError(
-        "FrameBuffer error. Status: " + std::to_string(status)) {}
 };
 
 class STBLoadError : public EngineError {

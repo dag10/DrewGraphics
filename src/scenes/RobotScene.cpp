@@ -14,18 +14,9 @@
 #include "dg/behaviors/KeyboardCameraController.h"
 #include "dg/behaviors/KeyboardLightController.h"
 #include "dg/materials/StandardMaterial.h"
-#include "dg/materials/UVMaterial.h"
 
 std::unique_ptr<dg::RobotScene> dg::RobotScene::Make() {
-  return std::unique_ptr<dg::RobotScene>(new dg::RobotScene(false));
-}
-
-std::unique_ptr<dg::RobotScene> dg::RobotScene::MakeVR() {
-  return std::unique_ptr<dg::RobotScene>(new dg::RobotScene(true));
-}
-
-dg::RobotScene::RobotScene(bool enableVR) : Scene() {
-  this->enableVR = enableVR;
+  return std::unique_ptr<dg::RobotScene>(new dg::RobotScene());
 }
 
 void dg::RobotScene::Initialize() {
@@ -54,9 +45,7 @@ void dg::RobotScene::Initialize() {
             << std::endl;
 
   // Lock window cursor to center.
-  if (!enableVR) {
-    window->LockCursor();
-  }
+  window->LockCursor();
 
   // Create sky light.
   auto skylight = std::make_shared<DirectionalLight>(
@@ -397,11 +386,9 @@ void dg::RobotScene::Initialize() {
   mainCamera->LookAtDirection({ -0.524f, -0.324f, -0.788f });
 
   // Allow camera to be controller by the keyboard and mouse.
-  if (!enableVR) {
-    Behavior::Attach(
-        mainCamera,
-        std::make_shared<KeyboardCameraController>(window, 7.f));
-  }
+  Behavior::Attach(
+      mainCamera,
+      std::make_shared<KeyboardCameraController>(window, 7.f));
 
   // Create a flashlight attached to the camera.
   flashlight = std::make_shared<SpotLight>(

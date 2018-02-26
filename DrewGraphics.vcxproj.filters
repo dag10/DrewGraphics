@@ -25,29 +25,11 @@
     <Filter Include="Header Files\behaviors">
       <UniqueIdentifier>{f6466575-0398-4467-98a5-2bfbd1a24cf3}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\glad">
-      <UniqueIdentifier>{7f39ae93-d32d-4057-97e3-2688dda8be1c}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\KHR">
-      <UniqueIdentifier>{1fb0c7be-1c4c-454d-bd10-8243e4e3e67b}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\materials">
       <UniqueIdentifier>{5ee19998-370e-4a1a-a768-91b25cb48f40}</UniqueIdentifier>
     </Filter>
     <Filter Include="Header Files\scenes">
       <UniqueIdentifier>{adbb3a12-eed1-47d6-8658-828259c8605f}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\vr">
-      <UniqueIdentifier>{b8dc3a69-449b-4f2d-b035-d69aced06d12}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\vr">
-      <UniqueIdentifier>{7a7146b2-8404-41fd-8171-72f7711d9eef}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\opengl">
-      <UniqueIdentifier>{4be5b1fa-3209-4e11-b0ff-58ee3599c4d0}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\opengl">
-      <UniqueIdentifier>{b16af9f4-c38a-4828-86ce-e2dbd7e9041f}</UniqueIdentifier>
     </Filter>
     <Filter Include="Header Files\directx">
       <UniqueIdentifier>{12e93034-0492-4fd3-88bc-0bb783f21f0b}</UniqueIdentifier>
@@ -79,9 +61,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\FileUtils.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\glad.c">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Lights.cpp">
@@ -126,68 +105,20 @@
     <ClCompile Include="src\materials\StandardMaterial.cpp">
       <Filter>Source Files\materials</Filter>
     </ClCompile>
-    <ClCompile Include="src\scenes\PortalScene.cpp">
-      <Filter>Source Files\scenes</Filter>
-    </ClCompile>
-    <ClCompile Include="src\scenes\QuadScene.cpp">
-      <Filter>Source Files\scenes</Filter>
-    </ClCompile>
-    <ClCompile Include="src\scenes\TutorialScene.cpp">
-      <Filter>Source Files\scenes</Filter>
-    </ClCompile>
-    <ClCompile Include="src\scenes\VRScene.cpp">
-      <Filter>Source Files\scenes</Filter>
-    </ClCompile>
-    <ClCompile Include="src\materials\UVMaterial.cpp">
-      <Filter>Source Files\materials</Filter>
-    </ClCompile>
-    <ClCompile Include="src\scenes\MeshesScene.cpp">
-      <Filter>Source Files\scenes</Filter>
-    </ClCompile>
     <ClCompile Include="src\scenes\RobotScene.cpp">
       <Filter>Source Files\scenes</Filter>
-    </ClCompile>
-    <ClCompile Include="src\FrameBuffer.cpp">
-      <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\MathUtils.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\vr\VRManager.cpp">
-      <Filter>Source Files\vr</Filter>
-    </ClCompile>
-    <ClCompile Include="src\vr\VRTrackedObject.cpp">
-      <Filter>Source Files\vr</Filter>
-    </ClCompile>
     <ClCompile Include="src\behaviors\KeyboardLightController.cpp">
       <Filter>Source Files\behaviors</Filter>
-    </ClCompile>
-    <ClCompile Include="src\materials\ScreenQuadMaterial.cpp">
-      <Filter>Source Files\materials</Filter>
-    </ClCompile>
-    <ClCompile Include="src\CanvasScene.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\scenes\CanvasTestScene.cpp">
-      <Filter>Source Files\scenes</Filter>
     </ClCompile>
     <ClCompile Include="src\Canvas.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\scenes\TexturesScene.cpp">
-      <Filter>Source Files\scenes</Filter>
-    </ClCompile>
-    <ClCompile Include="src\scenes\DeepCloningScene.cpp">
-      <Filter>Source Files\scenes</Filter>
-    </ClCompile>
     <ClCompile Include="src\Graphics.cpp">
       <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\scenes\SimpleScene.cpp">
-      <Filter>Source Files\scenes</Filter>
-    </ClCompile>
-    <ClCompile Include="src\opengl\ShaderSource.cpp">
-      <Filter>Source Files\opengl</Filter>
     </ClCompile>
     <ClCompile Include="src\directx\SimpleShader.cpp">
       <Filter>Source Files\directx</Filter>
@@ -251,80 +182,26 @@
     <ClInclude Include="include\dg\behaviors\KeyboardCameraController.h">
       <Filter>Header Files\behaviors</Filter>
     </ClInclude>
-    <ClInclude Include="include\dg\glad\glad.h">
-      <Filter>Header Files\glad</Filter>
-    </ClInclude>
-    <ClInclude Include="include\dg\KHR\khrplatform.h">
-      <Filter>Header Files\KHR</Filter>
-    </ClInclude>
     <ClInclude Include="include\dg\materials\StandardMaterial.h">
       <Filter>Header Files\materials</Filter>
-    </ClInclude>
-    <ClInclude Include="include\dg\scenes\PortalScene.h">
-      <Filter>Header Files\scenes</Filter>
-    </ClInclude>
-    <ClInclude Include="include\dg\scenes\QuadScene.h">
-      <Filter>Header Files\scenes</Filter>
-    </ClInclude>
-    <ClInclude Include="include\dg\scenes\TutorialScene.h">
-      <Filter>Header Files\scenes</Filter>
-    </ClInclude>
-    <ClInclude Include="include\dg\scenes\VRScene.h">
-      <Filter>Header Files\scenes</Filter>
-    </ClInclude>
-    <ClInclude Include="include\dg\materials\UVMaterial.h">
-      <Filter>Header Files\materials</Filter>
-    </ClInclude>
-    <ClInclude Include="include\dg\scenes\MeshesScene.h">
-      <Filter>Header Files\scenes</Filter>
     </ClInclude>
     <ClInclude Include="include\dg\scenes\RobotScene.h">
       <Filter>Header Files\scenes</Filter>
     </ClInclude>
-    <ClInclude Include="include\dg\FrameBuffer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\dg\MathUtils.h">
       <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\dg\vr\VRManager.h">
-      <Filter>Header Files\vr</Filter>
-    </ClInclude>
-    <ClInclude Include="include\dg\vr\VRTrackedObject.h">
-      <Filter>Header Files\vr</Filter>
     </ClInclude>
     <ClInclude Include="include\dg\behaviors\KeyboardLightController.h">
       <Filter>Header Files\behaviors</Filter>
     </ClInclude>
-    <ClInclude Include="include\dg\materials\ScreenQuadMaterial.h">
-      <Filter>Header Files\materials</Filter>
-    </ClInclude>
-    <ClInclude Include="include\dg\CanvasScene.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\dg\scenes\CanvasTestScene.h">
-      <Filter>Header Files\scenes</Filter>
-    </ClInclude>
     <ClInclude Include="include\dg\Canvas.h">
       <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\dg\scenes\TexturesScene.h">
-      <Filter>Header Files\scenes</Filter>
     </ClInclude>
     <ClInclude Include="include\dg\InputCodes.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\dg\scenes\DeepCloningScene.h">
-      <Filter>Header Files\scenes</Filter>
-    </ClInclude>
     <ClInclude Include="include\dg\Graphics.h">
       <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\dg\scenes\SimpleScene.h">
-      <Filter>Header Files\scenes</Filter>
-    </ClInclude>
-    <ClInclude Include="include\dg\opengl\ShaderSource.h">
-      <Filter>Header Files\opengl</Filter>
     </ClInclude>
     <ClInclude Include="include\dg\directx\SimpleShader.h">
       <Filter>Header Files\directx</Filter>

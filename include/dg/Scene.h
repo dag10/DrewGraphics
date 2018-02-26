@@ -6,7 +6,6 @@
 
 #include "dg/Lights.h"
 #include "dg/SceneObject.h"
-#include <openvr.h>
 #include <forward_list>
 #include <memory>
 
@@ -40,26 +39,17 @@ namespace dg {
     protected:
 
       // Pipeline functions for overriding in special cases.
-      virtual void RenderFrame(vr::EVREye eye);
-      virtual void DrawScene(
-          const Camera& camera, bool renderForVR = false,
-          vr::EVREye eye = vr::EVREye::Eye_Left);
+      virtual void DrawScene(const Camera& camera);
       virtual void PrepareModelForDraw(
           const Model& model, glm::vec3 cameraPosition, glm::mat4x4 view,
           glm::mat4x4 projection,
           const Light::ShaderData (&lights)[Light::MAX_LIGHTS]) const;
       virtual void ClearBuffer();
-      virtual void DrawHiddenAreaMesh(vr::EVREye eye) = 0;
       virtual void ConfigureBuffer() = 0;
 
       std::shared_ptr<Camera> mainCamera;
       std::shared_ptr<Window> window = nullptr;
       std::shared_ptr<Skybox> skybox = nullptr;
-
-      // Virtual reality
-      bool enableVR = false;
-      std::shared_ptr<SceneObject> vrContainer;
-      std::shared_ptr<ScreenQuadMaterial> hiddenAreaMeshMaterial = nullptr;
 
   }; // class BaseScene
 
@@ -68,7 +58,6 @@ namespace dg {
 
     protected:
 
-     virtual void DrawHiddenAreaMesh(vr::EVREye eye);
      virtual void ConfigureBuffer();
 
   }; // class DirectXScene

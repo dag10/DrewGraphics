@@ -39,11 +39,6 @@ void dg::Skybox::Draw(const Camera& camera, const Window& window) {
   Draw(camera, projection);
 }
 
-void dg::Skybox::Draw(const Camera& camera, vr::EVREye eye) {
-  glm::mat4x4 projection = camera.GetProjectionMatrix(eye);
-  Draw(camera, projection);
-}
-
 void dg::Skybox::Draw(const Camera& camera, glm::mat4x4 projection) {
   glm::mat4x4 model = Transform::TS(
     camera.transform.translation, glm::vec3(5)).ToMat4();

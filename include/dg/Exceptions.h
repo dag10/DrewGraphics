@@ -6,19 +6,12 @@
 
 #include <stdexcept>
 #include <string>
-#include <openvr.h>
 
 namespace dg {
 
 class EngineError : public std::runtime_error {
   public:
     EngineError(const std::string& msg) : std::runtime_error(msg) {}
-};
-
-class OpenVRError : public EngineError {
-  public:
-    OpenVRError(vr::EVRInitError error) : EngineError(
-      VR_GetVRInitErrorAsSymbol(error)) { };
 };
 
 class ShaderCompileError : public EngineError {

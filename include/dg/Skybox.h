@@ -3,7 +3,6 @@
 //
 #pragma once
 
-#include <openvr.h>
 #include <memory>
 #include "dg/Camera.h"
 #include "dg/Texture.h"
@@ -28,7 +27,6 @@ namespace dg {
       friend void swap(Skybox& first, Skybox& second); // nothrow
 
       void Draw(const Camera& camera, const Window& window);
-      void Draw(const Camera& camera, vr::EVREye eye);
 
     private:
 

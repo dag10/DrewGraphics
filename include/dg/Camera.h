@@ -7,7 +7,6 @@
 
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
-#include <openvr.h>
 
 namespace dg {
 
@@ -21,9 +20,7 @@ namespace dg {
       Camera();
 
       glm::mat4x4 GetViewMatrix() const;
-      glm::mat4x4 GetViewMatrix(vr::EVREye eye) const;
       glm::mat4x4 GetProjectionMatrix(float aspectRatio) const;
-      glm::mat4x4 GetProjectionMatrix(vr::EVREye eye) const;
 
   }; // class Camera
 

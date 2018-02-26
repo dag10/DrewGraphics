@@ -104,7 +104,7 @@ dg::DirectXTexture::~DirectXTexture() {
 void dg::DirectXTexture::UpdateData(const void *pixels, bool genMipMap) {
   size_t rowPitch = (options.width * options.GetDirectXBitsPerPixel() + 7) / 8;
   Graphics::Instance->context->UpdateSubresource(texture, 0, NULL, pixels,
-                                                 rowPitch, 0);
+                                                 (UINT)rowPitch, 0);
   if (options.mipmap && genMipMap) {
     Graphics::Instance->context->GenerateMips(srv);
   }

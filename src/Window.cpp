@@ -8,6 +8,7 @@
 #include <iostream>
 #include <string>
 
+#include <Windows.h>
 #include <WindowsX.h>
 
 #pragma region Base Window
@@ -169,7 +170,6 @@ std::shared_ptr<dg::Window> dg::Win32Window::Open(
   return window;
 }
 
-#include <iostream>
 void dg::Win32Window::Open(int width, int height) {
 
   WNDCLASS wndClass = {};

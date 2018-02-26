@@ -43,12 +43,6 @@
     <Filter Include="Shaders\DirectX">
       <UniqueIdentifier>{fac89a88-1b96-4403-9721-81fd3f6a28d9}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Shaders\OpenGL">
-      <UniqueIdentifier>{926e2b8b-3a3e-4cc3-8a63-53eb7d7f635f}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Shaders\OpenGL\Includes">
-      <UniqueIdentifier>{4d2cf6e3-d0aa-449e-9d21-9870b0f0516c}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Behavior.cpp">
@@ -219,48 +213,6 @@
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="assets\shaders\depthreset.f.glsl">
-      <Filter>Shaders\OpenGL</Filter>
-    </None>
-    <None Include="assets\shaders\depthreset.v.glsl">
-      <Filter>Shaders\OpenGL</Filter>
-    </None>
-    <None Include="assets\shaders\screenquad.f.glsl">
-      <Filter>Shaders\OpenGL</Filter>
-    </None>
-    <None Include="assets\shaders\screenquad.v.glsl">
-      <Filter>Shaders\OpenGL</Filter>
-    </None>
-    <None Include="assets\shaders\solidcolor.f.glsl">
-      <Filter>Shaders\OpenGL</Filter>
-    </None>
-    <None Include="assets\shaders\solidcolor.v.glsl">
-      <Filter>Shaders\OpenGL</Filter>
-    </None>
-    <None Include="assets\shaders\standard.f.glsl">
-      <Filter>Shaders\OpenGL</Filter>
-    </None>
-    <None Include="assets\shaders\standard.v.glsl">
-      <Filter>Shaders\OpenGL</Filter>
-    </None>
-    <None Include="assets\shaders\uv.f.glsl">
-      <Filter>Shaders\OpenGL</Filter>
-    </None>
-    <None Include="assets\shaders\uv.v.glsl">
-      <Filter>Shaders\OpenGL</Filter>
-    </None>
-    <None Include="assets\shaders\includes\fragment_head.glsl">
-      <Filter>Shaders\OpenGL\Includes</Filter>
-    </None>
-    <None Include="assets\shaders\includes\fragment_main.glsl">
-      <Filter>Shaders\OpenGL\Includes</Filter>
-    </None>
-    <None Include="assets\shaders\includes\vertex_head.glsl">
-      <Filter>Shaders\OpenGL\Includes</Filter>
-    </None>
-    <None Include="assets\shaders\includes\vertex_main.glsl">
-      <Filter>Shaders\OpenGL\Includes</Filter>
-    </None>
     <None Include="packages.config" />
   </ItemGroup>
 </Project>

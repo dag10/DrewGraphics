@@ -67,7 +67,7 @@ float3 calculateLight(Light light, VertexToPixel input, float3 normal,
 
   // Diffuse
   float3 norm = normalize(normal);
-  float3 lightDir;
+  float3 lightDir = float3(0, -1, 0);
   if (light.type == LIGHT_TYPE_POINT || light.type == LIGHT_TYPE_SPOT) {
     lightDir = normalize(light.position - input.scenePos.xyz);
   } else if (light.type == LIGHT_TYPE_DIRECTIONAL) {
@@ -130,8 +130,9 @@ float4 main(VertexToPixel input) : SV_TARGET {
     // Transform normal from tangent space (which is what the normal map is)
     // to world space by left-multiplying the world-space basis vectors of
     // this fragment's tangent space.
-    normal = normalize(
-        mul(normal, float3x4(input.tangent, input.bitangent, input.normal)));
+    normal =
+        normalize(mul(normal, float3x3(input.tangent.xyz, input.bitangent.xyz,
+                                       input.normal.xyz)));
   }
 
   float3 cumulative = float3(0, 0, 0);

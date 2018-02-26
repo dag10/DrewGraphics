@@ -58,10 +58,6 @@ struct VertexToPixel {
 
 float3 calculateLight(Light light, VertexToPixel input, float3 normal,
                       float3 diffuse, float3 specular) {
-  if (light.type == LIGHT_TYPE_NULL) {
-    return float3(0, 0, 0);
-  }
-
   // Ambient
   float3 ambientComponent = light.ambient * diffuse;
 
@@ -137,7 +133,10 @@ float4 main(VertexToPixel input) : SV_TARGET {
 
   float3 cumulative = float3(0, 0, 0);
   for (int i = 0; i < MAX_LIGHTS; i++) {
-    cumulative += calculateLight(lights[i], input, normal, diffuseColor, specularColor);
+    if (lights[i].type != LIGHT_TYPE_NULL) {
+      cumulative +=
+          calculateLight(lights[i], input, normal, diffuseColor, specularColor);
+    }
   }
 
   return float4(cumulative, 1.0);

@@ -9,6 +9,8 @@
 
 namespace dg {
 
+  class SpotLight;
+
   class RobotScene : public Scene {
 
     public:
@@ -26,6 +28,7 @@ namespace dg {
       virtual void ClearBuffer();
 
       std::shared_ptr<SceneObject> lightContainer;
+      std::shared_ptr<SpotLight> flashlight;
 
       // Robot joints.
       std::shared_ptr<SceneObject> robot;
@@ -39,9 +42,6 @@ namespace dg {
       // Robot state.
       float nextBlink = -1;
       float endOfBlink = -1;
-
-      // Control state.
-      bool freeFly = false;
 
   }; // class RobotScene
 

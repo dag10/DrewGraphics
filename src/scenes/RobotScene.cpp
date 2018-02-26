@@ -4,15 +4,17 @@
 
 #include "dg/scenes/RobotScene.h"
 
+#include <glm/glm.hpp>
+#include <iostream>
 #include "dg/EngineTime.h"
 #include "dg/Graphics.h"
 #include "dg/Lights.h"
 #include "dg/Mesh.h"
 #include "dg/Model.h"
 #include "dg/behaviors/KeyboardCameraController.h"
+#include "dg/behaviors/KeyboardLightController.h"
 #include "dg/materials/StandardMaterial.h"
 #include "dg/materials/UVMaterial.h"
-#include <glm/glm.hpp>
 
 std::unique_ptr<dg::RobotScene> dg::RobotScene::Make() {
   return std::unique_ptr<dg::RobotScene>(new dg::RobotScene(false));
@@ -29,6 +31,28 @@ dg::RobotScene::RobotScene(bool enableVR) : Scene() {
 void dg::RobotScene::Initialize() {
   Scene::Initialize();
 
+  std::cout << "This scene is a demo of lighting, textures, specularity maps, "
+            << "and normal maps." << std::endl
+            << std::endl
+            << "Light controls:" << std::endl
+            << "  F:       Toggle flashlight" << std::endl
+            << std::endl
+            << "Camera controls:" << std::endl
+            << "  Mouse:   Look around" << std::endl
+            << "  W:       Move forward" << std::endl
+            << "  A:       Move left" << std::endl
+            << "  S:       Move backward" << std::endl
+            << "  D:       Move right" << std::endl
+            << "  Shift:   Increase movement speed" << std::endl
+            << "  Control: Decrease movement speed" << std::endl
+            << "  R:       Reset camera to initial pose" << std::endl
+            << "  C:       Print current camera pose" << std::endl
+            << std::endl
+            << "Press ESC or Q to release the cursor, and press "
+               "again to quit."
+            << std::endl
+            << std::endl;
+
   // Lock window cursor to center.
   if (!enableVR) {
     window->LockCursor();
@@ -37,7 +61,7 @@ void dg::RobotScene::Initialize() {
   // Create sky light.
   auto skylight = std::make_shared<DirectionalLight>(
     glm::vec3(1.0f, 0.93f, 0.86f),
-    0.14f, 0.35f, 0.17f);
+    0.017f, 0.086f, 0.17f);
   skylight->LookAtDirection({ -0.3f, -1.f, -0.2f });
   AddChild(skylight);
 
@@ -61,7 +85,9 @@ void dg::RobotScene::Initialize() {
   float eyeSeparation = 0.1f;
 
   // Robot container.
-  robot = std::make_shared<SceneObject>();
+  robot = std::make_shared<SceneObject>(
+      Transform::TR({0, legLength + (torsoHeight * 0.5f), 0},
+                    glm::quat(glm::radians(glm::vec3(0, 45, 0)))));
   AddChild(robot);
 
   // Create light container.
@@ -75,34 +101,43 @@ void dg::RobotScene::Initialize() {
   // Create point light.
   auto pointLight = std::make_shared<PointLight>(
     glm::vec3(1.f, 0.23f, 0.36f), 0.227f, 1.33f, 2.063f);
-  pointLight->transform.translation = { 0, 1.0f, -2 };
+  pointLight->transform.translation = { 0, 0.2f, -2 };
   lightContainer->AddChild(pointLight, false);
 
   // Add point light sphere.
-  lightModelMaterial.SetDiffuse(pointLight->GetDiffuse());
-  pointLight->AddChild(std::make_shared<Model>(
-    Mesh::Sphere,
-    std::make_shared<StandardMaterial>(lightModelMaterial),
-    Transform::S({ 0.2f, 0.2f, 0.2f })), false);
+  pointLight->AddChild(
+      std::make_shared<Model>(
+          Mesh::Sphere,
+          std::make_shared<StandardMaterial>(
+              StandardMaterial::WithColor(pointLight->GetSpecular())),
+          Transform::S({0.2f, 0.2f, 0.2f})),
+      false);
 
-  // Create spot light.
-  auto spotLight = std::make_shared<SpotLight>(
-    glm::vec3(0.4f, 0.63f, 0.86f), 0.186f, 1.344f, 2.21f);
-  spotLight->SetFeather(glm::radians(3.f));
-  spotLight->transform = Transform::TR(
-      { 0, 2, 2 },
-      glm::quat(glm::radians(glm::vec3(-50, 0, 0))));
-  lightContainer->AddChild(spotLight, false);
+  // Create wooden cube material.
+  auto cubeMaterial =
+      std::make_shared<StandardMaterial>(StandardMaterial::WithTexture(
+          Texture::FromPath("assets/textures/container2.png")));
+  cubeMaterial->SetSpecular(
+      Texture::FromPath("assets/textures/container2_specular.png"));
+  cubeMaterial->SetShininess(64);
 
-  // Add spot light cone.
-  lightModelMaterial.SetDiffuse(spotLight->GetDiffuse());
-  spotLight->AddChild(std::make_shared<Model>(
-    Mesh::LoadOBJ("assets/models/cone.obj"),
-    std::make_shared<StandardMaterial>(lightModelMaterial),
-    Transform::RS(
-      glm::quat(glm::radians(glm::vec3(90, 0, 0))),
-      { 0.2f, 0.2f, 0.2f }
-  )), false);
+  // Create wooden cubes.
+  float cubeSize = 0.9f;
+  AddChild(std::make_shared<Model>(
+      Mesh::Cube, cubeMaterial,
+      Transform::TRS({-2.0, cubeSize * 0.5f, 2.1},
+                     glm::quat(glm::radians(glm::vec3(0, 40, 0))),
+                     glm::vec3(cubeSize))));
+  AddChild(std::make_shared<Model>(
+      Mesh::Cube, cubeMaterial,
+      Transform::TRS({-2.2, cubeSize * 1.5f, 2.2},
+                     glm::quat(glm::radians(glm::vec3(0, 10, 0))),
+                     glm::vec3(cubeSize))));
+  AddChild(std::make_shared<Model>(
+      Mesh::Cube, cubeMaterial,
+      Transform::TRS({2.1, cubeSize * 0.5f, -1.8},
+                     glm::quat(glm::radians(glm::vec3(0, -34, 0))),
+                     glm::vec3(cubeSize))));
 
   // Robot materials.
   std::shared_ptr<StandardMaterial> robotMaterial =
@@ -130,43 +165,60 @@ void dg::RobotScene::Initialize() {
   auto armMaterial = std::make_shared<StandardMaterial>(*robotMaterial);
   armMaterial->SetDiffuse({ 0.15f, 0.35f, 0.2f });
 
+  // Room wall and floor container.
+  auto roomSides = std::make_shared<SceneObject>(Transform::T({ -3, 0, -3 }));
+  AddChild(roomSides);
+
   // Floor material.
-  StandardMaterial floorMaterial = StandardMaterial::WithColor(
-    glm::vec3(0.4f, 0.6f, 0.75f));
+  const int floorSize = 500;
+  StandardMaterial floorMaterial =
+      StandardMaterial::WithTexture(Texture::FromPath(
+          "assets/textures/Flooring_Stone_001/Flooring_Stone_001_COLOR.png"));
+  floorMaterial.SetNormalMap(Texture::FromPath(
+      "assets/textures/Flooring_Stone_001/Flooring_Stone_001_NRM.png"));
+  floorMaterial.SetSpecular(Texture::FromPath(
+      "assets/textures/Flooring_Stone_001/Flooring_Stone_001_SPEC.png"));
+  floorMaterial.SetShininess(9);
+  floorMaterial.SetUVScale(glm::vec2((float)floorSize));
+  floorMaterial.SetLit(true);
 
   // Add floor quad.
-  const float floorSize = 2000;
-  AddChild(std::make_shared<Model>(
+  roomSides->AddChild(std::make_shared<Model>(
     Mesh::Quad,
     std::make_shared<StandardMaterial>(floorMaterial),
     Transform::TRS(
-      { 0, -legLength - (torsoHeight * 0.5f), 0 },
+      { floorSize / 2, 0, floorSize / 2 },
       glm::quat(glm::radians(glm::vec3(-90, 0, 0))),
-      { floorSize, floorSize, floorSize }
-  )));
+      { floorSize, floorSize, 1 }
+  )), false);
 
-  // OBJ model material.
-  auto objMaterial = std::make_shared<StandardMaterial>(
-    StandardMaterial::WithColor(glm::vec3(0.3f)));
-  objMaterial->SetSpecular(glm::vec3(0.9f));
+  // Wall material.
+  glm::vec2 wallSize(floorSize, 6);
+  StandardMaterial wallMaterial = StandardMaterial::WithTexture(
+      Texture::FromPath("assets/textures/brickwall.jpg"));
+  wallMaterial.SetNormalMap(
+      Texture::FromPath("assets/textures/brickwall_normal.jpg"));
+  wallMaterial.SetSpecular(0.2f);
+  wallMaterial.SetUVScale(wallSize / 2.f);
+  wallMaterial.SetShininess(64);
 
-  // Load torus.
-  AddChild(std::make_shared<Model>(
-    Mesh::LoadOBJ("assets/models/torus.obj"),
-    objMaterial,
-    Transform::TS(
-      { -1.5f, 0, 0 },
-      { 0.8f, 0.8f, 0.8f }
-  )));
-
-  // Load helix.
-  AddChild(std::make_shared<Model>(
-    Mesh::LoadOBJ("assets/models/helix.obj"),
-    objMaterial,
-    Transform::TS(
-      { 1.2f, 0, 0 },
-      { 0.5f, 0.5f, 0.5f }
-  )));
+  // Create walls.
+  roomSides->AddChild(std::make_shared<Model>(
+    Mesh::Quad,
+    std::make_shared<StandardMaterial>(wallMaterial),
+    Transform::TRS(
+      { wallSize.x / 2, wallSize.y / 2, 0 },
+      glm::quat(glm::radians(glm::vec3(0, 0, 0))),
+      { wallSize.x, wallSize.y, 1 }
+  )), false);
+  roomSides->AddChild(std::make_shared<Model>(
+    Mesh::Quad,
+    std::make_shared<StandardMaterial>(wallMaterial),
+    Transform::TRS(
+      { 0, wallSize.y / 2, wallSize.x / 2 },
+      glm::quat(glm::radians(glm::vec3(0, 90, 0))),
+      { wallSize.x, wallSize.y, 1 }
+  )), false);
 
   // Torso
   auto torso = std::make_shared<Model>(
@@ -340,26 +392,40 @@ void dg::RobotScene::Initialize() {
       { eyeSize, eyeSize, faceFeatureDepth }
   )), false);
 
+  // Initial camera position.
+  mainCamera->transform = Transform::T({ 2.f, 2.36f, 3.64f });
+  mainCamera->LookAtDirection({ -0.524f, -0.324f, -0.788f });
 
   // Allow camera to be controller by the keyboard and mouse.
   if (!enableVR) {
     Behavior::Attach(
         mainCamera,
-        std::make_shared<KeyboardCameraController>(window));
+        std::make_shared<KeyboardCameraController>(window, 7.f));
   }
+
+  // Create a flashlight attached to the camera.
+  flashlight = std::make_shared<SpotLight>(
+    glm::vec3(0.4f, 0.63f, 0.86f), 0.244f, 2.76f, 3.11f);
+  flashlight->SetCutoff(glm::radians(25.f));
+  flashlight->SetFeather(glm::radians(2.f));
+  flashlight->SetCutoff(glm::radians(25.f));
+  flashlight->transform = Transform::T(glm::vec3(0.1f, -0.1f, 0));
+  Behavior::Attach(
+    flashlight, std::make_shared<KeyboardLightController>(window));
+  mainCamera->AddChild(flashlight, false);
 }
 
 void dg::RobotScene::Update() {
   Scene::Update();
 
+  // If F is tapped, toggle flashlight.
+  if (window->IsKeyJustPressed(Key::F)) {
+    flashlight->enabled = !flashlight->enabled;
+  }
+
 	// Make lights orbit scene.
   lightContainer->transform.rotation =
     glm::quat(glm::radians(glm::vec3(0, Time::Elapsed * 50, 0)));
-
-  // If space is tapped, toggle between free-fly mode and wobble mode.
-  if (window->IsKeyJustPressed(Key::SPACE)) {
-    freeFly = !freeFly;
-  }
 
   // Blink at random intervals.
   if (Time::Elapsed >= nextBlink && Time::Elapsed < endOfBlink) {
@@ -390,20 +456,11 @@ void dg::RobotScene::Update() {
   rightElbow->transform.rotation =
     glm::quat(glm::radians(glm::vec3(0, 0, -24 + rightArmMovement * -6)));
 
-  // Slow wobble of camera.
-  float cameraMovement = (float)sin(Time::Elapsed * 0.7f + 0.7f);
-  if (!freeFly && !enableVR) {
-    mainCamera->transform =
-      Transform::R(glm::quat(glm::radians(
-              glm::vec3(0, cameraMovement * 20, 0)))) *
-      Transform::T({ 0, 2.5, 4 });
-    mainCamera->LookAt(*robot);
-  }
-
-  // Slow head wobble. Head also partially follows camera.
+  // Slow head wobble.
+  float sideMovement = (float)sin(Time::Elapsed * 0.7f + 0.7f);
   float headMovement = (float)cos(Time::Elapsed * 2);
   neck->transform.rotation =
-    glm::quat(glm::radians(glm::vec3(-11, cameraMovement * 10, headMovement * 3)));
+    glm::quat(glm::radians(glm::vec3(-11, sideMovement * 10, headMovement * 3)));
 }
 
 void dg::RobotScene::ClearBuffer() {

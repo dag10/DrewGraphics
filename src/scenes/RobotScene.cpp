@@ -58,6 +58,11 @@ void dg::RobotScene::Initialize() {
     window->LockCursor();
   }
 
+  // Adjust VR scale.
+  if (enableVR) {
+    vrContainer->transform.scale *= 2.f;
+  }
+
   // Create sky light.
   auto skylight = std::make_shared<DirectionalLight>(
     glm::vec3(1.0f, 0.93f, 0.86f),

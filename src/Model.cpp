@@ -21,11 +21,18 @@ dg::Model::Model(Model& other) : SceneObject(other) {
 void dg::Model::Draw(glm::mat4x4 view, glm::mat4x4 projection) const {
   glm::mat4x4 xfMat = SceneSpace().ToMat4();
 
+#if defined(_OPENGL)
+  material->Use();
+#endif
+
   material->SendMatrixNormal(glm::transpose(glm::inverse(xfMat)));
   material->SendMatrixM(xfMat);
   material->SendMatrixMVP(projection * view * xfMat);
 
+#if defined(_DIRECTX)
   material->Use();
+#endif
+
   mesh->Draw();
 }
 

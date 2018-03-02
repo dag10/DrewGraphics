@@ -11,7 +11,8 @@
 
 namespace dg {
 
-  glm::mat4x4 OVR2GLM(vr::HmdMatrix44_t hmdMat);
-  glm::mat4x4 OVR2GLM(vr::HmdMatrix34_t hmdMat);
+  glm::mat4x4 OVR2GLM(vr::HmdMatrix44_t mat);
+  glm::mat4x4 OVR2GLM(vr::HmdMatrix34_t mat);
+  glm::vec3 OVR2GLM(vr::HmdVector3_t vec);
 
 }  // namespace dg

@@ -211,6 +211,7 @@ std::shared_ptr<dg::Mesh> dg::VRManager::GetRenderModelMesh(
     return pair->second->mesh;
   }
 
+  // Synchronously load render model data from OpenVR.
   vr::RenderModel_t *vrModel;
   vr::EVRRenderModelError err = vr::VRRenderModelError_Loading;
   do {
@@ -219,6 +220,8 @@ std::shared_ptr<dg::Mesh> dg::VRManager::GetRenderModelMesh(
   if (err != vr::VRRenderModelError_None) {
     return nullptr;
   }
+
+  // Create single mesh component.
   auto mesh = Mesh::Create();
   for (unsigned int i = 0; i < vrModel->unTriangleCount; i++) {
     glm::vec3 positions[3];
@@ -226,15 +229,10 @@ std::shared_ptr<dg::Mesh> dg::VRManager::GetRenderModelMesh(
     glm::vec2 texCoords[3];
 
     for (int j = 0; j < 3; j++) {
-      auto position =
-          vrModel->rVertexData[vrModel->rIndexData[i * 3 + j]].vPosition.v;
-      auto normal =
-          vrModel->rVertexData[vrModel->rIndexData[i * 3 + j]].vNormal.v;
-      auto texCoord =
-          vrModel->rVertexData[vrModel->rIndexData[i * 3 + j]].rfTextureCoord;
-      positions[j] = { position[0], position[1], position[2] };
-      normals[j] = { normal[0], normal[1], normal[2] };
-      texCoords[j] = { texCoord[0], texCoord[1] };
+      auto vert = vrModel->rVertexData[vrModel->rIndexData[i * 3 + j]];
+      positions[j] = OVR2GLM(vert.vPosition);
+      normals[j] = OVR2GLM(vert.vNormal);
+      texCoords[j] = { vert.rfTextureCoord[0], vert.rfTextureCoord[1] };
     }
 
     mesh->AddTriangle(

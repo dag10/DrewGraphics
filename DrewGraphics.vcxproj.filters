@@ -150,9 +150,6 @@
     <ClCompile Include="src\FrameBuffer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\MathUtils.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\vr\VRManager.cpp">
       <Filter>Source Files\vr</Filter>
     </ClCompile>
@@ -196,6 +193,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\vr\VRRenderModel.cpp">
+      <Filter>Source Files\vr</Filter>
+    </ClCompile>
+    <ClCompile Include="src\directx\DXUtils.cpp">
+      <Filter>Source Files\directx</Filter>
+    </ClCompile>
+    <ClCompile Include="src\vr\VRUtils.cpp">
       <Filter>Source Files\vr</Filter>
     </ClCompile>
   </ItemGroup>
@@ -287,9 +290,6 @@
     <ClInclude Include="include\dg\FrameBuffer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\dg\MathUtils.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\dg\vr\VRManager.h">
       <Filter>Header Files\vr</Filter>
     </ClInclude>
@@ -337,6 +337,12 @@
     </ClInclude>
     <ClInclude Include="include\dg\vr\VRRenderModel.h">
       <Filter>Header Files\vr</Filter>
+    </ClInclude>
+    <ClInclude Include="include\dg\vr\VRUtils.h">
+      <Filter>Header Files\vr</Filter>
+    </ClInclude>
+    <ClInclude Include="include\dg\directx\DXUtils.h">
+      <Filter>Header Files\directx</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

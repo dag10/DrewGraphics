@@ -165,10 +165,11 @@ void dg::BaseScene::DrawScene(
   }
 
   // Render models.
-  Transform camera_SS = camera.SceneSpace();
+  glm::vec4 cameraPos_h = glm::inverse(view) * glm::vec4(0, 0, 0, 1);
+  glm::vec3 cameraPos = glm::vec3(cameraPos_h) / cameraPos_h.w;
   for (auto model = models.begin(); model != models.end(); model++) {
     PrepareModelForDraw(
-        **model, camera_SS.translation, view, projection, lightArray);
+        **model, cameraPos, view, projection, lightArray);
     (*model)->Draw(view, projection);
   }
 }

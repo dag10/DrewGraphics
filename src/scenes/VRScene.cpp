@@ -233,8 +233,10 @@ void dg::VRScene::Initialize() {
   vrContainer->AddChild(rightController);
 
   // Create controller block material.
-  StandardMaterial controllerMaterial =
-      StandardMaterial::WithColor(glm::vec3(0.1f));
+  //StandardMaterial controllerMaterial =
+  //    StandardMaterial::WithColor(glm::vec3(0.1f));
+  StandardMaterial controllerMaterial = StandardMaterial::WithTexture(
+      VRManager::Instance->GetRenderModelTexture("vr_controller_vive_1_5"));
   controllerMaterial.SetSpecular(0.3f);
 
   // Create blocks to represent left and right controllers.

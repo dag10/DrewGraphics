@@ -6,9 +6,10 @@
 
 #include <glm/gtc/matrix_transform.hpp>
 #define GLM_ENABLE_EXPERIMENTAL
-#include <glm/gtx/quaternion.hpp>
 #include <glm/gtc/constants.hpp>
-#include "dg/MathUtils.h"
+#include <glm/gtx/quaternion.hpp>
+#include "dg/directx/DXUtils.h"
+#include "dg/vr/VRUtils.h"
 
 #if defined(_DIRECTX)
 #include <DirectXMath.h>
@@ -25,7 +26,7 @@ glm::mat4x4 dg::Camera::GetViewMatrix() const {
 }
 
 glm::mat4x4 dg::Camera::GetViewMatrix(vr::EVREye eye) const {
-  glm::mat4x4 head2eye = HmdMat2Glm(
+  glm::mat4x4 head2eye = OVR2GLM(
     vr::VRSystem()->GetEyeToHeadTransform(eye));
   return glm::inverse(head2eye) * GetViewMatrix();
 }
@@ -42,7 +43,7 @@ glm::mat4x4 dg::Camera::GetProjectionMatrix(float aspectRatio) const {
 }
 
 glm::mat4x4 dg::Camera::GetProjectionMatrix(vr::EVREye eye) const {
-  return HmdMat2Glm(
+  return OVR2GLM(
     vr::VRSystem()->GetProjectionMatrix(eye, nearClip, farClip));
 }
 

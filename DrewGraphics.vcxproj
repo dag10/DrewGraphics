@@ -433,6 +433,7 @@ del /s $(OutDir)*.obj, $(OutDir)*.pdb, $(OutDir)*.ipdb, $(OutDir)*.iobj</Command
     <ClCompile Include="src\Camera.cpp" />
     <ClCompile Include="src\Canvas.cpp" />
     <ClCompile Include="src\CanvasScene.cpp" />
+    <ClCompile Include="src\directx\DXUtils.cpp" />
     <ClCompile Include="src\directx\SimpleShader.cpp" />
     <ClCompile Include="src\EngineTime.cpp" />
     <ClCompile Include="src\FileUtils.cpp" />
@@ -445,7 +446,6 @@ del /s $(OutDir)*.obj, $(OutDir)*.pdb, $(OutDir)*.ipdb, $(OutDir)*.iobj</Command
     <ClCompile Include="src\materials\ScreenQuadMaterial.cpp" />
     <ClCompile Include="src\materials\StandardMaterial.cpp" />
     <ClCompile Include="src\materials\UVMaterial.cpp" />
-    <ClCompile Include="src\MathUtils.cpp" />
     <ClCompile Include="src\Mesh.cpp" />
     <ClCompile Include="src\Model.cpp" />
     <ClCompile Include="src\opengl\ShaderSource.cpp" />
@@ -470,6 +470,7 @@ del /s $(OutDir)*.obj, $(OutDir)*.pdb, $(OutDir)*.ipdb, $(OutDir)*.iobj</Command
     <ClCompile Include="src\vr\VRManager.cpp" />
     <ClCompile Include="src\vr\VRRenderModel.cpp" />
     <ClCompile Include="src\vr\VRTrackedObject.cpp" />
+    <ClCompile Include="src\vr\VRUtils.cpp" />
     <ClCompile Include="src\Window.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -479,6 +480,7 @@ del /s $(OutDir)*.obj, $(OutDir)*.pdb, $(OutDir)*.ipdb, $(OutDir)*.iobj</Command
     <ClInclude Include="include\dg\Camera.h" />
     <ClInclude Include="include\dg\Canvas.h" />
     <ClInclude Include="include\dg\CanvasScene.h" />
+    <ClInclude Include="include\dg\directx\DXUtils.h" />
     <ClInclude Include="include\dg\directx\SimpleShader.h" />
     <ClInclude Include="include\dg\EngineTime.h" />
     <ClInclude Include="include\dg\Exceptions.h" />
@@ -493,7 +495,6 @@ del /s $(OutDir)*.obj, $(OutDir)*.pdb, $(OutDir)*.ipdb, $(OutDir)*.iobj</Command
     <ClInclude Include="include\dg\materials\ScreenQuadMaterial.h" />
     <ClInclude Include="include\dg\materials\StandardMaterial.h" />
     <ClInclude Include="include\dg\materials\UVMaterial.h" />
-    <ClInclude Include="include\dg\MathUtils.h" />
     <ClInclude Include="include\dg\Mesh.h" />
     <ClInclude Include="include\dg\Model.h" />
     <ClInclude Include="include\dg\opengl\ShaderSource.h" />
@@ -518,6 +519,7 @@ del /s $(OutDir)*.obj, $(OutDir)*.pdb, $(OutDir)*.ipdb, $(OutDir)*.iobj</Command
     <ClInclude Include="include\dg\vr\VRManager.h" />
     <ClInclude Include="include\dg\vr\VRRenderModel.h" />
     <ClInclude Include="include\dg\vr\VRTrackedObject.h" />
+    <ClInclude Include="include\dg\vr\VRUtils.h" />
     <ClInclude Include="include\dg\Window.h" />
   </ItemGroup>
   <ItemGroup>

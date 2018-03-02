@@ -3,6 +3,7 @@
 //
 
 #include "dg/vr/VRManager.h"
+#include <iostream>
 #include "dg/Exceptions.h"
 #include "dg/MathUtils.h"
 #include "dg/Mesh.h"
@@ -39,6 +40,9 @@ void dg::VRManager::StartOpenVR() {
   }
 
   vrCompositor = vr::VRCompositor();
+  vrRenderModels = vr::VRRenderModels();
+
+  PopulateRenderModelList();
 
   CreateFramebuffers();
 }
@@ -150,6 +154,22 @@ void dg::VRManager::UpdatePoses() {
   }
 }
 
+void dg::VRManager::PopulateRenderModelList() {
+  uint32_t numModels = vrRenderModels->GetRenderModelCount();
+  for (unsigned int i = 0; i < numModels; i++) {
+    size_t size = vrRenderModels->GetRenderModelName(i, nullptr, 0);
+    std::vector<char> nameBuff(size);
+    vrRenderModels->GetRenderModelName(i, nameBuff.data(), size);
+    std::string name(nameBuff.data());
+
+    auto rmInfo = std::make_shared<RenderModelInfo>();
+    rmInfo->renderModelIndex = i;
+    renderModels[name] = rmInfo;
+
+    std::cout << name << std::endl; // TODO: TEMPORARY
+  }
+}
+
 void dg::VRManager::RegisterTrackedObject(VRTrackedObject *object) {
   trackedObjects.push_front(object);
 }
@@ -179,6 +199,49 @@ void dg::VRManager::SubmitFrame(vr::EVREye eye) {
 #elif defined(_DIRECTX)
   // TODO
 #endif
+}
+
+std::shared_ptr<dg::Mesh> dg::VRManager::GetRenderModelMesh(
+    const std::string& name) {
+  auto pair = renderModels.find(name);
+  if (pair == renderModels.end()) {
+    return nullptr;
+  }
+  if (pair->second->mesh != nullptr) {
+    return pair->second->mesh;
+  }
+
+  vr::RenderModel_t *model;
+  vr::EVRRenderModelError err = vr::VRRenderModelError_Loading;
+  do {
+    err = vrRenderModels->LoadRenderModel_Async(name.c_str(), &model);
+  } while (err == vr::VRRenderModelError_Loading);
+  if (err != vr::VRRenderModelError_None) {
+    return nullptr;
+  }
+  auto mesh = Mesh::Create();
+  for (unsigned int i = 0; i < model->unTriangleCount; i++) {
+    glm::vec3 positions[3];
+    glm::vec3 normals[3];
+    glm::vec2 texCoords[3];
+
+    for (int j = 0; j < 3; j++) {
+      auto position = model->rVertexData[model->rIndexData[i * 3 + j]].vPosition.v;
+      positions[j] = { position[0], position[1], position[2] };
+      auto normal = model->rVertexData[model->rIndexData[i * 3 + j]].vNormal.v;
+      normals[j] = { normal[0], normal[1], normal[2] };
+      auto texCoord = model->rVertexData[model->rIndexData[i * 3 + j]].rfTextureCoord;
+      texCoords[j] = { texCoord[0], texCoord[1] };
+    }
+    mesh->AddTriangle(
+      Vertex(positions[0], normals[0], texCoords[0]),
+      Vertex(positions[1], normals[1], texCoords[1]),
+      Vertex(positions[2], normals[2], texCoords[2]),
+      Mesh::Winding::CW);
+  }
+  mesh->FinishBuilding();
+  pair->second->mesh = mesh;
+  return mesh;
 }
 
 std::shared_ptr<dg::Mesh> dg::VRManager::GetHiddenAreaMesh(vr::EVREye eye) {

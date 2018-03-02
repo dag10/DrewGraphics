@@ -468,6 +468,7 @@ del /s $(OutDir)*.obj, $(OutDir)*.pdb, $(OutDir)*.ipdb, $(OutDir)*.iobj</Command
     <ClCompile Include="src\Transform.cpp" />
     <ClCompile Include="src\Utils.cpp" />
     <ClCompile Include="src\vr\VRManager.cpp" />
+    <ClCompile Include="src\vr\VRRenderModel.cpp" />
     <ClCompile Include="src\vr\VRTrackedObject.cpp" />
     <ClCompile Include="src\Window.cpp" />
   </ItemGroup>
@@ -515,6 +516,7 @@ del /s $(OutDir)*.obj, $(OutDir)*.pdb, $(OutDir)*.ipdb, $(OutDir)*.iobj</Command
     <ClInclude Include="include\dg\Transform.h" />
     <ClInclude Include="include\dg\Utils.h" />
     <ClInclude Include="include\dg\vr\VRManager.h" />
+    <ClInclude Include="include\dg\vr\VRRenderModel.h" />
     <ClInclude Include="include\dg\vr\VRTrackedObject.h" />
     <ClInclude Include="include\dg\Window.h" />
   </ItemGroup>

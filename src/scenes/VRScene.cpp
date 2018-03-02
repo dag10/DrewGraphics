@@ -233,21 +233,21 @@ void dg::VRScene::Initialize() {
   vrContainer->AddChild(rightController);
 
   // Create controller block material.
-  StandardMaterial controllerMaterial = StandardMaterial::WithColor(
-    glm::vec3(0.4, 0, 0));
+  StandardMaterial controllerMaterial =
+      StandardMaterial::WithColor(glm::vec3(0.1f));
   controllerMaterial.SetSpecular(0.3f);
 
   // Create blocks to represent left and right controllers.
-  auto leftControllerSphere = std::make_shared<Model>(
-    Mesh::Cube,
+  auto leftControllerModel = std::make_shared<Model>(
+    VRManager::Instance->GetRenderModelMesh("vr_controller_vive_1_5"),
     std::make_shared<StandardMaterial>(controllerMaterial),
-    Transform::S(glm::vec3(0.05, 0.03, 0.1)));
-  leftController->AddChild(leftControllerSphere, false);
-  auto rightControllerSphere = std::make_shared<Model>(
-    Mesh::Cube,
+    Transform());
+  leftController->AddChild(leftControllerModel, false);
+  auto rightControllerModel = std::make_shared<Model>(
+    VRManager::Instance->GetRenderModelMesh("vr_controller_vive_1_5"),
     std::make_shared<StandardMaterial>(controllerMaterial),
-    Transform::S(glm::vec3(0.05, 0.03, 0.1)));
-  rightController->AddChild(rightControllerSphere, false);
+    Transform());
+  rightController->AddChild(rightControllerModel, false);
 
   // Create a flashlight attached to the right controller.
   flashlight = std::make_shared<SpotLight>(

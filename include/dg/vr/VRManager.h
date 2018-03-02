@@ -9,6 +9,7 @@
 #include "dg/FrameBuffer.h"
 #include <memory>
 #include <vector>
+#include <unordered_map>
 #include <forward_list>
 #include <openvr.h>
 
@@ -21,10 +22,17 @@ namespace dg {
 
     public:
 
+      class RenderModelInfo {
+      public:
+        uint32_t renderModelIndex;
+        std::shared_ptr<Mesh> mesh = nullptr;
+      };
+
       static VRManager *Instance;
 
       vr::IVRSystem *vrSystem = nullptr;
       vr::IVRCompositor *vrCompositor = nullptr;
+      vr::IVRRenderModels *vrRenderModels = nullptr;
 
       VRManager() = default;
       virtual ~VRManager();
@@ -46,6 +54,8 @@ namespace dg {
       std::shared_ptr<FrameBuffer> GetFramebuffer(vr::EVREye eye) const;
       void SubmitFrame(vr::EVREye eye);
 
+      std::shared_ptr<Mesh> GetRenderModelMesh(const std::string& name);
+
       std::shared_ptr<Mesh> GetHiddenAreaMesh(vr::EVREye eye);
 
     private:
@@ -53,6 +63,7 @@ namespace dg {
       void StartOpenVR();
       void CreateFramebuffers();
       void UpdatePoses();
+      void PopulateRenderModelList();
 
       int leftControllerIndex = -1;
       int rightControllerIndex = -1;
@@ -68,6 +79,8 @@ namespace dg {
       std::vector<vr::TrackedDevicePose_t> nextPoses
         = std::vector<vr::TrackedDevicePose_t>(vr::k_unMaxTrackedDeviceCount);
       std::forward_list<VRTrackedObject*> trackedObjects;
+
+      std::unordered_map<std::string, std::shared_ptr<RenderModelInfo>> renderModels;
 
   }; // class VRManager
 

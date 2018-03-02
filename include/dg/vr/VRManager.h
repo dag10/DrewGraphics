@@ -22,12 +22,6 @@ namespace dg {
 
     public:
 
-      class RenderModelInfo {
-      public:
-        uint32_t renderModelIndex;
-        std::shared_ptr<Mesh> mesh = nullptr;
-      };
-
       static VRManager *Instance;
 
       vr::IVRSystem *vrSystem = nullptr;
@@ -55,10 +49,18 @@ namespace dg {
       void SubmitFrame(vr::EVREye eye);
 
       std::shared_ptr<Mesh> GetRenderModelMesh(const std::string& name);
+      std::shared_ptr<Texture> GetRenderModelTexture(const std::string& name);
 
       std::shared_ptr<Mesh> GetHiddenAreaMesh(vr::EVREye eye);
 
     private:
+
+      struct RenderModelInfo {
+        uint32_t renderModelIndex;
+        std::shared_ptr<Mesh> mesh = nullptr;
+        std::shared_ptr<Texture> texture = nullptr;
+        vr::RenderModel_t *data = nullptr;
+      };
 
       void StartOpenVR();
       void CreateFramebuffers();
@@ -80,7 +82,8 @@ namespace dg {
         = std::vector<vr::TrackedDevicePose_t>(vr::k_unMaxTrackedDeviceCount);
       std::forward_list<VRTrackedObject*> trackedObjects;
 
-      std::unordered_map<std::string, std::shared_ptr<RenderModelInfo>> renderModels;
+      std::unordered_map<std::string, std::shared_ptr<RenderModelInfo>>
+          renderModels;
 
   }; // class VRManager
 

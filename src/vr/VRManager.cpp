@@ -212,24 +212,27 @@ std::shared_ptr<dg::Mesh> dg::VRManager::GetRenderModelMesh(
   }
 
   // Synchronously load render model data from OpenVR.
-  vr::RenderModel_t *vrModel;
-  vr::EVRRenderModelError err = vr::VRRenderModelError_Loading;
-  do {
-    err = vrRenderModels->LoadRenderModel_Async(name.c_str(), &vrModel);
-  } while (err == vr::VRRenderModelError_Loading);
-  if (err != vr::VRRenderModelError_None) {
-    return nullptr;
+  if (pair->second->data == nullptr) {
+    vr::EVRRenderModelError err = vr::VRRenderModelError_Loading;
+    do {
+      err = vrRenderModels->LoadRenderModel_Async(
+          name.c_str(), &pair->second->data);
+    } while (err == vr::VRRenderModelError_Loading);
+    if (err != vr::VRRenderModelError_None) {
+      return nullptr;
+    }
   }
 
   // Create single mesh component.
   auto mesh = Mesh::Create();
-  for (unsigned int i = 0; i < vrModel->unTriangleCount; i++) {
+  for (unsigned int i = 0; i < pair->second->data->unTriangleCount; i++) {
     glm::vec3 positions[3];
     glm::vec3 normals[3];
     glm::vec2 texCoords[3];
 
     for (int j = 0; j < 3; j++) {
-      auto vert = vrModel->rVertexData[vrModel->rIndexData[i * 3 + j]];
+      auto vert = pair->second->data
+                      ->rVertexData[pair->second->data->rIndexData[i * 3 + j]];
       positions[j] = OVR2GLM(vert.vPosition);
       normals[j] = OVR2GLM(vert.vNormal);
       texCoords[j] = { vert.rfTextureCoord[0], vert.rfTextureCoord[1] };
@@ -244,6 +247,52 @@ std::shared_ptr<dg::Mesh> dg::VRManager::GetRenderModelMesh(
   mesh->FinishBuilding();
   pair->second->mesh = mesh;
   return mesh;
+}
+
+std::shared_ptr<dg::Texture> dg::VRManager::GetRenderModelTexture(
+    const std::string &name) {
+  auto pair = renderModels.find(name);
+  if (pair == renderModels.end()) {
+    return nullptr;
+  }
+  if (pair->second->texture != nullptr) {
+    return pair->second->texture;
+  }
+
+  // Synchronously load render model data from OpenVR.
+  if (pair->second->data == nullptr) {
+    vr::EVRRenderModelError err = vr::VRRenderModelError_Loading;
+    do {
+      err = vrRenderModels->LoadRenderModel_Async(
+          name.c_str(), &pair->second->data);
+    } while (err == vr::VRRenderModelError_Loading);
+    if (err != vr::VRRenderModelError_None) {
+      return nullptr;
+    }
+  }
+
+  // Synchronously load texture data from OpenVR.
+  vr::RenderModel_TextureMap_t *texdata;
+  vr::EVRRenderModelError err = vr::VRRenderModelError_Loading;
+  do {
+    err = vrRenderModels->LoadTexture_Async(
+        pair->second->data->diffuseTextureId, &texdata);
+  } while (err == vr::VRRenderModelError_Loading);
+  if (err != vr::VRRenderModelError_None) {
+    return nullptr;
+  }
+
+  // Create texture.
+  TextureOptions texOpts;
+  texOpts.width = texdata->unWidth;
+  texOpts.height = texdata->unHeight;
+  texOpts.mipmap = true;
+  texOpts.format = TexturePixelFormat::RGBA;
+  texOpts.type = TexturePixelType::BYTE;
+  auto texture = Texture::Generate(texOpts);
+  texture->UpdateData(texdata->rubTextureMapData, true);
+  pair->second->texture = texture;
+  return texture;
 }
 
 std::shared_ptr<dg::Mesh> dg::VRManager::GetHiddenAreaMesh(vr::EVREye eye) {

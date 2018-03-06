@@ -125,7 +125,7 @@ dg::RayResult dg::Renderer::TraceRay(Ray ray) {
 
 dg::Renderer::Pixel dg::Renderer::RenderPixel(RayResult rayres) {
   if (rayres.hit) {
-    return Pixel(glm::vec3(1));
+    return Pixel(glm::vec3(rayres.distance / 10.f));
   }
 
   // Encode direction as pixel.

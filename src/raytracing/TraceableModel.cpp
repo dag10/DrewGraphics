@@ -73,7 +73,7 @@ dg::RayResult dg::TraceableModel::RayTest(Ray ray) const {
   // Transform distance scalar from model space to world space before
   // returning. Also substitutes model-space ray for original world-space
   // ray.
-  res.distance /= glm::length(ray_MS.direction);
+  res.distance /= glm::length(direction_MS);
   res.ray = ray;
   return res;
 

@@ -13,13 +13,16 @@ namespace dg {
   struct Ray {
     glm::vec3 origin;
     glm::vec3 direction;
+    float scaleFromParent = 1;
 
     Ray() = default;
     Ray(glm::vec3 origin, glm::vec3 direction)
       : origin(origin), direction(direction) {}
 
-    RayResult IntersectTriangle(glm::vec3 v1, glm::vec3 v2, glm::vec3 v3);
-    RayResult IntersectSphere(float radius);
+    Ray TransformedBy(glm::mat4 xf) const;
+
+    RayResult IntersectTriangle(glm::vec3 v1, glm::vec3 v2, glm::vec3 v3) const;
+    RayResult IntersectSphere(float radius) const;
   };
 
   struct RayResult {

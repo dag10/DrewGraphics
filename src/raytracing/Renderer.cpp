@@ -117,12 +117,7 @@ dg::RayResult dg::Renderer::TraceRay(Ray ray) {
   RayResult shortest = RayResult::Miss(ray);
 
   for (auto model = objects.begin(); model != objects.end(); model++) {
-    RayResult res = (*model)->RayTest(ray);
-    if (!res.hit) continue;
-    //if (res.distance < camera->nearClip) continue;
-    if (!shortest.hit || res.distance < shortest.distance) {
-      shortest = res;
-    }
+    shortest = RayResult::Closest((*model)->RayTest(ray), shortest);
   }
 
   return shortest;

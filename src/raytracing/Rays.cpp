@@ -3,6 +3,7 @@
 //
 
 #include <raytracing/Rays.h>
+#include <Mesh.h>
 #include <glm/gtc/matrix_access.hpp>
 
 dg::Ray dg::Ray::TransformedBy(glm::mat4 xf) const {
@@ -78,6 +79,24 @@ dg::RayResult dg::Ray::IntersectTriangle(
   return RayResult::Miss(*this);
 }
 
+dg::RayResult dg::Ray::IntersectMesh(std::shared_ptr<Mesh> mesh) const {
+  // Specialize for sphere mesh.
+  if (mesh == Mesh::Sphere) {
+    return IntersectSphere(0.5f);
+  }
+
+  RayResult res = RayResult::Miss(*this);
+  int triangleCount = mesh->TriangleCount();
+  for (int i = 0; i < triangleCount; i++) {
+    Vertex v1 = mesh->GetVertex(i * 3 + 0);
+    Vertex v2 = mesh->GetVertex(i * 3 + 1);
+    Vertex v3 = mesh->GetVertex(i * 3 + 2);
+    RayResult triRes = IntersectTriangle(v1.position, v2.position, v3.position);
+    res = RayResult::Closest(res, triRes);
+  }
+  return res;
+}
+
 dg::RayResult dg::Ray::IntersectSphere(float radius) const {
   float dot = glm::dot(-origin, direction);
   glm::vec3 closest = origin + (dot * direction);
@@ -85,6 +104,8 @@ dg::RayResult dg::Ray::IntersectSphere(float radius) const {
   float dist = glm::distance(closest, glm::vec3(0));
 
   if (dist <= radius) {
+    // FIXME: This doesn't return the distance to the outer point of the sphere.
+    //        We need to do a new calculation at this point.
     return RayResult::Hit(*this, glm::distance(closest, origin));
   }
 

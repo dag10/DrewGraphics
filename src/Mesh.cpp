@@ -255,6 +255,36 @@ void dg::Mesh::FinishBuilding() {
   vertexMap.clear();
 }
 
+dg::Vertex dg::Mesh::GetVertex(unsigned int index) const {
+  unsigned int vertIndex = indices[index];
+  Vertex vert(attributes);
+  if (!!(attributes & Vertex::AttrFlag::POSITION)) {
+    vert.position = vertexPositions[vertIndex];
+  }
+  if (!!(attributes & Vertex::AttrFlag::NORMAL)) {
+    vert.normal = vertexNormals[vertIndex];
+  }
+  if (!!(attributes & Vertex::AttrFlag::TEXCOORD)) {
+    vert.texCoord = vertexTexCoords[vertIndex];
+  }
+  if (!!(attributes & Vertex::AttrFlag::TANGENT)) {
+    vert.tangent = vertexTangents[vertIndex];
+  }
+  return vert;
+}
+
+unsigned int dg::Mesh::VertexCount() const {
+  return indices.size();
+}
+
+unsigned int dg::Mesh::UniqueVertexCount() const {
+  return vertexPositions.size();
+}
+
+unsigned int dg::Mesh::TriangleCount() const {
+  return VertexCount() / 3;
+}
+
 void dg::Mesh::Draw() const {
   glBindVertexArray(VAO);
   if (lastDrawnMesh != this) {

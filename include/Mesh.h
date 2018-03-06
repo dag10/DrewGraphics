@@ -33,6 +33,7 @@ namespace dg {
     glm::vec3 tangent;
     AttrFlag attributes = AttrFlag::NONE;
 
+    Vertex(AttrFlag attributes) : attributes(attributes) {};
     Vertex(glm::vec3 position)
       : position(position), attributes(AttrFlag::POSITION) {};
     Vertex(
@@ -114,6 +115,11 @@ namespace dg {
           Vertex v1, Vertex v2, Vertex v3, Vertex v4, Winding winding);
       void AddTriangle(Vertex v1, Vertex v2, Vertex v3, Winding winding);
       void FinishBuilding();
+
+      Vertex GetVertex(unsigned int index) const;
+      unsigned int VertexCount() const;
+      unsigned int UniqueVertexCount() const;
+      unsigned int TriangleCount() const;
 
       void Draw() const;
 

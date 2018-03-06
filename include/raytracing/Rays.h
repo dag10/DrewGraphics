@@ -5,9 +5,11 @@
 #pragma once
 
 #include <glm/glm.hpp>
+#include <memory>
 
 namespace dg {
 
+  struct Mesh;
   struct RayResult;
 
   struct Ray {
@@ -22,6 +24,7 @@ namespace dg {
     Ray TransformedBy(glm::mat4 xf) const;
 
     RayResult IntersectTriangle(glm::vec3 v1, glm::vec3 v2, glm::vec3 v3) const;
+    RayResult IntersectMesh(std::shared_ptr<Mesh> mesh) const;
     RayResult IntersectSphere(float radius) const;
   };
 

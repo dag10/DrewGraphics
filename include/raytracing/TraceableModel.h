@@ -21,7 +21,14 @@ namespace dg {
 
       TraceableModel(TraceableModel& other);
 
+      void CacheTransforms();
+
       RayResult RayTest(Ray ray) const;
+
+    private:
+
+      glm::mat4 xfSceneSpace;
+      glm::mat4 xfSceneSpaceInv;
 
   }; // class TraceableModel
 

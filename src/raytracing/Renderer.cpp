@@ -103,6 +103,7 @@ void dg::Renderer::ProcessSceneObjects() {
       if (!(*child)->enabled) continue;
       remainingObjects.push_front(child->get());
       if (auto model = std::dynamic_pointer_cast<TraceableModel>(*child)) {
+        model->CacheTransforms();
         objects.push_front((const TraceableModel*)(model.get()));
         numObjects++;
       }

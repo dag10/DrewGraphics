@@ -12,12 +12,13 @@ dg::TraceableModel::TraceableModel(
 
 dg::TraceableModel::TraceableModel(TraceableModel& other) : Model(other) { }
 
-dg::RayResult dg::TraceableModel::RayTest(Ray ray) const {
-  Transform ss = SceneSpace();
-  glm::mat4x4 xf = ss.ToMat4();
-  glm::mat4x4 xfInv = glm::inverse(xf);
+void dg::TraceableModel::CacheTransforms() {
+  xfSceneSpace = SceneSpace().ToMat4();
+  xfSceneSpaceInv = glm::inverse(xfSceneSpace);
+}
 
-  Ray ray_MS = ray.TransformedBy(SceneSpace().ToMat4());
+dg::RayResult dg::TraceableModel::RayTest(Ray ray) const {
+  Ray ray_MS = ray.TransformedBy(xfSceneSpaceInv);
   RayResult res = ray_MS.IntersectMesh(mesh);
 
   // Transform distance scalar from model space to world space before

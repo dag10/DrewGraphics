@@ -7,8 +7,6 @@
 #include <glm/gtc/matrix_access.hpp>
 
 dg::Ray dg::Ray::TransformedBy(glm::mat4 xf) const {
-  glm::mat4 xfInv = glm::inverse(xf);
-
   // Transform ray to model space.
   glm::vec4 origin_SS_h(
       origin.x,
@@ -25,7 +23,7 @@ dg::Ray dg::Ray::TransformedBy(glm::mat4 xf) const {
       direction_SS_h,
       glm::vec4(0),
       glm::vec4(0));
-  glm::mat4x4 mat_MS = xfInv * mat_SS;
+  glm::mat4x4 mat_MS = xf * mat_SS;
   glm::vec4 origin_MS_h = glm::column(mat_MS, 0);
   glm::vec4 direction_pos_MS_h = glm::column(mat_MS, 1);
   glm::vec3 origin_MS(

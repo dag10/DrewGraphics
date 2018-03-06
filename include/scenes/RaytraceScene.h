@@ -29,6 +29,7 @@ namespace dg {
     private:
 
       void Raytrace();
+      virtual void ConfigureBuffer();
 
       std::shared_ptr<ScreenQuadMaterial> quadMaterial = nullptr;
       Transform renderCameraTransform;

@@ -128,6 +128,13 @@ void dg::RaytraceScene::RenderFrame() {
   Scene::RenderFrame();
 }
 
+void dg::RaytraceScene::ConfigureBuffer() {
+  glEnable(GL_DEPTH_TEST);
+  glDepthFunc(GL_LESS);
+  glDepthMask(GL_TRUE);
+  glDisable(GL_CULL_FACE);
+}
+
 void dg::RaytraceScene::Raytrace() {
   window->UnlockCursor();
   std::unique_ptr<Renderer> renderer = std::unique_ptr<Renderer>(

@@ -95,19 +95,39 @@ dg::RayResult dg::Ray::IntersectMesh(std::shared_ptr<Mesh> mesh) const {
   return res;
 }
 
+// http://www.lighthouse3d.com/tutorials/maths/ray-sphere-intersection
 dg::RayResult dg::Ray::IntersectSphere(float radius) const {
+  float originLen = glm::length(origin);
   float dot = glm::dot(-origin, direction);
   glm::vec3 closest = origin + (dot * direction);
+  float closestLen = glm::length(closest);
+  float dist = sqrt(radius * radius - closestLen * closestLen);
 
-  float dist = glm::distance(closest, glm::vec3(0));
+  glm::vec3 intersection;
 
-  if (dist <= radius) {
-    // FIXME: This doesn't return the distance to the outer point of the sphere.
-    //        We need to do a new calculation at this point.
-    return RayResult::Hit(*this, glm::distance(closest, origin));
+  if (dot < 0) {
+    if (originLen > radius) {
+      return RayResult::Miss(*this);
+    } else if (originLen == radius) {
+      intersection = origin;
+    } else {
+      float di1 = dist - glm::length(closest - origin);
+      intersection = origin + direction + di1;
+    }
+  } else {
+    if (closestLen > radius) {
+      return RayResult::Miss(*this);
+    } else {
+      float di1;
+      if (originLen > radius) {
+        dist *= -1;
+      }
+      di1 = glm::length(closest - origin) + dist;
+      intersection = origin + direction * di1;
+    }
   }
 
-  return RayResult::Miss(*this);
+  return RayResult::Hit(*this, glm::distance(intersection, origin));
 }
 
 dg::RayResult dg::RayResult::Hit(Ray ray, float distance) {

@@ -7,6 +7,7 @@ find_library(OPENVR_FRAMEWORK OpenVR HINTS external/openvr/bin/osx64)
 find_package(glfw3 REQUIRED)
 find_package(OpenGL REQUIRED)
 
+add_definitions(-DDEFAULT_SCENE="raytrace")
 add_definitions(-DGLM_FORCE_NO_CTOR_INIT)
 add_definitions(-DGLFW_INCLUDE_NONE)
 

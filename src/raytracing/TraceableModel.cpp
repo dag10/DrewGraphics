@@ -26,8 +26,7 @@ dg::RayResult dg::TraceableModel::RayTest(Ray ray) const {
   // ray.
   res.distance /= ray_MS.scaleFromParent;
   res.ray = ray;
+  res.model = this;
   return res;
-
-  return RayResult::Miss(ray);
 }
 

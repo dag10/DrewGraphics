@@ -11,6 +11,7 @@ namespace dg {
 
   struct Mesh;
   struct RayResult;
+  class TraceableModel;
 
   struct Ray {
     glm::vec3 origin;
@@ -29,6 +30,7 @@ namespace dg {
   };
 
   struct RayResult {
+    const TraceableModel *model = nullptr;
     bool hit = false;
     Ray ray;
     float distance = 0;

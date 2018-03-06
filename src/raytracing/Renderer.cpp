@@ -126,7 +126,15 @@ dg::RayResult dg::Renderer::TraceRay(Ray ray) {
 
 dg::Renderer::Pixel dg::Renderer::RenderPixel(RayResult rayres) {
   if (rayres.hit) {
-    return Pixel(glm::vec3(rayres.distance / 50.f));
+    glm::vec3 color = glm::vec3(rayres.distance / 50.f);
+
+    if (rayres.model->mesh == Mesh::Sphere) {
+      color *= glm::vec3(1, 0, 0);
+    } else if (rayres.model->mesh == Mesh::Cube) {
+      color *= glm::vec3(0, 1, 0);
+    }
+
+    return Pixel(color);
   }
 
   // Encode direction as pixel.

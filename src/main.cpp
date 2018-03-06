@@ -156,6 +156,11 @@ int main(int argc, const char *argv[]) {
       terminateWithError(e.what());
     }
 
+    // If user hits SPACE to render, let them recapture focus later by clicking.
+    if (window->IsKeyJustPressed(dg::Key::SPACE)) {
+      cursorWasLocked = true;
+    }
+
     // Handle escape key to release cursor or quit app.
     if (window->IsKeyJustPressed(dg::Key::ESCAPE) ||
         window->IsKeyJustPressed(dg::Key::Q)) {

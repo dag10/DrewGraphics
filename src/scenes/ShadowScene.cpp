@@ -1,8 +1,8 @@
 //
-//  scenes/TutorialScene.cpp
+//  scenes/ShadowScene.cpp
 //
 
-#include "dg/scenes/TutorialScene.h"
+#include "dg/scenes/ShadowScene.h"
 
 #include <forward_list>
 #include <glm/glm.hpp>
@@ -19,13 +19,13 @@
 #include "dg/behaviors/KeyboardCameraController.h"
 #include "dg/materials/StandardMaterial.h"
 
-std::unique_ptr<dg::TutorialScene> dg::TutorialScene::Make() {
-  return std::unique_ptr<dg::TutorialScene>(new dg::TutorialScene());
+std::unique_ptr<dg::ShadowScene> dg::ShadowScene::Make() {
+  return std::unique_ptr<dg::ShadowScene>(new dg::ShadowScene());
 }
 
-dg::TutorialScene::TutorialScene() : Scene() {}
+dg::ShadowScene::ShadowScene() : Scene() {}
 
-void dg::TutorialScene::Initialize() {
+void dg::ShadowScene::Initialize() {
   Scene::Initialize();
 
   // Lock window cursor to center.
@@ -101,7 +101,7 @@ void dg::TutorialScene::Initialize() {
       std::make_shared<KeyboardCameraController>(window));
 }
 
-void dg::TutorialScene::ClearBuffer() {
+void dg::ShadowScene::ClearBuffer() {
   Graphics::Instance->Clear(glm::vec3(26.f, 37.f, 43.f) / 255.f);
 }
 

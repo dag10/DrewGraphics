@@ -1,5 +1,5 @@
 //
-//  scenes/TutorialScene.h
+//  scenes/ShadowScene.h
 //
 
 #pragma once
@@ -9,13 +9,13 @@
 
 namespace dg {
 
-  class TutorialScene : public Scene {
+  class ShadowScene : public Scene {
 
     public:
 
-      static std::unique_ptr<TutorialScene> Make();
+      static std::unique_ptr<ShadowScene> Make();
 
-      TutorialScene();
+      ShadowScene();
 
       virtual void Initialize();
 
@@ -23,6 +23,6 @@ namespace dg {
 
       virtual void ClearBuffer();
 
-  }; // class TutorialScene
+  }; // class ShadowScene
 
 } // namespace dg

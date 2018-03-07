@@ -44,7 +44,7 @@
 #include "dg/scenes/RobotScene.h"
 #include "dg/scenes/SimpleScene.h"
 #include "dg/scenes/TexturesScene.h"
-#include "dg/scenes/TutorialScene.h"
+#include "dg/scenes/ShadowScene.h"
 #include "dg/scenes/VRScene.h"
 
 using namespace dg;
@@ -73,7 +73,7 @@ std::unique_ptr<Scene> PromptForScene(
     std::string,
     std::function<std::unique_ptr<dg::Scene>()>> constructors;
   constructors["portal"]     = dg::PortalScene::Make;
-  constructors["tutorial"]   = dg::TutorialScene::Make;
+  constructors["shadows"]    = dg::ShadowScene::Make;
   constructors["simple"]     = dg::SimpleScene::Make;
   constructors["cloning"]    = dg::DeepCloningScene::Make;
   constructors["cloning-vr"] = dg::DeepCloningScene::MakeVR;

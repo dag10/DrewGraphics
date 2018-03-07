@@ -3,7 +3,6 @@
 //
 
 #include "dg/scenes/ShadowScene.h"
-
 #include <forward_list>
 #include <glm/glm.hpp>
 #include "dg/Camera.h"
@@ -46,20 +45,18 @@ void dg::ShadowScene::Initialize() {
 
   // Create ceiling light source.
   auto ceilingLight = std::make_shared<PointLight>(
-      glm::vec3(1.0f, 0.93f, 0.86f),
-      0.732f, 0.399f, 0.968f);
+      glm::vec3(1.0f, 0.93f, 0.86f), 0.732f, 0.399f, 0.968f);
   ceilingLight->transform.translation = glm::vec3(0.8f, 1.2f, -0.2f);
   AddChild(ceilingLight);
 
   // Create light sphere material.
-  StandardMaterial lightMaterial = StandardMaterial::WithColor(
-      ceilingLight->GetSpecular());
+  StandardMaterial lightMaterial =
+      StandardMaterial::WithColor(ceilingLight->GetSpecular());
   lightMaterial.SetLit(false);
 
   // Create light sphere.
   auto lightModel = std::make_shared<Model>(
-      dg::Mesh::Sphere,
-      std::make_shared<StandardMaterial>(lightMaterial),
+      dg::Mesh::Sphere, std::make_shared<StandardMaterial>(lightMaterial),
       Transform::S(glm::vec3(0.05f)));
   ceilingLight->AddChild(lightModel, false);
 
@@ -70,38 +67,33 @@ void dg::ShadowScene::Initialize() {
 
   // Create wooden cube.
   auto cube = std::make_shared<Model>(
-      dg::Mesh::Cube,
-      std::make_shared<StandardMaterial>(cubeMaterial),
+      dg::Mesh::Cube, std::make_shared<StandardMaterial>(cubeMaterial),
       Transform::TS(glm::vec3(0, 0.25f, 0), glm::vec3(0.5f)));
   AddChild(cube);
 
   // Create floor material.
   const int floorSize = 10;
-  StandardMaterial floorMaterial = StandardMaterial::WithTexture(
-      hardwoodTexture);
+  StandardMaterial floorMaterial =
+      StandardMaterial::WithTexture(hardwoodTexture);
   floorMaterial.SetUVScale(glm::vec2((float)floorSize));
 
   // Create floor plane.
   AddChild(std::make_shared<Model>(
-        dg::Mesh::Quad,
-        std::make_shared<StandardMaterial>(floorMaterial),
-        Transform::RS(
-          glm::quat(glm::radians(glm::vec3(-90, 0, 0))),
-          glm::vec3(floorSize, floorSize, 1))));
+      dg::Mesh::Quad, std::make_shared<StandardMaterial>(floorMaterial),
+      Transform::RS(glm::quat(glm::radians(glm::vec3(-90, 0, 0))),
+                    glm::vec3(floorSize, floorSize, 1))));
 
   // Configure camera.
   mainCamera->transform.translation = glm::vec3(-1.25f, 2, 1.1f);
   mainCamera->LookAtPoint(
-      (cube->transform.translation +
-       ceilingLight->transform.translation) / 2.f);
+      (cube->transform.translation + ceilingLight->transform.translation) /
+      2.f);
 
   // Allow camera to be controller by the keyboard and mouse.
-  Behavior::Attach(
-      mainCamera,
-      std::make_shared<KeyboardCameraController>(window));
+  Behavior::Attach(mainCamera,
+                   std::make_shared<KeyboardCameraController>(window));
 }
 
 void dg::ShadowScene::ClearBuffer() {
   Graphics::Instance->Clear(glm::vec3(26.f, 37.f, 43.f) / 255.f);
 }
-

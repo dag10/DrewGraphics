@@ -137,6 +137,9 @@ dg::OpenGLWindow::~OpenGLWindow() {
     glfwDestroyWindow(glfwWindow);
     glfwWindow = nullptr;
   }
+  if (windowMap.empty()) {
+    glfwTerminate();
+  }
 }
 
 dg::OpenGLWindow& dg::OpenGLWindow::operator=(dg::OpenGLWindow&& other) {

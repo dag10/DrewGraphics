@@ -53,7 +53,6 @@ namespace dg {
     public:
 
       OpenGLGraphics(const Window& window);
-      virtual ~OpenGLGraphics();
 
       virtual void Clear(glm::vec3 color);
 

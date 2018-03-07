@@ -62,12 +62,6 @@ void dg::OpenGLGraphics::InitializeResources() {
   dg::OpenGLShader::AddFragmentSource("assets/shaders/includes/fragment_main.glsl");
 }
 
-dg::OpenGLGraphics::~OpenGLGraphics() {
-  // Even though GLFW is initialized in OpenGLWindow::InitializeGLFW(), we'll
-  // shut down here because this is called at final termination of the program.
-  glfwTerminate();
-}
-
 void dg::OpenGLGraphics::Clear(glm::vec3 color) {
   glClearColor(color.x, color.y, color.z, 1);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);

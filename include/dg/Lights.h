@@ -126,6 +126,8 @@ namespace dg {
 
     private:
 
+      void SetDefaultProperties();
+
       float cutoff = glm::radians(30.f); // Radians of light cone.
       float feather = glm::radians(5.f); // Radians of cone edge fading.
 

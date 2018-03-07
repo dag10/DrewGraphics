@@ -158,20 +158,29 @@ dg::Light::ShaderData dg::SpotLight::GetShaderData() const {
   return ret;
 }
 
-dg::SpotLight::SpotLight() {
+dg::SpotLight::SpotLight() : Light() {
   data.type = LightType::SPOT;
+  SetDefaultProperties();
 }
 
 dg::SpotLight::SpotLight(
   glm::vec3 color, float ambient, float diffuse, float specular)
   : Light(color * ambient, color * diffuse, color * specular) {
   data.type = LightType::SPOT;
+  SetDefaultProperties();
 }
 
 dg::SpotLight::SpotLight(
   glm::vec3 ambient, glm::vec3 diffuse, glm::vec3 specular)
   : Light(ambient, diffuse, specular) {
   data.type = LightType::SPOT;
+  SetDefaultProperties();
+}
+
+// Set default virtual properties in underlying data struct.
+void dg::SpotLight::SetDefaultProperties() {
+  SetFeather(feather);
+  SetCutoff(cutoff);
 }
 
 #pragma endregion

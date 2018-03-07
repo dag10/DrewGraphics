@@ -12,10 +12,10 @@
 #include "dg/Mesh.h"
 #include "dg/Model.h"
 #include "dg/Shader.h"
-#include "dg/Skybox.h"
 #include "dg/Texture.h"
 #include "dg/Window.h"
 #include "dg/behaviors/KeyboardCameraController.h"
+#include "dg/behaviors/KeyboardLightController.h"
 #include "dg/materials/StandardMaterial.h"
 
 std::unique_ptr<dg::ShadowScene> dg::ShadowScene::Make() {
@@ -37,27 +37,29 @@ void dg::ShadowScene::Initialize() {
       Texture::FromPath("assets/textures/container2_specular.png");
   std::shared_ptr<Texture> hardwoodTexture =
       Texture::FromPath("assets/textures/hardwood.jpg");
-  std::shared_ptr<Texture> skyboxTexture =
-      Texture::FromPath("assets/textures/skybox_daylight.png");
-
-  // Create skybox.
-  skybox = std::make_shared<Skybox>(skyboxTexture);
 
   // Create ceiling light source.
-  auto ceilingLight = std::make_shared<PointLight>(
-      glm::vec3(1.0f, 0.93f, 0.86f), 0.732f, 0.399f, 0.968f);
-  ceilingLight->transform.translation = glm::vec3(0.8f, 1.2f, -0.2f);
+  auto ceilingLight = std::make_shared<SpotLight>(glm::vec3(1.0f, 0.93f, 0.86f),
+                                                  0.31, 0.91, 0.86);
+  ceilingLight->transform.translation = glm::vec3(1.4f, 1.2f, -0.7f);
+  ceilingLight->LookAtPoint({0, 0, 0});
   AddChild(ceilingLight);
 
-  // Create light sphere material.
+  // Make light controllable with keyboard.
+  Behavior::Attach(ceilingLight,
+                   std::make_shared<KeyboardLightController>(window));
+
+  // Create light cone material.
   StandardMaterial lightMaterial =
       StandardMaterial::WithColor(ceilingLight->GetSpecular());
   lightMaterial.SetLit(false);
 
-  // Create light sphere.
+  // Create light cone.
   auto lightModel = std::make_shared<Model>(
-      dg::Mesh::Sphere, std::make_shared<StandardMaterial>(lightMaterial),
-      Transform::S(glm::vec3(0.05f)));
+      Mesh::LoadOBJ("assets/models/cone.obj"),
+      std::make_shared<StandardMaterial>(lightMaterial),
+      Transform::RS(glm::quat(glm::radians(glm::vec3(90, 0, 0))),
+                    glm::vec3(0.05f)));
   ceilingLight->AddChild(lightModel, false);
 
   // Create wooden cube material.
@@ -72,7 +74,7 @@ void dg::ShadowScene::Initialize() {
   AddChild(cube);
 
   // Create floor material.
-  const int floorSize = 10;
+  const int floorSize = 500;
   StandardMaterial floorMaterial =
       StandardMaterial::WithTexture(hardwoodTexture);
   floorMaterial.SetUVScale(glm::vec2((float)floorSize));
@@ -84,10 +86,8 @@ void dg::ShadowScene::Initialize() {
                     glm::vec3(floorSize, floorSize, 1))));
 
   // Configure camera.
-  mainCamera->transform.translation = glm::vec3(-1.25f, 2, 1.1f);
-  mainCamera->LookAtPoint(
-      (cube->transform.translation + ceilingLight->transform.translation) /
-      2.f);
+  mainCamera->transform = Transform::T({1.054, 1.467, 2.048});
+  mainCamera->LookAtDirection({-0.3126, -0.4692, -0.8259});
 
   // Allow camera to be controller by the keyboard and mouse.
   Behavior::Attach(mainCamera,
@@ -95,5 +95,5 @@ void dg::ShadowScene::Initialize() {
 }
 
 void dg::ShadowScene::ClearBuffer() {
-  Graphics::Instance->Clear(glm::vec3(26.f, 37.f, 43.f) / 255.f);
+  Graphics::Instance->Clear(glm::vec3(0) / 255.f);
 }

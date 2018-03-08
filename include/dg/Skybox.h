@@ -7,7 +7,6 @@
 #include <memory>
 #include "dg/Camera.h"
 #include "dg/Texture.h"
-#include "dg/Window.h"
 #include "dg/materials/StandardMaterial.h"
 
 namespace dg {
@@ -27,7 +26,7 @@ namespace dg {
       Skybox(std::shared_ptr<Texture> texture);
       friend void swap(Skybox& first, Skybox& second); // nothrow
 
-      void Draw(const Camera& camera, const Window& window);
+      void Draw(const Camera& camera);
       void Draw(const Camera& camera, vr::EVREye eye);
 
     private:

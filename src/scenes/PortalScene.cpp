@@ -450,8 +450,7 @@ void dg::PortalScene::UpdateLightingConfiguration() {
 void dg::PortalScene::RenderPortalStencil(dg::Transform xfPortal) {
 #if defined(_OPENGL)
   glm::mat4x4 view = mainCamera->GetViewMatrix();
-  glm::mat4x4 projection = mainCamera->GetProjectionMatrix(
-    window->GetAspectRatio());
+  glm::mat4x4 projection = mainCamera->GetProjectionMatrix();
 
   glEnable(GL_STENCIL_TEST);
   glStencilFunc(GL_ALWAYS, 1, 0xFF);
@@ -512,6 +511,7 @@ void dg::PortalScene::RenderFrame() {
 
   // Render immediate scene.
   invPortal = glm::mat4x4(0);
+  mainCamera->aspectRatio = window->GetAspectRatio();
   DrawScene(*mainCamera);
 
   // Render first (red) portal stencil.
@@ -554,4 +554,3 @@ void dg::PortalScene::DrawScene(
   // Attach the flashlight back to the original camera.
   flashlight->transform = xfFlashlightOriginal;
 }
-

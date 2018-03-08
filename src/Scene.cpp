@@ -83,6 +83,7 @@ void dg::BaseScene::RenderFrame() {
   // TODO: If VR, just render a quad of the left eye instead.
   ClearBuffer();
   ConfigureBuffer();
+  mainCamera->aspectRatio = window->GetAspectRatio();
   DrawScene(*mainCamera);
 
   if (enableVR) {
@@ -115,7 +116,7 @@ void dg::BaseScene::DrawScene(
     if (enableVR && renderForVR) {
       skybox->Draw(camera, eye);
     } else {
-      skybox->Draw(camera, *window);
+      skybox->Draw(camera);
     }
   }
 
@@ -151,7 +152,7 @@ void dg::BaseScene::DrawScene(
     projection = camera.GetProjectionMatrix(eye);
   } else {
     view = camera.GetViewMatrix();
-    projection = camera.GetProjectionMatrix(window->GetAspectRatio());
+    projection = camera.GetProjectionMatrix();
   }
 
   // Prepare light data.

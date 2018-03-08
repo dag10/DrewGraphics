@@ -30,13 +30,13 @@ glm::mat4x4 dg::Camera::GetViewMatrix(vr::EVREye eye) const {
   return glm::inverse(head2eye) * GetViewMatrix();
 }
 
-glm::mat4x4 dg::Camera::GetProjectionMatrix(float aspectRatio) const {
+glm::mat4x4 dg::Camera::GetProjectionMatrix() const {
 #if defined(_OPENGL)
-  return glm::perspective(glm::radians(fov), aspectRatio, nearClip, farClip);
+  return glm::perspective(fov, aspectRatio, nearClip, farClip);
 #elif defined(_DIRECTX)
   XMFLOAT4X4 ret;
-  XMStoreFloat4x4(&ret, XMMatrixPerspectiveFovRH(
-    glm::radians(fov), aspectRatio, nearClip, farClip));
+  XMStoreFloat4x4(
+      &ret, XMMatrixPerspectiveFovRH(fov, aspectRatio, nearClip, farClip));
   return glm::transpose(FLOAT4X4toMAT4X4(ret));
 #endif
 }
@@ -45,4 +45,3 @@ glm::mat4x4 dg::Camera::GetProjectionMatrix(vr::EVREye eye) const {
   return HmdMat2Glm(
     vr::VRSystem()->GetProjectionMatrix(eye, nearClip, farClip));
 }
-

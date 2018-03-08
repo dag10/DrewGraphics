@@ -9,6 +9,7 @@
 #include "dg/Mesh.h"
 #include "dg/Model.h"
 #include "dg/Skybox.h"
+#include "dg/Window.h"
 #include "dg/materials/StandardMaterial.h"
 
 std::unique_ptr<dg::QuadScene> dg::QuadScene::Make() {
@@ -80,4 +81,3 @@ void dg::QuadScene::Update() {
     skybox->enabled = !skybox->enabled;
   }
 }
-

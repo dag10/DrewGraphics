@@ -18,6 +18,7 @@
 #include "dg/Skybox.h"
 #include "dg/Texture.h"
 #include "dg/Transform.h"
+#include "dg/Window.h"
 #include "dg/behaviors/KeyboardLightController.h"
 #include "dg/materials/StandardMaterial.h"
 #include "dg/vr/VRManager.h"

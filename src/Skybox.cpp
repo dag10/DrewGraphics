@@ -34,8 +34,8 @@ void dg::swap(Skybox& first, Skybox& second) {
   swap(first.material, second.material);
 }
 
-void dg::Skybox::Draw(const Camera& camera, const Window& window) {
-  glm::mat4x4 projection = camera.GetProjectionMatrix(window.GetAspectRatio());
+void dg::Skybox::Draw(const Camera& camera) {
+  glm::mat4x4 projection = camera.GetProjectionMatrix();
   Draw(camera, projection);
 }
 

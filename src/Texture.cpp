@@ -60,6 +60,7 @@ std::shared_ptr<dg::Texture> dg::BaseTexture::DepthTexture(
       : TexturePixelFormat::DEPTH;
   texOpts.type = TexturePixelType::INT;
   texOpts.wrap = TextureWrap::CLAMP_EDGE;
+  texOpts.interpolation = TextureInterpolation::LINEAR;
   texOpts.mipmap = false;
 
   return Generate(texOpts);

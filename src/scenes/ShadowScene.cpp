@@ -44,8 +44,9 @@ void dg::ShadowScene::Initialize() {
   spotlight = std::make_shared<SpotLight>(glm::vec3(1.0f, 0.93f, 0.86f), 0.31,
                                           0.91, 0.86);
   spotlight->SetCutoff(mainCamera->fov / 2);  // TODO: Temporary
-  spotlight->SetFeather(0);                   // TODO: Temporary
-  spotlight->transform.translation = glm::vec3(1.4f, 1.2f, -0.7f);
+  //spotlight->SetFeather(0);                   // TODO: Temporary
+  //spotlight->transform.translation = glm::vec3(1.4f, 1.2f, -0.7f);
+  spotlight->transform.translation = glm::vec3(1.4f, 1.2f, 0);
   spotlight->LookAtPoint({0, 0, 0});
   AddChild(spotlight);
 
@@ -67,7 +68,8 @@ void dg::ShadowScene::Initialize() {
   spotlight->AddChild(lightModel, false);
 
   // Create frame buffer for light.
-  framebuffer = std::make_shared<FrameBuffer>(1024, 1024, true, false, false);
+  //framebuffer = std::make_shared<FrameBuffer>(1024, 1024, true, false, false);
+  framebuffer = std::make_shared<FrameBuffer>(1024, 1024, true, false, true);
 
   // Create wooden cube material.
   StandardMaterial cubeMaterial = StandardMaterial::WithTexture(crateTexture);
@@ -103,19 +105,26 @@ void dg::ShadowScene::Initialize() {
   // Material for drawing depth map over scene.
   quadMaterial =
       std::make_shared<ScreenQuadMaterial>(glm::vec3(0), glm::vec2(1));
-  quadMaterial->SetRedChannelOnly(true);
+  //quadMaterial->SetRedChannelOnly(true);
 
 
   // TODO TMP
-  //mainCamera->transform = spotlight->transform;
+  mainCamera->transform = spotlight->transform;
 }
 
 void dg::ShadowScene::Update() {
   Scene::Update();
 
+  // Slowly rotate light.
+  spotlight->transform =
+      Transform::R(glm::quat(glm::radians(glm::vec3(0, Time::Delta * 30, 0)))) *
+      spotlight->transform;
+
   // Slowly rotate cube.
-  cube->transform.rotation *=
-      glm::quat(glm::radians(glm::vec3(0, Time::Delta * 50, 0)));
+  //cube->transform.rotation *=
+      //glm::quat(glm::radians(glm::vec3(0, Time::Delta * 50, 0)));
+
+  //cube->enabled = false;
 }
 
 void dg::ShadowScene::RenderFrame() {
@@ -130,10 +139,21 @@ void dg::ShadowScene::RenderFrame() {
   Camera lightCamera;
   lightCamera.transform = spotlight->SceneSpace();
   lightCamera.fov = spotlight->GetCutoff() * 2;
+  renderingDepthOnly = true;
   DrawScene(lightCamera);
+  renderingDepthOnly = false;
   framebuffer->Unbind();
   window->ResetViewport();
+
+  lightTransform =
+      lightCamera.GetProjectionMatrix() * lightCamera.GetViewMatrix();
+  //lightTransform = lightCamera.GetViewMatrix();
+  //lightTransform =
+      //lightCamera.GetViewMatrix() * lightCamera.GetProjectionMatrix();
+  //lightTransform = glm::inverse(lightTransform);
 #endif
+
+  //renderingDepthOnly = true;
 
   ClearBuffer();
   ConfigureBuffer();
@@ -143,10 +163,23 @@ void dg::ShadowScene::RenderFrame() {
   DrawScene(*mainCamera);
 
   // Draw depth map over scene.
-  quadMaterial->SetTexture(framebuffer->GetDepthTexture());
+  quadMaterial->SetTexture(framebuffer->GetColorTexture());
+  //quadMaterial->SetTexture(framebuffer->GetDepthTexture());
   glm::vec2 scale = glm::vec2(1) / glm::vec2(window->GetAspectRatio(), 1);
   quadMaterial->SetScale(scale);
   quadMaterial->SetOffset(glm::vec2(1 - scale.x * 0.5, -1 + scale.y * 0.5));
   quadMaterial->Use();
   Mesh::Quad->Draw();
+}
+
+void dg::ShadowScene::PrepareModelForDraw(
+    const Model& model,
+    glm::vec3 cameraPosition,
+    glm::mat4x4 view,
+    glm::mat4x4 projection,
+    const Light::ShaderData(&lights)[Light::MAX_LIGHTS]) const {
+  Scene::PrepareModelForDraw(model, cameraPosition, view, projection, lights);
+  model.material->SendShadowMap(framebuffer->GetDepthTexture());
+  model.material->SendLightTransform(lightTransform);
+  model.material->shader->SetBool("_DepthOnly", renderingDepthOnly);
 }

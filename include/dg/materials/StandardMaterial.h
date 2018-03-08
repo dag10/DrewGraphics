@@ -42,10 +42,12 @@ namespace dg {
 
     private:
 
-      enum STANDARD_TEX_UNIT_HINTS {
-        TEX_UNIT_HINT_DIFFUSE = 0,
-        TEX_UNIT_HINT_SPECULAR,
-        TEX_UNIT_HINT_NORMAL,
+      enum class TexUnitHints {
+        DIFFUSE = (int)Material::TexUnitHints::END,
+        SPECULAR,
+        NORMAL,
+
+        END,
       };
 
       static std::shared_ptr<Shader> standardShader;

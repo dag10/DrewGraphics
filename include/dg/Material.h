@@ -112,6 +112,9 @@ namespace dg {
       void SendMatrixNormal(glm::mat4x4 normal);
       void SendLights(const Light::ShaderData(&lights)[Light::MAX_LIGHTS]);
 
+      void SendShadowMap(std::shared_ptr<Texture> shadowMap);
+      void SendLightTransform(glm::mat4x4 xfLight);
+
       // Portal world-to-local transform, for back-of-portal fragment culling.
       // Set this if we're currently rendering "through" a portal, and set
       // to zeros if we're not rendering through a portal.
@@ -123,6 +126,12 @@ namespace dg {
       RenderQueue queue = RenderQueue::Geometry;
 
     protected:
+
+      enum class TexUnitHints {
+        SHADOWMAP = 0,
+
+        END,
+      };
 
       static const std::string LightProperty(
           int index, const std::string& property);

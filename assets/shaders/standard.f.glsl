@@ -18,8 +18,47 @@ struct Material {
 uniform Material _Material;
 uniform vec2 _UVScale;
 
+// TODO: TEMPORARY
+uniform bool _DepthOnly;
+
+uniform sampler2D _ShadowMap;
+
 in vec2 v_TexCoord;
 in mat3 v_TBN;
+in vec4 v_FragPosLightSpace;
+
+#define near_plane 0.1
+#define far_plane 100.0
+
+float LinearizeDepth(float depth) {
+  float z = depth * 2.0 - 1.0; // Back to NDC
+  return (2.0 * near_plane * far_plane) /
+    (far_plane + near_plane - z * (far_plane - near_plane));
+}
+
+float calculateShadow(vec4 fragPosLightSpace) {
+  //vec2 shadowUV = v_FragPosLightSpace.xy / v_FragPosLightSpace.w;
+  //shadowUV += 1;
+  //shadowUV *= 0.5;
+
+  //return texture(_ShadowMap, shadowUV).r;
+
+  // perform perspective divide
+  vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
+  // transform to [0,1] range
+  projCoords = projCoords * 0.5 + 0.5;
+  // get closest depth value from light's perspective (using [0,1] range fragPosLight as coords)
+  float closestDepth = texture(_ShadowMap, projCoords.xy).r;
+  //closestDepth = LinearizeDepth(closestDepth);
+  // get depth of current fragment from light's perspective
+  float currentDepth = projCoords.z;
+  // check whether current frag pos is in shadow
+  float shadow = currentDepth > closestDepth  ? 1.0 : 0.0;
+
+  //shadow = currentDepth - closestDepth;
+
+  return shadow;
+}
 
 vec3 calculateLight(
     Light light, vec3 normal, vec3 diffuseColor, vec3 specularColor) {
@@ -67,7 +106,43 @@ vec3 calculateLight(
     specular *= intensity;
   }
 
-	return specular + diffuse + ambient;
+  // Calculate shadow
+  //float shadow = calculateShadow(v_FragPosLightSpace);
+  // perform perspective divide
+  vec3 projCoords = v_FragPosLightSpace.xyz / v_FragPosLightSpace.w;
+  // transform to [0,1] range
+  projCoords = projCoords * 0.5 + 0.5;
+  // get closest depth value from light's perspective (using [0,1] range fragPosLight as coords)
+  float closestDepth = texture(_ShadowMap, projCoords.xy).r;
+  //closestDepth = LinearizeDepth(closestDepth);
+  // get depth of current fragment from light's perspective
+  float currentDepth = projCoords.z;
+  // check whether current frag pos is in shadow
+  float bias = max(0.01 * (1.0 - dot(norm, lightDir)), 0.005);
+  //bias = 0.005;
+  bias = 0.0001;
+  float shadow = currentDepth - bias > closestDepth  ? 1.0 : 0.0;
+
+  //vec3 lightSpace = v_FragPosLightSpace.xyz / v_FragPosLightSpace.w;
+  //lightSpace += 1;
+  //lightSpace *= 0.5;
+
+  if (!_DepthOnly) {
+    ////return vec3(lightSpace.xy, 0);
+    //return texture(_ShadowMap, lightSpace.xy).xyz;
+    ////return mix(
+        ////diffuseColor,
+        ////texture(_ShadowMap, lightSpace.xy).xyz,
+        ////0.8);
+    ////return mix(
+        ////diffuseColor,
+        ////lightSpace.zzz,
+        ////0.8);
+
+    //return vec3(shadow);
+  }
+
+	return ((1.0 - shadow) * (specular + diffuse)) + ambient;
 }
 
 vec4 frag() {

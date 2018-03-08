@@ -4,6 +4,7 @@
 out vec4 v_ScenePos;
 out vec3 v_Normal;
 out mat3 v_TBN; // The tangent space basis vectors in scene space.
+out vec4 v_FragPosLightSpace;
 
 vec4 vert();
 
@@ -14,6 +15,10 @@ void main() {
   // Bitangent is negative because OpenGL's Y coordinate for images is reversed.
   vec3 B = -normalize(cross(v_Normal, T));
   v_TBN = mat3(T, B, v_Normal);
+
+  // TODO
+  v_FragPosLightSpace = _Matrix_Shadow_VP * v_ScenePos;
+  //v_FragPosLightSpace = v_ScenePos;
 
   gl_Position = vert();
 }

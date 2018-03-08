@@ -176,6 +176,22 @@ void dg::Material::SetInvPortal(glm::mat4x4 invPortal) {
   SetProperty("_InvPortal", invPortal);
 }
 
+void dg::Material::SendShadowMap(std::shared_ptr<Texture> shadowMap) {
+#if defined(_OPENGL)
+  SetProperty("_ShadowMap", shadowMap, (int)TexUnitHints::SHADOWMAP);
+#elif defined(_DIRECTX)
+  // TODO
+#endif
+}
+
+void dg::Material::SendLightTransform(glm::mat4x4 xfLight) {
+#if defined(_OPENGL)
+  shader->SetMat4("_Matrix_Shadow_VP", xfLight);
+#elif defined(_DIRECTX)
+  // TODO
+#endif
+}
+
 void dg::Material::Use() const {
 #if defined(_OPENGL)
   shader->Use();
@@ -223,4 +239,3 @@ void dg::Material::Use() const {
   shader->Use();
 #endif
 }
-

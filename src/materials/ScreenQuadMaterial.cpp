@@ -22,6 +22,7 @@ dg::ScreenQuadMaterial::ScreenQuadMaterial(
   SetColor(color);
   SetScale(scale);
   SetOffset(offset);
+  SetRedChannelOnly(false);
 }
 
 dg::ScreenQuadMaterial::ScreenQuadMaterial(
@@ -30,6 +31,7 @@ dg::ScreenQuadMaterial::ScreenQuadMaterial(
   SetTexture(texture);
   SetScale(scale);
   SetOffset(offset);
+  SetRedChannelOnly(false);
 }
 
 dg::ScreenQuadMaterial::ScreenQuadMaterial(ScreenQuadMaterial& other)
@@ -79,3 +81,6 @@ void dg::ScreenQuadMaterial::SetOffset(glm::vec2 offset) {
   SetProperty("_Offset", offset);
 }
 
+void dg::ScreenQuadMaterial::SetRedChannelOnly(bool useRedChannelOnly) {
+  SetProperty("_RedChannelOnly", useRedChannelOnly);
+}

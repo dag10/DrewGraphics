@@ -34,6 +34,7 @@ namespace dg {
       void SetTexture(std::shared_ptr<Texture> texture);
       void SetScale(glm::vec2 scale);
       void SetOffset(glm::vec2 offset);
+      void SetRedChannelOnly(bool useRedChannelOnly);
 
     private:
 

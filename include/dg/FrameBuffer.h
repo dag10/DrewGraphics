@@ -43,7 +43,7 @@ namespace dg {
     public:
       FrameBuffer(
         unsigned int width, unsigned int height, bool depthReadable = false,
-        bool allowStencil = false);
+        bool allowStencil = false, bool createColorTexture = true);
       FrameBuffer(FrameBuffer& other) = delete;
       FrameBuffer(FrameBuffer&& other);
       ~FrameBuffer();

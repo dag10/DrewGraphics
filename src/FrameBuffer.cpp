@@ -60,17 +60,19 @@ unsigned int dg::RenderBuffer::GetHeight() const {
 #pragma region FrameBuffer
 
 dg::FrameBuffer::FrameBuffer(unsigned int width, unsigned int height,
-                             bool depthReadable, bool allowStencil)
+                             bool depthReadable, bool allowStencil,
+                             bool createColorTexture)
     : width(width), height(height) {
-
 #if defined(_OPENGL)
   glGenFramebuffers(1, &bufferHandle);
 
-  TextureOptions texOpts;
-  texOpts.width = width;
-  texOpts.height = height;
-  texOpts.wrap = TextureWrap::CLAMP_EDGE;
-  AttachColorTexture(Texture::Generate(texOpts));
+  if (createColorTexture) {
+    TextureOptions texOpts;
+    texOpts.width = width;
+    texOpts.height = height;
+    texOpts.wrap = TextureWrap::CLAMP_EDGE;
+    AttachColorTexture(Texture::Generate(texOpts));
+  }
 
   if (depthReadable) {
     if (allowStencil) {

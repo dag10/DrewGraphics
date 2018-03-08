@@ -43,10 +43,7 @@ void dg::ShadowScene::Initialize() {
   // Create ceiling light source.
   spotlight = std::make_shared<SpotLight>(glm::vec3(1.0f, 0.93f, 0.86f), 0.31,
                                           0.91, 0.86);
-  //spotlight->SetCutoff(mainCamera->fov / 2);  // TODO: Temporary
-  //spotlight->SetFeather(0);                   // TODO: Temporary
-  //spotlight->transform.translation = glm::vec3(1.4f, 1.2f, -0.7f);
-  spotlight->transform.translation = glm::vec3(1.4f, 1.2f, 0);
+  spotlight->transform.translation = glm::vec3(1.4f, 1.6f, -0.7f);
   spotlight->LookAtPoint({0, 0, 0});
   AddChild(spotlight);
 
@@ -95,8 +92,8 @@ void dg::ShadowScene::Initialize() {
                     glm::vec3(floorSize, floorSize, 1))));
 
   // Configure camera.
-  mainCamera->transform = Transform::T({1.054, 1.467, 2.048});
-  mainCamera->LookAtDirection({-0.3126, -0.4692, -0.8259});
+  mainCamera->transform = Transform::T({1.6, 1.74, 2.38});
+  mainCamera->LookAtDirection({-0.279, -0.465, -0.841});
 
   // Allow camera to be controller by the keyboard and mouse.
   Behavior::Attach(mainCamera,
@@ -105,6 +102,8 @@ void dg::ShadowScene::Initialize() {
   // Material for drawing depth map over scene.
   quadMaterial =
       std::make_shared<ScreenQuadMaterial>(glm::vec3(0), glm::vec2(1));
+
+  SetState(State::Spotlight);
 }
 
 void dg::ShadowScene::Update() {
@@ -114,6 +113,26 @@ void dg::ShadowScene::Update() {
   spotlight->transform =
       Transform::R(glm::quat(glm::radians(glm::vec3(0, Time::Delta * 30, 0)))) *
       spotlight->transform;
+
+  if (window->IsKeyJustPressed(Key::NUM_1)) {
+    SetState(State::Spotlight);
+  } else if (window->IsKeyJustPressed(Key::NUM_2)) {
+    SetState(State::RenderLight);
+  } else if (window->IsKeyJustPressed(Key::NUM_3)) {
+    SetState(State::RenderDepth);
+  } else if (window->IsKeyJustPressed(Key::NUM_4)) {
+    SetState(State::Shadow);
+  } else if (window->IsKeyJustPressed(Key::NUM_5)) {
+    SetState(State::Feather);
+  } else if (window->IsKeyJustPressed(Key::NUM_6)) {
+    SetState(State::Robot);
+  }
+}
+
+void dg::ShadowScene::SetState(State state) {
+  this->state = state;
+  spotlight->SetFeather((int)state >= (int)State::Feather ? glm::radians(5.f)
+                                                          : 0.f);
 }
 
 void dg::ShadowScene::RenderFrame() {
@@ -124,7 +143,7 @@ void dg::ShadowScene::RenderFrame() {
   lightCamera.transform = spotlight->SceneSpace();
   lightCamera.fov = spotlight->GetCutoff() * 2;
   lightCamera.nearClip = 0.5;
-  lightCamera.farClip = 6;
+  lightCamera.farClip = 7;
   lightTransform =
       lightCamera.GetProjectionMatrix() * lightCamera.GetViewMatrix();
   framebuffer->Bind();
@@ -148,22 +167,28 @@ void dg::ShadowScene::RenderFrame() {
   mainCamera->aspectRatio = window->GetAspectRatio();
   DrawScene(*mainCamera);
 
-  // Draw depth map over scene.
-  quadMaterial->SetTexture(framebuffer->GetDepthTexture());
-  glm::vec2 scale = glm::vec2(1) / glm::vec2(window->GetAspectRatio(), 1);
-  quadMaterial->SetScale(scale);
-  quadMaterial->SetRedChannelOnly(true);
-  quadMaterial->SetOffset(glm::vec2(1 - scale.x * 0.5, scale.y * 0.5));
-  quadMaterial->Use();
-  Mesh::Quad->Draw();
 
-  // Draw light color rendering over scene.
-  quadMaterial->SetTexture(framebuffer->GetColorTexture());
-  quadMaterial->SetRedChannelOnly(false);
-  quadMaterial->SetScale(scale);
-  quadMaterial->SetOffset(glm::vec2(1 - scale.x * 0.5, -1 + scale.y * 0.5));
-  quadMaterial->Use();
-  Mesh::Quad->Draw();
+  if ((int)state >= (int)State::RenderLight) {
+    // Draw light color rendering over scene.
+    glm::vec2 scale = glm::vec2(1) / glm::vec2(window->GetAspectRatio(), 1);
+    quadMaterial->SetTexture(framebuffer->GetColorTexture());
+    quadMaterial->SetRedChannelOnly(false);
+    quadMaterial->SetScale(scale);
+    quadMaterial->SetOffset(glm::vec2(1 - scale.x * 0.5, scale.y * 0.5));
+    quadMaterial->Use();
+    Mesh::Quad->Draw();
+  }
+
+  if ((int)state >= (int)State::RenderDepth) {
+    // Draw depth map over scene.
+    glm::vec2 scale = glm::vec2(1) / glm::vec2(window->GetAspectRatio(), 1);
+    quadMaterial->SetTexture(framebuffer->GetDepthTexture());
+    quadMaterial->SetScale(scale);
+    quadMaterial->SetRedChannelOnly(true);
+    quadMaterial->SetOffset(glm::vec2(1 - scale.x * 0.5, -1 + scale.y * 0.5));
+    quadMaterial->Use();
+    Mesh::Quad->Draw();
+  }
 }
 
 void dg::ShadowScene::PrepareModelForDraw(
@@ -173,6 +198,10 @@ void dg::ShadowScene::PrepareModelForDraw(
     glm::mat4x4 projection,
     const Light::ShaderData(&lights)[Light::MAX_LIGHTS]) const {
   Scene::PrepareModelForDraw(model, cameraPosition, view, projection, lights);
-  model.material->SendShadowMap(framebuffer->GetDepthTexture());
-  model.material->SendLightTransform(lightTransform);
+  if ((int)state >= (int)State::Shadow) {
+    model.material->SendShadowMap(framebuffer->GetDepthTexture());
+    model.material->SendLightTransform(lightTransform);
+  } else {
+    model.material->SendLightTransform(glm::mat4(0));
+  }
 }

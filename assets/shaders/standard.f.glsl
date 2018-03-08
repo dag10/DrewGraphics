@@ -71,12 +71,15 @@ vec3 calculateLight(
   }
 
   // Calculate shadow
-  vec3 projCoords = v_FragPosLightSpace.xyz / v_FragPosLightSpace.w;
-  projCoords = projCoords * 0.5 + 0.5;
-  float closestDepth = texture(_ShadowMap, projCoords.xy).r;
-  float currentDepth = projCoords.z;
-  float bias = 0.0001;
-  float shadow = currentDepth - bias > closestDepth  ? 1.0 : 0.0;
+  float shadow = 0;
+  if (v_FragPosLightSpace.w != 0) {
+    vec3 projCoords = v_FragPosLightSpace.xyz / v_FragPosLightSpace.w;
+    projCoords = projCoords * 0.5 + 0.5;
+    float closestDepth = texture(_ShadowMap, projCoords.xy).r;
+    float currentDepth = projCoords.z;
+    float bias = 0.0001;
+    shadow = currentDepth - bias > closestDepth  ? 1.0 : 0.0;
+  }
 
 	return ((1.0 - shadow) * (specular + diffuse)) + ambient;
 }

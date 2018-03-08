@@ -9,6 +9,10 @@
 
 namespace dg {
 
+  class FrameBuffer;
+  class ScreenQuadMaterial;
+  class SpotLight;
+
   class ShadowScene : public Scene {
 
     public:
@@ -18,10 +22,16 @@ namespace dg {
       ShadowScene();
 
       virtual void Initialize();
+      virtual void Update();
 
-    protected:
+    private:
 
-      virtual void ClearBuffer();
+      virtual void RenderFrame();
+
+      std::shared_ptr<Model> cube = nullptr;
+      std::shared_ptr<FrameBuffer> framebuffer = nullptr;
+      std::shared_ptr<SpotLight> spotlight = nullptr;
+      std::shared_ptr<ScreenQuadMaterial> quadMaterial = nullptr;
 
   }; // class ShadowScene
 

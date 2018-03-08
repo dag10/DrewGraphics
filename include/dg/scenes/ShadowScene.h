@@ -41,7 +41,6 @@ namespace dg {
 
       // TODO: Refactor this
       glm::mat4 lightTransform = glm::mat4(0);
-      bool renderingDepthOnly = false;
 
   }; // class ShadowScene
 

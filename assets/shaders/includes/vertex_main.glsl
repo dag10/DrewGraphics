@@ -16,9 +16,7 @@ void main() {
   vec3 B = -normalize(cross(v_Normal, T));
   v_TBN = mat3(T, B, v_Normal);
 
-  // TODO
   v_FragPosLightSpace = _Matrix_Shadow_VP * v_ScenePos;
-  //v_FragPosLightSpace = v_ScenePos;
 
   gl_Position = vert();
 }

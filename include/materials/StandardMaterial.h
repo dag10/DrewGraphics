@@ -39,6 +39,10 @@ namespace dg {
       void SetNormalMap(std::shared_ptr<Texture> normalMap);
       void SetShininess(float shininess);
 
+    protected:
+
+      void SetDefaultProperties();
+
     private:
 
       enum STANDARD_TEX_UNIT_HINTS {

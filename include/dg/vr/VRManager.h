@@ -82,7 +82,8 @@ namespace dg {
         = std::vector<vr::TrackedDevicePose_t>(vr::k_unMaxTrackedDeviceCount);
       std::forward_list<VRTrackedObject*> trackedObjects;
 
-      std::unordered_map<std::string, std::shared_ptr<RenderModelInfo>> renderModels;
+      std::unordered_map<std::string, std::shared_ptr<RenderModelInfo>>
+          renderModels;
 
   }; // class VRManager
 

@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include <Lights.h>
 #include <glm/glm.hpp>
 
 namespace dg {

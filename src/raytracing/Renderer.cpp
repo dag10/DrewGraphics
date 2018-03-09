@@ -143,7 +143,11 @@ dg::Renderer::Pixel dg::Renderer::RenderPixel(RayResult rayres) {
     auto traceableMat =
         std::dynamic_pointer_cast<TraceableMaterial>(rayres.model->material);
     if (traceableMat != nullptr) {
-      color = traceableMat->Shade(rayres);
+      try {
+        color = traceableMat->Shade(rayres);
+      } catch (const std::exception &e) {
+        throw std::runtime_error("Failed to shade: " + std::string(e.what()));
+      }
     }
 
     return Pixel(color);

@@ -3,11 +3,11 @@
 //
 #pragma once
 
-#include <memory>
-#include <unordered_map>
+#include <Lights.h>
 #include <Shader.h>
 #include <Texture.h>
-#include <Lights.h>
+#include <memory>
+#include <unordered_map>
 
 namespace dg {
 
@@ -49,6 +49,10 @@ namespace dg {
           const std::string& name, std::shared_ptr<Texture> value,
           int texUnitHint);
 
+      const MaterialProperty *GetProperty(const std::string& name) const;
+      const MaterialProperty *GetRequiredProperty(
+          const std::string &name) const;
+
       void ClearProperty(const std::string& name);
 
       void SetCameraPosition(glm::vec3 position);
@@ -65,6 +69,10 @@ namespace dg {
       void SetInvPortal(glm::mat4x4 invPortal);
 
       void Use() const;
+
+    protected:
+
+      std::unordered_map<int, Light::ShaderData> lights;
 
     private:
 

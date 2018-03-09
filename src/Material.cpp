@@ -112,6 +112,25 @@ void dg::Material::SetProperty(
   properties.insert_or_assign(name, prop);
 }
 
+const dg::MaterialProperty *dg::Material::GetProperty(
+    const std::string &name) const {
+  auto found = properties.find(name);
+  if (found == properties.end()) {
+    return nullptr;
+  }
+  return &found->second;
+}
+
+const dg::MaterialProperty *dg::Material::GetRequiredProperty(
+    const std::string &name) const {
+  auto prop = GetProperty(name);
+  if (prop == nullptr) {
+    throw std::runtime_error("Material lacked required property \"" + name +
+                             "\"");
+  }
+  return prop;
+}
+
 void dg::Material::ClearProperty(const std::string& name) {
   properties.erase(name);
 }
@@ -133,6 +152,7 @@ void dg::Material::SetMatrixNormal(glm::mat3x3 normal) {
 }
 
 void dg::Material::SetLight(int index, const Light& light) {
+  lights[index] = light.GetShaderData();
   light.SetMaterialProperties(index, *this);
 }
 
@@ -143,6 +163,7 @@ void dg::Material::ClearLights() {
 }
 
 void dg::Material::ClearLight(int index) {
+  lights[index].type = Light::LightType::NONE;
   Light::ClearMaterialProperties(index, *this);
 }
 
@@ -197,4 +218,3 @@ void dg::Material::Use() const {
     }
   }
 }
-

@@ -66,7 +66,6 @@ void dg::RaytraceScene::Initialize() {
       dg::Mesh::Sphere,
       std::make_shared<TraceableStandardMaterial>(sphereMaterial),
       Transform::TS(glm::vec3(-1, 0.5, -2), glm::vec3(2.5))));
-      //Transform::TS(glm::vec3(-1, 1.5, -2), glm::vec3(2.5))));
 
   // Create camera.
   mainCamera = std::make_shared<Camera>();

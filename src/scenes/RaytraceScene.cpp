@@ -41,17 +41,23 @@ void dg::RaytraceScene::Initialize() {
   floorMaterial.SetProperty("_Size", floorSize);
   floorMaterial.SetProperty("_Colors[0]", glm::vec3(1, 0, 0));
   floorMaterial.SetProperty("_Colors[1]", glm::vec3(1, 1, 0));
+  TraceableStandardMaterial solidFloorMaterial =
+      TraceableStandardMaterial::WithColor(glm::vec3(0.5));
+  solidFloorMaterial.SetSpecular(0.1);
+  solidFloorMaterial.SetShininess(64);
 
   // Create floor plane.
   AddChild(std::make_shared<TraceableModel>(
         dg::Mesh::Quad,
-        std::make_shared<Material>(floorMaterial),
+        //std::make_shared<Material>(floorMaterial),
+        std::make_shared<TraceableStandardMaterial>(solidFloorMaterial),
         Transform::RS(
           glm::quat(glm::radians(glm::vec3(-90, 0, 0))),
           glm::vec3(floorSize.x, floorSize.y, 1))));
 
   // Create sphere material.
-  TraceableStandardMaterial sphereMaterial = TraceableStandardMaterial::WithColor(glm::vec3(0.3));
+  TraceableStandardMaterial sphereMaterial =
+      TraceableStandardMaterial::WithColor(glm::vec3(0.3));
   sphereMaterial.SetSpecular(0.3);
   sphereMaterial.SetShininess(64);
 
@@ -65,7 +71,7 @@ void dg::RaytraceScene::Initialize() {
   AddChild(std::make_shared<TraceableModel>(
       dg::Mesh::Sphere,
       std::make_shared<TraceableStandardMaterial>(sphereMaterial),
-      Transform::TS(glm::vec3(-1, 0.5, -2), glm::vec3(2.5))));
+      Transform::TS(glm::vec3(-1, 1.5, -2), glm::vec3(2.5))));
 
   // Create camera.
   mainCamera = std::make_shared<Camera>();

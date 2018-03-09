@@ -95,13 +95,15 @@ glm::vec3 dg::TraceableStandardMaterial::CalculateLight(
   }
 
   // Spot light cutoff
-  //if (light.type == Light::LightType::SPOT) {
-    //float theta = glm::dot(lightDir, glm::normalize(-light.direction));
-    //float epsilon = light.outerCutoff - light.innerCutoff;
-    //float intensity = clamp((theta - cos(light.innerCutoff)) / epsilon, 0.0, 1.0);
-    //diffuse *= intensity;
-    //specular *= intensity;
-  //}
+  if (light.type == Light::LightType::SPOT) {
+    float theta = glm::dot(lightDir, glm::normalize(-light.direction));
+    float epsilon = light.outerCutoff - light.innerCutoff;
+    float intensity = (theta - cos(light.innerCutoff)) / epsilon;
+    intensity = std::max(intensity, 0.f);
+    intensity = std::min(intensity, 1.f);
+    diffuse *= intensity;
+    specular *= intensity;
+  }
 
 	return specular + diffuse + ambient;
 }

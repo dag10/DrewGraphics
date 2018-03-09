@@ -1,9 +1,8 @@
 //
-//  MathUtils.h
+//  DXUtils.h
 //
 #pragma once
 
-#include <openvr.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -13,10 +12,6 @@
 #endif
 
 namespace dg {
-
-  glm::mat4x4 HmdMat2Glm(vr::HmdMatrix44_t hmdMat);
-
-  glm::mat4x4 HmdMat2Glm(vr::HmdMatrix34_t hmdMat);
 
 #if defined(_DIRECTX)
   // Converts an XMFLOAT4X4 to a glm::mat4x4.

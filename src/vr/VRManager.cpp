@@ -5,10 +5,10 @@
 #include "dg/vr/VRManager.h"
 #include <iostream>
 #include "dg/Exceptions.h"
-#include "dg/MathUtils.h"
 #include "dg/Mesh.h"
 #include "dg/SceneObject.h"
 #include "dg/vr/VRTrackedObject.h"
+#include "dg/vr/VRUtils.h"
 
 dg::VRManager *dg::VRManager::Instance = nullptr;
 
@@ -134,7 +134,7 @@ void dg::VRManager::UpdatePoses() {
       if (trackedObject->deviceIndex == -1) {
         continue;
       }
-      trackedSceneObject->transform = Transform(HmdMat2Glm(
+      trackedSceneObject->transform = Transform(OVR2GLM(
         poses[trackedObject->deviceIndex].mDeviceToAbsoluteTracking));
     } else {
       int index = (trackedObject->role ==
@@ -147,7 +147,7 @@ void dg::VRManager::UpdatePoses() {
         trackedSceneObject->enabled = false;
       } else {
         trackedSceneObject->enabled = true;
-        trackedSceneObject->transform = Transform(HmdMat2Glm(
+        trackedSceneObject->transform = Transform(OVR2GLM(
           poses[index].mDeviceToAbsoluteTracking));
       }
     }
@@ -211,28 +211,33 @@ std::shared_ptr<dg::Mesh> dg::VRManager::GetRenderModelMesh(
     return pair->second->mesh;
   }
 
-  vr::RenderModel_t *model;
-  vr::EVRRenderModelError err = vr::VRRenderModelError_Loading;
-  do {
-    err = vrRenderModels->LoadRenderModel_Async(name.c_str(), &model);
-  } while (err == vr::VRRenderModelError_Loading);
-  if (err != vr::VRRenderModelError_None) {
-    return nullptr;
+  // Synchronously load render model data from OpenVR.
+  if (pair->second->data == nullptr) {
+    vr::EVRRenderModelError err = vr::VRRenderModelError_Loading;
+    do {
+      err = vrRenderModels->LoadRenderModel_Async(
+          name.c_str(), &pair->second->data);
+    } while (err == vr::VRRenderModelError_Loading);
+    if (err != vr::VRRenderModelError_None) {
+      return nullptr;
+    }
   }
+
+  // Create single mesh component.
   auto mesh = Mesh::Create();
-  for (unsigned int i = 0; i < model->unTriangleCount; i++) {
+  for (unsigned int i = 0; i < pair->second->data->unTriangleCount; i++) {
     glm::vec3 positions[3];
     glm::vec3 normals[3];
     glm::vec2 texCoords[3];
 
     for (int j = 0; j < 3; j++) {
-      auto position = model->rVertexData[model->rIndexData[i * 3 + j]].vPosition.v;
-      positions[j] = { position[0], position[1], position[2] };
-      auto normal = model->rVertexData[model->rIndexData[i * 3 + j]].vNormal.v;
-      normals[j] = { normal[0], normal[1], normal[2] };
-      auto texCoord = model->rVertexData[model->rIndexData[i * 3 + j]].rfTextureCoord;
-      texCoords[j] = { texCoord[0], texCoord[1] };
+      auto vert = pair->second->data
+                      ->rVertexData[pair->second->data->rIndexData[i * 3 + j]];
+      positions[j] = OVR2GLM(vert.vPosition);
+      normals[j] = OVR2GLM(vert.vNormal);
+      texCoords[j] = { vert.rfTextureCoord[0], vert.rfTextureCoord[1] };
     }
+
     mesh->AddTriangle(
       Vertex(positions[0], normals[0], texCoords[0]),
       Vertex(positions[1], normals[1], texCoords[1]),
@@ -242,6 +247,52 @@ std::shared_ptr<dg::Mesh> dg::VRManager::GetRenderModelMesh(
   mesh->FinishBuilding();
   pair->second->mesh = mesh;
   return mesh;
+}
+
+std::shared_ptr<dg::Texture> dg::VRManager::GetRenderModelTexture(
+    const std::string &name) {
+  auto pair = renderModels.find(name);
+  if (pair == renderModels.end()) {
+    return nullptr;
+  }
+  if (pair->second->texture != nullptr) {
+    return pair->second->texture;
+  }
+
+  // Synchronously load render model data from OpenVR.
+  if (pair->second->data == nullptr) {
+    vr::EVRRenderModelError err = vr::VRRenderModelError_Loading;
+    do {
+      err = vrRenderModels->LoadRenderModel_Async(
+          name.c_str(), &pair->second->data);
+    } while (err == vr::VRRenderModelError_Loading);
+    if (err != vr::VRRenderModelError_None) {
+      return nullptr;
+    }
+  }
+
+  // Synchronously load texture data from OpenVR.
+  vr::RenderModel_TextureMap_t *texdata;
+  vr::EVRRenderModelError err = vr::VRRenderModelError_Loading;
+  do {
+    err = vrRenderModels->LoadTexture_Async(
+        pair->second->data->diffuseTextureId, &texdata);
+  } while (err == vr::VRRenderModelError_Loading);
+  if (err != vr::VRRenderModelError_None) {
+    return nullptr;
+  }
+
+  // Create texture.
+  TextureOptions texOpts;
+  texOpts.width = texdata->unWidth;
+  texOpts.height = texdata->unHeight;
+  texOpts.mipmap = true;
+  texOpts.format = TexturePixelFormat::RGBA;
+  texOpts.type = TexturePixelType::BYTE;
+  auto texture = Texture::Generate(texOpts);
+  texture->UpdateData(texdata->rubTextureMapData, true);
+  pair->second->texture = texture;
+  return texture;
 }
 
 std::shared_ptr<dg::Mesh> dg::VRManager::GetHiddenAreaMesh(vr::EVREye eye) {

@@ -75,6 +75,9 @@ float dg::Window::GetHeight() const {
 
 float dg::Window::GetAspectRatio() const {
   glm::vec2 size = GetContentSize();
+  if (size.y == 0) {
+    return 1;
+  }
   return size.x / size.y;
 }
 

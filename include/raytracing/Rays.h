@@ -34,11 +34,15 @@ namespace dg {
     bool hit = false;
     Ray ray;
     float distance = 0;
+    glm::vec3 normal;
 
-    static RayResult Hit(Ray ray, float distance);
+    static RayResult Hit(Ray ray, float distance, glm::vec3 normal);
     static RayResult Miss(Ray ray);
 
     static const RayResult& Closest(const RayResult& a, const RayResult& b);
+
+    RayResult TransformedBy(glm::mat4 xf,
+                            const Ray *substituteRay = nullptr) const;
 
     RayResult() = default;
   };

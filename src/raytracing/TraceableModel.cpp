@@ -19,13 +19,7 @@ void dg::TraceableModel::CacheTransforms() {
 
 dg::RayResult dg::TraceableModel::RayTest(Ray ray) const {
   Ray ray_MS = ray.TransformedBy(xfSceneSpaceInv);
-  RayResult res = ray_MS.IntersectMesh(mesh);
-
-  // Transform distance scalar from model space to world space before
-  // returning. Also substitutes model-space ray for original world-space
-  // ray.
-  res.distance /= ray_MS.scaleFromParent;
-  res.ray = ray;
+  RayResult res = ray_MS.IntersectMesh(mesh).TransformedBy(xfSceneSpace, &ray);
   res.model = this;
   return res;
 }

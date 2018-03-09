@@ -71,7 +71,7 @@ dg::RayResult dg::Ray::IntersectTriangle(
 
   float t = f * glm::dot(edge2, q);
   if (t > EPSILON) { // ray intersection
-    return RayResult::Hit(*this, t);
+    return RayResult::Hit(*this, t, glm::vec3(0));
   }
 
   return RayResult::Miss(*this);
@@ -90,6 +90,10 @@ dg::RayResult dg::Ray::IntersectMesh(std::shared_ptr<Mesh> mesh) const {
     Vertex v2 = mesh->GetVertex(i * 3 + 1);
     Vertex v3 = mesh->GetVertex(i * 3 + 2);
     RayResult triRes = IntersectTriangle(v1.position, v2.position, v3.position);
+
+    // TODO: Calculate normal using Barycentric interpolation.
+    triRes.normal = v1.normal;
+
     res = RayResult::Closest(res, triRes);
   }
   return res;
@@ -127,14 +131,17 @@ dg::RayResult dg::Ray::IntersectSphere(float radius) const {
     }
   }
 
-  return RayResult::Hit(*this, glm::distance(intersection, origin));
+  float distance = glm::distance(intersection, origin);
+  glm::vec3 normal = glm::normalize(intersection);
+  return RayResult::Hit(*this, distance, normal);
 }
 
-dg::RayResult dg::RayResult::Hit(Ray ray, float distance) {
+dg::RayResult dg::RayResult::Hit(Ray ray, float distance, glm::vec3 normal) {
   RayResult res;
   res.ray = ray;
   res.hit = true;
   res.distance = distance;
+  res.normal = normal;
   return res;
 }
 
@@ -150,3 +157,17 @@ const dg::RayResult& dg::RayResult::Closest(
   return (!b.hit || (a.hit && a.distance < b.distance)) ? a : b;
 }
 
+dg::RayResult dg::RayResult::TransformedBy(glm::mat4 xf,
+                                           const Ray *substituteRay) const {
+  auto newRay =
+      (substituteRay == nullptr) ? ray.TransformedBy(xf) : *substituteRay;
+
+  RayResult ret;
+  ret.model = model;
+  ret.hit = hit;
+  ret.distance = distance / ray.scaleFromParent; // TODO: Possibly incorrect.
+  ret.ray = newRay;
+  ret.normal =
+      glm::normalize(glm::mat3x3(glm::transpose(glm::inverse(xf))) * normal);
+  return ret;
+}

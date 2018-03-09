@@ -128,11 +128,15 @@ dg::Renderer::Pixel dg::Renderer::RenderPixel(RayResult rayres) {
   if (rayres.hit) {
     glm::vec3 color = glm::vec3(rayres.distance / 50.f);
 
+    // Color objects based on mesh type.
     if (rayres.model->mesh == Mesh::Sphere) {
       color *= glm::vec3(1, 0, 0);
     } else if (rayres.model->mesh == Mesh::Cube) {
       color *= glm::vec3(0, 1, 0);
     }
+
+    // Set color to be surface normal.
+    color = rayres.normal * 0.5f + 0.5f;
 
     return Pixel(color);
   }

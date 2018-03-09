@@ -97,6 +97,8 @@ void dg::RaytraceScene::Update() {
       showRender = false;
     }
     return;
+  } else {
+    window->SetTitle("Real-Time Preview (OpenGL)");
   }
 
   Scene::Update();
@@ -144,5 +146,5 @@ void dg::RaytraceScene::Raytrace() {
 }
 
 bool dg::RaytraceScene::AutomaticWindowTitle() const {
-  return !showRender && !raytraceNextFrame;
+  return false;
 }

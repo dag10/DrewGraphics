@@ -30,6 +30,7 @@ namespace dg {
       int deviceIndex = -1;
       std::string currentModelName;
       std::weak_ptr<Model> model;
+      double nextLoadRetryTime = 0;
 
   }; // class VRRenderModel
 

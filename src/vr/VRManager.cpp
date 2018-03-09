@@ -42,7 +42,7 @@ void dg::VRManager::StartOpenVR() {
   vrCompositor = vr::VRCompositor();
   vrRenderModels = vr::VRRenderModels();
 
-  PopulateRenderModelList();
+  UpdateRenderModelList();
 
   CreateFramebuffers();
 }
@@ -154,7 +154,7 @@ void dg::VRManager::UpdatePoses() {
   }
 }
 
-void dg::VRManager::PopulateRenderModelList() {
+void dg::VRManager::UpdateRenderModelList() {
   uint32_t numModels = vrRenderModels->GetRenderModelCount();
   for (unsigned int i = 0; i < numModels; i++) {
     size_t size = vrRenderModels->GetRenderModelName(i, nullptr, 0);
@@ -164,9 +164,9 @@ void dg::VRManager::PopulateRenderModelList() {
 
     auto rmInfo = std::make_shared<RenderModelInfo>();
     rmInfo->renderModelIndex = i;
-    renderModels[name] = rmInfo;
-
-    std::cout << name << std::endl; // TODO: TEMPORARY
+    if (renderModels.find(name) == renderModels.end()) {
+      renderModels[name] = rmInfo;
+    }
   }
 }
 
@@ -203,20 +203,24 @@ void dg::VRManager::SubmitFrame(vr::EVREye eye) {
 
 std::shared_ptr<dg::Mesh> dg::VRManager::GetRenderModelMesh(
     const std::string& name) {
+  std::shared_ptr<RenderModelInfo> info = nullptr;
+
   auto pair = renderModels.find(name);
   if (pair == renderModels.end()) {
     return nullptr;
   }
-  if (pair->second->mesh != nullptr) {
-    return pair->second->mesh;
+  info = pair->second;
+
+  if (info->mesh != nullptr) {
+    return info->mesh;
   }
 
   // Synchronously load render model data from OpenVR.
-  if (pair->second->data == nullptr) {
+  if (info->data == nullptr) {
     vr::EVRRenderModelError err = vr::VRRenderModelError_Loading;
     do {
       err = vrRenderModels->LoadRenderModel_Async(
-          name.c_str(), &pair->second->data);
+          name.c_str(), &info->data);
     } while (err == vr::VRRenderModelError_Loading);
     if (err != vr::VRRenderModelError_None) {
       return nullptr;
@@ -225,14 +229,13 @@ std::shared_ptr<dg::Mesh> dg::VRManager::GetRenderModelMesh(
 
   // Create single mesh component.
   auto mesh = Mesh::Create();
-  for (unsigned int i = 0; i < pair->second->data->unTriangleCount; i++) {
+  for (unsigned int i = 0; i < info->data->unTriangleCount; i++) {
     glm::vec3 positions[3];
     glm::vec3 normals[3];
     glm::vec2 texCoords[3];
 
     for (int j = 0; j < 3; j++) {
-      auto vert = pair->second->data
-                      ->rVertexData[pair->second->data->rIndexData[i * 3 + j]];
+      auto vert = info->data->rVertexData[info->data->rIndexData[i * 3 + j]];
       positions[j] = OVR2GLM(vert.vPosition);
       normals[j] = OVR2GLM(vert.vNormal);
       texCoords[j] = { vert.rfTextureCoord[0], vert.rfTextureCoord[1] };
@@ -245,26 +248,29 @@ std::shared_ptr<dg::Mesh> dg::VRManager::GetRenderModelMesh(
       Mesh::Winding::CW);
   }
   mesh->FinishBuilding();
-  pair->second->mesh = mesh;
+  info->mesh = mesh;
   return mesh;
 }
 
 std::shared_ptr<dg::Texture> dg::VRManager::GetRenderModelTexture(
     const std::string &name) {
+  std::shared_ptr<RenderModelInfo> info = nullptr;
+
   auto pair = renderModels.find(name);
   if (pair == renderModels.end()) {
     return nullptr;
   }
-  if (pair->second->texture != nullptr) {
-    return pair->second->texture;
+  info = pair->second;
+
+  if (info->texture != nullptr) {
+    return info->texture;
   }
 
   // Synchronously load render model data from OpenVR.
-  if (pair->second->data == nullptr) {
+  if (info->data == nullptr) {
     vr::EVRRenderModelError err = vr::VRRenderModelError_Loading;
     do {
-      err = vrRenderModels->LoadRenderModel_Async(
-          name.c_str(), &pair->second->data);
+      err = vrRenderModels->LoadRenderModel_Async(name.c_str(), &info->data);
     } while (err == vr::VRRenderModelError_Loading);
     if (err != vr::VRRenderModelError_None) {
       return nullptr;
@@ -275,8 +281,8 @@ std::shared_ptr<dg::Texture> dg::VRManager::GetRenderModelTexture(
   vr::RenderModel_TextureMap_t *texdata;
   vr::EVRRenderModelError err = vr::VRRenderModelError_Loading;
   do {
-    err = vrRenderModels->LoadTexture_Async(
-        pair->second->data->diffuseTextureId, &texdata);
+    err = vrRenderModels->LoadTexture_Async(info->data->diffuseTextureId,
+                                            &texdata);
   } while (err == vr::VRRenderModelError_Loading);
   if (err != vr::VRRenderModelError_None) {
     return nullptr;
@@ -291,7 +297,7 @@ std::shared_ptr<dg::Texture> dg::VRManager::GetRenderModelTexture(
   texOpts.type = TexturePixelType::BYTE;
   auto texture = Texture::Generate(texOpts);
   texture->UpdateData(texdata->rubTextureMapData, true);
-  pair->second->texture = texture;
+  info->texture = texture;
   return texture;
 }
 

@@ -48,6 +48,7 @@ namespace dg {
       std::shared_ptr<FrameBuffer> GetFramebuffer(vr::EVREye eye) const;
       void SubmitFrame(vr::EVREye eye);
 
+      void UpdateRenderModelList();
       std::shared_ptr<Mesh> GetRenderModelMesh(const std::string& name);
       std::shared_ptr<Texture> GetRenderModelTexture(const std::string& name);
 
@@ -65,7 +66,6 @@ namespace dg {
       void StartOpenVR();
       void CreateFramebuffers();
       void UpdatePoses();
-      void PopulateRenderModelList();
 
       int leftControllerIndex = -1;
       int rightControllerIndex = -1;

@@ -4,6 +4,7 @@
 
 #include "dg/vr/VRRenderModel.h"
 #include <iostream>
+#include "dg/EngineTime.h"
 #include "dg/Model.h"
 #include "dg/SceneObject.h"
 #include "dg/materials/StandardMaterial.h"
@@ -18,6 +19,10 @@ void dg::VRRenderModel::Update() {
   //auto trackedObject = this->trackedObject.lock();
   auto trackedObject = GetSceneObject()->GetBehavior<VRTrackedObject>();
   if (!trackedObject) {
+    return;
+  }
+
+  if (Time::Elapsed < nextLoadRetryTime) {
     return;
   }
 
@@ -39,7 +44,9 @@ void dg::VRRenderModel::Update() {
   if (len == 0) {
     std::cerr << "Failed to load render model name property for device "
               << deviceIndex << std::endl;
-    enabled = false;
+    nextLoadRetryTime = Time::Elapsed + 1.0;
+    deviceIndex = -1;
+    return;
   }
 
   LoadRenderModel(name);
@@ -58,14 +65,21 @@ void dg::VRRenderModel::LoadRenderModel(const std::string& modelName) {
   }
   currentModelName = modelName;
 
+  VRManager::Instance->UpdateRenderModelList();
+
   StandardMaterial material = StandardMaterial::WithTexture(
       VRManager::Instance->GetRenderModelTexture(currentModelName));
   material.SetSpecular(0.3f);
 
+  auto mesh = VRManager::Instance->GetRenderModelMesh(currentModelName);
+  if (!mesh) {
+    return;
+  }
+
+  DestroyRenderModel();
+
   std::shared_ptr<Model> model = std::make_shared<Model>(
-    VRManager::Instance->GetRenderModelMesh(currentModelName),
-    std::make_shared<StandardMaterial>(material),
-    Transform());
+      mesh, std::make_shared<StandardMaterial>(material), Transform());
   GetSceneObject()->AddChild(model, false);
   this->model = model;
 }

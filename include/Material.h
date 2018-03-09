@@ -7,7 +7,7 @@
 #include <unordered_map>
 #include <Shader.h>
 #include <Texture.h>
-#include <Light.h>
+#include <Lights.h>
 
 namespace dg {
 

@@ -4,6 +4,9 @@
 
 #include <behaviors/KeyboardLightController.h>
 #include <EngineTime.h>
+#include <Lights.h>
+#include <Window.h>
+#include <InputCodes.h>
 #include <iostream>
 
 dg::KeyboardLightController::KeyboardLightController(
@@ -26,35 +29,72 @@ void dg::KeyboardLightController::Update() {
   if (!light || !window) return;
 
   const float lightDelta = 0.05f;
+  glm::vec3 ambient = light->GetAmbient();
   if (window->IsKeyPressed(ambientModifierKey) &&
       window->IsKeyJustPressed(Key::UP)) {
-    light->ambient += light->ambient * lightDelta;
-    std::cout << "Ambient R: " << light->ambient.r << std::endl;
+    ambient += ambient * lightDelta;
+    std::cout
+      << "Ambient:"
+      << "\t" << ambient.r
+      << "\t" << ambient.g
+      << "\t" << ambient.b
+      << std::endl;
   } else if (window->IsKeyPressed(ambientModifierKey) &&
       window->IsKeyJustPressed(Key::DOWN)) {
-    light->ambient -= light->ambient * lightDelta;
-    std::cout << "Ambient R: " << light->ambient.r << std::endl;
+    ambient -= ambient * lightDelta;
+    std::cout
+      << "Ambient:"
+      << "\t" << ambient.r
+      << "\t" << ambient.g
+      << "\t" << ambient.b
+      << std::endl;
   }
+  light->SetAmbient(ambient);
 
   // Adjust light diffuse power with keyboard.
+  glm::vec3 diffuse = light->GetDiffuse();
   if (window->IsKeyPressed(diffuseModifierKey) &&
       window->IsKeyJustPressed(Key::UP)) {
-    light->diffuse += light->diffuse * lightDelta;
-    std::cout << "Diffuse R: " << light->diffuse.r << std::endl;
+    diffuse += diffuse * lightDelta;
+    std::cout
+      << "Diffuse:"
+      << "\t" << diffuse.r
+      << "\t" << diffuse.g
+      << "\t" << diffuse.b
+      << std::endl;
   } else if (window->IsKeyPressed(diffuseModifierKey) &&
       window->IsKeyJustPressed(Key::DOWN)) {
-    light->diffuse -= light->diffuse * lightDelta;
-    std::cout << "Diffuse R: " << light->diffuse.r << std::endl;
+    diffuse -= diffuse * lightDelta;
+    std::cout
+      << "Diffuse:"
+      << "\t" << diffuse.r
+      << "\t" << diffuse.g
+      << "\t" << diffuse.b
+      << std::endl;
   }
+  light->SetDiffuse(diffuse);
 
   // Adjust light specular power with keyboard.
+  glm::vec3 specular = light->GetSpecular();
   if (window->IsKeyPressed(specularModifierKey) &&
       window->IsKeyJustPressed(Key::UP)) {
-    light->specular += light->specular * lightDelta;
-    std::cout << "Specular R: " << light->specular.r << std::endl;
+    specular += specular * lightDelta;
+    std::cout
+      << "Specular:"
+      << "\t" << specular.r
+      << "\t" << specular.g
+      << "\t" << specular.b
+      << std::endl;
   } else if (window->IsKeyPressed(specularModifierKey) &&
       window->IsKeyJustPressed(Key::DOWN)) {
-    light->specular -= light->specular * lightDelta;
-    std::cout << "Specular R: " << light->specular.r << std::endl;
+    specular -= specular * lightDelta;
+    std::cout
+      << "Specular:"
+      << "\t" << specular.r
+      << "\t" << specular.g
+      << "\t" << specular.b
+      << std::endl;
   }
+  light->SetSpecular(specular);
 }
+

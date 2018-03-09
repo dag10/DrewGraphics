@@ -8,7 +8,6 @@
 #include <raytracing/TraceableStandardMaterial.h>
 #include <materials/ScreenQuadMaterial.h>
 #include <behaviors/KeyboardCameraController.h>
-#include <lights/DirectionalLight.h>
 #include <raytracing/Renderer.h>
 #include <raytracing/TraceableModel.h>
 
@@ -28,9 +27,9 @@ void dg::RaytraceScene::Initialize() {
 
   // Create directinal light.
   auto directionalLight = std::make_shared<DirectionalLight>(
-      glm::normalize(glm::vec3(0, -1, -0.3)),
       glm::vec3(1.0f, 0.93f, 0.86f),
       0.732f, 0.399f, 0.968f);
+  directionalLight->LookAtDirection(glm::normalize(glm::vec3(0, -1, -0.3)));
   AddChild(directionalLight);
 
   // Create floor material.
@@ -147,4 +146,3 @@ void dg::RaytraceScene::Raytrace() {
 bool dg::RaytraceScene::AutomaticWindowTitle() const {
   return !showRender && !raytraceNextFrame;
 }
-

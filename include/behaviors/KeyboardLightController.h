@@ -5,7 +5,7 @@
 #pragma once
 
 #include <Behavior.h>
-#include <Light.h>
+#include <Lights.h>
 #include <Window.h>
 #include <InputCodes.h>
 #include <memory>

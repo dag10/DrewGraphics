@@ -10,7 +10,7 @@
 #include <SceneObject.h>
 #include <Skybox.h>
 #include <Model.h>
-#include <Light.h>
+#include <Lights.h>
 #include <FrameBuffer.h>
 #include <materials/ScreenQuadMaterial.h>
 

@@ -241,28 +241,10 @@ void dg::VRScene::Initialize() {
   Behavior::Attach(rightController, std::make_shared<VRRenderModel>());
   vrContainer->AddChild(rightController);
 
-  // Create controller block material.
-  //StandardMaterial controllerMaterial =
-  //    StandardMaterial::WithColor(glm::vec3(0.1f));
-  //StandardMaterial controllerMaterial = StandardMaterial::WithTexture(
-  //    VRManager::Instance->GetRenderModelTexture("vr_controller_vive_1_5"));
-  //controllerMaterial.SetSpecular(0.3f);
-
-  // Create blocks to represent left and right controllers.
-  //auto leftControllerModel = std::make_shared<Model>(
-  //  VRManager::Instance->GetRenderModelMesh("vr_controller_vive_1_5"),
-  //  std::make_shared<StandardMaterial>(controllerMaterial),
-  //  Transform());
-  //leftController->AddChild(leftControllerModel, false);
-  //auto rightControllerModel = std::make_shared<Model>(
-  //  VRManager::Instance->GetRenderModelMesh("vr_controller_vive_1_5"),
-  //  std::make_shared<StandardMaterial>(controllerMaterial),
-  //  Transform());
-  //rightController->AddChild(rightControllerModel, false);
-
   // Create a flashlight attached to the right controller.
   flashlight = std::make_shared<SpotLight>(
       ceilingLightColor, 0.314f, 2.16f, 2.11f);
+  flashlight->transform.translation.z = 0.035;
   flashlight->LookAtDirection(FORWARD);
   flashlight->SetCutoff(glm::radians(35.f));
   Behavior::Attach(
@@ -362,8 +344,8 @@ void dg::VRScene::RenderFrame() {
     Camera lightCamera;
     lightCamera.transform = flashlight->SceneSpace();
     lightCamera.fov = flashlight->GetCutoff() * 2;
-    //lightCamera.nearClip = 0.01;
-    //lightCamera.farClip = 30;
+    lightCamera.nearClip = 0.01;
+    lightCamera.farClip = 100;
     lightTransform =
         lightCamera.GetProjectionMatrix() * lightCamera.GetViewMatrix();
     framebuffer->Bind();

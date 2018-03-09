@@ -6,15 +6,7 @@
 #include <Shader.h>
 #include <Window.h>
 #include <glad/glad.h>
-#include <scenes/CanvasTestScene.h>
-#include <scenes/MeshesScene.h>
 #include <scenes/RaytraceScene.h>
-#include <scenes/PortalScene.h>
-#include <scenes/QuadScene.h>
-#include <scenes/RobotScene.h>
-#include <scenes/TexturesScene.h>
-#include <scenes/TutorialScene.h>
-#include <scenes/VRScene.h>
 #include <functional>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -47,17 +39,7 @@ int main(int argc, const char *argv[]) {
   std::map<
     std::string,
     std::function<std::unique_ptr<dg::Scene>()>> constructors;
-  constructors["portal"]    = dg::PortalScene::Make;
-  constructors["tutorial"]  = dg::TutorialScene::Make;
-  constructors["textures"]  = dg::TexturesScene::Make;
-  constructors["meshes"]    = dg::MeshesScene::Make;
-  constructors["meshes-vr"] = dg::MeshesScene::MakeVR;
   constructors["raytrace"]  = dg::RaytraceScene::Make;
-  constructors["robot"]     = dg::RobotScene::Make;
-  constructors["robot-vr"]  = dg::RobotScene::MakeVR;
-  constructors["quad"]      = dg::QuadScene::Make;
-  constructors["canvas"]    = dg::CanvasTestScene::Make;
-  constructors["vr"]        = dg::VRScene::Make;
   std::string sceneName;
   if (argc > 1) {
     sceneName = argv[1];

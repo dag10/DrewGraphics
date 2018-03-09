@@ -4,6 +4,7 @@
 
 #include "dg/scenes/VRScene.h"
 
+#include <openvr.h>
 #include <glm/glm.hpp>
 #include <iostream>
 #include <memory>
@@ -20,6 +21,7 @@
 #include "dg/Transform.h"
 #include "dg/Window.h"
 #include "dg/behaviors/KeyboardLightController.h"
+#include "dg/materials/ScreenQuadMaterial.h"
 #include "dg/materials/StandardMaterial.h"
 #include "dg/vr/VRManager.h"
 #include "dg/vr/VRRenderModel.h"
@@ -49,6 +51,9 @@ void dg::VRScene::Initialize() {
     << "Press ESC or Q to release the cursor, and press "
        "again to quit." << std::endl
     << std::endl;
+
+  vrQuadMaterial =
+      std::make_shared<ScreenQuadMaterial>(glm::vec3(0), glm::vec2(2));
 
   // Create textures.
   std::shared_ptr<Texture> crateTexture =
@@ -264,8 +269,11 @@ void dg::VRScene::Initialize() {
     flashlight, std::make_shared<KeyboardLightController>(window));
   rightController->AddChild(flashlight, false);
 
+  // Create frame buffer for flashlight.
+  framebuffer = std::make_shared<FrameBuffer>(2048, 2048, true, false, false);
+
   // Initial lighting configuration is the indoor point light.
-  lightingType = PointLighting;
+  lightingType = FlashlightLighting;
   UpdateLightingConfiguration();
 
   // Ceiling light is initially not moving.
@@ -340,4 +348,95 @@ void dg::VRScene::UpdateLightingConfiguration() {
   outdoorCeilingLight->enabled = (lightingType == OutdoorLighting);
   spotLight->enabled = (lightingType == SpotLighting);
   flashlight->enabled = (lightingType == FlashlightLighting);
+}
+
+void dg::VRScene::RenderFrame() {
+  if (enableVR) {
+    // Wait for "running start", and get latest poses.
+    VRManager::Instance->ReadyToRender();
+  }
+
+#if defined(_OPENGL)
+  if (flashlight->enabled) {
+    // Render scene for light framebuffer.
+    Camera lightCamera;
+    lightCamera.transform = flashlight->SceneSpace();
+    lightCamera.fov = flashlight->GetCutoff() * 2;
+    //lightCamera.nearClip = 0.01;
+    //lightCamera.farClip = 30;
+    lightTransform =
+        lightCamera.GetProjectionMatrix() * lightCamera.GetViewMatrix();
+    framebuffer->Bind();
+    framebuffer->SetViewport();
+
+    glClear(GL_DEPTH_BUFFER_BIT);
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_FRONT);
+
+    DrawScene(lightCamera);
+
+    glCullFace(GL_BACK);
+
+    framebuffer->Unbind();
+    window->ResetViewport();
+  }
+
+#endif
+
+  if (enableVR) {
+    // Render left and right eyes for VR.
+    Scene::RenderFrame(vr::EVREye::Eye_Left);
+    Scene::RenderFrame(vr::EVREye::Eye_Right);
+  }
+
+  ClearBuffer();
+  ConfigureBuffer();
+
+  if (enableVR) {
+    // Render cropped left eye to screen.
+    mainCamera->aspectRatio = window->GetAspectRatio();
+    float aspect = window->GetAspectRatio();
+    if (aspect > 1) {
+      vrQuadMaterial->SetScale(glm::vec2(2.7) *
+                               glm::vec2(1, window->GetAspectRatio()));
+    } else {
+      vrQuadMaterial->SetScale(glm::vec2(3.2) /
+                               glm::vec2(window->GetAspectRatio(), 1));
+    }
+    vrQuadMaterial->SetTexture(
+        VRManager::Instance->GetFramebuffer(vr::EVREye::Eye_Left)
+            ->GetColorTexture());
+    vrQuadMaterial->Use();
+    Mesh::Quad->Draw();
+  } else {
+    DrawScene(*mainCamera);
+  }
+
+  if (enableVR) {
+    VRManager::Instance->RenderFinished();
+  }
+}
+
+void dg::VRScene::ConfigureBuffer() {
+  glEnable(GL_DEPTH_TEST);
+  glDepthFunc(GL_LESS);
+  glDepthMask(GL_TRUE);
+  glEnable(GL_CULL_FACE);
+  //glCullFace(GL_BACK);
+}
+
+void dg::VRScene::PrepareModelForDraw(
+    const Model& model,
+    glm::vec3 cameraPosition,
+    glm::mat4x4 view,
+    glm::mat4x4 projection,
+    const Light::ShaderData(&lights)[Light::MAX_LIGHTS]) const {
+  Scene::PrepareModelForDraw(model, cameraPosition, view, projection, lights);
+  if (flashlight->enabled) {
+    model.material->SendShadowMap(framebuffer->GetDepthTexture());
+    model.material->SendLightTransform(lightTransform);
+  } else {
+    model.material->SendLightTransform(glm::mat4(0));
+  }
 }

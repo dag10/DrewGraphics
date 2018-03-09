@@ -132,9 +132,6 @@
     <ClCompile Include="src\scenes\QuadScene.cpp">
       <Filter>Source Files\scenes</Filter>
     </ClCompile>
-    <ClCompile Include="src\scenes\TutorialScene.cpp">
-      <Filter>Source Files\scenes</Filter>
-    </ClCompile>
     <ClCompile Include="src\scenes\VRScene.cpp">
       <Filter>Source Files\scenes</Filter>
     </ClCompile>
@@ -200,6 +197,9 @@
     </ClCompile>
     <ClCompile Include="src\vr\VRUtils.cpp">
       <Filter>Source Files\vr</Filter>
+    </ClCompile>
+    <ClCompile Include="src\scenes\ShadowScene.cpp">
+      <Filter>Source Files\scenes</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -272,9 +272,6 @@
     <ClInclude Include="include\dg\scenes\QuadScene.h">
       <Filter>Header Files\scenes</Filter>
     </ClInclude>
-    <ClInclude Include="include\dg\scenes\TutorialScene.h">
-      <Filter>Header Files\scenes</Filter>
-    </ClInclude>
     <ClInclude Include="include\dg\scenes\VRScene.h">
       <Filter>Header Files\scenes</Filter>
     </ClInclude>
@@ -343,6 +340,9 @@
     </ClInclude>
     <ClInclude Include="include\dg\directx\DXUtils.h">
       <Filter>Header Files\directx</Filter>
+    </ClInclude>
+    <ClInclude Include="include\dg\scenes\ShadowScene.h">
+      <Filter>Header Files\scenes</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

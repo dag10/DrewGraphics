@@ -456,9 +456,9 @@ del /s $(OutDir)*.obj, $(OutDir)*.pdb, $(OutDir)*.ipdb, $(OutDir)*.iobj</Command
     <ClCompile Include="src\scenes\DeepCloningScene.cpp" />
     <ClCompile Include="src\scenes\PortalScene.cpp" />
     <ClCompile Include="src\scenes\QuadScene.cpp" />
+    <ClCompile Include="src\scenes\ShadowScene.cpp" />
     <ClCompile Include="src\scenes\SimpleScene.cpp" />
     <ClCompile Include="src\scenes\TexturesScene.cpp" />
-    <ClCompile Include="src\scenes\TutorialScene.cpp" />
     <ClCompile Include="src\scenes\MeshesScene.cpp" />
     <ClCompile Include="src\scenes\RobotScene.cpp" />
     <ClCompile Include="src\scenes\VRScene.cpp" />
@@ -504,9 +504,9 @@ del /s $(OutDir)*.obj, $(OutDir)*.pdb, $(OutDir)*.ipdb, $(OutDir)*.iobj</Command
     <ClInclude Include="include\dg\scenes\DeepCloningScene.h" />
     <ClInclude Include="include\dg\scenes\PortalScene.h" />
     <ClInclude Include="include\dg\scenes\QuadScene.h" />
+    <ClInclude Include="include\dg\scenes\ShadowScene.h" />
     <ClInclude Include="include\dg\scenes\SimpleScene.h" />
     <ClInclude Include="include\dg\scenes\TexturesScene.h" />
-    <ClInclude Include="include\dg\scenes\TutorialScene.h" />
     <ClInclude Include="include\dg\scenes\MeshesScene.h" />
     <ClInclude Include="include\dg\scenes\RobotScene.h" />
     <ClInclude Include="include\dg\scenes\VRScene.h" />

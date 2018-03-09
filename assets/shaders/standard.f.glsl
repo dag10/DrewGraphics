@@ -79,6 +79,9 @@ vec3 calculateLight(
     float currentDepth = projCoords.z;
     float bias = 0.0001;
     shadow = currentDepth - bias > closestDepth  ? 1.0 : 0.0;
+    if (projCoords.z > 1.0) {
+      shadow = 0.0;
+    }
   }
 
 	return ((1.0 - shadow) * (specular + diffuse)) + ambient;

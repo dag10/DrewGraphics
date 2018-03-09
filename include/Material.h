@@ -24,6 +24,7 @@ namespace dg {
     public:
 
       Material() = default;
+      virtual ~Material() {};
 
       Material(Material& other);
       Material(Material&& other);

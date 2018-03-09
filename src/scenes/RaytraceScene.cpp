@@ -5,7 +5,7 @@
 #include <scenes/RaytraceScene.h>
 
 #include <glm/glm.hpp>
-#include <materials/StandardMaterial.h>
+#include <raytracing/TraceableStandardMaterial.h>
 #include <materials/ScreenQuadMaterial.h>
 #include <behaviors/KeyboardCameraController.h>
 #include <lights/DirectionalLight.h>
@@ -52,20 +52,20 @@ void dg::RaytraceScene::Initialize() {
           glm::vec3(floorSize.x, floorSize.y, 1))));
 
   // Create sphere material.
-  StandardMaterial sphereMaterial = StandardMaterial::WithColor(glm::vec3(0.3));
+  TraceableStandardMaterial sphereMaterial = TraceableStandardMaterial::WithColor(glm::vec3(0.3));
   sphereMaterial.SetSpecular(0.3);
   sphereMaterial.SetShininess(64);
 
   // Create front sphere.
   AddChild(std::make_shared<TraceableModel>(
       dg::Mesh::Sphere,
-      std::make_shared<StandardMaterial>(sphereMaterial),
+      std::make_shared<TraceableStandardMaterial>(sphereMaterial),
       Transform::TS(glm::vec3(-3, 2, 0), glm::vec3(2.5))));
 
   // Create back sphere.
   AddChild(std::make_shared<TraceableModel>(
       dg::Mesh::Sphere,
-      std::make_shared<StandardMaterial>(sphereMaterial),
+      std::make_shared<TraceableStandardMaterial>(sphereMaterial),
       Transform::TS(glm::vec3(-1, 0.5, -2), glm::vec3(2.5))));
       //Transform::TS(glm::vec3(-1, 1.5, -2), glm::vec3(2.5))));
 

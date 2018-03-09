@@ -4,6 +4,7 @@
 
 #include <raytracing/Renderer.h>
 #include <raytracing/TraceableModel.h>
+#include <raytracing/TraceableMaterial.h>
 #include <Texture.h>
 #include <Canvas.h>
 #include <Scene.h>
@@ -138,10 +139,16 @@ dg::Renderer::Pixel dg::Renderer::RenderPixel(RayResult rayres) {
     // Set color to be surface normal.
     color = rayres.normal * 0.5f + 0.5f;
 
+    // Shade using material.
+    auto traceableMat =
+        std::dynamic_pointer_cast<TraceableMaterial>(rayres.model->material);
+    if (traceableMat != nullptr) {
+      color = traceableMat->Shade(rayres);
+    }
+
     return Pixel(color);
   }
 
   // Encode direction as pixel.
   return Pixel((rayres.ray.direction + 1.f) * 0.5f);
 }
-

@@ -18,9 +18,9 @@ void dg::TraceableModel::CacheTransforms() {
 }
 
 dg::RayResult dg::TraceableModel::RayTest(Ray ray) const {
-  Ray ray_MS = ray.TransformedBy(xfSceneSpaceInv);
-  RayResult res = ray_MS.IntersectMesh(mesh).TransformedBy(xfSceneSpace, &ray);
+  RayResult res = ray.TransformedBy(xfSceneSpaceInv)
+                      .IntersectMesh(mesh)
+                      .TransformedBy(xfSceneSpace);
   res.model = this;
   return res;
 }
-

@@ -136,10 +136,17 @@ dg::RayResult dg::Ray::IntersectSphere(float radius) const {
   return RayResult::Hit(*this, distance, normal);
 }
 
+dg::RayResult dg::Ray::IntersectLight(const DirectionalLight &light) const {
+  // TODO
+  return RayResult::Miss(*this);
+}
+
 dg::RayResult dg::RayResult::Hit(Ray ray, float distance, glm::vec3 normal) {
+  assert(distance >= 0);
   RayResult res;
   res.ray = ray;
   res.hit = true;
+  res.hitsMainLight = false;
   res.distance = distance;
   res.normal = normal;
   return res;
@@ -152,8 +159,8 @@ dg::RayResult dg::RayResult::Miss(Ray ray) {
   return res;
 }
 
-const dg::RayResult& dg::RayResult::Closest(
-    const RayResult& a, const RayResult& b) {
+const dg::RayResult &dg::RayResult::Closest(const RayResult &a,
+                                            const RayResult &b) {
   return (!b.hit || (a.hit && a.distance < b.distance)) ? a : b;
 }
 
@@ -165,9 +172,25 @@ dg::RayResult dg::RayResult::TransformedBy(glm::mat4 xf,
   RayResult ret;
   ret.model = model;
   ret.hit = hit;
-  ret.distance = distance / ray.scaleFromParent; // TODO: Possibly incorrect.
   ret.ray = newRay;
   ret.normal =
       glm::normalize(glm::mat3x3(glm::transpose(glm::inverse(xf))) * normal);
+  ret.distance = distance / ray.scaleFromParent;
   return ret;
+}
+
+glm::vec3 dg::RayResult::GetIntersectionPoint() const {
+  return ray.origin + (ray.direction * distance);
+}
+
+dg::Ray dg::RayResult::GetReflectedRay() const {
+  Ray ret;
+  ret.origin = GetIntersectionPoint();
+  ret.direction = glm::reflect(ray.direction, normal);
+  return ret;
+}
+
+dg::RayResult dg::RayResult::BounceToLight(
+    const DirectionalLight &light) const {
+  return GetReflectedRay().IntersectLight(light);
 }

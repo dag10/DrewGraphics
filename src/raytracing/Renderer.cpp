@@ -13,6 +13,9 @@
 
 dg::Renderer::Renderer(unsigned int width, unsigned int height, Scene *scene)
   : scene(scene) {
+  const float resScale = 0.5f;
+  width *= resScale;
+  height *= resScale;
   canvas = std::make_shared<Canvas>(width, height);
 }
 
@@ -72,6 +75,9 @@ void dg::Renderer::Render() {
         glm::normalize(xfPixel_SS.translation - xfCamera.translation)
       );
       RayResult res = TraceRay(ray);
+      if (res.hit) {
+        //res = TraceRay(res.GetReflectedRay());
+      }
       Pixel pixel = RenderPixel(res);
       canvas->SetPixel(x, y, pixel.red, pixel.green, pixel.blue);
     }
@@ -119,7 +125,22 @@ dg::RayResult dg::Renderer::TraceRay(Ray ray) {
   RayResult shortest = RayResult::Miss(ray);
 
   for (auto model = objects.begin(); model != objects.end(); model++) {
-    shortest = RayResult::Closest((*model)->RayTest(ray), shortest);
+    //shortest = RayResult::Closest((*model)->RayTest(ray), shortest);
+    RayResult res = (*model)->RayTest(ray);
+    shortest = RayResult::Closest(res, shortest);
+  }
+
+  if (shortest.hit) {
+    ray = shortest.GetReflectedRay();
+    auto reflectingModel = shortest.model;
+    shortest = RayResult::Miss(ray);
+    for (auto model = objects.begin(); model != objects.end(); model++) {
+      if (*model == reflectingModel) continue;
+
+      //shortest = RayResult::Closest((*model)->RayTest(ray), shortest);
+      RayResult res = (*model)->RayTest(ray);
+      shortest = RayResult::Closest(res, shortest);
+    }
   }
 
   return shortest;
@@ -127,7 +148,7 @@ dg::RayResult dg::Renderer::TraceRay(Ray ray) {
 
 dg::Renderer::Pixel dg::Renderer::RenderPixel(RayResult rayres) {
   if (rayres.hit) {
-    glm::vec3 color = glm::vec3(rayres.distance / 50.f);
+    glm::vec3 color;
 
     // Color objects based on mesh type.
     if (rayres.model->mesh == Mesh::Sphere) {
@@ -148,6 +169,11 @@ dg::Renderer::Pixel dg::Renderer::RenderPixel(RayResult rayres) {
       } catch (const std::exception &e) {
         throw std::runtime_error("Failed to shade: " + std::string(e.what()));
       }
+    }
+
+    // TODO: TEMPORARYILY shade as distance
+    if (rayres.hit) {
+      color = glm::vec3(glm::length(rayres.distance) / 14);
     }
 
     return Pixel(color);

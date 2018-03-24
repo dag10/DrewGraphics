@@ -42,9 +42,10 @@
 #include "dg/scenes/PortalScene.h"
 #include "dg/scenes/QuadScene.h"
 #include "dg/scenes/RobotScene.h"
+#include "dg/scenes/ShadowScene.h"
 #include "dg/scenes/SimpleScene.h"
 #include "dg/scenes/TexturesScene.h"
-#include "dg/scenes/ShadowScene.h"
+#include "dg/scenes/TransparencyScene.h"
 #include "dg/scenes/VRScene.h"
 
 using namespace dg;
@@ -72,19 +73,20 @@ std::unique_ptr<Scene> PromptForScene(
   std::map<
     std::string,
     std::function<std::unique_ptr<dg::Scene>()>> constructors;
-  constructors["portal"]     = dg::PortalScene::Make;
-  constructors["shadows"]    = dg::ShadowScene::Make;
-  constructors["simple"]     = dg::SimpleScene::Make;
-  constructors["cloning"]    = dg::DeepCloningScene::Make;
-  constructors["cloning-vr"] = dg::DeepCloningScene::MakeVR;
-  constructors["textures"]   = dg::TexturesScene::Make;
-  constructors["meshes"]     = dg::MeshesScene::Make;
-  constructors["meshes-vr"]  = dg::MeshesScene::MakeVR;
-  constructors["robot"]      = dg::RobotScene::Make;
-  constructors["robot-vr"]   = dg::RobotScene::MakeVR;
-  constructors["quad"]       = dg::QuadScene::Make;
-  constructors["canvas"]     = dg::CanvasTestScene::Make;
-  constructors["vr"]         = dg::VRScene::Make;
+  constructors["portal"]       = dg::PortalScene::Make;
+  constructors["shadows"]      = dg::ShadowScene::Make;
+  constructors["simple"]       = dg::SimpleScene::Make;
+  constructors["cloning"]      = dg::DeepCloningScene::Make;
+  constructors["cloning-vr"]   = dg::DeepCloningScene::MakeVR;
+  constructors["textures"]     = dg::TexturesScene::Make;
+  constructors["meshes"]       = dg::MeshesScene::Make;
+  constructors["meshes-vr"]    = dg::MeshesScene::MakeVR;
+  constructors["robot"]        = dg::RobotScene::Make;
+  constructors["robot-vr"]     = dg::RobotScene::MakeVR;
+  constructors["quad"]         = dg::QuadScene::Make;
+  constructors["canvas"]       = dg::CanvasTestScene::Make;
+  constructors["vr"]           = dg::VRScene::Make;
+  constructors["transparency"] = dg::TransparencyScene::Make;
   std::string sceneName;
   if (!launchArg.empty()) {
     sceneName = launchArg;

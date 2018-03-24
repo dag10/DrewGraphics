@@ -13,7 +13,7 @@
 
 dg::Renderer::Renderer(unsigned int width, unsigned int height, Scene *scene)
   : scene(scene) {
-  const float resScale = 0.5f;
+  const float resScale = 0.5;
   width *= resScale;
   height *= resScale;
   canvas = std::make_shared<Canvas>(width, height);
@@ -75,9 +75,6 @@ void dg::Renderer::Render() {
         glm::normalize(xfPixel_SS.translation - xfCamera.translation)
       );
       RayResult res = TraceRay(ray);
-      if (res.hit) {
-        //res = TraceRay(res.GetReflectedRay());
-      }
       Pixel pixel = RenderPixel(res);
       canvas->SetPixel(x, y, pixel.red, pixel.green, pixel.blue);
     }
@@ -113,6 +110,9 @@ void dg::Renderer::ProcessSceneObjects() {
         model->CacheTransforms();
         objects.push_front((const TraceableModel*)(model.get()));
         numObjects++;
+      } else if (auto light = std::dynamic_pointer_cast<Light>(*child)) {
+        lights.push_front(light.get()->GetShaderData());
+        numObjects++;
       }
     }
   }
@@ -125,21 +125,29 @@ dg::RayResult dg::Renderer::TraceRay(Ray ray) {
   RayResult shortest = RayResult::Miss(ray);
 
   for (auto model = objects.begin(); model != objects.end(); model++) {
-    //shortest = RayResult::Closest((*model)->RayTest(ray), shortest);
     RayResult res = (*model)->RayTest(ray);
     shortest = RayResult::Closest(res, shortest);
   }
 
+  // See if intersection point is in shadow.
   if (shortest.hit) {
-    ray = shortest.GetReflectedRay();
-    auto reflectingModel = shortest.model;
-    shortest = RayResult::Miss(ray);
-    for (auto model = objects.begin(); model != objects.end(); model++) {
-      if (*model == reflectingModel) continue;
-
-      //shortest = RayResult::Closest((*model)->RayTest(ray), shortest);
-      RayResult res = (*model)->RayTest(ray);
-      shortest = RayResult::Closest(res, shortest);
+    for (auto &light : shortest.model->material->lights) {
+      shortest.lightDirectIllumination[light.first] = false;
+      if (light.second.type == Light::LightType::NONE) {
+        continue;
+      }
+      Ray lightRay = shortest.RayToLight(light.second);
+      RayResult shortestLightRayRes = RayResult::Miss(ray);
+      for (auto model = objects.begin(); model != objects.end(); model++) {
+        if (*model == shortest.model) continue;
+        shortestLightRayRes =
+            RayResult::Closest(shortestLightRayRes, (*model)->RayTest(lightRay));
+      }
+      if (!shortestLightRayRes.hit) {
+        if (lightRay.IntersectLight(light.second).hit) {
+          shortest.lightDirectIllumination[light.first] = true;
+        }
+      }
     }
   }
 
@@ -150,16 +158,6 @@ dg::Renderer::Pixel dg::Renderer::RenderPixel(RayResult rayres) {
   if (rayres.hit) {
     glm::vec3 color;
 
-    // Color objects based on mesh type.
-    if (rayres.model->mesh == Mesh::Sphere) {
-      color *= glm::vec3(1, 0, 0);
-    } else if (rayres.model->mesh == Mesh::Cube) {
-      color *= glm::vec3(0, 1, 0);
-    }
-
-    // Set color to be surface normal.
-    color = rayres.normal * 0.5f + 0.5f;
-
     // Shade using material.
     auto traceableMat =
         std::dynamic_pointer_cast<TraceableMaterial>(rayres.model->material);
@@ -169,11 +167,6 @@ dg::Renderer::Pixel dg::Renderer::RenderPixel(RayResult rayres) {
       } catch (const std::exception &e) {
         throw std::runtime_error("Failed to shade: " + std::string(e.what()));
       }
-    }
-
-    // TODO: TEMPORARYILY shade as distance
-    if (rayres.hit) {
-      color = glm::vec3(glm::length(rayres.distance) / 14);
     }
 
     return Pixel(color);

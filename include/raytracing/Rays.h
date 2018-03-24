@@ -4,8 +4,11 @@
 
 #pragma once
 
+#include <Lights.h>
+#include <Mesh.h>
 #include <glm/glm.hpp>
 #include <memory>
+#include <unordered_map>
 #include <unordered_set>
 
 namespace dg {
@@ -13,7 +16,6 @@ namespace dg {
   struct Mesh;
   struct RayResult;
   class TraceableModel;
-  class DirectionalLight;
 
   class Ray {
 
@@ -29,10 +31,11 @@ namespace dg {
 
       Ray TransformedBy(glm::mat4 xf) const;
 
-      RayResult IntersectTriangle(glm::vec3 v1, glm::vec3 v2, glm::vec3 v3) const;
+      RayResult IntersectTriangle(glm::vec3 v1, glm::vec3 v2,
+                                  glm::vec3 v3) const;
       RayResult IntersectMesh(std::shared_ptr<Mesh> mesh) const;
       RayResult IntersectSphere(float radius) const;
-      RayResult IntersectLight(const DirectionalLight& light) const;
+      RayResult IntersectLight(const Light::ShaderData& lightData) const;
 
   };
 
@@ -42,10 +45,11 @@ namespace dg {
 
       const TraceableModel *model = nullptr;
       bool hit = false;
-      bool hitsMainLight = false;
+      std::unordered_map<int, bool> lightDirectIllumination;
       Ray ray;
       float distance = 0;
       glm::vec3 normal;
+      Vertex interpolatedVertex = Vertex(Vertex::AttrFlag::NONE);
 
       static RayResult Hit(Ray ray, float distance, glm::vec3 normal);
       static RayResult Miss(Ray ray);
@@ -56,7 +60,9 @@ namespace dg {
 
       glm::vec3 GetIntersectionPoint() const;
       Ray GetReflectedRay() const;
-      RayResult BounceToLight(const DirectionalLight& light) const;
+
+      // Expects RayResult to be in Scene Space.
+      Ray RayToLight(const Light::ShaderData& lightData) const;
 
       RayResult TransformedBy(glm::mat4 xf,
                               const Ray *substituteRay = nullptr) const;

@@ -70,8 +70,6 @@ namespace dg {
 
       void Use() const;
 
-    protected:
-
       std::unordered_map<int, Light::ShaderData> lights;
 
     private:

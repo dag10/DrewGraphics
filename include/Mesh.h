@@ -48,6 +48,9 @@ namespace dg {
           AttrFlag::POSITION | AttrFlag::NORMAL |
           AttrFlag::TEXCOORD | AttrFlag::TANGENT) {};
 
+    static Vertex Interpolate(glm::vec3 position, const Vertex &v1,
+                              const Vertex &v2, const Vertex &v3);
+
     bool HasAllAttr(AttrFlag flags) const {
       return (this->attributes & flags) == flags;
     }

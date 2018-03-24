@@ -13,4 +13,6 @@ namespace dg {
 
   glm::mat4x4 HmdMat2Glm(vr::HmdMatrix34_t hmdMat);
 
+  glm::vec2 VectorToPitchYaw(glm::vec3 direction);
+
 } // namespace dg

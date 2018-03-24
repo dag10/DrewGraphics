@@ -16,6 +16,18 @@
 #define sscanf sscanf_s
 #endif
 
+dg::Vertex dg::Vertex::Interpolate(glm::vec3 position, const Vertex &v1,
+                                   const Vertex &v2, const Vertex &v3) {
+  float d1 = glm::distance(position, v1.position);
+  float d2 = glm::distance(position, v2.position);
+  float d3 = glm::distance(position, v3.position);
+  float d12 = glm::distance(v1.position, v2.position);
+  float d23 = glm::distance(v2.position, v3.position);
+  float d31 = glm::distance(v3.position, v1.position);
+  // TODO: How do I calculate the area of a triangle?
+  return v1;
+}
+
 dg::Mesh *dg::Mesh::lastDrawnMesh = nullptr;
 std::unordered_map<std::string, std::weak_ptr<dg::Mesh>> dg::Mesh::fileMap;
 
@@ -811,4 +823,3 @@ std::shared_ptr<dg::Mesh> dg::Mesh::LoadOBJ(const char *filename) {
   fileMap.insert_or_assign(filename, mesh);
   return mesh;
 }
-

@@ -4,10 +4,11 @@
 
 #pragma once
 
+#include <Lights.h>
 #include <raytracing/Rays.h>
-#include <memory>
 #include <forward_list>
 #include <glm/glm.hpp>
+#include <memory>
 
 namespace dg {
 
@@ -46,6 +47,7 @@ namespace dg {
 
       int numObjects = 0;
       std::forward_list<const TraceableModel*> objects;
+      std::forward_list<const Light::ShaderData> lights;
       std::shared_ptr<Canvas> canvas;
       const Scene *scene;
 

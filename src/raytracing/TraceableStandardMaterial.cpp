@@ -33,21 +33,25 @@ dg::TraceableStandardMaterial::TraceableStandardMaterial(
     TraceableStandardMaterial &other)
     : StandardMaterial(other) {}
 
-dg::TraceableStandardMaterial::TraceableStandardMaterial(TraceableStandardMaterial&& other) {
+dg::TraceableStandardMaterial::TraceableStandardMaterial(
+    TraceableStandardMaterial &&other) {
   *this = std::move(other);
 }
 
-dg::TraceableStandardMaterial& dg::TraceableStandardMaterial::operator=(TraceableStandardMaterial& other) {
+dg::TraceableStandardMaterial &dg::TraceableStandardMaterial::operator=(
+    TraceableStandardMaterial &other) {
   *this = TraceableStandardMaterial(other);
   return *this;
 }
 
-dg::TraceableStandardMaterial& dg::TraceableStandardMaterial::operator=(TraceableStandardMaterial&& other) {
+dg::TraceableStandardMaterial &dg::TraceableStandardMaterial::operator=(
+    TraceableStandardMaterial &&other) {
   swap(*this, other);
   return *this;
 }
 
-void dg::swap(TraceableStandardMaterial& first, TraceableStandardMaterial& second) {
+void dg::swap(TraceableStandardMaterial &first,
+              TraceableStandardMaterial &second) {
   using std::swap;
   swap((Material&)first, (Material&)second);
 }
@@ -62,13 +66,11 @@ glm::vec3 dg::TraceableStandardMaterial::CalculateLight(
     return glm::vec3(0);
   }
 
-  // Ambient
-  glm::vec3 ambient = light.ambient * diffuseColor;
-
   // Diffuse
   glm::vec3 norm = normalize(normal);
   glm::vec3 lightDir;
-  if (light.type == Light::LightType::POINT || light.type == Light::LightType::SPOT) {
+  if (light.type == Light::LightType::POINT ||
+      light.type == Light::LightType::SPOT) {
     lightDir = normalize(light.position - scenePos);
   } else if (light.type == Light::LightType::DIRECTIONAL) {
     lightDir = -light.direction;
@@ -90,7 +92,6 @@ glm::vec3 dg::TraceableStandardMaterial::CalculateLight(
         1.0 / (light.constantCoeff + light.linearCoeff * distance +
                light.quadraticCoeff * (distance * distance));
     diffuse *= attenuation;
-    ambient *= attenuation;
     specular *= attenuation;
   }
 
@@ -105,7 +106,7 @@ glm::vec3 dg::TraceableStandardMaterial::CalculateLight(
     specular *= intensity;
   }
 
-	return specular + diffuse + ambient;
+	return specular + diffuse;
 }
 
 glm::vec3 dg::TraceableStandardMaterial::Shade(const RayResult& rayres) const {
@@ -118,18 +119,17 @@ glm::vec3 dg::TraceableStandardMaterial::Shade(const RayResult& rayres) const {
   glm::vec3 cameraPos = GetRequiredProperty("_CameraPosition")->value._vec3;
   glm::vec3 normal = rayres.normal;
 
+  auto mutLightDirectIllumination =
+      (std::unordered_map<int, bool> &)rayres.lightDirectIllumination;
+
   glm::vec3 cumulative(0);
   for (auto& light : lights) {
+    if (!mutLightDirectIllumination[light.first]) {
+      continue;
+    }
     cumulative += CalculateLight(light.second, normal, diffuseColor,
                                  specularColor, scenePos, cameraPos);
   }
 
   return cumulative;
-
-  //glm::vec3 norm = glm::normalize(normal);
-  //glm::vec3 lightDir;
-  // Directional light.
-  //lightDir = -light.direction;
-  //float diff = max(dot(norm, lightDir), 0.0);
-  //glm::vec3 diffuse = light.diffuse * diff * diffuseColor;
 }

@@ -2,9 +2,12 @@
 //  raytracer/Rays.cpp
 //
 
-#include <raytracing/Rays.h>
+#include <Lights.h>
+#include <MathUtils.h>
 #include <Mesh.h>
+#include <raytracing/Rays.h>
 #include <glm/gtc/matrix_access.hpp>
+#include <limits>
 
 dg::Ray dg::Ray::TransformedBy(glm::mat4 xf) const {
   // Transform ray to model space.
@@ -91,9 +94,9 @@ dg::RayResult dg::Ray::IntersectMesh(std::shared_ptr<Mesh> mesh) const {
     Vertex v3 = mesh->GetVertex(i * 3 + 2);
     RayResult triRes = IntersectTriangle(v1.position, v2.position, v3.position);
 
-    // TODO: Calculate normal using Barycentric interpolation.
     triRes.normal = v1.normal;
-
+    triRes.interpolatedVertex =
+        Vertex::Interpolate(triRes.GetIntersectionPoint(), v1, v2, v3);
     res = RayResult::Closest(res, triRes);
   }
   return res;
@@ -133,12 +136,27 @@ dg::RayResult dg::Ray::IntersectSphere(float radius) const {
 
   float distance = glm::distance(intersection, origin);
   glm::vec3 normal = glm::normalize(intersection);
-  return RayResult::Hit(*this, distance, normal);
+  auto res = RayResult::Hit(*this, distance, normal);
+  res.interpolatedVertex.normal = normal;
+  glm::vec2 normalEuler = VectorToPitchYaw(normal);
+  res.interpolatedVertex.texCoord =
+      glm::vec2((glm::degrees(normalEuler.y) + 180.f) / 360.f,
+                (glm::degrees(normalEuler.x) / 180.f) + 0.5f);
+  return res;
 }
 
-dg::RayResult dg::Ray::IntersectLight(const DirectionalLight &light) const {
-  // TODO
-  return RayResult::Miss(*this);
+dg::RayResult dg::Ray::IntersectLight(
+    const Light::ShaderData &lightData) const {
+  if (lightData.type != Light::LightType::DIRECTIONAL) {
+    return RayResult::Miss(*this);
+  }
+
+  if (glm::dot(direction, -lightData.direction) <= 0) {
+    return RayResult::Miss(*this);
+  }
+
+  return RayResult::Hit(*this, std::numeric_limits<float>::infinity(),
+                        lightData.direction);
 }
 
 dg::RayResult dg::RayResult::Hit(Ray ray, float distance, glm::vec3 normal) {
@@ -146,7 +164,6 @@ dg::RayResult dg::RayResult::Hit(Ray ray, float distance, glm::vec3 normal) {
   RayResult res;
   res.ray = ray;
   res.hit = true;
-  res.hitsMainLight = false;
   res.distance = distance;
   res.normal = normal;
   return res;
@@ -170,6 +187,7 @@ dg::RayResult dg::RayResult::TransformedBy(glm::mat4 xf,
       (substituteRay == nullptr) ? ray.TransformedBy(xf) : *substituteRay;
 
   RayResult ret;
+  ret.interpolatedVertex = interpolatedVertex;
   ret.model = model;
   ret.hit = hit;
   ret.ray = newRay;
@@ -190,7 +208,18 @@ dg::Ray dg::RayResult::GetReflectedRay() const {
   return ret;
 }
 
-dg::RayResult dg::RayResult::BounceToLight(
-    const DirectionalLight &light) const {
-  return GetReflectedRay().IntersectLight(light);
+// Expects RayResult to be in Scene Space.
+dg::Ray dg::RayResult::RayToLight(
+    const Light::ShaderData &lightData) const {
+  switch (lightData.type) {
+    case Light::LightType::DIRECTIONAL: {
+      Ray rayToLight;
+      rayToLight.origin = GetIntersectionPoint();
+      rayToLight.direction = -lightData.direction;
+      return rayToLight;
+    }
+    default:
+      throw std::runtime_error("BounceToLight not implemented for light type " +
+                               std::to_string((int)lightData.type));
+  }
 }

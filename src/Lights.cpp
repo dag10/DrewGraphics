@@ -14,19 +14,23 @@ const int dg::Light::MAX_LIGHTS;
 #pragma region Light
 
 void dg::Light::SetMaterialProperties(int index, Material& material) const {
-  material.SetProperty(LightProperty(index, "diffuse"), data.diffuse);
-  material.SetProperty(LightProperty(index, "type"), (int)data.type);
-  material.SetProperty(LightProperty(index, "ambient"), data.ambient);
-  material.SetProperty(LightProperty(index, "innerCutoff"), data.innerCutoff);
-  material.SetProperty(LightProperty(index, "specular"), data.specular);
-  material.SetProperty(LightProperty(index, "outerCutoff"), data.outerCutoff);
-  material.SetProperty(LightProperty(index, "position"), data.position);
+  auto shaderData = GetShaderData();
+  material.SetProperty(LightProperty(index, "diffuse"), shaderData.diffuse);
+  material.SetProperty(LightProperty(index, "type"), (int)shaderData.type);
+  material.SetProperty(LightProperty(index, "ambient"), shaderData.ambient);
+  material.SetProperty(LightProperty(index, "innerCutoff"),
+                       shaderData.innerCutoff);
+  material.SetProperty(LightProperty(index, "specular"), shaderData.specular);
+  material.SetProperty(LightProperty(index, "outerCutoff"),
+                       shaderData.outerCutoff);
+  material.SetProperty(LightProperty(index, "position"), shaderData.position);
   material.SetProperty(LightProperty(index, "constantCoeff"),
-                       data.constantCoeff);
-  material.SetProperty(LightProperty(index, "direction"), data.direction);
-  material.SetProperty(LightProperty(index, "linearCoeff"), data.linearCoeff);
+                       shaderData.constantCoeff);
+  material.SetProperty(LightProperty(index, "direction"), shaderData.direction);
+  material.SetProperty(LightProperty(index, "linearCoeff"),
+                       shaderData.linearCoeff);
   material.SetProperty(LightProperty(index, "quadraticCoeff"),
-                       data.quadraticCoeff);
+                       shaderData.quadraticCoeff);
 }
 
 void dg::Light::ClearMaterialProperties(int index, Material& material) {

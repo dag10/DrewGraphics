@@ -4,12 +4,15 @@
 
 #include <scenes/RaytraceScene.h>
 
-#include <glm/glm.hpp>
-#include <raytracing/TraceableStandardMaterial.h>
-#include <materials/ScreenQuadMaterial.h>
 #include <behaviors/KeyboardCameraController.h>
+#include <behaviors/KeyboardLightController.h>
+#include <materials/ScreenQuadMaterial.h>
 #include <raytracing/Renderer.h>
+#include <raytracing/TraceableCheckerboardMaterial.h>
 #include <raytracing/TraceableModel.h>
+#include <raytracing/TraceableStandardMaterial.h>
+#include <raytracing/TraceableUVMaterial.h>
+#include <glm/glm.hpp>
 
 std::unique_ptr<dg::RaytraceScene> dg::RaytraceScene::Make() {
   return std::unique_ptr<dg::RaytraceScene>(new dg::RaytraceScene());
@@ -27,20 +30,19 @@ void dg::RaytraceScene::Initialize() {
 
   // Create directinal light.
   auto directionalLight = std::make_shared<DirectionalLight>(
-      glm::vec3(1.0f, 0.93f, 0.86f),
-      0.732f, 0.399f, 0.968f);
-  directionalLight->LookAtDirection(glm::normalize(glm::vec3(0, -1, -0.3)));
+      glm::vec3(1.0f, 0.93f, 0.86f), 0, 0.8, 0.968f);
+  directionalLight->LookAtDirection(glm::normalize(glm::vec3(-0.6, -1, -0.3)));
   AddChild(directionalLight);
+
+  Behavior::Attach(directionalLight,
+                   std::make_shared<KeyboardLightController>(window));
 
   // Create floor material.
   glm::vec2 floorSize(12, 28);
-  Material floorMaterial;
-  floorMaterial.shader = std::make_shared<Shader>(Shader::FromFiles(
-        "assets/shaders/checkerboard.v.glsl",
-        "assets/shaders/checkerboard.f.glsl"));
-  floorMaterial.SetProperty("_Size", floorSize);
-  floorMaterial.SetProperty("_Colors[0]", glm::vec3(1, 0, 0));
-  floorMaterial.SetProperty("_Colors[1]", glm::vec3(1, 1, 0));
+  TraceableCheckerboardMaterial floorMaterial;
+  floorMaterial.SetSize(floorSize);
+  floorMaterial.SetColorA(glm::vec3(1, 0, 0));
+  floorMaterial.SetColorA(glm::vec3(1, 0, 1));
   TraceableStandardMaterial solidFloorMaterial =
       TraceableStandardMaterial::WithColor(glm::vec3(0.5));
   solidFloorMaterial.SetSpecular(0.1);
@@ -49,28 +51,32 @@ void dg::RaytraceScene::Initialize() {
   // Create floor plane.
   AddChild(std::make_shared<TraceableModel>(
         dg::Mesh::Quad,
-        //std::make_shared<Material>(floorMaterial),
-        std::make_shared<TraceableStandardMaterial>(solidFloorMaterial),
+        std::make_shared<TraceableCheckerboardMaterial>(floorMaterial),
+        //std::make_shared<TraceableStandardMaterial>(solidFloorMaterial),
         Transform::RS(
           glm::quat(glm::radians(glm::vec3(-90, 0, 0))),
           glm::vec3(floorSize.x, floorSize.y, 1))));
 
   // Create sphere material.
   TraceableStandardMaterial sphereMaterial =
-      TraceableStandardMaterial::WithColor(glm::vec3(0.3));
+      TraceableStandardMaterial::WithColor(glm::vec3(0));
   sphereMaterial.SetSpecular(0.3);
   sphereMaterial.SetShininess(64);
 
   // Create front sphere.
+  sphereMaterial.SetDiffuse(glm::vec3(0.7, 0.3, 0.3));
   AddChild(std::make_shared<TraceableModel>(
       dg::Mesh::Sphere,
-      std::make_shared<TraceableStandardMaterial>(sphereMaterial),
+      //std::make_shared<TraceableStandardMaterial>(sphereMaterial),
+      std::make_shared<TraceableUVMaterial>(),
       Transform::TS(glm::vec3(-3, 2, 0), glm::vec3(2.5))));
 
   // Create back sphere.
+  sphereMaterial.SetDiffuse(glm::vec3(0.3, 0.7, 0.3));
   AddChild(std::make_shared<TraceableModel>(
       dg::Mesh::Sphere,
-      std::make_shared<TraceableStandardMaterial>(sphereMaterial),
+      //std::make_shared<TraceableStandardMaterial>(sphereMaterial),
+      std::make_shared<TraceableCheckerboardMaterial>(floorMaterial),
       Transform::TS(glm::vec3(-1, 1.5, -2), glm::vec3(2.5))));
 
   // Create camera.

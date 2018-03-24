@@ -18,7 +18,6 @@
 #include "dg/Window.h"
 #include "dg/behaviors/KeyboardCameraController.h"
 #include "dg/materials/StandardMaterial.h"
-#include "dg/materials/UVMaterial.h"
 
 std::unique_ptr<dg::TransparencyScene> dg::TransparencyScene::Make() {
   return std::unique_ptr<TransparencyScene>(new TransparencyScene(false));
@@ -36,7 +35,7 @@ void dg::TransparencyScene::Initialize() {
   Scene::Initialize();
 
   std::cout
-    << "This scene is a demo of various built-in meshes." << std::endl
+    << "This scene is a demo of transparent material rendering." << std::endl
     << std::endl;
   if (!enableVR) {
     std::cout
@@ -75,39 +74,54 @@ void dg::TransparencyScene::Initialize() {
   ceilingLight->transform.translation = glm::vec3(0, 0.8, -0.5);
   AddChild(ceilingLight);
 
-  // Container for UV meshes.
-  auto uvTransparency = std::make_shared<SceneObject>(
-      Transform::T(FORWARD * -1.f));
-  AddChild(uvTransparency);
+  // Container for additively blended meshes.
+  auto additiveMeshes =
+      std::make_shared<SceneObject>(Transform::T(FORWARD * -1.f));
+  AddChild(additiveMeshes);
 
-  // Create UV cube.
-  uvTransparency->AddChild(std::make_shared<Model>(
+  // Additive material.
+  StandardMaterial additiveMaterial =
+      StandardMaterial::WithColor(glm::vec4(1, 1, 1, 0.5f));
+  float additiveAlpha = 0.5f;
+
+  // Create additive cube.
+  additiveMaterial.SetDiffuse(
+      glm::vec4(glm::vec3(75, 0, 130) / 255.f, additiveAlpha));
+  additiveMeshes->AddChild(std::make_shared<Model>(
       Mesh::Cube,
-      std::make_shared<UVMaterial>(),
+      std::make_shared<StandardMaterial>(additiveMaterial),
       Transform::TS(glm::vec3(-2, 0.25, 0), glm::vec3(0.5))), false);
 
-  // Create UV mapped cube.
-  uvTransparency->AddChild(std::make_shared<Model>(
+  // Create additive mapped cube.
+  additiveMaterial.SetDiffuse(
+      glm::vec4(glm::vec3(0, 0, 255) / 255.f, additiveAlpha));
+  additiveMeshes->AddChild(std::make_shared<Model>(
       Mesh::MappedCube,
-      std::make_shared<UVMaterial>(),
+      std::make_shared<StandardMaterial>(additiveMaterial),
       Transform::TS(glm::vec3(-1, 0.25, 0), glm::vec3(0.5))), false);
 
-  // Create UV quad.
-  uvTransparency->AddChild(std::make_shared<Model>(
+  // Create additive quad.
+  additiveMaterial.SetDiffuse(
+      glm::vec4(glm::vec3(0, 255, 0) / 255.f, additiveAlpha));
+  additiveMeshes->AddChild(std::make_shared<Model>(
       Mesh::Quad,
-      std::make_shared<UVMaterial>(),
+      std::make_shared<StandardMaterial>(additiveMaterial),
       Transform::TS(glm::vec3(0, 0.25, 0), glm::vec3(0.5))), false);
 
-  // Create UV sphere.
-  uvTransparency->AddChild(std::make_shared<Model>(
+  // Create additive sphere.
+  additiveMaterial.SetDiffuse(
+      glm::vec4(glm::vec3(255, 255, 0) / 255.f, additiveAlpha));
+  additiveMeshes->AddChild(std::make_shared<Model>(
       Mesh::Sphere,
-      std::make_shared<UVMaterial>(),
+      std::make_shared<StandardMaterial>(additiveMaterial),
       Transform::TS(glm::vec3(1, 0.25, 0), glm::vec3(0.5))), false);
 
-  // Create UV cylinder.
-  uvTransparency->AddChild(std::make_shared<Model>(
+  // Create additive cylinder.
+  additiveMaterial.SetDiffuse(
+      glm::vec4(glm::vec3(255, 127, 0) / 255.f, additiveAlpha));
+  additiveMeshes->AddChild(std::make_shared<Model>(
       Mesh::Cylinder,
-      std::make_shared<UVMaterial>(),
+      std::make_shared<StandardMaterial>(additiveMaterial),
       Transform::TS(glm::vec3(2, 0.25, 0), glm::vec3(0.5))), false);
 
   // Create shiny brick material.
@@ -154,9 +168,10 @@ void dg::TransparencyScene::Initialize() {
       Transform::TS(glm::vec3(2, 0.25, 0), glm::vec3(0.5))), false);
 
   // Create a spinning helix to demonstrate loading an OBJ model.
+  additiveMaterial.SetDiffuse(glm::vec4(0.5f, 0.5f, 0.5f, additiveAlpha));
   spinningHelix = std::make_shared<Model>(
       Mesh::LoadOBJ("assets/models/helix.obj"),
-      std::make_shared<StandardMaterial>(brickMaterial),
+      std::make_shared<StandardMaterial>(additiveMaterial),
       Transform::TS(glm::vec3(-1.f, 0.25f, 0.f), glm::vec3(0.2f)));
   AddChild(spinningHelix, false);
 

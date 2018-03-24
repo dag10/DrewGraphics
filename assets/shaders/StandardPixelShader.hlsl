@@ -31,7 +31,7 @@ cbuffer Camera : register(b1) { float3 _CameraPosition; }
 
 cbuffer Material : register(b2) {
   int lit;
-  float3 diffuse;
+  float4 diffuse;
   bool useDiffuseMap;
   float3 specular;
   bool useSpecularMap;
@@ -111,7 +111,7 @@ float4 main(VertexToPixel input) : SV_TARGET {
 
   float3 diffuseColor =
       useDiffuseMap ? diffuseTexture.Sample(diffuseTextureSampler, texCoord).rgb
-                    : diffuse;
+                    : diffuse.rgb;
 
   if (!lit) {
     return float4(diffuseColor, 1);

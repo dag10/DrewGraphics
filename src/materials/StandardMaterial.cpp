@@ -14,7 +14,7 @@ dg::StandardMaterial dg::StandardMaterial::WithColor(glm::vec3 color) {
 
 dg::StandardMaterial dg::StandardMaterial::WithColor(glm::vec4 color) {
   StandardMaterial material;
-  material.SetDiffuse({ color.x, color.y, color.z });
+  material.SetDiffuse(color);
   return material;
 }
 
@@ -95,6 +95,10 @@ void dg::StandardMaterial::SetDiffuse(float diffuse) {
 }
 
 void dg::StandardMaterial::SetDiffuse(glm::vec3 diffuse) {
+  SetDiffuse(glm::vec4(diffuse, 1));
+}
+
+void dg::StandardMaterial::SetDiffuse(glm::vec4 diffuse) {
 #if defined(_OPENGL)
   SetProperty("_Material.useDiffuseMap", false);
   SetProperty("_Material.diffuse", diffuse);

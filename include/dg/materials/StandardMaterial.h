@@ -32,6 +32,7 @@ namespace dg {
       void SetLit(bool lit);
       void SetDiffuse(float diffuse);
       void SetDiffuse(glm::vec3 diffuse);
+      void SetDiffuse(glm::vec4 diffuse);
       void SetDiffuse(std::shared_ptr<Texture> diffuseMap);
       void SetSpecular(float specular);
       void SetSpecular(glm::vec3 specular);

@@ -3,7 +3,7 @@ struct Material {
 
   bool useDiffuseMap;
   sampler2D diffuseMap;
-  vec3 diffuse;
+  vec4 diffuse;
 
   bool useSpecularMap;
   sampler2D specularMap;
@@ -73,12 +73,12 @@ vec3 calculateLight(
 vec4 frag() {
   vec2 texCoord = v_TexCoord * _UVScale;
 
-  vec3 diffuseColor = _Material.useDiffuseMap
-                    ? texture(_Material.diffuseMap, texCoord).rgb
-                    : vec3(_Material.diffuse);
+  vec4 diffuseColor = _Material.useDiffuseMap
+                    ? texture(_Material.diffuseMap, texCoord)
+                    : vec4(_Material.diffuse);
 
   if (!_Material.lit) {
-    return vec4(diffuseColor, 1.0);
+    return diffuseColor;
   }
 
   vec3 specularColor = _Material.useSpecularMap
@@ -98,9 +98,9 @@ vec4 frag() {
   vec3 cumulative = vec3(0);
   for (int i = 0; i < MAX_LIGHTS; i++) {
     cumulative += calculateLight(
-        _Lights[i], normal, diffuseColor, specularColor);
+        _Lights[i], normal, diffuseColor.rgb, specularColor);
   }
 
-  return vec4(cumulative, 1.0);
+  return vec4(cumulative, diffuseColor.a);
 }
 

@@ -14,6 +14,10 @@ dg::RasterizerState::RasterizerState(const RasterizerState &other) {
   depthFunc = other.depthFunc;
 }
 
+bool dg::RasterizerState::HasDeclaredAttributes() const {
+  return static_cast<bool>(declaredAttributes);
+}
+
 void dg::RasterizerState::SetCullMode(CullMode mode, bool important) {
   cullMode = mode;
   DeclareAttribute(AttrFlag::CULL);
@@ -58,6 +62,11 @@ dg::RasterizerState::DepthFunc dg::RasterizerState::GetDepthFunc() const {
 
 dg::RasterizerState dg::RasterizerState::Flatten(const RasterizerState &parent,
                                                  const RasterizerState &child) {
+  // Early out if child doesn't declare anything.
+  if (!child.HasDeclaredAttributes()) {
+    return RasterizerState(parent);
+  }
+
   RasterizerState merged;
 
   merged.declaredAttributes =

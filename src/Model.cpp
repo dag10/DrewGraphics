@@ -3,6 +3,7 @@
 //
 
 #include "dg/Model.h"
+#include "dg/Graphics.h"
 
 dg::Model::Model() : SceneObject() {}
 
@@ -21,6 +22,10 @@ dg::Model::Model(Model& other) : SceneObject(other) {
 void dg::Model::Draw(glm::mat4x4 view, glm::mat4x4 projection) const {
   glm::mat4x4 xfMat = SceneSpace().ToMat4();
 
+  if (material->rasterizerOverride.HasDeclaredAttributes()) {
+    Graphics::Instance->PushRasterizerState(material->rasterizerOverride);
+  }
+
 #if defined(_OPENGL)
   material->Use();
 #endif
@@ -34,5 +39,8 @@ void dg::Model::Draw(glm::mat4x4 view, glm::mat4x4 projection) const {
 #endif
 
   mesh->Draw();
-}
 
+  if (material->rasterizerOverride.HasDeclaredAttributes()) {
+    Graphics::Instance->PopRasterizerState();
+  }
+}

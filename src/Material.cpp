@@ -8,6 +8,7 @@ dg::Material::Material(Material& other) {
   this->shader = other.shader;
   this->properties = other.properties;
   this->highestTexUnitHint = other.highestTexUnitHint;
+  this->rasterizerOverride = other.rasterizerOverride;
 }
 
 dg::Material::Material(Material&& other) {
@@ -29,6 +30,7 @@ void dg::swap(Material& first, Material& second) {
   swap(first.shader, second.shader);
   swap(first.properties, second.properties);
   swap(first.highestTexUnitHint, second.highestTexUnitHint);
+  swap(first.rasterizerOverride, second.rasterizerOverride);
 }
 
 void dg::Material::SetProperty(const std::string& name, bool value) {

@@ -5,9 +5,10 @@
 
 #include <memory>
 #include <unordered_map>
+#include "dg/Lights.h"
+#include "dg/RasterizerState.h"
 #include "dg/Shader.h"
 #include "dg/Texture.h"
-#include "dg/Lights.h"
 
 namespace dg {
 
@@ -86,6 +87,8 @@ namespace dg {
       void SetInvPortal(glm::mat4x4 invPortal);
 
       void Use() const;
+
+      RasterizerState rasterizerOverride;
 
     protected:
 

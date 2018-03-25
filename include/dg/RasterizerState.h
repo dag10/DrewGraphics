@@ -34,10 +34,7 @@ namespace dg {
       RasterizerState() = default;
       RasterizerState(const RasterizerState &);
 
-      static RasterizerState CloneFlat(
-          const RasterizerState &other);
-      static RasterizerState CloneAsSibling(
-          const RasterizerState other);
+      bool HasDeclaredAttributes() const;
 
       void SetCullMode(CullMode mode, bool important = false);
       void ClearCullMode();

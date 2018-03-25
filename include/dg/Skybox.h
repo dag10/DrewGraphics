@@ -31,7 +31,7 @@ namespace dg {
 
     private:
 
-      void Draw(const Camera& camera,  glm::mat4x4 projection);
+      void Draw(const Camera& camera, glm::mat4x4 projection);
 
   }; // class Skybox
 

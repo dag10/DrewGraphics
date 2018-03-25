@@ -3,7 +3,9 @@
 //
 
 #include "dg/Skybox.h"
+#include "dg/Graphics.h"
 #include "dg/Mesh.h"
+#include "dg/RasterizerState.h"
 #include "dg/materials/StandardMaterial.h"
 
 dg::Skybox::Skybox(std::shared_ptr<Texture> texture) {
@@ -55,12 +57,12 @@ void dg::Skybox::Draw(const Camera& camera, glm::mat4x4 projection) {
 
   material.Use();
 
-#if defined(_OPENGL)
-  glCullFace(GL_FRONT);
-  glDepthMask(GL_FALSE);
-#elif defined(_DIRECTX)
-  // TODO
-#endif
-  Mesh::MappedCube->Draw();
-}
+  RasterizerState state;
+  state.SetCullMode(RasterizerState::CullMode::FRONT);
+  state.SetWriteDepth(false);
+  Graphics::Instance->PushRasterizerState(state);
 
+  Mesh::MappedCube->Draw();
+
+  Graphics::Instance->PopRasterizerState();
+}

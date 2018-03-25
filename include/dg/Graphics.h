@@ -4,8 +4,10 @@
 
 #pragma once
 
-#include <memory>
+#include <forward_list>
 #include <glm/glm.hpp>
+#include <memory>
+#include "dg/RasterizerState.h"
 
 #if defined(_DIRECTX)
 #include <d3d11.h>
@@ -39,10 +41,16 @@ namespace dg {
 
       virtual void Clear(glm::vec3 color) = 0;
 
+      void PushRasterizerState(const RasterizerState &state);
+      void PopRasterizerState();
+
     protected:
 
       virtual void InitializeGraphics() = 0;
       virtual void InitializeResources();
+      virtual void UpdateRasterizerState() = 0;
+
+      std::forward_list<std::unique_ptr<RasterizerState>> states;
 
   }; // class Graphics
 
@@ -60,6 +68,7 @@ namespace dg {
 
       virtual void InitializeGraphics();
       virtual void InitializeResources();
+      virtual void UpdateRasterizerState();
 
   }; // class OpenGLGraphics
 #endif
@@ -88,6 +97,7 @@ namespace dg {
     protected:
 
       virtual void InitializeGraphics();
+      virtual void UpdateRasterizerState();
 
     private:
 

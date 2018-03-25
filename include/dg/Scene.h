@@ -4,11 +4,12 @@
 
 #pragma once
 
-#include "dg/Lights.h"
-#include "dg/SceneObject.h"
 #include <openvr.h>
 #include <forward_list>
 #include <memory>
+#include "dg/Lights.h"
+#include "dg/RasterizerState.h"
+#include "dg/SceneObject.h"
 
 namespace dg {
 
@@ -51,6 +52,8 @@ namespace dg {
       virtual void ClearBuffer();
       virtual void DrawHiddenAreaMesh(vr::EVREye eye) = 0;
       virtual void ConfigureBuffer() = 0;
+
+      RasterizerState defaultRasterizerState;
 
       std::shared_ptr<Camera> mainCamera;
       std::shared_ptr<Window> window = nullptr;

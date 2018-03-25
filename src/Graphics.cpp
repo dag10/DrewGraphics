@@ -5,6 +5,7 @@
 #include "dg/Graphics.h"
 #include <cassert>
 #include "dg/Mesh.h"
+#include "dg/RasterizerState.h"
 #include "dg/Shader.h"
 #include "dg/Window.h"
 
@@ -30,6 +31,22 @@ void dg::Graphics::Initialize(const Window& window) {
 void dg::Graphics::InitializeResources() {
   // Create primitive meshes.
   dg::Mesh::CreatePrimitives();
+}
+
+void dg::Graphics::PushRasterizerState(const RasterizerState &state) {
+  if (states.empty()) {
+    states.push_front(
+        std::unique_ptr<RasterizerState>(new RasterizerState(state)));
+  } else {
+    states.push_front(std::unique_ptr<RasterizerState>(
+        new RasterizerState(RasterizerState::Flatten(*states.front(), state))));
+  }
+  UpdateRasterizerState();
+}
+
+void dg::Graphics::PopRasterizerState() {
+  states.pop_front();
+  UpdateRasterizerState();
 }
 
 void dg::Graphics::Shutdown() {
@@ -65,6 +82,33 @@ void dg::OpenGLGraphics::InitializeResources() {
 void dg::OpenGLGraphics::Clear(glm::vec3 color) {
   glClearColor(color.x, color.y, color.z, 1);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+}
+
+void dg::OpenGLGraphics::UpdateRasterizerState() {
+  // TODO: Don't set if same as previous state.
+
+  if (states.empty()) {
+    return;
+  }
+
+  //const RasterizerState &state = states.front();
+  auto &state = *states.front();
+
+  switch (state.GetCullMode()) {
+    case RasterizerState::CullMode::OFF:
+      glDisable(GL_CULL_FACE);
+      break;
+    case RasterizerState::CullMode::FRONT:
+      glEnable(GL_CULL_FACE);
+      glCullFace(GL_FRONT);
+      break;
+    case RasterizerState::CullMode::BACK:
+      glEnable(GL_CULL_FACE);
+      glCullFace(GL_BACK);
+      break;
+  }
+
+  glDepthMask(state.GetWriteDepth() ? GL_TRUE : GL_FALSE);
 }
 
 #endif
@@ -254,6 +298,11 @@ void dg::DirectXGraphics::Clear(glm::vec3 color) {
   context->ClearRenderTargetView(backBufferRTV, colorArray);
   context->ClearDepthStencilView(
       depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+}
+
+void dg::DirectXGraphics::UpdateRasterizerState() {
+  throw std::runtime_error("TODO: Implement SetRasterizerState for DirectX.");
+  // TODO
 }
 
 #endif

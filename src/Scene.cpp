@@ -8,6 +8,7 @@
 #include "dg/Graphics.h"
 #include "dg/Lights.h"
 #include "dg/Model.h"
+#include "dg/RasterizerState.h"
 #include "dg/Skybox.h"
 #include "dg/Window.h"
 #include "dg/materials/ScreenQuadMaterial.h"
@@ -20,6 +21,9 @@ dg::BaseScene::BaseScene() : SceneObject() {}
 dg::BaseScene::~BaseScene() {}
 
 void dg::BaseScene::Initialize() {
+  defaultRasterizerState.SetCullMode(RasterizerState::CullMode::BACK);
+  defaultRasterizerState.SetWriteDepth(true);
+
   if (enableVR) {
     hiddenAreaMeshMaterial = std::make_shared<ScreenQuadMaterial>(
       glm::vec3(0), glm::vec2(2), glm::vec2(-1));
@@ -84,7 +88,9 @@ void dg::BaseScene::RenderFrame() {
   ClearBuffer();
   ConfigureBuffer();
   mainCamera->aspectRatio = window->GetAspectRatio();
+  Graphics::Instance->PushRasterizerState(defaultRasterizerState);
   DrawScene(*mainCamera);
+  Graphics::Instance->PopRasterizerState();
 
   if (enableVR) {
     VRManager::Instance->RenderFinished();
@@ -204,8 +210,6 @@ void dg::OpenGLScene::ConfigureBuffer() {
   glEnable(GL_DEPTH_TEST);
   glDepthFunc(GL_LESS);
   glDepthMask(GL_TRUE);
-  glEnable(GL_CULL_FACE);
-  glCullFace(GL_BACK);
 }
 
 #endif
@@ -218,11 +222,7 @@ void dg::DirectXScene::DrawHiddenAreaMesh(vr::EVREye eye) {
 }
 
 void dg::DirectXScene::ConfigureBuffer() {
-  //glEnable(GL_DEPTH_TEST);
-  //glDepthFunc(GL_LESS);
-  //glDepthMask(GL_TRUE);
-  //glEnable(GL_CULL_FACE);
-  //glCullFace(GL_BACK);
+  // TODO
 }
 
 #endif

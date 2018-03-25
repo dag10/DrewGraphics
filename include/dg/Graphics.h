@@ -43,12 +43,12 @@ namespace dg {
 
       void PushRasterizerState(const RasterizerState &state);
       void PopRasterizerState();
+      virtual void UpdateRasterizerState() = 0;
 
     protected:
 
       virtual void InitializeGraphics() = 0;
       virtual void InitializeResources();
-      virtual void UpdateRasterizerState() = 0;
 
       std::forward_list<std::unique_ptr<RasterizerState>> states;
 
@@ -63,12 +63,12 @@ namespace dg {
       OpenGLGraphics(const Window& window);
 
       virtual void Clear(glm::vec3 color);
+      virtual void UpdateRasterizerState();
 
     protected:
 
       virtual void InitializeGraphics();
       virtual void InitializeResources();
-      virtual void UpdateRasterizerState();
 
   }; // class OpenGLGraphics
 #endif
@@ -85,6 +85,7 @@ namespace dg {
       virtual void OnWindowResize(const Window& window);
 
       virtual void Clear(glm::vec3 color);
+      virtual void UpdateRasterizerState();
 
       ID3D11Device *device;
       ID3D11DeviceContext *context;
@@ -97,7 +98,6 @@ namespace dg {
     protected:
 
       virtual void InitializeGraphics();
-      virtual void UpdateRasterizerState();
 
     private:
 

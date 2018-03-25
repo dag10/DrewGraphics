@@ -18,6 +18,16 @@ namespace dg {
         BACK,
       };
 
+      enum class DepthFunc {
+        OFF,
+        LESS,
+        EQUAL,
+        LEQUAL,
+        GREATER,
+        NOTEQUAL,
+        GEQUAL,
+      };
+
       static RasterizerState Create();
       static RasterizerState CreateDefault();
 
@@ -37,6 +47,10 @@ namespace dg {
       void ClearWriteDepth();
       bool GetWriteDepth() const;
 
+      void SetDepthFunc(DepthFunc func, bool important = false);
+      void ClearDepthFunc();
+      DepthFunc GetDepthFunc() const;
+
       static RasterizerState Flatten(const RasterizerState &parent,
                                      const RasterizerState &child);
 
@@ -48,8 +62,8 @@ namespace dg {
         NONE        = 0,
         CULL        = 1,
         WRITE_DEPTH = 2,
+        DEPTH_FUNC  = 4,
       };
-      static const int NumAttrs = 1;
 
       using T = std::underlying_type_t<AttrFlag>;
       friend inline AttrFlag operator - (AttrFlag lhs, AttrFlag rhs) {
@@ -84,6 +98,7 @@ namespace dg {
       // This state's declared attribute values.
       CullMode cullMode;
       bool writeDepth;
+      DepthFunc depthFunc;
 
       inline void SetImportant(AttrFlag attr, bool important) {
         if (important) {

@@ -8,8 +8,10 @@
 dg::RasterizerState::RasterizerState(const RasterizerState &other) {
   declaredAttributes = other.declaredAttributes;
   importantAttributes = other.importantAttributes;
+
   cullMode = other.cullMode;
   writeDepth = other.writeDepth;
+  depthFunc = other.depthFunc;
 }
 
 void dg::RasterizerState::SetCullMode(CullMode mode, bool important) {
@@ -40,6 +42,19 @@ bool dg::RasterizerState::GetWriteDepth() const {
   return writeDepth;
 }
 
+void dg::RasterizerState::SetDepthFunc(DepthFunc func, bool important) {
+  depthFunc = func;
+  DeclareAttribute(AttrFlag::DEPTH_FUNC);
+  SetImportant(AttrFlag::DEPTH_FUNC, important);
+}
+
+void dg::RasterizerState::ClearDepthFunc() {
+  UndeclareAttribute(AttrFlag::DEPTH_FUNC);
+}
+
+dg::RasterizerState::DepthFunc dg::RasterizerState::GetDepthFunc() const {
+  return depthFunc;
+}
 
 dg::RasterizerState dg::RasterizerState::Flatten(const RasterizerState &parent,
                                                  const RasterizerState &child) {
@@ -65,6 +80,12 @@ dg::RasterizerState dg::RasterizerState::Flatten(const RasterizerState &parent,
     merged.writeDepth = child.writeDepth;
   } else if (static_cast<bool>(attrsFromParent & AttrFlag::WRITE_DEPTH)) {
     merged.writeDepth = parent.writeDepth;
+  }
+
+  if (static_cast<bool>(attrsFromChild & AttrFlag::DEPTH_FUNC)) {
+    merged.depthFunc = child.depthFunc;
+  } else if (static_cast<bool>(attrsFromParent & AttrFlag::DEPTH_FUNC)) {
+    merged.depthFunc = parent.depthFunc;
   }
 
   return merged;

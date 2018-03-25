@@ -91,7 +91,6 @@ void dg::OpenGLGraphics::UpdateRasterizerState() {
     return;
   }
 
-  //const RasterizerState &state = states.front();
   auto &state = *states.front();
 
   switch (state.GetCullMode()) {
@@ -109,6 +108,36 @@ void dg::OpenGLGraphics::UpdateRasterizerState() {
   }
 
   glDepthMask(state.GetWriteDepth() ? GL_TRUE : GL_FALSE);
+
+  switch (state.GetDepthFunc()) {
+    case RasterizerState::DepthFunc::OFF:
+      glDisable(GL_DEPTH_TEST);
+      break;
+    case RasterizerState::DepthFunc::LESS:
+      glEnable(GL_DEPTH_TEST);
+      glDepthFunc(GL_LESS);
+      break;
+    case RasterizerState::DepthFunc::EQUAL:
+      glEnable(GL_DEPTH_TEST);
+      glDepthFunc(GL_EQUAL);
+      break;
+    case RasterizerState::DepthFunc::LEQUAL:
+      glEnable(GL_DEPTH_TEST);
+      glDepthFunc(GL_LEQUAL);
+      break;
+    case RasterizerState::DepthFunc::GREATER:
+      glEnable(GL_DEPTH_TEST);
+      glDepthFunc(GL_GREATER);
+      break;
+    case RasterizerState::DepthFunc::NOTEQUAL:
+      glEnable(GL_DEPTH_TEST);
+      glDepthFunc(GL_NOTEQUAL);
+      break;
+    case RasterizerState::DepthFunc::GEQUAL:
+      glEnable(GL_DEPTH_TEST);
+      glDepthFunc(GL_GEQUAL);
+      break;
+  }
 }
 
 #endif

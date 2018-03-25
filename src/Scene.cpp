@@ -23,6 +23,7 @@ dg::BaseScene::~BaseScene() {}
 void dg::BaseScene::Initialize() {
   defaultRasterizerState.SetCullMode(RasterizerState::CullMode::BACK);
   defaultRasterizerState.SetWriteDepth(true);
+  defaultRasterizerState.SetDepthFunc(RasterizerState::DepthFunc::LESS);
 
   if (enableVR) {
     hiddenAreaMeshMaterial = std::make_shared<ScreenQuadMaterial>(
@@ -207,9 +208,10 @@ void dg::OpenGLScene::DrawHiddenAreaMesh(vr::EVREye eye) {
 }
 
 void dg::OpenGLScene::ConfigureBuffer() {
-  glEnable(GL_DEPTH_TEST);
-  glDepthFunc(GL_LESS);
-  glDepthMask(GL_TRUE);
+  // TODO: Remove this once all GL state calls are removed and we entirely
+  //       rely on the RasterizerState stack. This call is redundant to Pushing
+  //       and popping states.
+  Graphics::Instance->UpdateRasterizerState();
 }
 
 #endif
@@ -222,7 +224,10 @@ void dg::DirectXScene::DrawHiddenAreaMesh(vr::EVREye eye) {
 }
 
 void dg::DirectXScene::ConfigureBuffer() {
-  // TODO
+  // TODO: Remove this once all GL state calls are removed and we entirely
+  //       rely on the RasterizerState stack. This call is redundant to Pushing
+  //       and popping states.
+  Graphics::Instance->UpdateRasterizerState();
 }
 
 #endif

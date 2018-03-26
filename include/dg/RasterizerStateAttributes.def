@@ -1,0 +1,22 @@
+//
+//  RasterizerStateAttributes.def
+//
+
+#ifndef STATE_ATTRIBUTE
+  #error Must define STATE_ATTRIBUTE before including RasterizerStateAttributes.def
+#endif
+
+// Format:
+//
+// STATE_ATTRIBUTE(
+//   bit_index,
+//   attr_type,
+//   public_name,
+//   member_name,
+// )
+
+STATE_ATTRIBUTE( 1, dg::RasterizerState::CullMode, CullMode, cullMode )
+STATE_ATTRIBUTE( 2, bool, WriteDepth, writeDepth )
+STATE_ATTRIBUTE( 4, dg::RasterizerState::DepthFunc, DepthFunc, depthFunc )
+
+#undef STATE_ATTRIBUTE

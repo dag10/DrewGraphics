@@ -36,17 +36,13 @@ namespace dg {
 
       bool HasDeclaredAttributes() const;
 
-      void SetCullMode(CullMode mode, bool important = false);
-      void ClearCullMode();
-      CullMode GetCullMode() const;
-
-      void SetWriteDepth(bool writeDepth, bool important = false);
-      void ClearWriteDepth();
-      bool GetWriteDepth() const;
-
-      void SetDepthFunc(DepthFunc func, bool important = false);
-      void ClearDepthFunc();
-      DepthFunc GetDepthFunc() const;
+      // Automatically create Setters, Getters, and Clearers for all possible
+      // RasterizerState attributes.
+#define STATE_ATTRIBUTE(bit_index, attr_type, public_name, member_name) \
+      void Set##public_name(attr_type member_name, bool important = false); \
+      void Clear##public_name(); \
+      attr_type Get##public_name() const;
+#include "dg/RasterizerStateAttributes.def"
 
       static RasterizerState Flatten(const RasterizerState &parent,
                                      const RasterizerState &child);
@@ -56,10 +52,10 @@ namespace dg {
       // Flags to keep trach of which attributes this state has declared or
       // might wish to override on child states.
       enum class AttrFlag : uint32_t {
-        NONE        = 0,
-        CULL        = 1,
-        WRITE_DEPTH = 2,
-        DEPTH_FUNC  = 4,
+        None = 0,
+#define STATE_ATTRIBUTE(bit_index, attr_type, public_name, member_name) \
+        public_name = bit_index,
+#include "dg/RasterizerStateAttributes.def"
       };
 
       using T = std::underlying_type_t<AttrFlag>;
@@ -86,16 +82,16 @@ namespace dg {
       }
 
       // Which attributes this state has declared.
-      AttrFlag declaredAttributes = AttrFlag::NONE;
+      AttrFlag declaredAttributes = AttrFlag::None;
 
       // Which attributes this state declares as important, and will therefore
       // override non-important child states' attributes.
-      AttrFlag importantAttributes = AttrFlag::NONE;
+      AttrFlag importantAttributes = AttrFlag::None;
 
       // This state's declared attribute values.
-      CullMode cullMode;
-      bool writeDepth;
-      DepthFunc depthFunc;
+#define STATE_ATTRIBUTE(bit_index, attr_type, name, member_name) \
+      attr_type member_name;
+#include "dg/RasterizerStateAttributes.def"
 
       inline void SetImportant(AttrFlag attr, bool important) {
         if (important) {

@@ -220,7 +220,7 @@ void dg::TexturesScene::RenderFrame() {
   // Render scene for framebuffer.
   framebuffer->Bind();
   framebuffer->SetViewport();
-  Graphics::Instance->Clear(glm::vec3(0,1,1));
+  Graphics::Instance->ClearColor(glm::vec3(0,1,1));
   renderQuads->enabled = false;
   dummyRenderQuads->enabled = true;
   Graphics::Instance->PushRasterizerState(defaultRasterizerState);

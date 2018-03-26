@@ -43,7 +43,10 @@ namespace dg {
 
       virtual void OnWindowResize(const Window& window) {};
 
-      virtual void Clear(glm::vec3 color) = 0;
+      virtual void ClearColor(glm::vec3 color, bool clearDepth = true,
+                              bool clearStencil = true) = 0;
+      virtual void ClearDepthStencil(bool clearDepth = true,
+                                     bool clearStencil = true) = 0;
 
       void PushRasterizerState(const RasterizerState &state);
       void PopRasterizerState();
@@ -68,7 +71,10 @@ namespace dg {
 
       OpenGLGraphics(const Window& window);
 
-      virtual void Clear(glm::vec3 color);
+      virtual void ClearColor(glm::vec3 color, bool clearDepth = true,
+                              bool clearStencil = true);
+      virtual void ClearDepthStencil(bool clearDepth = true,
+                                     bool clearStencil = true);
 
     protected:
 
@@ -95,7 +101,10 @@ namespace dg {
 
       virtual void OnWindowResize(const Window& window);
 
-      virtual void Clear(glm::vec3 color);
+      virtual void ClearColor(glm::vec3 color, bool clearDepth = true,
+                              bool clearStencil = true);
+      virtual void ClearDepthStencil(bool clearDepth = true,
+                                     bool clearStencil = true);
 
       ID3D11Device *device;
       ID3D11DeviceContext *context;

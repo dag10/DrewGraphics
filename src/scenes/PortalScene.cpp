@@ -10,6 +10,7 @@
 #include <memory>
 #include "dg/Camera.h"
 #include "dg/EngineTime.h"
+#include "dg/Graphics.h"
 #include "dg/Lights.h"
 #include "dg/Mesh.h"
 #include "dg/Model.h"
@@ -455,7 +456,7 @@ void dg::PortalScene::RenderPortalStencil(dg::Transform xfPortal) {
   glStencilFunc(GL_ALWAYS, 1, 0xFF);
   glDepthFunc(GL_LEQUAL);
   glStencilOp(GL_ZERO, GL_ZERO, GL_REPLACE);
-  glClear(GL_STENCIL_BUFFER_BIT);
+  Graphics::Instance->ClearDepthStencil(false, true);
 
   portalStencilMaterial->SendMatrixMVP(
       projection * view * xfPortal * portalOpeningScale);
@@ -499,9 +500,7 @@ dg::Camera dg::PortalScene::CameraForPortal(
 #if defined(_OPENGL)
 void dg::PortalScene::RenderFrame() {
   // Clear back buffer.
-  glClearColor(
-      backgroundColor.x, backgroundColor.y, backgroundColor.z, 1);
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+  Graphics::Instance->ClearColor(backgroundColor);
 
   // Render params.
   glEnable(GL_DEPTH_TEST);

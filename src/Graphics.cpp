@@ -100,11 +100,40 @@ void dg::OpenGLGraphics::InitializeResources() {
   dg::OpenGLShader::AddFragmentSource("assets/shaders/includes/fragment_main.glsl");
 }
 
-void dg::OpenGLGraphics::Clear(glm::vec3 color) {
-  glEnable(GL_DEPTH_TEST);
-  glDepthMask(GL_TRUE);
+void dg::OpenGLGraphics::ClearColor(glm::vec3 color, bool clearDepth,
+                                    bool clearStencil) {
+  GLenum clearBits = GL_COLOR_BUFFER_BIT;
+  if (clearDepth) {
+    clearBits |= GL_DEPTH_BUFFER_BIT;
+  }
+  if (clearStencil) {
+    clearBits |= GL_STENCIL_BUFFER_BIT;
+  }
+
+  if (clearDepth || clearStencil) {
+    glEnable(GL_DEPTH_TEST);
+    glDepthMask(GL_TRUE);
+  }
   glClearColor(color.x, color.y, color.z, 1);
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+  glClear(clearBits);
+}
+
+void dg::OpenGLGraphics::ClearDepthStencil(bool clearDepth, bool clearStencil) {
+  if (!clearDepth && !clearStencil) {
+    return;
+  }
+  GLenum clearBits = GL_NONE;
+  if (clearDepth) {
+    clearBits |= GL_DEPTH_BUFFER_BIT;
+  }
+  if (clearStencil) {
+    clearBits |= GL_STENCIL_BUFFER_BIT;
+  }
+  if (clearDepth || clearStencil) {
+    glEnable(GL_DEPTH_TEST);
+    glDepthMask(GL_TRUE);
+  }
+  glClear(clearBits);
 }
 
 void dg::OpenGLGraphics::ApplyRasterizerState(const RasterizerState &state) {
@@ -403,6 +432,29 @@ void dg::DirectXGraphics::Clear(glm::vec3 color) {
   context->ClearDepthStencilView(
       depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 }
+
+void dg::DirectXGraphics::ClearColor(glm::vec3 color, bool clearDepth,
+                                     bool clearStencil) {
+  const float colorArray[4] = { color.x, color.y, color.z, 0 };
+  context->ClearRenderTargetView(backBufferRTV, colorArray);
+  if (clearDepth || clearStencil) {
+    int clearBits = 0;
+    if (clearDepth) {
+      clearBits |= D3D11_CLEAR_DEPTH;
+    }
+    if (clearStencil) {
+      clearBits |= D3D11_CLEAR_STENCIL;
+    }
+    context->ClearDepthStencilView(depthStencilView, clearBits, 1.0f, 0);
+  }
+}
+
+void dg::DirectXGLGraphics::ClearDepthStencil(bool clearDepth,
+                                              bool clearStencil) {
+  context->ClearDepthStencilView(
+      depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+}
+
 
 void dg::OpenGLGraphics::ApplyRasterizerState(const RasterizerState &state) {
   throw std::runtime_error("TODO: Implement ApplyRasterizerState for DirectX.");

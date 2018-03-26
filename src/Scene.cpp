@@ -83,7 +83,7 @@ void dg::BaseScene::Update() {
 }
 
 void dg::BaseScene::ClearBuffer() {
-  Graphics::Instance->Clear(glm::vec3(0));
+  Graphics::Instance->ClearColor(glm::vec3(0));
 }
 
 void dg::BaseScene::RenderFrame() {

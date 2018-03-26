@@ -58,6 +58,14 @@ class FrameBufferException : public EngineError {
         "FrameBuffer error. Status: " + std::to_string(status)) {}
 };
 
+class UndeclaredRasterizerStateAttribute : public EngineError {
+  public:
+    UndeclaredRasterizerStateAttribute(const std::string &attribute)
+        : EngineError(
+              "Final RasterizerState does not have declared value for "
+              "attribute \"" + attribute + "\"") {}
+};
+
 class STBLoadError : public EngineError {
   public:
     STBLoadError(const std::string& path, const std::string& str)
@@ -65,4 +73,3 @@ class STBLoadError : public EngineError {
 };
 
 } // namespace dg
-

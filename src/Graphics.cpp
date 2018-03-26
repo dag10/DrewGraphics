@@ -4,6 +4,7 @@
 
 #include "dg/Graphics.h"
 #include <cassert>
+#include "dg/Exceptions.h"
 #include "dg/Mesh.h"
 #include "dg/RasterizerState.h"
 #include "dg/Shader.h"
@@ -41,12 +42,28 @@ void dg::Graphics::PushRasterizerState(const RasterizerState &state) {
     states.push_front(std::unique_ptr<RasterizerState>(
         new RasterizerState(RasterizerState::Flatten(*states.front(), state))));
   }
-  UpdateRasterizerState();
 }
 
 void dg::Graphics::PopRasterizerState() {
   states.pop_front();
-  UpdateRasterizerState();
+}
+
+void dg::Graphics::ApplyCurrentRasterizerState() {
+  // TODO: Don't set if same as previous state.
+
+  if (states.empty()) {
+    return;
+  }
+
+  auto &state = *states.front();
+
+#define STATE_ATTRIBUTE(index, attr_type, public_name, member_name) \
+  if (!state.Declares##public_name()) { \
+    throw UndeclaredRasterizerStateAttribute(#public_name); \
+  }
+#include "dg/RasterizerStateAttributes.def"
+
+  ApplyRasterizerState(state);
 }
 
 void dg::Graphics::Shutdown() {
@@ -84,15 +101,7 @@ void dg::OpenGLGraphics::Clear(glm::vec3 color) {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 }
 
-void dg::OpenGLGraphics::UpdateRasterizerState() {
-  // TODO: Don't set if same as previous state.
-
-  if (states.empty()) {
-    return;
-  }
-
-  auto &state = *states.front();
-
+void dg::OpenGLGraphics::ApplyRasterizerState(const RasterizerState &state) {
   switch (state.GetCullMode()) {
     case RasterizerState::CullMode::OFF:
       glDisable(GL_CULL_FACE);
@@ -329,8 +338,8 @@ void dg::DirectXGraphics::Clear(glm::vec3 color) {
       depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 }
 
-void dg::DirectXGraphics::UpdateRasterizerState() {
-  throw std::runtime_error("TODO: Implement SetRasterizerState for DirectX.");
+void dg::OpenGLGraphics::ApplyRasterizerState(const RasterizerState &state) {
+  throw std::runtime_error("TODO: Implement ApplyRasterizerState for DirectX.");
   // TODO
 }
 

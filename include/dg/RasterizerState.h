@@ -5,6 +5,8 @@
 #pragma once
 
 #include <memory>
+#include <ostream>
+#include <string>
 
 namespace dg {
 
@@ -38,25 +40,31 @@ namespace dg {
 
       // Automatically create Setters, Getters, and Clearers for all possible
       // RasterizerState attributes.
-#define STATE_ATTRIBUTE(bit_index, attr_type, public_name, member_name) \
+#define STATE_ATTRIBUTE(index, attr_type, public_name, member_name) \
       void Set##public_name(attr_type member_name, bool important = false); \
       void Clear##public_name(); \
-      attr_type Get##public_name() const;
+      attr_type Get##public_name() const; \
+      inline bool Declares##public_name() { \
+        return Declares(AttrFlag::public_name); \
+      }
 #include "dg/RasterizerStateAttributes.def"
 
       static RasterizerState Flatten(const RasterizerState &parent,
                                      const RasterizerState &child);
 
-    private:
+      friend std::ostream &operator<<(std::ostream &os,
+                                      const RasterizerState &state);
 
       // Flags to keep trach of which attributes this state has declared or
       // might wish to override on child states.
       enum class AttrFlag : uint32_t {
         None = 0,
-#define STATE_ATTRIBUTE(bit_index, attr_type, public_name, member_name) \
-        public_name = bit_index,
+#define STATE_ATTRIBUTE(index, attr_type, public_name, member_name) \
+        public_name = 1 << index,
 #include "dg/RasterizerStateAttributes.def"
       };
+
+    private:
 
       using T = std::underlying_type_t<AttrFlag>;
       friend inline AttrFlag operator - (AttrFlag lhs, AttrFlag rhs) {
@@ -89,7 +97,7 @@ namespace dg {
       AttrFlag importantAttributes = AttrFlag::None;
 
       // This state's declared attribute values.
-#define STATE_ATTRIBUTE(bit_index, attr_type, name, member_name) \
+#define STATE_ATTRIBUTE(index, attr_type, name, member_name) \
       attr_type member_name;
 #include "dg/RasterizerStateAttributes.def"
 
@@ -121,3 +129,11 @@ namespace dg {
   }; // class RasterizerState
 
 } // namespace dg
+
+namespace std {
+  std::string to_string(const dg::RasterizerState::CullMode &cullMode);
+  std::string to_string(
+      const dg::RasterizerState::DepthFunc &depthFunc);
+
+  std::string to_string(const dg::RasterizerState &state);
+} // namespace std

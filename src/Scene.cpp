@@ -211,7 +211,7 @@ void dg::OpenGLScene::ConfigureBuffer() {
   // TODO: Remove this once all GL state calls are removed and we entirely
   //       rely on the RasterizerState stack. This call is redundant to Pushing
   //       and popping states.
-  Graphics::Instance->UpdateRasterizerState();
+  Graphics::Instance->ApplyCurrentRasterizerState();
 }
 
 #endif

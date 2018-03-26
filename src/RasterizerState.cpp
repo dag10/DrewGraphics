@@ -3,6 +3,7 @@
 //
 
 #include "dg/RasterizerState.h"
+#include <sstream>
 #include <string>
 
 dg::RasterizerState::RasterizerState(const RasterizerState &other) {
@@ -60,7 +61,7 @@ dg::RasterizerState dg::RasterizerState::Flatten(const RasterizerState &parent,
 
 // Automatically create Setters, Getters, and Clearers for all possible
 // RasterizerState attributes.
-#define STATE_ATTRIBUTE(bit_index, attr_type, public_name, member_name) \
+#define STATE_ATTRIBUTE(index, attr_type, public_name, member_name) \
 void dg::RasterizerState::Set##public_name(attr_type member_name, bool important) { \
   this->member_name = member_name; \
   DeclareAttribute(AttrFlag::public_name); \
@@ -73,3 +74,61 @@ attr_type dg::RasterizerState::Get##public_name() const { \
   return member_name; \
 }
 #include "dg/RasterizerStateAttributes.def"
+
+std::ostream &dg::operator<<(std::ostream &os, const RasterizerState &state) {
+#define STATE_ATTRIBUTE(index, attr_type, public_name, member_name) \
+  os << #public_name << ": "; \
+  if (state.Declares(dg::RasterizerState::AttrFlag::public_name)) { \
+    if (std::string(#attr_type) == "bool") { \
+      os << (static_cast<bool>(state.member_name) ? "TRUE" : "FALSE"); \
+    } else { \
+      os << std::to_string(state.member_name); \
+    } \
+    if (state.DeclaresImportant(dg::RasterizerState::AttrFlag::public_name)) { \
+      os << " (important)"; \
+    } \
+  } else { \
+    os << "(unset)"; \
+  } \
+  os << std::endl;
+#include "dg/RasterizerStateAttributes.def"
+
+  return os;
+}
+
+std::string std::to_string(const dg::RasterizerState &state) {
+  std::stringstream ss;
+  ss << state;
+  return ss.str();
+}
+
+std::string std::to_string(const dg::RasterizerState::CullMode &cullMode) {
+  switch (cullMode) {
+    case dg::RasterizerState::CullMode::OFF:
+      return "OFF";
+    case dg::RasterizerState::CullMode::FRONT:
+      return "FRONT";
+    case dg::RasterizerState::CullMode::BACK:
+      return "BACK";
+  }
+}
+
+std::string std::to_string(
+    const dg::RasterizerState::DepthFunc &depthFunc) {
+  switch (depthFunc) {
+    case dg::RasterizerState::DepthFunc::OFF:
+      return "OFF";
+    case dg::RasterizerState::DepthFunc::LESS:
+      return "LESS";
+    case dg::RasterizerState::DepthFunc::EQUAL:
+      return "EQUAL";
+    case dg::RasterizerState::DepthFunc::LEQUAL:
+      return "LEQUAL";
+    case dg::RasterizerState::DepthFunc::GREATER:
+      return "GREATER";
+    case dg::RasterizerState::DepthFunc::NOTEQUAL:
+      return "NOTEQUAL";
+    case dg::RasterizerState::DepthFunc::GEQUAL:
+      return "GEQUAL";
+  }
+}

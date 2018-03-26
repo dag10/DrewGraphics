@@ -183,6 +183,10 @@ const dg::Vertex dg::Mesh::GetVertex(int i) const {
   return vertex;
 }
 
+void dg::Mesh::Draw() const {
+  Graphics::Instance->ApplyCurrentRasterizerState();
+}
+
 std::shared_ptr<dg::Mesh> dg::Mesh::CreateCube() {
   std::shared_ptr<Mesh> mesh = Create();
 
@@ -807,6 +811,8 @@ void dg::OpenGLMesh::FinishBuilding() {
 }
 
 void dg::OpenGLMesh::Draw() const {
+  Mesh::Draw();
+
   glBindVertexArray(VAO);
   if (lastDrawnMesh != this) {
     for (int i = 0; i < Vertex::NumAttrs; i++) {
@@ -881,6 +887,8 @@ void dg::DirectXMesh::FinishBuilding() {
 void dg::DirectXMesh::Draw() const {
   assert(vertexBuffer != nullptr);
   assert(indexBuffer != nullptr);
+
+  Mesh::Draw();
 
   UINT stride = sizeof(Vertex::Data);
   UINT offset = 0;

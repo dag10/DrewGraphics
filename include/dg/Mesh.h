@@ -126,7 +126,7 @@ namespace dg {
 
       const Vertex GetVertex(int i) const;
 
-      virtual void Draw() const = 0;
+      virtual void Draw() const;
 
     protected:
 

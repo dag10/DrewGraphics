@@ -43,43 +43,43 @@ namespace dg {
     return static_cast<T>(lhs) == static_cast<T>(rhs);
   };
 
-  enum class MaterialPropertyType {
-    NONE,
-
-    BOOL,
-    INT,
-    FLOAT,
-    VEC2,
-    VEC3,
-    VEC4,
-    MAT4X4,
-    TEXTURE,
-  };
-
-  union MaterialPropertyValue {
-    bool _bool;
-    int _int;
-    float _float;
-    glm::vec2 _vec2;
-    glm::vec3 _vec3;
-    glm::vec4 _vec4;
-    glm::mat4x4 _mat4x4;
-
-    MaterialPropertyValue() {
-      memset(this, 0, sizeof(MaterialPropertyValue));
-    }
-  };
-
-  struct MaterialProperty {
-    MaterialPropertyType type = MaterialPropertyType::NONE;
-    MaterialPropertyValue value;
-    std::shared_ptr<Texture> texture = nullptr;
-    int texUnitHint = -1;
-  };
-
   class Material {
 
     public:
+
+    enum class PropertyType {
+      NONE,
+
+      BOOL,
+      INT,
+      FLOAT,
+      VEC2,
+      VEC3,
+      VEC4,
+      MAT4X4,
+      TEXTURE,
+    };
+
+    union PropertyValue {
+      bool _bool;
+      int _int;
+      float _float;
+      glm::vec2 _vec2;
+      glm::vec3 _vec3;
+      glm::vec4 _vec4;
+      glm::mat4x4 _mat4x4;
+
+      PropertyValue() {
+        memset(this, 0, sizeof(PropertyValue));
+      }
+    };
+
+    struct Property {
+      PropertyType type = PropertyType::NONE;
+      PropertyValue value;
+      std::shared_ptr<Texture> texture = nullptr;
+      int texUnitHint = -1;
+    };
 
       Material() = default;
 
@@ -135,7 +135,7 @@ namespace dg {
 
     private:
 
-      std::unordered_map<std::string, MaterialProperty> properties;
+      std::unordered_map<std::string, Property> properties;
       unsigned int highestTexUnitHint = 0;
 
   }; // class Material

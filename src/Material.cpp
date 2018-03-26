@@ -36,50 +36,50 @@ void dg::swap(Material& first, Material& second) {
 }
 
 void dg::Material::SetProperty(const std::string& name, bool value) {
-  MaterialProperty prop;
-  prop.type = MaterialPropertyType::BOOL;
+  Property prop;
+  prop.type = PropertyType::BOOL;
   prop.value._bool = value;
   properties.insert_or_assign(name, prop);
 }
 
 void dg::Material::SetProperty(const std::string& name, int value) {
-  MaterialProperty prop;
-  prop.type = MaterialPropertyType::INT;
+  Property prop;
+  prop.type = PropertyType::INT;
   prop.value._int = value;
   properties.insert_or_assign(name, prop);
 }
 
 void dg::Material::SetProperty(const std::string& name, float value) {
-  MaterialProperty prop;
-  prop.type = MaterialPropertyType::FLOAT;
+  Property prop;
+  prop.type = PropertyType::FLOAT;
   prop.value._float = value;
   properties.insert_or_assign(name, prop);
 }
 
 void dg::Material::SetProperty(const std::string& name, glm::vec2 value) {
-  MaterialProperty prop;
-  prop.type = MaterialPropertyType::VEC2;
+  Property prop;
+  prop.type = PropertyType::VEC2;
   prop.value._vec2 = value;
   properties.insert_or_assign(name, prop);
 }
 
 void dg::Material::SetProperty(const std::string& name, glm::vec3 value) {
-  MaterialProperty prop;
-  prop.type = MaterialPropertyType::VEC3;
+  Property prop;
+  prop.type = PropertyType::VEC3;
   prop.value._vec3 = value;
   properties.insert_or_assign(name, prop);
 }
 
 void dg::Material::SetProperty(const std::string& name, glm::vec4 value) {
-  MaterialProperty prop;
-  prop.type = MaterialPropertyType::VEC4;
+  Property prop;
+  prop.type = PropertyType::VEC4;
   prop.value._vec4 = value;
   properties.insert_or_assign(name, prop);
 }
 
 void dg::Material::SetProperty(const std::string& name, glm::mat4x4 value) {
-  MaterialProperty prop;
-  prop.type = MaterialPropertyType::MAT4X4;
+  Property prop;
+  prop.type = PropertyType::MAT4X4;
   prop.value._mat4x4 = value;
   properties.insert_or_assign(name, prop);
 }
@@ -92,8 +92,8 @@ void dg::Material::SetProperty(
 void dg::Material::SetProperty(
     const std::string& name, std::shared_ptr<Texture> value,
     int texUnitHint) {
-  MaterialProperty prop;
-  prop.type = MaterialPropertyType::TEXTURE;
+  Property prop;
+  prop.type = PropertyType::TEXTURE;
   prop.texture = value;
   prop.texUnitHint = texUnitHint;
   if (texUnitHint > (int)highestTexUnitHint) {
@@ -184,28 +184,28 @@ void dg::Material::Use() const {
   unsigned int textureUnit = highestTexUnitHint + 1;
   for (auto it = properties.begin(); it != properties.end(); it++) {
     switch (it->second.type) {
-      case MaterialPropertyType::BOOL:
+      case PropertyType::BOOL:
         shader->SetBool(it->first, it->second.value._bool);
         break;
-      case MaterialPropertyType::INT:
+      case PropertyType::INT:
         shader->SetInt(it->first, it->second.value._int);
         break;
-      case MaterialPropertyType::FLOAT:
+      case PropertyType::FLOAT:
         shader->SetFloat(it->first, it->second.value._float);
         break;
-      case MaterialPropertyType::VEC2:
+      case PropertyType::VEC2:
         shader->SetVec2(it->first, it->second.value._vec2);
         break;
-      case MaterialPropertyType::VEC3:
+      case PropertyType::VEC3:
         shader->SetVec3(it->first, it->second.value._vec3);
         break;
-      case MaterialPropertyType::VEC4:
+      case PropertyType::VEC4:
         shader->SetVec4(it->first, it->second.value._vec4);
         break;
-      case MaterialPropertyType::MAT4X4:
+      case PropertyType::MAT4X4:
         shader->SetMat4(it->first, it->second.value._mat4x4);
         break;
-      case MaterialPropertyType::TEXTURE:
+      case PropertyType::TEXTURE:
         if (it->second.texUnitHint >= 0) {
           shader->SetTexture(
               it->second.texUnitHint, it->first, it->second.texture.get());

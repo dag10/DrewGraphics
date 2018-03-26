@@ -69,7 +69,6 @@ std::ostream &dg::operator<<(std::ostream &os, const RasterizerState &state) {
 #define STATE_ATTRIBUTE(index, attr_type, public_name, member_name) \
   os << #public_name << ": "; \
   if (state.Declares(dg::RasterizerState::AttrFlag::public_name)) { \
-    os << "VALUE = "; \
     if (std::string(#attr_type) == "bool") { \
       os << (static_cast<bool>(state.member_name) ? "TRUE" : "FALSE"); \
     } else { \
@@ -113,8 +112,8 @@ std::string std::to_string(dg::RasterizerState::CullMode cullMode) {
 
 std::string std::to_string(dg::RasterizerState::DepthFunc depthFunc) {
   switch (depthFunc) {
-    case dg::RasterizerState::DepthFunc::OFF:
-      return "OFF";
+    case dg::RasterizerState::DepthFunc::ALWAYS:
+      return "ALWAYS";
     case dg::RasterizerState::DepthFunc::LESS:
       return "LESS";
     case dg::RasterizerState::DepthFunc::EQUAL:

@@ -241,7 +241,6 @@ void dg::TexturesScene::RenderFrame() {
 #endif
 
   ClearBuffer();
-  ConfigureBuffer();
 
   // Render scene for real.
   DrawScene(*mainCamera);

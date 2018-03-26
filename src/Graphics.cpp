@@ -101,6 +101,8 @@ void dg::OpenGLGraphics::InitializeResources() {
 }
 
 void dg::OpenGLGraphics::Clear(glm::vec3 color) {
+  glEnable(GL_DEPTH_TEST);
+  glDepthMask(GL_TRUE);
   glClearColor(color.x, color.y, color.z, 1);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 }
@@ -118,22 +120,14 @@ void dg::OpenGLGraphics::ApplyRasterizerState(const RasterizerState &state) {
       break;
   }
 
-  glDepthMask(state.GetWriteDepth() ? GL_TRUE : GL_FALSE);
-
+  bool writeDepth = state.GetWriteDepth();
   auto depthFunc = state.GetDepthFunc();
-  switch (depthFunc) {
-    case RasterizerState::DepthFunc::OFF:
-      glDisable(GL_DEPTH_TEST);
-      break;
-    case RasterizerState::DepthFunc::LESS:
-    case RasterizerState::DepthFunc::EQUAL:
-    case RasterizerState::DepthFunc::LEQUAL:
-    case RasterizerState::DepthFunc::GREATER:
-    case RasterizerState::DepthFunc::NOTEQUAL:
-    case RasterizerState::DepthFunc::GEQUAL:
-      glEnable(GL_DEPTH_TEST);
-      glDepthFunc(ToGLEnum(depthFunc));
-      break;
+  if (!writeDepth && depthFunc == RasterizerState::DepthFunc::ALWAYS) {
+    glDisable(GL_DEPTH_TEST);
+  } else {
+    glEnable(GL_DEPTH_TEST);
+    glDepthMask(writeDepth ? GL_TRUE : GL_FALSE);
+    glDepthFunc(ToGLEnum(depthFunc));
   }
 
   if (state.GetBlendEnabled()) {
@@ -162,8 +156,8 @@ GLenum dg::OpenGLGraphics::ToGLEnum(RasterizerState::CullMode cullMode) {
 
 GLenum dg::OpenGLGraphics::ToGLEnum(RasterizerState::DepthFunc depthFunc) {
   switch (depthFunc) {
-    case RasterizerState::DepthFunc::OFF:
-      return GL_NONE;
+    case RasterizerState::DepthFunc::ALWAYS:
+      return GL_ALWAYS;
     case RasterizerState::DepthFunc::LESS:
       return GL_LESS;
     case RasterizerState::DepthFunc::EQUAL:

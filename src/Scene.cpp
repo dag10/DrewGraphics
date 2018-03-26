@@ -96,7 +96,6 @@ void dg::BaseScene::RenderFrame() {
 
   // TODO: If VR, just render a quad of the left eye instead.
   ClearBuffer();
-  ConfigureBuffer();
   mainCamera->aspectRatio = window->GetAspectRatio();
   Graphics::Instance->PushRasterizerState(defaultRasterizerState);
   DrawScene(*mainCamera);
@@ -114,7 +113,6 @@ void dg::BaseScene::RenderFrame(vr::EVREye eye) {
   framebuffer->SetViewport();
   ClearBuffer();
   DrawHiddenAreaMesh(eye);
-  ConfigureBuffer();
 
   DrawScene(*mainCamera, true, eye);
 
@@ -135,8 +133,6 @@ void dg::BaseScene::DrawScene(
       skybox->Draw(camera);
     }
   }
-
-  ConfigureBuffer();
 
   // Traverse scene tree and sort out different types of objects
   // into their own lists.
@@ -216,13 +212,6 @@ void dg::OpenGLScene::DrawHiddenAreaMesh(vr::EVREye eye) {
   VRManager::Instance->GetHiddenAreaMesh(eye)->Draw();
 }
 
-void dg::OpenGLScene::ConfigureBuffer() {
-  // TODO: Remove this once all GL state calls are removed and we entirely
-  //       rely on the RasterizerState stack. This call is redundant to Pushing
-  //       and popping states.
-  Graphics::Instance->ApplyCurrentRasterizerState();
-}
-
 #endif
 #pragma endregion
 #pragma region DirectX Scene
@@ -230,13 +219,6 @@ void dg::OpenGLScene::ConfigureBuffer() {
 
 void dg::DirectXScene::DrawHiddenAreaMesh(vr::EVREye eye) {
   // TODO
-}
-
-void dg::DirectXScene::ConfigureBuffer() {
-  // TODO: Remove this once all GL state calls are removed and we entirely
-  //       rely on the RasterizerState stack. This call is redundant to Pushing
-  //       and popping states.
-  Graphics::Instance->UpdateRasterizerState();
 }
 
 #endif

@@ -136,7 +136,6 @@ void dg::ShadowScene::RenderFrame() {
 #endif
 
   ClearBuffer();
-  ConfigureBuffer();
 
   // Render scene for real.
   mainCamera->aspectRatio = window->GetAspectRatio();

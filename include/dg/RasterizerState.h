@@ -21,7 +21,7 @@ namespace dg {
       };
 
       enum class DepthFunc {
-        OFF,
+        ALWAYS,
         LESS,
         EQUAL,
         LEQUAL,

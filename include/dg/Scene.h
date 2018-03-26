@@ -51,7 +51,6 @@ namespace dg {
           const Light::ShaderData (&lights)[Light::MAX_LIGHTS]) const;
       virtual void ClearBuffer();
       virtual void DrawHiddenAreaMesh(vr::EVREye eye) = 0;
-      virtual void ConfigureBuffer() = 0;
 
       RasterizerState defaultRasterizerState;
 
@@ -73,7 +72,6 @@ namespace dg {
     protected:
 
       virtual void DrawHiddenAreaMesh(vr::EVREye eye);
-      virtual void ConfigureBuffer();
 
   }; // class OpenGLScene
 
@@ -86,7 +84,6 @@ namespace dg {
     protected:
 
      virtual void DrawHiddenAreaMesh(vr::EVREye eye);
-     virtual void ConfigureBuffer();
 
   }; // class DirectXScene
 

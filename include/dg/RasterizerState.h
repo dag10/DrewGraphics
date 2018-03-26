@@ -14,6 +14,9 @@ namespace dg {
 
     public:
 
+      static RasterizerState AdditiveBlending();
+      static RasterizerState AlphaBlending();
+
       enum class CullMode {
         OFF,
         FRONT,

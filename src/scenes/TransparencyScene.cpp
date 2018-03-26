@@ -66,7 +66,7 @@ void dg::TransparencyScene::Initialize() {
       Texture::FromPath("assets/textures/skybox_daylight.png");
 
   // Create skybox.
-  //skybox = std::make_shared<Skybox>(skyboxTexture);
+  skybox = std::make_shared<Skybox>(skyboxTexture);
 
   // Create ceiling light source.
   auto ceilingLight = std::make_shared<PointLight>(
@@ -84,12 +84,11 @@ void dg::TransparencyScene::Initialize() {
       StandardMaterial::WithColor(glm::vec4(1, 1, 1, 0.5f));
   additiveMaterial.rasterizerOverride.SetBlendEnabled(true);
   additiveMaterial.rasterizerOverride.SetWriteDepth(false);
-  additiveMaterial.rasterizerOverride.SetDepthFunc(
-      RasterizerState::DepthFunc::ALWAYS);
   additiveMaterial.rasterizerOverride.SetSrcRGBBlendFunc(
       RasterizerState::BlendFunc::ONE);
   additiveMaterial.rasterizerOverride.SetDstRGBBlendFunc(
       RasterizerState::BlendFunc::ONE);
+  additiveMaterial.queue = RenderQueue::Transparent;
   float additiveAlpha = 0.1f;
 
   // Create additive cube.

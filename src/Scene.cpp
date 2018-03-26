@@ -3,6 +3,8 @@
 //
 
 #include "dg/Scene.h"
+#include <deque>
+#include <vector>
 #include "dg/Camera.h"
 #include "dg/FrameBuffer.h"
 #include "dg/Graphics.h"
@@ -136,9 +138,9 @@ void dg::BaseScene::DrawScene(
 
   // Traverse scene tree and sort out different types of objects
   // into their own lists.
-  std::forward_list<SceneObject*> remainingObjects;
-  std::forward_list<Model*> models;
-  std::forward_list<Light*> lights;
+  std::deque<SceneObject*> remainingObjects;
+  std::vector<Model*> models;
+  std::deque<Light*> lights;
   remainingObjects.push_front((SceneObject*)this);
   while (!remainingObjects.empty()) {
     SceneObject *obj = remainingObjects.front();
@@ -149,12 +151,17 @@ void dg::BaseScene::DrawScene(
       if (!(*child)->enabled) continue;
       remainingObjects.push_front(child->get());
       if (auto model = std::dynamic_pointer_cast<Model>(*child)) {
-        models.push_front(model.get());
+        models.push_back(model.get());
       } else if (auto light = std::dynamic_pointer_cast<Light>(*child)) {
         lights.push_front(light.get());
       }
     }
   }
+
+  // Sort models.
+  sort(models.begin(), models.end(), [](Model *a, Model *b) -> bool {
+    return a->material->queue < b->material->queue;
+  });
 
   // Set up view.
   glm::mat4x4 view;

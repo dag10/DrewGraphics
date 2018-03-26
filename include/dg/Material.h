@@ -12,6 +12,37 @@
 
 namespace dg {
 
+  // Value for rendering order.
+  enum class RenderQueue : int {
+    Background  = 1000,
+    Geometry    = 2000,
+    Transparent = 3000,
+    Overlay     = 4000,
+  };
+
+  using T = std::underlying_type_t<RenderQueue>;
+  inline RenderQueue operator - (RenderQueue lhs, int rhs) {
+    return (RenderQueue)(static_cast<T>(lhs) - rhs);
+  };
+  inline RenderQueue operator + (RenderQueue lhs, int rhs) {
+    return (RenderQueue)(static_cast<T>(lhs) + rhs);
+  };
+  inline bool operator < (RenderQueue lhs, RenderQueue rhs) {
+    return static_cast<T>(lhs) < static_cast<T>(rhs);
+  };
+  inline bool operator > (RenderQueue lhs, RenderQueue rhs) {
+    return static_cast<T>(lhs) > static_cast<T>(rhs);
+  };
+  inline bool operator <= (RenderQueue lhs, RenderQueue rhs) {
+    return static_cast<T>(lhs) <= static_cast<T>(rhs);
+  };
+  inline bool operator >= (RenderQueue lhs, RenderQueue rhs) {
+    return static_cast<T>(lhs) >= static_cast<T>(rhs);
+  };
+  inline bool operator == (RenderQueue lhs, RenderQueue rhs) {
+    return static_cast<T>(lhs) == static_cast<T>(rhs);
+  };
+
   enum class MaterialPropertyType {
     NONE,
 
@@ -89,6 +120,7 @@ namespace dg {
       void Use() const;
 
       RasterizerState rasterizerOverride;
+      RenderQueue queue = RenderQueue::Geometry;
 
     protected:
 

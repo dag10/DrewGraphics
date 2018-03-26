@@ -6,6 +6,32 @@
 #include <sstream>
 #include <string>
 
+dg::RasterizerState dg::RasterizerState::AdditiveBlending() {
+  RasterizerState state;
+  state.SetWriteDepth(false);
+  state.SetBlendEnabled(true);
+  state.SetRGBBlendEquation(RasterizerState::BlendEquation::ADD);
+  state.SetAlphaBlendEquation(RasterizerState::BlendEquation::ADD);
+  state.SetSrcRGBBlendFunc(RasterizerState::BlendFunc::SRC_ALPHA);
+  state.SetDstRGBBlendFunc(RasterizerState::BlendFunc::ONE);
+  state.SetSrcAlphaBlendFunc(RasterizerState::BlendFunc::ZERO);
+  state.SetDstAlphaBlendFunc(RasterizerState::BlendFunc::ONE);
+  return state;
+}
+
+dg::RasterizerState dg::RasterizerState::AlphaBlending() {
+  RasterizerState state;
+  state.SetWriteDepth(false);
+  state.SetBlendEnabled(true);
+  state.SetRGBBlendEquation(RasterizerState::BlendEquation::ADD);
+  state.SetAlphaBlendEquation(RasterizerState::BlendEquation::ADD);
+  state.SetSrcRGBBlendFunc(RasterizerState::BlendFunc::SRC_ALPHA);
+  state.SetDstRGBBlendFunc(RasterizerState::BlendFunc::ONE_MINUS_SRC_ALPHA);
+  state.SetSrcAlphaBlendFunc(RasterizerState::BlendFunc::ONE);
+  state.SetDstAlphaBlendFunc(RasterizerState::BlendFunc::ONE);
+  return state;
+}
+
 dg::RasterizerState::RasterizerState(const RasterizerState &other) {
   declaredAttributes = other.declaredAttributes;
   importantAttributes = other.importantAttributes;

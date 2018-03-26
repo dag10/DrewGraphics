@@ -82,14 +82,9 @@ void dg::TransparencyScene::Initialize() {
   // Additive material.
   StandardMaterial additiveMaterial =
       StandardMaterial::WithColor(glm::vec4(1, 1, 1, 0.5f));
-  additiveMaterial.rasterizerOverride.SetBlendEnabled(true);
-  additiveMaterial.rasterizerOverride.SetWriteDepth(false);
-  additiveMaterial.rasterizerOverride.SetSrcRGBBlendFunc(
-      RasterizerState::BlendFunc::ONE);
-  additiveMaterial.rasterizerOverride.SetDstRGBBlendFunc(
-      RasterizerState::BlendFunc::ONE);
+  additiveMaterial.rasterizerOverride = RasterizerState::AdditiveBlending();
   additiveMaterial.queue = RenderQueue::Transparent;
-  float additiveAlpha = 0.1f;
+  float additiveAlpha = 0.2f;
 
   // Create additive cube.
   additiveMaterial.SetDiffuse(
@@ -110,10 +105,13 @@ void dg::TransparencyScene::Initialize() {
   // Create additive quad.
   additiveMaterial.SetDiffuse(
       glm::vec4(glm::vec3(0, 255, 0) / 255.f, additiveAlpha));
+  additiveMaterial.rasterizerOverride.SetCullMode(
+      RasterizerState::CullMode::OFF);
   additiveMeshes->AddChild(std::make_shared<Model>(
       Mesh::Quad,
       std::make_shared<StandardMaterial>(additiveMaterial),
       Transform::TS(glm::vec3(0, 0.25, 0), glm::vec3(0.5))), false);
+  additiveMaterial.rasterizerOverride.ClearCullMode();
 
   // Create additive sphere.
   additiveMaterial.SetDiffuse(

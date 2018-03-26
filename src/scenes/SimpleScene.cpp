@@ -119,5 +119,5 @@ void dg::SimpleScene::Initialize() {
 }
 
 void dg::SimpleScene::ClearBuffer() {
-  Graphics::Instance->Clear(glm::vec3(0.4f, 0.6f, 0.75f));
+  Graphics::Instance->ClearColor(glm::vec3(0.4f, 0.6f, 0.75f));
 }

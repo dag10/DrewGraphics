@@ -469,6 +469,6 @@ void dg::RobotScene::Update() {
 }
 
 void dg::RobotScene::ClearBuffer() {
-  Graphics::Instance->Clear(glm::vec3(26.f, 37.f, 43.f) / 255.f);
+  Graphics::Instance->ClearColor(glm::vec3(26.f, 37.f, 43.f) / 255.f);
 }
 

@@ -4,21 +4,22 @@
 
 #include "dg/scenes/TexturesScene.h"
 
+#include <forward_list>
+#include <glm/glm.hpp>
 #include "dg/Camera.h"
 #include "dg/Canvas.h"
 #include "dg/EngineTime.h"
 #include "dg/FrameBuffer.h"
+#include "dg/Graphics.h"
 #include "dg/Lights.h"
 #include "dg/Mesh.h"
+#include "dg/Model.h"
 #include "dg/Shader.h"
 #include "dg/Skybox.h"
 #include "dg/Texture.h"
 #include "dg/Window.h"
 #include "dg/behaviors/KeyboardCameraController.h"
 #include "dg/materials/StandardMaterial.h"
-#include <forward_list>
-#include <glm/glm.hpp>
-#include "dg/Model.h"
 
 std::unique_ptr<dg::TexturesScene> dg::TexturesScene::Make() {
   return std::unique_ptr<dg::TexturesScene>(new dg::TexturesScene());
@@ -123,39 +124,33 @@ void dg::TexturesScene::Initialize() {
   // Create quad to show framebuffer color and depth buffers.
   float quadSize = 1.2f;
   float quadSep = 0.1f;
+  float quadAspect = 1.5f;
   renderQuads->AddChild(std::make_shared<Model>(
     dg::Mesh::Quad,
     std::make_shared<StandardMaterial>(framebufferColorMaterial),
     Transform::TS(
       glm::vec3(-quadSize * 0.5f - quadSep * 0.5f, 0, 0),
-      quadSize * glm::vec3(1, 1 / window->GetAspectRatio(), 1))), false);
+      quadSize * glm::vec3(1, 1 / quadAspect, 1))), false);
   renderQuads->AddChild(std::make_shared<Model>(
     dg::Mesh::Quad,
     std::make_shared<StandardMaterial>(framebufferDepthMaterial),
     Transform::TS(
       glm::vec3(quadSize * 0.5f + quadSep * 0.5f, 0, 0),
-      quadSize * glm::vec3(1, 1 / window->GetAspectRatio(), 1))), false);
+      quadSize * glm::vec3(1, 1 / quadAspect, 1))), false);
   dummyRenderQuads->AddChild(std::make_shared<Model>(
     dg::Mesh::Quad,
     std::make_shared<StandardMaterial>(dummyFramebufferMaterial),
     Transform::TS(
       glm::vec3(-quadSize * 0.5f - quadSep * 0.5f, 0, 0),
-      quadSize * glm::vec3(1, 1 / window->GetAspectRatio(), 1))), false);
+      quadSize * glm::vec3(1, 1 / quadAspect, 1))), false);
   dummyRenderQuads->AddChild(std::make_shared<Model>(
     dg::Mesh::Quad,
     std::make_shared<StandardMaterial>(dummyFramebufferMaterial),
     Transform::TS(
       glm::vec3(quadSize * 0.5f + quadSep * 0.5f, 0, 0),
-      quadSize * glm::vec3(1, 1 / window->GetAspectRatio(), 1))), false);
+      quadSize * glm::vec3(1, 1 / quadAspect, 1))), false);
 
   // Create custom texture using a Canvas.
-  //Canvas canvas(1, 6);
-  //canvas.SetPixel(0, 5, 75, 0, 130);
-  //canvas.SetPixel(0, 4, 0, 0, 255);
-  //canvas.SetPixel(0, 3, 0, 255, 0);
-  //canvas.SetPixel(0, 2, 255, 255, 0);
-  //canvas.SetPixel(0, 1, 255, 127, 0);
-  //canvas.SetPixel(0, 0, 255, 0, 0);
   Canvas canvas(128, 128);
   for (int i = 0; i < canvas.GetWidth(); i++) {
     for (int j = 0; j < canvas.GetHeight(); j++) {
@@ -175,7 +170,7 @@ void dg::TexturesScene::Initialize() {
       StandardMaterial::WithTexture(canvas.GetTexture())),
     Transform::TS(
       glm::vec3(quadSize * 1.5f + (2 * quadSep) * 0.5f, 0, 0),
-      quadSize * glm::vec3(1, 1 / window->GetAspectRatio(), 1))), false);
+      quadSize * glm::vec3(1, 1 / quadAspect, 1))), false);
 
   // Create virtual camera.
   virtualCamera = std::make_shared<Camera>();
@@ -183,6 +178,7 @@ void dg::TexturesScene::Initialize() {
   virtualCamera->LookAtPoint(glm::vec3(cube->transform.translation));
   virtualCamera->farClip = 7;
   virtualCamera->nearClip = 1;
+  virtualCamera->aspectRatio = quadAspect;
   AddChild(virtualCamera);
 
   // Configure camera.
@@ -221,28 +217,20 @@ void dg::TexturesScene::Update() {
 }
 
 void dg::TexturesScene::RenderFrame() {
-#if defined(_OPENGL)
   // Render scene for framebuffer.
   framebuffer->Bind();
-  glViewport(0, 0, framebuffer->GetWidth(), framebuffer->GetHeight());
-  glClearColor(0, 1, 1, 1);
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-  glEnable(GL_DEPTH_TEST);
-  glEnable(GL_CULL_FACE);
-  glCullFace(GL_BACK);
+  framebuffer->SetViewport();
+  Graphics::Instance->Clear(glm::vec3(0,1,1));
   renderQuads->enabled = false;
   dummyRenderQuads->enabled = true;
+  Graphics::Instance->PushRasterizerState(defaultRasterizerState);
   DrawScene(*virtualCamera);
+  Graphics::Instance->PopRasterizerState();
   dummyRenderQuads->enabled = false;
   renderQuads->enabled = true;
   framebuffer->Unbind();
-  glViewport(
-    0, 0, (GLsizei)window->GetWidth() * 2, (GLsizei)window->GetHeight() * 2);
-#endif
+  window->ResetViewport();
 
-  ClearBuffer();
-
-  // Render scene for real.
-  DrawScene(*mainCamera);
+  // Render scene for output.
+  Scene::RenderFrame();
 }
-

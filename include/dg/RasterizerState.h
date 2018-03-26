@@ -30,6 +30,28 @@ namespace dg {
         GEQUAL,
       };
 
+      enum class BlendEquation {
+        ADD,
+        SUBTRACT,
+        REVERSE_SUBTRACT,
+        MIN,
+        MAX,
+      };
+
+      enum class BlendFunc {
+        ZERO,
+        ONE,
+        SRC_COLOR,
+        ONE_MINUS_SRC_COLOR,
+        DST_COLOR,
+        ONE_MINUS_DST_COLOR,
+        SRC_ALPHA,
+        ONE_MINUS_SRC_ALPHA,
+        DST_ALPHA,
+        ONE_MINUS_DST_ALPHA,
+        // Holding off on declaring the others until I see the utility.
+      };
+
       static RasterizerState Create();
       static RasterizerState CreateDefault();
 
@@ -131,9 +153,10 @@ namespace dg {
 } // namespace dg
 
 namespace std {
-  std::string to_string(const dg::RasterizerState::CullMode &cullMode);
-  std::string to_string(
-      const dg::RasterizerState::DepthFunc &depthFunc);
+  std::string to_string(dg::RasterizerState::CullMode cullMode);
+  std::string to_string(dg::RasterizerState::DepthFunc depthFunc);
+  std::string to_string(dg::RasterizerState::BlendEquation blendEquation);
+  std::string to_string(dg::RasterizerState::BlendFunc blendFunc);
 
   std::string to_string(const dg::RasterizerState &state);
 } // namespace std

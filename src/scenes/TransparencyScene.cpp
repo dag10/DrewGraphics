@@ -82,7 +82,15 @@ void dg::TransparencyScene::Initialize() {
   // Additive material.
   StandardMaterial additiveMaterial =
       StandardMaterial::WithColor(glm::vec4(1, 1, 1, 0.5f));
-  float additiveAlpha = 0.5f;
+  additiveMaterial.rasterizerOverride.SetBlendEnabled(true);
+  additiveMaterial.rasterizerOverride.SetWriteDepth(false);
+  additiveMaterial.rasterizerOverride.SetDepthFunc(
+      RasterizerState::DepthFunc::OFF);
+  additiveMaterial.rasterizerOverride.SetSrcRGBBlendFunc(
+      RasterizerState::BlendFunc::ONE);
+  additiveMaterial.rasterizerOverride.SetDstRGBBlendFunc(
+      RasterizerState::BlendFunc::ONE);
+  float additiveAlpha = 0.1f;
 
   // Create additive cube.
   additiveMaterial.SetDiffuse(

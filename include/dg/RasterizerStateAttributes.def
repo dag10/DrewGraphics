@@ -18,5 +18,18 @@
 STATE_ATTRIBUTE( 0, dg::RasterizerState::CullMode, CullMode, cullMode )
 STATE_ATTRIBUTE( 1, bool, WriteDepth, writeDepth )
 STATE_ATTRIBUTE( 2, dg::RasterizerState::DepthFunc, DepthFunc, depthFunc )
+STATE_ATTRIBUTE( 3, bool, BlendEnabled, blendEnabled )
+STATE_ATTRIBUTE( 4, dg::RasterizerState::BlendEquation,
+                    RGBBlendEquation, rgbBlendEquation )
+STATE_ATTRIBUTE( 5, dg::RasterizerState::BlendEquation,
+                    AlphaBlendEquation, alphaBlendEquation )
+STATE_ATTRIBUTE( 6, dg::RasterizerState::BlendFunc,
+                    SrcRGBBlendFunc, srcRGBBlendFunc )
+STATE_ATTRIBUTE( 7, dg::RasterizerState::BlendFunc,
+                    DstRGBBlendFunc, dstRGBBlendFunc )
+STATE_ATTRIBUTE( 8, dg::RasterizerState::BlendFunc,
+                    SrcAlphaBlendFunc, srcAlphaBlendFunc )
+STATE_ATTRIBUTE( 9, dg::RasterizerState::BlendFunc,
+                    DstAlphaBlendFunc, dstAlphaBlendFunc )
 
 #undef STATE_ATTRIBUTE

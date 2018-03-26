@@ -10,11 +10,7 @@
 #include "dg/Shader.h"
 #include "dg/Window.h"
 
-#if defined(_OPENGL)
-#include "dg/glad/glad.h"
-
-#include <GLFW/glfw3.h>
-#elif defined(_DIRECTX)
+#if defined(_DIRECTX)
 #include <WindowsX.h>
 #endif
 
@@ -66,6 +62,14 @@ void dg::Graphics::ApplyCurrentRasterizerState() {
   ApplyRasterizerState(state);
 }
 
+const dg::RasterizerState *dg::Graphics::GetEffectiveRasterizerState() const {
+  if (states.empty()) {
+    return nullptr;
+  } else {
+    return states.front().get();
+  }
+}
+
 void dg::Graphics::Shutdown() {
   if (Instance != nullptr) {
     Instance = nullptr;
@@ -102,50 +106,118 @@ void dg::OpenGLGraphics::Clear(glm::vec3 color) {
 }
 
 void dg::OpenGLGraphics::ApplyRasterizerState(const RasterizerState &state) {
-  switch (state.GetCullMode()) {
+  auto cullMode = state.GetCullMode();
+  switch (cullMode) {
     case RasterizerState::CullMode::OFF:
       glDisable(GL_CULL_FACE);
       break;
     case RasterizerState::CullMode::FRONT:
-      glEnable(GL_CULL_FACE);
-      glCullFace(GL_FRONT);
-      break;
     case RasterizerState::CullMode::BACK:
       glEnable(GL_CULL_FACE);
-      glCullFace(GL_BACK);
+      glCullFace(ToGLEnum(cullMode));
       break;
   }
 
   glDepthMask(state.GetWriteDepth() ? GL_TRUE : GL_FALSE);
 
-  switch (state.GetDepthFunc()) {
+  auto depthFunc = state.GetDepthFunc();
+  switch (depthFunc) {
     case RasterizerState::DepthFunc::OFF:
       glDisable(GL_DEPTH_TEST);
       break;
     case RasterizerState::DepthFunc::LESS:
-      glEnable(GL_DEPTH_TEST);
-      glDepthFunc(GL_LESS);
-      break;
     case RasterizerState::DepthFunc::EQUAL:
-      glEnable(GL_DEPTH_TEST);
-      glDepthFunc(GL_EQUAL);
-      break;
     case RasterizerState::DepthFunc::LEQUAL:
-      glEnable(GL_DEPTH_TEST);
-      glDepthFunc(GL_LEQUAL);
-      break;
     case RasterizerState::DepthFunc::GREATER:
-      glEnable(GL_DEPTH_TEST);
-      glDepthFunc(GL_GREATER);
-      break;
     case RasterizerState::DepthFunc::NOTEQUAL:
-      glEnable(GL_DEPTH_TEST);
-      glDepthFunc(GL_NOTEQUAL);
-      break;
     case RasterizerState::DepthFunc::GEQUAL:
       glEnable(GL_DEPTH_TEST);
-      glDepthFunc(GL_GEQUAL);
+      glDepthFunc(ToGLEnum(depthFunc));
       break;
+  }
+
+  if (state.GetBlendEnabled()) {
+    glEnable(GL_BLEND);
+    glBlendEquationSeparate(ToGLEnum(state.GetRGBBlendEquation()),
+                            ToGLEnum(state.GetAlphaBlendEquation()));
+    glBlendFuncSeparate(ToGLEnum(state.GetSrcRGBBlendFunc()),
+                        ToGLEnum(state.GetDstRGBBlendFunc()),
+                        ToGLEnum(state.GetSrcAlphaBlendFunc()),
+                        ToGLEnum(state.GetDstAlphaBlendFunc()));
+  } else {
+    glDisable(GL_BLEND);
+  }
+}
+
+GLenum dg::OpenGLGraphics::ToGLEnum(RasterizerState::CullMode cullMode) {
+  switch (cullMode) {
+    case RasterizerState::CullMode::OFF:
+      return GL_NONE;
+    case RasterizerState::CullMode::FRONT:
+      return GL_FRONT;
+    case RasterizerState::CullMode::BACK:
+      return GL_BACK;
+  }
+}
+
+GLenum dg::OpenGLGraphics::ToGLEnum(RasterizerState::DepthFunc depthFunc) {
+  switch (depthFunc) {
+    case RasterizerState::DepthFunc::OFF:
+      return GL_NONE;
+    case RasterizerState::DepthFunc::LESS:
+      return GL_LESS;
+    case RasterizerState::DepthFunc::EQUAL:
+      return GL_EQUAL;
+    case RasterizerState::DepthFunc::LEQUAL:
+      return GL_LEQUAL;
+    case RasterizerState::DepthFunc::GREATER:
+      return GL_GREATER;
+    case RasterizerState::DepthFunc::NOTEQUAL:
+      return GL_NOTEQUAL;
+    case RasterizerState::DepthFunc::GEQUAL:
+      return GL_GEQUAL;
+  }
+}
+
+GLenum dg::OpenGLGraphics::ToGLEnum(
+    RasterizerState::BlendEquation blendEquation) {
+  switch (blendEquation) {
+    case RasterizerState::BlendEquation::ADD:
+      return GL_FUNC_ADD;
+    case RasterizerState::BlendEquation::SUBTRACT:
+      return GL_FUNC_SUBTRACT;
+    case RasterizerState::BlendEquation::REVERSE_SUBTRACT:
+      return GL_FUNC_REVERSE_SUBTRACT;
+    case RasterizerState::BlendEquation::MIN:
+      return GL_MIN;
+    case RasterizerState::BlendEquation::MAX:
+      return GL_MAX;
+  }
+}
+
+GLenum dg::OpenGLGraphics::ToGLEnum(
+    RasterizerState::BlendFunc blendFunction) {
+  switch (blendFunction) {
+    case RasterizerState::BlendFunc::ZERO:
+      return GL_ZERO;
+    case RasterizerState::BlendFunc::ONE:
+      return GL_ONE;
+    case RasterizerState::BlendFunc::SRC_COLOR:
+      return GL_SRC_COLOR;
+    case RasterizerState::BlendFunc::ONE_MINUS_SRC_COLOR:
+      return GL_ONE_MINUS_SRC_COLOR;
+    case RasterizerState::BlendFunc::DST_COLOR:
+      return GL_DST_COLOR;
+    case RasterizerState::BlendFunc::ONE_MINUS_DST_COLOR:
+      return GL_ONE_MINUS_DST_COLOR;
+    case RasterizerState::BlendFunc::SRC_ALPHA:
+      return GL_SRC_ALPHA;
+    case RasterizerState::BlendFunc::ONE_MINUS_SRC_ALPHA:
+      return GL_ONE_MINUS_SRC_ALPHA;
+    case RasterizerState::BlendFunc::DST_ALPHA:
+      return GL_DST_ALPHA;
+    case RasterizerState::BlendFunc::ONE_MINUS_DST_ALPHA:
+      return GL_ONE_MINUS_DST_ALPHA;
   }
 }
 

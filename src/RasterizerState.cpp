@@ -10,13 +10,13 @@ dg::RasterizerState::RasterizerState(const RasterizerState &other) {
   declaredAttributes = other.declaredAttributes;
   importantAttributes = other.importantAttributes;
 
-  cullMode = other.cullMode;
-  writeDepth = other.writeDepth;
-  depthFunc = other.depthFunc;
+#define STATE_ATTRIBUTE(index, attr_type, public_name, member_name) \
+  member_name = other.member_name;
+#include "dg/RasterizerStateAttributes.def"
 }
 
 bool dg::RasterizerState::HasDeclaredAttributes() const {
-  return static_cast<bool>(declaredAttributes);
+  return static_cast<std::underlying_type_t<AttrFlag>>(declaredAttributes) > 0;
 }
 
 dg::RasterizerState dg::RasterizerState::Flatten(const RasterizerState &parent,
@@ -38,23 +38,13 @@ dg::RasterizerState dg::RasterizerState::Flatten(const RasterizerState &parent,
       (parent.declaredAttributes & !child.declaredAttributes);
   AttrFlag attrsFromChild = merged.declaredAttributes - attrsFromParent;
 
-  if (static_cast<bool>(attrsFromChild & AttrFlag::CullMode)) {
-    merged.cullMode = child.cullMode;
-  } else if (static_cast<bool>(attrsFromParent & AttrFlag::CullMode)) {
-    merged.cullMode = parent.cullMode;
+#define STATE_ATTRIBUTE(index, attr_type, public_name, member_name) \
+  if (static_cast<bool>(attrsFromChild & AttrFlag::public_name)) { \
+    merged.member_name = child.member_name; \
+  } else if (static_cast<bool>(attrsFromParent & AttrFlag::public_name)) { \
+    merged.member_name = parent.member_name; \
   }
-
-  if (static_cast<bool>(attrsFromChild & AttrFlag::WriteDepth)) {
-    merged.writeDepth = child.writeDepth;
-  } else if (static_cast<bool>(attrsFromParent & AttrFlag::WriteDepth)) {
-    merged.writeDepth = parent.writeDepth;
-  }
-
-  if (static_cast<bool>(attrsFromChild & AttrFlag::DepthFunc)) {
-    merged.depthFunc = child.depthFunc;
-  } else if (static_cast<bool>(attrsFromParent & AttrFlag::DepthFunc)) {
-    merged.depthFunc = parent.depthFunc;
-  }
+#include "dg/RasterizerStateAttributes.def"
 
   return merged;
 }
@@ -79,6 +69,7 @@ std::ostream &dg::operator<<(std::ostream &os, const RasterizerState &state) {
 #define STATE_ATTRIBUTE(index, attr_type, public_name, member_name) \
   os << #public_name << ": "; \
   if (state.Declares(dg::RasterizerState::AttrFlag::public_name)) { \
+    os << "VALUE = "; \
     if (std::string(#attr_type) == "bool") { \
       os << (static_cast<bool>(state.member_name) ? "TRUE" : "FALSE"); \
     } else { \
@@ -102,7 +93,7 @@ std::string std::to_string(const dg::RasterizerState &state) {
   return ss.str();
 }
 
-std::string std::to_string(const dg::RasterizerState::CullMode &cullMode) {
+std::string std::to_string(dg::RasterizerState::CullMode cullMode) {
   switch (cullMode) {
     case dg::RasterizerState::CullMode::OFF:
       return "OFF";
@@ -110,11 +101,17 @@ std::string std::to_string(const dg::RasterizerState::CullMode &cullMode) {
       return "FRONT";
     case dg::RasterizerState::CullMode::BACK:
       return "BACK";
+    default:
+      return "INVALID(" +
+             std::to_string(
+                 static_cast<
+                     std::underlying_type_t<dg::RasterizerState::CullMode>>(
+                     cullMode)) +
+             ")";
   }
 }
 
-std::string std::to_string(
-    const dg::RasterizerState::DepthFunc &depthFunc) {
+std::string std::to_string(dg::RasterizerState::DepthFunc depthFunc) {
   switch (depthFunc) {
     case dg::RasterizerState::DepthFunc::OFF:
       return "OFF";
@@ -130,5 +127,64 @@ std::string std::to_string(
       return "NOTEQUAL";
     case dg::RasterizerState::DepthFunc::GEQUAL:
       return "GEQUAL";
+    default:
+      return "INVALID(" +
+             std::to_string(
+                 static_cast<
+                     std::underlying_type_t<dg::RasterizerState::DepthFunc>>(
+                     depthFunc)) +
+             ")";
+  }
+}
+
+std::string std::to_string(dg::RasterizerState::BlendEquation blendEquation) {
+  switch (blendEquation) {
+    case dg::RasterizerState::BlendEquation::ADD:
+      return "ADD";
+    case dg::RasterizerState::BlendEquation::SUBTRACT:
+      return "SUBTRACT";
+    case dg::RasterizerState::BlendEquation::REVERSE_SUBTRACT:
+      return "REVERSE_SUBTRACT";
+    case dg::RasterizerState::BlendEquation::MIN:
+      return "MIN";
+    case dg::RasterizerState::BlendEquation::MAX:
+      return "MAX";
+    default:
+      return "INVALID(" +
+             std::to_string(
+                 static_cast<std::underlying_type_t<
+                     dg::RasterizerState::BlendEquation>>(blendEquation)) +
+             ")";
+  }
+}
+
+std::string std::to_string(dg::RasterizerState::BlendFunc blendFunc) {
+  switch (blendFunc) {
+    case dg::RasterizerState::BlendFunc::ZERO:
+      return "ZERO";
+    case dg::RasterizerState::BlendFunc::ONE:
+      return "ONE";
+    case dg::RasterizerState::BlendFunc::SRC_COLOR:
+      return "SRC_COLOR";
+    case dg::RasterizerState::BlendFunc::ONE_MINUS_SRC_COLOR:
+      return "ONE_MINUS_SRC_COLOR";
+    case dg::RasterizerState::BlendFunc::DST_COLOR:
+      return "DST_COLOR";
+    case dg::RasterizerState::BlendFunc::ONE_MINUS_DST_COLOR:
+      return "ONE_MINUS_DST_COLOR";
+    case dg::RasterizerState::BlendFunc::SRC_ALPHA:
+      return "SRC_ALPHA";
+    case dg::RasterizerState::BlendFunc::ONE_MINUS_SRC_ALPHA:
+      return "ONE_MINUS_SRC_ALPHA";
+    case dg::RasterizerState::BlendFunc::DST_ALPHA:
+      return "DST_ALPHA";
+    case dg::RasterizerState::BlendFunc::ONE_MINUS_DST_ALPHA:
+      return "ONE_MINUS_DST_ALPHA";
+    default:
+      return "INVALID(" +
+             std::to_string(
+                 static_cast<std::underlying_type_t<
+                     dg::RasterizerState::BlendFunc>>(blendFunc)) +
+             ")";
   }
 }

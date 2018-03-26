@@ -9,7 +9,11 @@
 #include <memory>
 #include "dg/RasterizerState.h"
 
-#if defined(_DIRECTX)
+#if defined(_OPENGL)
+#include "dg/glad/glad.h"
+
+#include <GLFW/glfw3.h>
+#elif defined(_DIRECTX)
 #include <d3d11.h>
 #pragma comment(lib, "d3d11.lib")
 #endif
@@ -44,6 +48,7 @@ namespace dg {
       void PushRasterizerState(const RasterizerState &state);
       void PopRasterizerState();
       void ApplyCurrentRasterizerState();
+      const RasterizerState *GetEffectiveRasterizerState() const;
 
     protected:
 
@@ -70,6 +75,11 @@ namespace dg {
       virtual void InitializeGraphics();
       virtual void InitializeResources();
       virtual void ApplyRasterizerState(const RasterizerState &state);
+
+      static GLenum ToGLEnum(RasterizerState::CullMode cullMode);
+      static GLenum ToGLEnum(RasterizerState::DepthFunc depthFunc);
+      static GLenum ToGLEnum(RasterizerState::BlendEquation blendEquation);
+      static GLenum ToGLEnum(RasterizerState::BlendFunc blendFunction);
 
   }; // class OpenGLGraphics
 #endif

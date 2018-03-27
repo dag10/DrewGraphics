@@ -22,7 +22,6 @@ uniform sampler2D _ShadowMap;
 
 in vec2 v_TexCoord;
 in mat3 v_TBN;
-in vec4 v_FragPosLightSpace;
 
 vec3 calculateLight(
     Light light, vec3 normal, vec3 diffuseColor, vec3 specularColor) {
@@ -73,7 +72,8 @@ vec3 calculateLight(
   // Calculate shadow
   float shadow = 0;
   if (light.hasShadow == 1) {
-    vec3 projCoords = v_FragPosLightSpace.xyz / v_FragPosLightSpace.w;
+    vec4 fragPosLightSpace = light.lightTransform * v_ScenePos;
+    vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
     projCoords = projCoords * 0.5 + 0.5;
     float closestDepth = texture(_ShadowMap, projCoords.xy).r;
     float currentDepth = projCoords.z;

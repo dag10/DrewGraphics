@@ -157,6 +157,8 @@ void dg::Material::SendLights(
   for (int i = 0; i < Light::MAX_LIGHTS; i++) {
     if (lights[i].type != Light::LightType::NONE) {
       SendLight(i, lights[i]);
+    } else {
+      ClearLight(i);
     }
   }
 #elif defined(_DIRECTX)

@@ -414,6 +414,7 @@ void dg::RobotScene::Initialize() {
   flashlight->SetCutoff(glm::radians(25.f));
   flashlight->SetFeather(glm::radians(2.f));
   flashlight->SetCutoff(glm::radians(25.f));
+  flashlight->SetCastShadows(true);
   flashlight->transform = Transform::T(glm::vec3(0.1f, -0.1f, 0));
   Behavior::Attach(
     flashlight, std::make_shared<KeyboardLightController>(window));
@@ -426,6 +427,15 @@ void dg::RobotScene::Update() {
   // If F is tapped, toggle flashlight.
   if (window->IsKeyJustPressed(Key::F)) {
     flashlight->enabled = !flashlight->enabled;
+  }
+
+  // If Space is tapped, tag whether flashlight is pinned to camera transform.
+  if (window->IsKeyJustPressed(Key::SPACE)) {
+    if (flashlight->Parent() == this) {
+      mainCamera->AddChild(flashlight, true);
+    } else {
+      AddChild(flashlight, true);
+    }
   }
 
 	// Make lights orbit scene.
@@ -471,4 +481,3 @@ void dg::RobotScene::Update() {
 void dg::RobotScene::ClearBuffer() {
   Graphics::Instance->ClearColor(glm::vec3(26.f, 37.f, 43.f) / 255.f);
 }
-

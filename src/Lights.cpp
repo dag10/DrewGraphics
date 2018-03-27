@@ -4,6 +4,7 @@
 
 #include "dg/Lights.h"
 #include "dg/Material.h"
+#include "dg/Texture.h"
 
 // NOTE: Keep these consistent with MAX_LIGHTS in
 //       -> assets/shaders/includes/fragment_head.glsl.
@@ -40,6 +41,19 @@ void dg::Light::SetSpecular(const glm::vec3& specular) {
   data.specular = specular;
 }
 
+void dg::Light::SetShadowMap(std::shared_ptr<Texture> shadowMap) {
+  this->shadowMap = shadowMap;
+  data.hasShadow = (shadowMap != nullptr) ? 1 : 0;
+}
+
+void dg::Light::SetCastShadows(bool castShadows) {
+  this->castShadows = castShadows;
+}
+
+void dg::Light::SetLightTransform(const glm::mat4x4 &xf) {
+  data.lightTransform = xf;
+}
+
 glm::vec3 dg::Light::GetAmbient() const {
   return data.ambient;
 }
@@ -50,6 +64,18 @@ glm::vec3 dg::Light::GetDiffuse() const {
 
 glm::vec3 dg::Light::GetSpecular() const {
   return data.specular;
+}
+
+std::shared_ptr<dg::Texture> dg::Light::GetShadowMap() const {
+  return shadowMap;
+}
+
+bool dg::Light::GetCastShadows() const {
+  return castShadows;
+}
+
+const glm::mat4x4 &dg::Light::GetLightTransform() const {
+  return data.lightTransform;
 }
 
 dg::Light::ShaderData dg::Light::GetShaderData() const {

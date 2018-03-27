@@ -4,6 +4,7 @@
 
 #include "dg/Scene.h"
 #include <deque>
+#include <iostream>
 #include <vector>
 #include "dg/Camera.h"
 #include "dg/FrameBuffer.h"
@@ -76,6 +77,9 @@ void dg::BaseScene::ClearBuffer() {
 }
 
 void dg::BaseScene::RenderFrame() {
+  ProcessSceneHierarchy();
+  RenderLightShadowMap();
+
   if (enableVR) {
     // Wait for "running start", and get latest poses.
     VRManager::Instance->ReadyToRender();
@@ -113,6 +117,102 @@ void dg::BaseScene::RenderFrame(vr::EVREye eye) {
   window->ResetViewport();
 }
 
+void dg::BaseScene::ProcessSceneHierarchy() {
+  currentModels.clear();
+  currentLights.clear();
+
+  // Traverse scene tree and sort out different types of objects
+  // into their own lists.
+  std::deque<SceneObject*> remainingObjects;
+  remainingObjects.push_front((SceneObject*)this);
+  while (!remainingObjects.empty()) {
+    SceneObject *obj = remainingObjects.front();
+    remainingObjects.pop_front();
+    for (auto child = obj->Children().begin();
+         child != obj->Children().end();
+         child++) {
+      if (!(*child)->enabled) continue;
+      remainingObjects.push_front(child->get());
+      if (auto model = std::dynamic_pointer_cast<Model>(*child)) {
+        currentModels.push_back(model.get());
+      } else if (auto light = std::dynamic_pointer_cast<Light>(*child)) {
+        currentLights.push_front(light.get());
+      }
+    }
+  }
+
+  // Sort models.
+  sort(currentModels.begin(), currentModels.end(),
+       [](Model *a, Model *b) -> bool {
+         return a->material->queue < b->material->queue;
+       });
+
+  // Reset light shadows.
+  bool foundShadowLight = false;
+  shadowCastingLight = nullptr;
+  for (auto &light : currentLights) {
+    light->SetShadowMap(nullptr);
+    if (light->GetCastShadows()) {
+      if (foundShadowLight) {
+        std::cerr
+            << "Warning: More than one light wants to cast shadows, but only "
+               "one shadow is supported at a time."
+            << std::endl;
+      } else {
+        foundShadowLight = true;
+        shadowCastingLight = light;
+      }
+    }
+  }
+}
+
+void dg::BaseScene::RenderLightShadowMap() {
+  if (shadowCastingLight == nullptr) {
+    return;
+  }
+
+  switch (shadowCastingLight->GetShaderData().type) {
+    case Light::LightType::NONE:
+      return;
+    case Light::LightType::POINT:
+      std::cerr << "Error: Shadows are not implemented for PointLight."
+                << std::endl;
+      return;
+    case Light::LightType::SPOT:
+      break;
+    case Light::LightType::DIRECTIONAL:
+      std::cerr << "Error: Shadows are not implemented for DirectionalLight."
+                << std::endl;
+      return;
+  }
+
+  if (shadowFrameBuffer == nullptr) {
+    shadowFrameBuffer =
+        std::make_shared<FrameBuffer>(2048, 2048, true, false, false);
+  }
+
+  SpotLight *spotlight = static_cast<SpotLight*>(shadowCastingLight);
+
+  Camera lightCamera;
+  lightCamera.transform = spotlight->SceneSpace();
+  lightCamera.fov = spotlight->GetCutoff() * 2;
+  lightCamera.nearClip = 0.01;
+  lightCamera.farClip = 100;
+  shadowCastingLight->SetLightTransform(lightCamera.GetProjectionMatrix() *
+                                        lightCamera.GetViewMatrix());
+  shadowFrameBuffer->Bind();
+  shadowFrameBuffer->SetViewport();
+
+  Graphics::Instance->ClearDepthStencil(true, false);
+
+  DrawScene(lightCamera);
+
+  shadowFrameBuffer->Unbind();
+  window->ResetViewport();
+
+  shadowCastingLight->SetShadowMap(shadowFrameBuffer->GetDepthTexture());
+}
+
 void dg::BaseScene::DrawScene(
   const Camera& camera, bool renderForVR, vr::EVREye eye) {
 
@@ -124,33 +224,6 @@ void dg::BaseScene::DrawScene(
       skybox->Draw(camera);
     }
   }
-
-  // Traverse scene tree and sort out different types of objects
-  // into their own lists.
-  std::deque<SceneObject*> remainingObjects;
-  std::vector<Model*> models;
-  std::deque<Light*> lights;
-  remainingObjects.push_front((SceneObject*)this);
-  while (!remainingObjects.empty()) {
-    SceneObject *obj = remainingObjects.front();
-    remainingObjects.pop_front();
-    for (auto child = obj->Children().begin();
-         child != obj->Children().end();
-         child++) {
-      if (!(*child)->enabled) continue;
-      remainingObjects.push_front(child->get());
-      if (auto model = std::dynamic_pointer_cast<Model>(*child)) {
-        models.push_back(model.get());
-      } else if (auto light = std::dynamic_pointer_cast<Light>(*child)) {
-        lights.push_front(light.get());
-      }
-    }
-  }
-
-  // Sort models.
-  sort(models.begin(), models.end(), [](Model *a, Model *b) -> bool {
-    return a->material->queue < b->material->queue;
-  });
 
   // Set up view.
   glm::mat4x4 view;
@@ -166,20 +239,20 @@ void dg::BaseScene::DrawScene(
   // Prepare light data.
   Light::ShaderData lightArray[Light::MAX_LIGHTS];
   int lightIdx = 0;
-  for (auto light = lights.begin(); light != lights.end(); light++) {
+  for (auto &light : currentLights) {
     if (lightIdx >= Light::MAX_LIGHTS) {
       break;
     }
-    lightArray[lightIdx++] = (*light)->GetShaderData();
+    lightArray[lightIdx++] = (*light).GetShaderData();
   }
 
   // Render models.
   glm::vec4 cameraPos_h = glm::inverse(view) * glm::vec4(0, 0, 0, 1);
   glm::vec3 cameraPos = glm::vec3(cameraPos_h) / cameraPos_h.w;
-  for (auto model = models.begin(); model != models.end(); model++) {
+  for (auto &model : currentModels) {
     PrepareModelForDraw(
-        **model, cameraPos, view, projection, lightArray);
-    (*model)->Draw(view, projection);
+        *model, cameraPos, view, projection, lightArray);
+    (*model).Draw(view, projection);
   }
 }
 
@@ -190,6 +263,12 @@ void dg::BaseScene::PrepareModelForDraw(
 
   model.material->SendCameraPosition(cameraPosition);
   model.material->SendLights(lights);
+  if (shadowCastingLight != nullptr) {
+    auto texture = shadowCastingLight->GetShadowMap();
+    if (texture != nullptr) {
+      model.material->SendShadowMap(texture);
+    }
+  }
 }
 
 bool dg::BaseScene::AutomaticWindowTitle() const {

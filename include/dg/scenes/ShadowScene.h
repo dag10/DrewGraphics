@@ -9,7 +9,6 @@
 
 namespace dg {
 
-  class FrameBuffer;
   class ScreenQuadMaterial;
   class SpotLight;
 
@@ -29,7 +28,6 @@ namespace dg {
       virtual void RenderFrame();
 
       std::shared_ptr<Model> cube = nullptr;
-      std::shared_ptr<FrameBuffer> framebuffer = nullptr;
       std::shared_ptr<SpotLight> spotlight = nullptr;
       std::shared_ptr<ScreenQuadMaterial> quadMaterial = nullptr;
 

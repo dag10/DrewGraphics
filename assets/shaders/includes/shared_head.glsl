@@ -2,11 +2,6 @@
 
 #version 330 core
 
-uniform mat4 _Matrix_MVP;
-uniform mat4 _Matrix_M;
-
-uniform mat4 _Matrix_Normal;
-
 #define LIGHT_TYPE_NULL        0
 #define LIGHT_TYPE_POINT       1
 #define LIGHT_TYPE_SPOT        2
@@ -35,12 +30,20 @@ struct Light {
   float constantCoeff;
   float linearCoeff;
   float quadraticCoeff;
+
+  // Shadow.
+  int hasShadow;
+  mat4 lightTransform;
 };
 
-// NOTE: Keep this consistent with MAX_LIGHTS in src/Light.cpp.
+// NOTE: Keep this consistent with MAX_LIGHTS in include/dg/Lights.h.
 const int MAX_LIGHTS = 8;
 uniform Light _Lights[MAX_LIGHTS];
 
 uniform vec3 _CameraPosition;
+
+uniform mat4 _Matrix_MVP;
+uniform mat4 _Matrix_M;
+uniform mat4 _Matrix_Normal;
 
 #line 1 1

@@ -4,8 +4,9 @@
 
 #pragma once
 
-#include "dg/SceneObject.h"
 #include <glm/vec3.hpp>
+#include "dg/SceneObject.h"
+#include "dg/Texture.h"
 
 namespace dg {
 
@@ -50,16 +51,24 @@ namespace dg {
         glm::vec3 direction = glm::vec3(0, -1, 0);
         float linearCoeff = 0.14f;
         float quadraticCoeff = 0.07f;
-        glm::vec3 _padding;
+        int hasShadow = 0;
+        glm::vec2 _padding;
+        glm::mat4x4 lightTransform;
       };
 
       void SetAmbient(const glm::vec3& ambient);
       void SetDiffuse(const glm::vec3& diffuse);
       void SetSpecular(const glm::vec3& specular);
+      void SetShadowMap(std::shared_ptr<Texture> shadowMap);
+      void SetCastShadows(bool castShadows);
+      void SetLightTransform(const glm::mat4x4 &xf);
 
       glm::vec3 GetAmbient() const;
       glm::vec3 GetDiffuse() const;
       glm::vec3 GetSpecular() const;
+      std::shared_ptr<Texture> GetShadowMap() const;
+      bool GetCastShadows() const;
+      const glm::mat4x4 &GetLightTransform() const;
 
       virtual ShaderData GetShaderData() const;
 
@@ -70,6 +79,8 @@ namespace dg {
       Light(glm::vec3 ambient, glm::vec3 diffuse, glm::vec3 specular);
 
       ShaderData data;
+      std::shared_ptr<Texture> shadowMap = nullptr;
+      bool castShadows = false;
 
   }; // class Light
 
@@ -134,4 +145,3 @@ namespace dg {
   }; // class SpotLight
 
 } // namespace dg
-

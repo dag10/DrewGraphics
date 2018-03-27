@@ -115,7 +115,7 @@ void dg::StandardMaterial::SetDiffuse(std::shared_ptr<Texture> diffuseMap) {
     ClearProperty("_Material.diffuseMap");
   } else {
     SetProperty("_Material.useDiffuseMap", true);
-    SetProperty("_Material.diffuseMap", diffuseMap, TEX_UNIT_HINT_DIFFUSE);
+    SetProperty("_Material.diffuseMap", diffuseMap, (int)TexUnitHints::DIFFUSE);
   }
 #elif defined(_DIRECTX)
   if (diffuseMap == nullptr) {
@@ -151,7 +151,8 @@ void dg::StandardMaterial::SetSpecular(std::shared_ptr<Texture> specularMap) {
     ClearProperty("_Material.specularMap");
   } else {
     SetProperty("_Material.useSpecularMap", true);
-    SetProperty("_Material.specularMap", specularMap, TEX_UNIT_HINT_SPECULAR);
+    SetProperty("_Material.specularMap", specularMap,
+                (int)TexUnitHints::SPECULAR);
   }
 #elif defined(_DIRECTX)
   if (specularMap == nullptr) {
@@ -171,7 +172,7 @@ void dg::StandardMaterial::SetNormalMap(std::shared_ptr<Texture> normalMap) {
     ClearProperty("_Material.normalMap");
   } else {
     SetProperty("_Material.useNormalMap", true);
-    SetProperty("_Material.normalMap", normalMap, TEX_UNIT_HINT_NORMAL);
+    SetProperty("_Material.normalMap", normalMap, (int)TexUnitHints::NORMAL);
   }
 #elif defined(_DIRECTX)
   if (normalMap == nullptr) {
@@ -191,4 +192,3 @@ void dg::StandardMaterial::SetShininess(float shininess) {
   SetProperty("shininess", shininess);
 #endif
 }
-

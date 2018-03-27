@@ -43,10 +43,9 @@ void dg::ShadowScene::Initialize() {
   // Create ceiling light source.
   spotlight = std::make_shared<SpotLight>(glm::vec3(1.0f, 0.93f, 0.86f), 0.31,
                                           0.91, 0.86);
-  spotlight->SetCutoff(mainCamera->fov / 2);  // TODO: Temporary
-  spotlight->SetFeather(0);                   // TODO: Temporary
-  spotlight->transform.translation = glm::vec3(1.4f, 1.2f, -0.7f);
+  spotlight->transform.translation = glm::vec3(1.4f, 1.2f, 0);
   spotlight->LookAtPoint({0, 0, 0});
+  spotlight->SetCastShadows(true);
   AddChild(spotlight);
 
   // Make light controllable with keyboard.
@@ -65,9 +64,6 @@ void dg::ShadowScene::Initialize() {
       Transform::RS(glm::quat(glm::radians(glm::vec3(90, 0, 0))),
                     glm::vec3(0.05f)));
   spotlight->AddChild(lightModel, false);
-
-  // Create frame buffer for light.
-  framebuffer = std::make_shared<FrameBuffer>(1024, 1024, true, false, false);
 
   // Create wooden cube material.
   StandardMaterial cubeMaterial = StandardMaterial::WithTexture(crateTexture);
@@ -103,37 +99,26 @@ void dg::ShadowScene::Initialize() {
   // Material for drawing depth map over scene.
   quadMaterial =
       std::make_shared<ScreenQuadMaterial>(glm::vec3(0), glm::vec2(1));
-  quadMaterial->SetRedChannelOnly(true);
 
-
-  // TODO TMP
-  //mainCamera->transform = spotlight->transform;
+  // Create custom shadow framebuffer with color map (for special screen
+  // quad output).
+  shadowFrameBuffer =
+      std::make_shared<FrameBuffer>(2048, 2048, true, false, true);
 }
 
 void dg::ShadowScene::Update() {
   Scene::Update();
 
-  // Slowly rotate cube.
-  cube->transform.rotation *=
-      glm::quat(glm::radians(glm::vec3(0, Time::Delta * 50, 0)));
+  // Slowly rotate light.
+  spotlight->transform =
+      Transform::R(glm::quat(glm::radians(glm::vec3(0, Time::Delta * 30, 0)))) *
+      spotlight->transform;
 }
 
 void dg::ShadowScene::RenderFrame() {
-#if defined(_OPENGL)
-  // Render scene for light framebuffer.
-  framebuffer->Bind();
-  framebuffer->SetViewport();
-  glClear(GL_DEPTH_BUFFER_BIT);
-  glEnable(GL_DEPTH_TEST);
-  glEnable(GL_CULL_FACE);
-  glCullFace(GL_BACK);
-  Camera lightCamera;
-  lightCamera.transform = spotlight->SceneSpace();
-  lightCamera.fov = spotlight->GetCutoff() * 2;
-  DrawScene(lightCamera);
-  framebuffer->Unbind();
-  window->ResetViewport();
-#endif
+  ProcessSceneHierarchy();
+  RenderLightShadowMap();
+  Graphics::Instance->PushRasterizerState(defaultRasterizerState);
 
   ClearBuffer();
 
@@ -142,10 +127,21 @@ void dg::ShadowScene::RenderFrame() {
   DrawScene(*mainCamera);
 
   // Draw depth map over scene.
-  quadMaterial->SetTexture(framebuffer->GetDepthTexture());
+  quadMaterial->SetTexture(shadowFrameBuffer->GetDepthTexture());
   glm::vec2 scale = glm::vec2(1) / glm::vec2(window->GetAspectRatio(), 1);
+  quadMaterial->SetScale(scale);
+  quadMaterial->SetRedChannelOnly(true);
+  quadMaterial->SetOffset(glm::vec2(1 - scale.x * 0.5, scale.y * 0.5));
+  quadMaterial->Use();
+  Mesh::Quad->Draw();
+
+  // Draw light color rendering over scene.
+  quadMaterial->SetTexture(shadowFrameBuffer->GetColorTexture());
+  quadMaterial->SetRedChannelOnly(false);
   quadMaterial->SetScale(scale);
   quadMaterial->SetOffset(glm::vec2(1 - scale.x * 0.5, -1 + scale.y * 0.5));
   quadMaterial->Use();
   Mesh::Quad->Draw();
+
+  Graphics::Instance->PopRasterizerState();
 }

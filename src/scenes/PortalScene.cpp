@@ -499,6 +499,9 @@ dg::Camera dg::PortalScene::CameraForPortal(
 
 #if defined(_OPENGL)
 void dg::PortalScene::RenderFrame() {
+  ProcessSceneHierarchy();
+  RenderLightShadowMap();
+
   // Clear back buffer.
   Graphics::Instance->ClearColor(backgroundColor);
 

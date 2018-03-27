@@ -22,7 +22,12 @@ struct Light {
   float linearCoeff;
 
   float quadraticCoeff;
-  float3 _padding;
+
+  int hasShadow;
+
+  float2 _padding;
+
+  matrix lightTransform;
 };
 
 cbuffer Lights : register(b0) { Light lights[MAX_LIGHTS]; }

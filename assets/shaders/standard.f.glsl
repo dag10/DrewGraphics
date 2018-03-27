@@ -18,8 +18,11 @@ struct Material {
 uniform Material _Material;
 uniform vec2 _UVScale;
 
+uniform sampler2D _ShadowMap;
+
 in vec2 v_TexCoord;
 in mat3 v_TBN;
+in vec4 v_FragPosLightSpace;
 
 vec3 calculateLight(
     Light light, vec3 normal, vec3 diffuseColor, vec3 specularColor) {
@@ -67,7 +70,18 @@ vec3 calculateLight(
     specular *= intensity;
   }
 
-	return specular + diffuse + ambient;
+  // Calculate shadow
+  float shadow = 0;
+  if (light.hasShadow == 1) {
+    vec3 projCoords = v_FragPosLightSpace.xyz / v_FragPosLightSpace.w;
+    projCoords = projCoords * 0.5 + 0.5;
+    float closestDepth = texture(_ShadowMap, projCoords.xy).r;
+    float currentDepth = projCoords.z;
+    float bias = 0.0001;
+    shadow = currentDepth - bias > closestDepth  ? 1.0 : 0.0;
+  }
+
+	return ((1.0 - shadow) * (specular + diffuse)) + ambient;
 }
 
 vec4 frag() {

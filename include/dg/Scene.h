@@ -5,8 +5,10 @@
 #pragma once
 
 #include <openvr.h>
+#include <deque>
 #include <forward_list>
 #include <memory>
+#include <vector>
 #include "dg/Lights.h"
 #include "dg/RasterizerState.h"
 #include "dg/SceneObject.h"
@@ -42,6 +44,8 @@ namespace dg {
 
       // Pipeline functions for overriding in special cases.
       virtual void RenderFrame(vr::EVREye eye);
+      virtual void ProcessSceneHierarchy();
+      virtual void RenderLightShadowMap();
       virtual void DrawScene(
           const Camera& camera, bool renderForVR = false,
           vr::EVREye eye = vr::EVREye::Eye_Left);
@@ -62,6 +66,12 @@ namespace dg {
       bool enableVR = false;
       std::shared_ptr<SceneObject> vrContainer;
       std::shared_ptr<ScreenQuadMaterial> hiddenAreaMeshMaterial = nullptr;
+
+      // Scene hierarchy for current frame.
+      std::vector<Model *> currentModels;
+      std::deque<Light *> currentLights;
+      Light *shadowCastingLight = nullptr;
+      std::shared_ptr<FrameBuffer> shadowFrameBuffer = nullptr;
 
   }; // class BaseScene
 

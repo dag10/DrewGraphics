@@ -135,6 +135,8 @@ void dg::Material::SendLight(int index, const Light::ShaderData& data) {
   shader->SetVec3(LightProperty(index, "direction"), data.direction);
   shader->SetFloat(LightProperty(index, "linearCoeff"), data.linearCoeff);
   shader->SetFloat(LightProperty(index, "quadraticCoeff"), data.quadraticCoeff);
+  shader->SetInt(LightProperty(index, "hasShadow"), data.hasShadow);
+  shader->SetMat4(LightProperty(index, "lightTransform"), data.lightTransform);
 }
 
 void dg::Material::ClearLights() {
@@ -174,6 +176,14 @@ const std::string dg::Material::LightProperty(
 
 void dg::Material::SetInvPortal(glm::mat4x4 invPortal) {
   SetProperty("_InvPortal", invPortal);
+}
+
+void dg::Material::SendShadowMap(std::shared_ptr<Texture> shadowMap) {
+#if defined(_OPENGL)
+  SetProperty("_ShadowMap", shadowMap, (int)TexUnitHints::SHADOWMAP);
+#elif defined(_DIRECTX)
+  // TODO
+#endif
 }
 
 void dg::Material::Use() const {
@@ -223,4 +233,3 @@ void dg::Material::Use() const {
   shader->Use();
 #endif
 }
-

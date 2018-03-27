@@ -29,6 +29,10 @@ void dg::BaseScene::Initialize() {
   if (enableVR) {
     hiddenAreaMeshMaterial = std::make_shared<ScreenQuadMaterial>(
       glm::vec3(0), glm::vec2(2), glm::vec2(-1));
+    hiddenAreaMeshMaterial->rasterizerOverride.SetDepthFunc(
+        RasterizerState::DepthFunc::ALWAYS);
+    hiddenAreaMeshMaterial->rasterizerOverride.SetCullMode(
+        RasterizerState::CullMode::OFF);
 
 #ifdef _OPENGL
     // Disable glfw vsync, since IVRComposer::WaitGetPoses() will wait for
@@ -295,26 +299,26 @@ bool dg::BaseScene::AutomaticWindowTitle() const {
   return true;
 }
 
+void dg::BaseScene::DrawHiddenAreaMesh(vr::EVREye eye) {
+  Graphics::Instance->PushRasterizerState(
+      hiddenAreaMeshMaterial->rasterizerOverride);
+  hiddenAreaMeshMaterial->Use();
+  VRManager::Instance->GetHiddenAreaMesh(eye)->Draw();
+  Graphics::Instance->PopRasterizerState();
+}
+
 #pragma endregion
 #pragma region OpenGL Scene
 #if defined(_OPENGL)
 
-void dg::OpenGLScene::DrawHiddenAreaMesh(vr::EVREye eye) {
-  glEnable(GL_DEPTH_TEST);
-  glDepthFunc(GL_ALWAYS);
-  glDisable(GL_CULL_FACE);
-  hiddenAreaMeshMaterial->Use();
-  VRManager::Instance->GetHiddenAreaMesh(eye)->Draw();
-}
+// No custom functions.
 
 #endif
 #pragma endregion
 #pragma region DirectX Scene
 #if defined(_DIRECTX)
 
-void dg::DirectXScene::DrawHiddenAreaMesh(vr::EVREye eye) {
-  // TODO
-}
+// No custom functions.
 
 #endif
 #pragma endregion

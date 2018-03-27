@@ -63,7 +63,7 @@ namespace dg {
           glm::mat4x4 projection,
           const Light::ShaderData (&lights)[Light::MAX_LIGHTS]) const;
       virtual void ClearBuffer();
-      virtual void DrawHiddenAreaMesh(vr::EVREye eye) = 0;
+      virtual void DrawHiddenAreaMesh(vr::EVREye eye);
 
       RasterizerState defaultRasterizerState;
 
@@ -88,10 +88,6 @@ namespace dg {
 
   class OpenGLScene : public BaseScene {
 
-    protected:
-
-      virtual void DrawHiddenAreaMesh(vr::EVREye eye);
-
   }; // class OpenGLScene
 
   using Scene = OpenGLScene;
@@ -99,10 +95,6 @@ namespace dg {
 #elif defined(_DIRECTX)
 
   class DirectXScene : public BaseScene {
-
-    protected:
-
-     virtual void DrawHiddenAreaMesh(vr::EVREye eye);
 
   }; // class DirectXScene
 

@@ -134,17 +134,37 @@ void dg::BaseScene::ProcessSceneHierarchy() {
       if (!(*child)->enabled) continue;
       remainingObjects.push_front(child->get());
       if (auto model = std::dynamic_pointer_cast<Model>(*child)) {
-        currentModels.push_back(model.get());
+        currentModels.push_back(CurrentModel(*model));
       } else if (auto light = std::dynamic_pointer_cast<Light>(*child)) {
         currentLights.push_front(light.get());
       }
     }
   }
 
+  // Compute all models' distances to camera.
+  glm::vec3 cameraPos = mainCamera->SceneSpace().translation;
+  for (CurrentModel &currentModel : currentModels) {
+    currentModel.distanceToCamera =
+        glm::distance(currentModel.model->SceneSpace().translation, cameraPos);
+  }
+
   // Sort models.
   sort(currentModels.begin(), currentModels.end(),
-       [](Model *a, Model *b) -> bool {
-         return a->material->queue < b->material->queue;
+       [](CurrentModel &a, CurrentModel &b) -> bool {
+         // First short by render queue order.
+         if (a.model->material->queue != b.model->material->queue) {
+           return a.model->material->queue < b.model->material->queue;
+         }
+
+         // Then short by distance to camera. If render queue is
+         // < Transparent, draw objects closer to camera first (for early-out
+         // in fragment shader). Otherwise, draw from back to front for
+         // transparency.
+         if (a.model->material->queue < RenderQueue::Transparent) {
+           return a.distanceToCamera < b.distanceToCamera;
+         } else {
+           return a.distanceToCamera > b.distanceToCamera;
+         }
        });
 
   // Reset light shadows.
@@ -249,10 +269,10 @@ void dg::BaseScene::DrawScene(
   // Render models.
   glm::vec4 cameraPos_h = glm::inverse(view) * glm::vec4(0, 0, 0, 1);
   glm::vec3 cameraPos = glm::vec3(cameraPos_h) / cameraPos_h.w;
-  for (auto &model : currentModels) {
+  for (auto &currentModel : currentModels) {
     PrepareModelForDraw(
-        *model, cameraPos, view, projection, lightArray);
-    (*model).Draw(view, projection);
+        *currentModel.model, cameraPos, view, projection, lightArray);
+    (*currentModel.model).Draw(view, projection);
   }
 }
 

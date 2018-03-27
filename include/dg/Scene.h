@@ -42,6 +42,15 @@ namespace dg {
 
     protected:
 
+      struct CurrentModel {
+        Model *model;
+        float distanceToCamera = 0;
+
+        CurrentModel(Model &model) {
+          this->model = &model;
+        }
+      };
+
       // Pipeline functions for overriding in special cases.
       virtual void RenderFrame(vr::EVREye eye);
       virtual void ProcessSceneHierarchy();
@@ -68,7 +77,7 @@ namespace dg {
       std::shared_ptr<ScreenQuadMaterial> hiddenAreaMeshMaterial = nullptr;
 
       // Scene hierarchy for current frame.
-      std::vector<Model *> currentModels;
+      std::vector<CurrentModel> currentModels;
       std::deque<Light *> currentLights;
       Light *shadowCastingLight = nullptr;
       std::shared_ptr<FrameBuffer> shadowFrameBuffer = nullptr;

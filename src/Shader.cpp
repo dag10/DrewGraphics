@@ -33,8 +33,10 @@ std::shared_ptr<dg::Shader> dg::Shader::FromFiles(
 #if defined(_OPENGL)
 #pragma region OpenGL Shader
 
-std::string dg::OpenGLShader::vertexHead = "";
-std::string dg::OpenGLShader::fragmentHead = "";
+std::vector<std::string> dg::OpenGLShader::vertexHeads =
+    std::vector<std::string>();
+std::vector<std::string> dg::OpenGLShader::fragmentHeads =
+    std::vector<std::string>();
 
 std::vector<dg::ShaderSource> dg::OpenGLShader::vertexSources = \
     std::vector<dg::ShaderSource>();
@@ -50,25 +52,28 @@ std::shared_ptr<dg::OpenGLShader> dg::OpenGLShader::FromFiles(
   return shader;
 }
 
-void dg::OpenGLShader::SetVertexHead(const std::string& path) {
-  vertexHead = dg::FileUtils::LoadFile(path);
+void dg::OpenGLShader::AddVertexHead(const std::string& path) {
+  vertexHeads.push_back(dg::FileUtils::LoadFile(path));
 }
 
-void dg::OpenGLShader::SetFragmentHead(const std::string& path) {
-  fragmentHead = dg::FileUtils::LoadFile(path);
+void dg::OpenGLShader::AddFragmentHead(const std::string& path) {
+  fragmentHeads.push_back(dg::FileUtils::LoadFile(path));
 }
 
 void dg::OpenGLShader::AddVertexSource(const std::string& path) {
-  dg::ShaderSource shader = vertexHead.empty()
-      ? dg::ShaderSource::FromFile(GL_VERTEX_SHADER, path)
-      : dg::ShaderSource::FromFileWithHead(GL_VERTEX_SHADER, path, vertexHead);
+  dg::ShaderSource shader =
+      vertexHeads.empty() ? dg::ShaderSource::FromFile(GL_VERTEX_SHADER, path)
+                          : dg::ShaderSource::FromFileWithHeads(
+                                GL_VERTEX_SHADER, path, vertexHeads);
   vertexSources.push_back(std::move(shader));
 }
 
 void dg::OpenGLShader::AddFragmentSource(const std::string& path) {
-  dg::ShaderSource shader = fragmentHead.empty()
-      ? dg::ShaderSource::FromFile(GL_FRAGMENT_SHADER, path)
-      : dg::ShaderSource::FromFileWithHead(GL_FRAGMENT_SHADER, path, fragmentHead);
+  dg::ShaderSource shader =
+      fragmentHeads.empty()
+          ? dg::ShaderSource::FromFile(GL_FRAGMENT_SHADER, path)
+          : dg::ShaderSource::FromFileWithHeads(GL_FRAGMENT_SHADER, path,
+                                                fragmentHeads);
   fragmentSources.push_back(std::move(shader));
 }
 
@@ -82,14 +87,16 @@ dg::OpenGLShader::~OpenGLShader() {
 void dg::OpenGLShader::CreateProgram() {
   assert(programHandle == 0);
 
-  dg::ShaderSource vertexShader = vertexHead.empty()
-      ? dg::ShaderSource::FromFile(GL_VERTEX_SHADER, vertexPath)
-      : dg::ShaderSource::FromFileWithHead(
-          GL_VERTEX_SHADER, vertexPath, vertexHead);
-  dg::ShaderSource fragmentShader = fragmentHead.empty()
-      ? dg::ShaderSource::FromFile(GL_FRAGMENT_SHADER, fragmentPath)
-      : dg::ShaderSource::FromFileWithHead(
-          GL_FRAGMENT_SHADER, fragmentPath, fragmentHead);
+  dg::ShaderSource vertexShader =
+      vertexHeads.empty()
+          ? dg::ShaderSource::FromFile(GL_VERTEX_SHADER, vertexPath)
+          : dg::ShaderSource::FromFileWithHeads(GL_VERTEX_SHADER, vertexPath,
+                                                vertexHeads);
+  dg::ShaderSource fragmentShader =
+      fragmentHeads.empty()
+          ? dg::ShaderSource::FromFile(GL_FRAGMENT_SHADER, fragmentPath)
+          : dg::ShaderSource::FromFileWithHeads(GL_FRAGMENT_SHADER,
+                                                fragmentPath, fragmentHeads);
 
   programHandle = glCreateProgram();
   glAttachShader(programHandle, vertexShader.GetHandle());

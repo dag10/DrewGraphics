@@ -79,8 +79,8 @@ namespace dg {
 
     public:
 
-      static void SetVertexHead(const std::string& path);
-      static void SetFragmentHead(const std::string& path);
+      static void AddVertexHead(const std::string& path);
+      static void AddFragmentHead(const std::string& path);
 
       static void AddVertexSource(const std::string& path);
       static void AddFragmentSource(const std::string& path);
@@ -115,8 +115,8 @@ namespace dg {
           const std::string& vertexPath, const std::string& fragmentPath);
 
       // Code to be included at top of shaders, includes global types.
-      static std::string vertexHead;
-      static std::string fragmentHead;
+      static std::vector<std::string> vertexHeads;
+      static std::vector<std::string> fragmentHeads;
 
       // Code to be linked into all shaders, includes main() and utilities.
       static std::vector<dg::ShaderSource> vertexSources;

@@ -94,10 +94,14 @@ void dg::OpenGLGraphics::InitializeResources() {
   Graphics::InitializeResources();
 
   // Configure global includes for all shader files.
-  dg::OpenGLShader::SetVertexHead("assets/shaders/includes/vertex_head.glsl");
+  dg::OpenGLShader::AddVertexHead("assets/shaders/includes/shared_head.glsl");
+  dg::OpenGLShader::AddVertexHead("assets/shaders/includes/vertex_head.glsl");
   dg::OpenGLShader::AddVertexSource("assets/shaders/includes/vertex_main.glsl");
-  dg::OpenGLShader::SetFragmentHead("assets/shaders/includes/fragment_head.glsl");
-  dg::OpenGLShader::AddFragmentSource("assets/shaders/includes/fragment_main.glsl");
+  dg::OpenGLShader::AddFragmentHead("assets/shaders/includes/shared_head.glsl");
+  dg::OpenGLShader::AddFragmentHead(
+      "assets/shaders/includes/fragment_head.glsl");
+  dg::OpenGLShader::AddFragmentSource(
+      "assets/shaders/includes/fragment_main.glsl");
 }
 
 void dg::OpenGLGraphics::ClearColor(glm::vec3 color, bool clearDepth,

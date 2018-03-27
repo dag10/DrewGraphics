@@ -4,8 +4,9 @@
 
 #pragma once
 
-#include <string>
 #include <glm/glm.hpp>
+#include <string>
+#include <vector>
 #include "dg/glad/glad.h"
 
 namespace dg {
@@ -16,8 +17,9 @@ namespace dg {
 
     public:
       static ShaderSource FromFile(GLenum type, const std::string& path);
-      static ShaderSource FromFileWithHead(
-          GLenum type, const std::string& path, const std::string& headCode);
+      static ShaderSource FromFileWithHeads(GLenum type,
+                                            const std::string &path,
+                                            std::vector<std::string> heads);
 
       ShaderSource() = default;
       ShaderSource(ShaderSource& other) = delete;
@@ -30,10 +32,11 @@ namespace dg {
       GLuint GetHandle() const;
 
     private:
+
       void CompileShader();
       void CheckCompileErrors();
 
-      const char *headCode = nullptr;
+      std::vector<std::string> heads;
       std::string path = std::string();
 
       GLenum shaderType = 0;
@@ -42,4 +45,3 @@ namespace dg {
   }; // class ShaderSource
 
 } // namespace dg
-

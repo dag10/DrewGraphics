@@ -15,12 +15,12 @@ dg::ShaderSource dg::ShaderSource::FromFile(
   return source;
 }
 
-dg::ShaderSource dg::ShaderSource::FromFileWithHead(
-    GLenum type, const std::string& path, const std::string& headCode) {
+dg::ShaderSource dg::ShaderSource::FromFileWithHeads(
+    GLenum type, const std::string &path, std::vector<std::string> heads) {
   ShaderSource source;
   source.shaderType = type;
   source.path = path;
-  source.headCode = headCode.c_str();
+  source.heads = heads;
   source.CompileShader();
   return source;
 }
@@ -43,7 +43,7 @@ dg::ShaderSource& dg::ShaderSource::operator=(dg::ShaderSource&& other) {
 
 void dg::swap(ShaderSource& first, ShaderSource& second) {
   using std::swap;
-  swap(first.headCode, second.headCode);
+  swap(first.heads, second.heads);
   swap(first.path, second.path);
   swap(first.shaderType, second.shaderType);
   swap(first.shaderHandle, second.shaderHandle);
@@ -58,15 +58,12 @@ void dg::ShaderSource::CompileShader() {
 
   std::string code = dg::FileUtils::LoadFile(path);
   shaderHandle = glCreateShader(shaderType);
-  if (headCode == nullptr) {
-    const char *codeString = code.c_str();
-    glShaderSource(shaderHandle, 1, &codeString, NULL);
-  } else {
-    const char *codeStrings[2];
-    codeStrings[0] = headCode;
-    codeStrings[1] = code.c_str();
-    glShaderSource(shaderHandle, 2, codeStrings, NULL);
+  std::vector<const char *> codeStrings;
+  for (const std::string &head : heads) {
+    codeStrings.push_back(head.c_str());
   }
+  codeStrings.push_back(code.c_str());
+  glShaderSource(shaderHandle, codeStrings.size(), codeStrings.data(), NULL);
   glCompileShader(shaderHandle);
   CheckCompileErrors();
 }
@@ -80,4 +77,3 @@ void dg::ShaderSource::CheckCompileErrors() {
     throw dg::ShaderCompileError(path, std::string(log));
   }
 }
-

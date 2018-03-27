@@ -14,6 +14,7 @@ namespace dg {
 
     public:
 
+      static RasterizerState Default();
       static RasterizerState AdditiveBlending();
       static RasterizerState AlphaBlending();
 

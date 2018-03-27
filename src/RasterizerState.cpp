@@ -6,6 +6,21 @@
 #include <sstream>
 #include <string>
 
+dg::RasterizerState dg::RasterizerState::Default() {
+  RasterizerState state;
+  state.SetCullMode(RasterizerState::CullMode::BACK);
+  state.SetWriteDepth(true);
+  state.SetDepthFunc(RasterizerState::DepthFunc::LESS);
+  state.SetBlendEnabled(false);
+  state.SetRGBBlendEquation(RasterizerState::BlendEquation::ADD);
+  state.SetAlphaBlendEquation(RasterizerState::BlendEquation::ADD);
+  state.SetSrcRGBBlendFunc(RasterizerState::BlendFunc::ONE);
+  state.SetDstRGBBlendFunc(RasterizerState::BlendFunc::ZERO);
+  state.SetSrcAlphaBlendFunc(RasterizerState::BlendFunc::ONE);
+  state.SetDstAlphaBlendFunc(RasterizerState::BlendFunc::ZERO);
+  return state;
+}
+
 dg::RasterizerState dg::RasterizerState::AdditiveBlending() {
   RasterizerState state;
   state.SetWriteDepth(false);

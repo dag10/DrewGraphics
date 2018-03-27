@@ -23,18 +23,7 @@ dg::BaseScene::BaseScene() : SceneObject() {}
 dg::BaseScene::~BaseScene() {}
 
 void dg::BaseScene::Initialize() {
-  defaultRasterizerState.SetCullMode(RasterizerState::CullMode::BACK);
-  defaultRasterizerState.SetWriteDepth(true);
-  defaultRasterizerState.SetDepthFunc(RasterizerState::DepthFunc::LESS);
-  defaultRasterizerState.SetBlendEnabled(false);
-  defaultRasterizerState.SetRGBBlendEquation(
-      RasterizerState::BlendEquation::ADD);
-  defaultRasterizerState.SetAlphaBlendEquation(
-      RasterizerState::BlendEquation::ADD);
-  defaultRasterizerState.SetSrcRGBBlendFunc(RasterizerState::BlendFunc::ONE);
-  defaultRasterizerState.SetDstRGBBlendFunc(RasterizerState::BlendFunc::ZERO);
-  defaultRasterizerState.SetSrcAlphaBlendFunc(RasterizerState::BlendFunc::ONE);
-  defaultRasterizerState.SetDstAlphaBlendFunc(RasterizerState::BlendFunc::ZERO);
+  defaultRasterizerState = RasterizerState::Default();
 
   if (enableVR) {
     hiddenAreaMeshMaterial = std::make_shared<ScreenQuadMaterial>(

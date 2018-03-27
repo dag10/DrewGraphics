@@ -3,6 +3,7 @@
 //
 
 #include "dg/materials/StandardMaterial.h"
+#include "dg/RasterizerState.h"
 
 std::shared_ptr<dg::Shader> dg::StandardMaterial::standardShader = nullptr;
 
@@ -15,6 +16,15 @@ dg::StandardMaterial dg::StandardMaterial::WithColor(glm::vec3 color) {
 dg::StandardMaterial dg::StandardMaterial::WithColor(glm::vec4 color) {
   StandardMaterial material;
   material.SetDiffuse(color);
+  return material;
+}
+
+dg::StandardMaterial dg::StandardMaterial::WithTransparentColor(
+    glm::vec4 color) {
+  StandardMaterial material;
+  material.SetDiffuse(color);
+  material.rasterizerOverride = RasterizerState::AlphaBlending();
+  material.queue = RenderQueue::Transparent;
   return material;
 }
 

@@ -16,6 +16,7 @@ namespace dg {
 
       static StandardMaterial WithColor(glm::vec3 color);
       static StandardMaterial WithColor(glm::vec4 color);
+      static StandardMaterial WithTransparentColor(glm::vec4 color);
       static StandardMaterial WithTexture(std::shared_ptr<Texture> texture);
 
       StandardMaterial();
@@ -24,7 +25,8 @@ namespace dg {
       StandardMaterial(StandardMaterial&& other);
       StandardMaterial& operator=(StandardMaterial& other);
       StandardMaterial& operator=(StandardMaterial&& other);
-      friend void swap(StandardMaterial& first, StandardMaterial& second); // nothrow
+      friend void swap(StandardMaterial &first,
+                       StandardMaterial &second);  // nothrow
 
       void Use() const;
 

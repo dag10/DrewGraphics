@@ -82,8 +82,6 @@ void dg::TransparencyScene::Initialize() {
   // Additive material.
   StandardMaterial additiveMaterial =
       StandardMaterial::WithTransparentColor(glm::vec4(1, 1, 1, 0.5f));
-  //additiveMaterial.rasterizerOverride = RasterizerState::AlphaBlending();
-  //additiveMaterial.queue = RenderQueue::Transparent;
   float additiveAlpha = 0.5f;
 
   // Create additive cube.

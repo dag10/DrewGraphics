@@ -11,6 +11,7 @@
 #include "dg/Lights.h"
 #include "dg/Mesh.h"
 #include "dg/Model.h"
+#include "dg/RasterizerState.h"
 #include "dg/SceneObject.h"
 #include "dg/Shader.h"
 #include "dg/Texture.h"
@@ -147,6 +148,10 @@ std::shared_ptr<dg::SceneObject> dg::DeepCloningScene::BuildWidget(
   std::shared_ptr<StandardMaterial> buttonMaterial =
     std::make_shared<StandardMaterial>();
 
+  std::shared_ptr<StandardMaterial> plasticMaterial =
+      std::make_shared<StandardMaterial>(
+          StandardMaterial::WithTransparentColor(glm::vec4(1, 1, 1, 0.5)));
+
   // Base of button
   widget->AddChild(std::make_shared<Model>(
         Mesh::Cube,
@@ -161,6 +166,15 @@ std::shared_ptr<dg::SceneObject> dg::DeepCloningScene::BuildWidget(
           { 0, 0.1f, 0 },
           { 0.35f, 0.3f, 0.35f }));
   widget->AddChild(button, false);
+
+  // Button clear plastic.
+  auto plastic = std::make_shared<Model>(
+        Mesh::Cube,
+        plasticMaterial,
+        Transform::TS(
+          { 0, 0.1f, 0 },
+          { 1.05f, 1.02f, 1.05f }));
+  button->AddChild(plastic, false);
 
   // Button light
   auto light = std::make_shared<PointLight>();
@@ -240,4 +254,3 @@ void WidgetBehavior::SetLight(bool enabled) {
 }
 
 #pragma endregion
-

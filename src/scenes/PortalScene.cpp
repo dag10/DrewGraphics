@@ -106,12 +106,11 @@ void dg::PortalScene::Initialize() {
       Texture::FromPath("assets/textures/hardwood.jpg");
   std::shared_ptr<Texture> rustyPlateTexture =
       Texture::FromPath("assets/textures/rustyplate.jpg");
-  std::shared_ptr<Texture> skyboxTexture =
-      Texture::FromPath("assets/textures/skybox_daylight.png");
 
   // Create skybox.
-  skybox = std::make_shared<Skybox>(skyboxTexture);
-  skybox->material.SetInvPortal(glm::mat4x4(0));
+  skybox =
+      Skybox::Create(Texture::FromPath("assets/textures/skybox_daylight.png"));
+  //skybox->material.SetInvPortal(glm::mat4x4(0));
 
   // Create sky light.
   skyLight = std::make_shared<DirectionalLight>(

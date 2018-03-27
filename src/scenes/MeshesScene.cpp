@@ -63,11 +63,10 @@ void dg::MeshesScene::Initialize() {
   // Create textures.
   std::shared_ptr<Texture> hardwoodTexture =
       Texture::FromPath("assets/textures/hardwood.jpg");
-  std::shared_ptr<Texture> skyboxTexture =
-      Texture::FromPath("assets/textures/skybox_daylight.png");
 
   // Create skybox.
-  skybox = std::make_shared<Skybox>(skyboxTexture);
+  skybox =
+      Skybox::Create(Texture::FromPath("assets/textures/skybox_daylight.png"));
 
   // Create ceiling light source.
   auto ceilingLight = std::make_shared<PointLight>(
@@ -202,4 +201,3 @@ void dg::MeshesScene::Update() {
   spinningTorus->transform.rotation = glm::quat(glm::radians(
         glm::vec3(0, dg::Time::Elapsed * 10, 0)));
 }
-

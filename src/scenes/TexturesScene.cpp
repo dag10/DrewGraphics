@@ -44,7 +44,7 @@ void dg::TexturesScene::Initialize() {
       Texture::FromPath("assets/textures/skybox_daylight.png");
 
   // Create skybox.
-  skybox = std::make_shared<Skybox>(skyboxTexture);
+  skybox = Skybox::Create(skyboxTexture);
 
   // Create ceiling light source.
   auto ceilingLight = std::make_shared<PointLight>(

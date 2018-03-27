@@ -60,12 +60,10 @@ void dg::VRScene::Initialize() {
       Texture::FromPath("assets/textures/brickwall_normal.jpg");
   std::shared_ptr<Texture> hardwoodTexture =
       Texture::FromPath("assets/textures/hardwood.jpg");
-  std::shared_ptr<Texture> skyboxTexture =
-      Texture::FromPath("assets/textures/skybox_daylight.png");
 
   // Create skybox.
-  skybox = std::make_shared<Skybox>(skyboxTexture);
-  skybox->material.SetInvPortal(glm::mat4x4(0));
+  skybox =
+      Skybox::Create(Texture::FromPath("assets/textures/skybox_daylight.png"));
 
   // Create sky light.
   skyLight = std::make_shared<DirectionalLight>(

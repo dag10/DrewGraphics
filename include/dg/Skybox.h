@@ -6,8 +6,7 @@
 #include <openvr.h>
 #include <memory>
 #include "dg/Camera.h"
-#include "dg/Texture.h"
-#include "dg/materials/StandardMaterial.h"
+#include "dg/Model.h"
 
 namespace dg {
 
@@ -16,20 +15,19 @@ namespace dg {
     public:
 
       bool enabled = true;
-      StandardMaterial material;
 
-      Skybox() = default;
-      Skybox(Skybox& other);
-      Skybox(Skybox&& other);
-      Skybox& operator=(Skybox& other);
-      Skybox& operator=(Skybox&& other);
-      Skybox(std::shared_ptr<Texture> texture);
-      friend void swap(Skybox& first, Skybox& second); // nothrow
+      static std::shared_ptr<Skybox> Create(std::shared_ptr<Texture> texture);
+
+      void SetTexture(std::shared_ptr<Texture> texture);
 
       void Draw(const Camera& camera);
       void Draw(const Camera& camera, vr::EVREye eye);
 
     private:
+
+      Model model;
+
+      Skybox(std::shared_ptr<Texture> texture);
 
       void Draw(const Camera& camera, glm::mat4x4 projection);
 

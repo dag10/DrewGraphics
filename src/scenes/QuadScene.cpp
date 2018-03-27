@@ -22,7 +22,7 @@ void dg::QuadScene::Initialize() {
   Scene::Initialize();
 
   // Create skybox, disabled by default.
-  skybox = std::make_shared<Skybox>(
+  skybox = Skybox::Create(
       Texture::FromPath("assets/textures/skybox_daylight.png"));
   skybox->enabled = false;
 

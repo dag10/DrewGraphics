@@ -8,32 +8,24 @@
 #include "dg/RasterizerState.h"
 #include "dg/materials/StandardMaterial.h"
 
+std::shared_ptr<dg::Skybox> dg::Skybox::Create(
+    std::shared_ptr<Texture> texture) {
+  return std::shared_ptr<Skybox>(new Skybox(texture));
+}
+
 dg::Skybox::Skybox(std::shared_ptr<Texture> texture) {
-  material = StandardMaterial::WithTexture(texture);
+  StandardMaterial material = StandardMaterial::WithTexture(texture);
   material.SetLit(false);
+  material.rasterizerOverride.SetCullMode(RasterizerState::CullMode::FRONT);
+  material.rasterizerOverride.SetWriteDepth(false);
+
+  model.material = std::make_shared<StandardMaterial>(material);
+  model.mesh = Mesh::MappedCube;
 }
 
-dg::Skybox::Skybox(Skybox& other) {
-  this->material = other.material;
-}
-
-dg::Skybox::Skybox(Skybox&& other) {
-  *this = std::move(other);
-}
-
-dg::Skybox& dg::Skybox::operator=(Skybox& other) {
-  *this = Skybox(other);
-  return *this;
-}
-
-dg::Skybox& dg::Skybox::operator=(Skybox&& other) {
-  swap(*this, other);
-  return *this;
-}
-
-void dg::swap(Skybox& first, Skybox& second) {
-  using std::swap;
-  swap(first.material, second.material);
+void dg::Skybox::SetTexture(std::shared_ptr<Texture> texture) {
+  std::static_pointer_cast<StandardMaterial>(model.material)
+      ->SetDiffuse(texture);
 }
 
 void dg::Skybox::Draw(const Camera& camera) {
@@ -47,22 +39,10 @@ void dg::Skybox::Draw(const Camera& camera, vr::EVREye eye) {
 }
 
 void dg::Skybox::Draw(const Camera& camera, glm::mat4x4 projection) {
-  glm::mat4x4 model = Transform::TS(
-    camera.transform.translation, glm::vec3(5)).ToMat4();
   glm::mat4x4 view = camera.GetViewMatrix();
 
-  material.SendMatrixNormal(glm::transpose(glm::inverse(model)));
-  material.SendMatrixM(model);
-  material.SendMatrixMVP(projection * view * model);
+  // Remove translation component from view transform.
+  view[3][0] = view[3][1] = view[3][2] = 0;
 
-  material.Use();
-
-  RasterizerState state;
-  state.SetCullMode(RasterizerState::CullMode::FRONT);
-  state.SetWriteDepth(false);
-  Graphics::Instance->PushRasterizerState(state);
-
-  Mesh::MappedCube->Draw();
-
-  Graphics::Instance->PopRasterizerState();
+  model.Draw(view, projection);
 }

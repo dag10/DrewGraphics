@@ -84,22 +84,6 @@ namespace dg {
 
   }; // class BaseScene
 
-#if defined(_OPENGL)
-
-  class OpenGLScene : public BaseScene {
-
-  }; // class OpenGLScene
-
-  using Scene = OpenGLScene;
-
-#elif defined(_DIRECTX)
-
-  class DirectXScene : public BaseScene {
-
-  }; // class DirectXScene
-
-  using Scene = DirectXScene;
-
-#endif
+  using Scene = BaseScene;
 
 } // namespace dg

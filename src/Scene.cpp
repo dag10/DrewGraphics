@@ -18,8 +18,6 @@
 #include "dg/vr/VRManager.h"
 #include "dg/vr/VRTrackedObject.h"
 
-#pragma region Base Class
-
 dg::BaseScene::BaseScene() : SceneObject() {}
 dg::BaseScene::~BaseScene() {}
 
@@ -307,18 +305,3 @@ void dg::BaseScene::DrawHiddenAreaMesh(vr::EVREye eye) {
   Graphics::Instance->PopRasterizerState();
 }
 
-#pragma endregion
-#pragma region OpenGL Scene
-#if defined(_OPENGL)
-
-// No custom functions.
-
-#endif
-#pragma endregion
-#pragma region DirectX Scene
-#if defined(_DIRECTX)
-
-// No custom functions.
-
-#endif
-#pragma endregion

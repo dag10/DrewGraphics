@@ -549,6 +549,7 @@ void dg::PortalScene::DrawScene(
   flashlight->SetSceneSpace(
     camera.SceneSpace() * mainCamera->SceneSpace().Inverse() *
     flashlight->SceneSpace());
+  flashlight->CacheSceneSpace();
 
   Scene::DrawScene(camera, renderForVR, eye);
 

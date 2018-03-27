@@ -20,7 +20,7 @@ dg::Model::Model(Model& other) : SceneObject(other) {
 }
 
 void dg::Model::Draw(glm::mat4x4 view, glm::mat4x4 projection) const {
-  glm::mat4x4 xfMat = SceneSpace().ToMat4();
+  glm::mat4x4 xfMat = CachedSceneSpace().ToMat4();
 
   if (material->rasterizerOverride.HasDeclaredAttributes()) {
     Graphics::Instance->PushRasterizerState(material->rasterizerOverride);

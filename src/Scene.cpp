@@ -123,6 +123,9 @@ void dg::BaseScene::ProcessSceneHierarchy() {
   currentModels.clear();
   currentLights.clear();
 
+  // Recursively cache the scene-space transforms of all SceneObjects.
+  CacheSceneSpace();
+
   // Traverse scene tree and sort out different types of objects
   // into their own lists.
   std::deque<SceneObject*> remainingObjects;
@@ -144,10 +147,10 @@ void dg::BaseScene::ProcessSceneHierarchy() {
   }
 
   // Compute all models' distances to camera.
-  glm::vec3 cameraPos = mainCamera->SceneSpace().translation;
+  glm::vec3 cameraPos = mainCamera->CachedSceneSpace().translation;
   for (CurrentModel &currentModel : currentModels) {
-    currentModel.distanceToCamera =
-        glm::distance(currentModel.model->SceneSpace().translation, cameraPos);
+    currentModel.distanceToCamera = glm::distance(
+        currentModel.model->CachedSceneSpace().translation, cameraPos);
   }
 
   // Sort models.
@@ -216,7 +219,7 @@ void dg::BaseScene::RenderLightShadowMap() {
   SpotLight *spotlight = static_cast<SpotLight*>(shadowCastingLight);
 
   Camera lightCamera;
-  lightCamera.transform = spotlight->SceneSpace();
+  lightCamera.transform = spotlight->CachedSceneSpace();
   lightCamera.fov = spotlight->GetCutoff() * 2;
   lightCamera.nearClip = 0.01;
   lightCamera.farClip = 100;
@@ -304,4 +307,3 @@ void dg::BaseScene::DrawHiddenAreaMesh(vr::EVREye eye) {
   VRManager::Instance->GetHiddenAreaMesh(eye)->Draw();
   Graphics::Instance->PopRasterizerState();
 }
-

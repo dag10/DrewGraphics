@@ -25,6 +25,7 @@ namespace dg {
   class SceneObject {
 
     public:
+
       Transform transform = Transform();
       bool enabled = true;
 
@@ -53,6 +54,9 @@ namespace dg {
       Transform SceneSpace() const;
       void SetSceneSpace(Transform transform);
 
+      void CacheSceneSpace();
+      Transform CachedSceneSpace() const;
+
       void AddChild(std::shared_ptr<SceneObject> child);
       void AddChild(
           std::shared_ptr<SceneObject> child, bool preserveSceneSpace);
@@ -67,9 +71,11 @@ namespace dg {
       void OrientUpwards();
 
     private:
+
       std::vector<std::shared_ptr<Behavior>> behaviors;
       SceneObject *parent = nullptr;
       std::set<std::shared_ptr<SceneObject>> children;
+      Transform xfCachedSceneSpace;
 
       void SetParent(SceneObject *parent, bool preserveSceneSpace);
 

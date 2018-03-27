@@ -101,7 +101,7 @@ dg::DirectionalLight::DirectionalLight(
 
 dg::Light::ShaderData dg::DirectionalLight::GetShaderData() const {
   ShaderData ret = data;
-  ret.direction = (glm::vec3)SceneSpace().Forward();
+  ret.direction = (glm::vec3)CachedSceneSpace().Forward();
   return ret;
 }
 
@@ -150,7 +150,7 @@ dg::PointLight::PointLight(
 
 dg::Light::ShaderData dg::PointLight::GetShaderData() const {
   ShaderData ret = data;
-  ret.position = (glm::vec3)SceneSpace().translation;
+  ret.position = (glm::vec3)CachedSceneSpace().translation;
   return ret;
 }
 
@@ -179,8 +179,8 @@ float dg::SpotLight::GetFeather() const {
 
 dg::Light::ShaderData dg::SpotLight::GetShaderData() const {
   ShaderData ret = data;
-  ret.direction = (glm::vec3)SceneSpace().Forward();
-  ret.position = (glm::vec3)SceneSpace().translation;
+  ret.direction = (glm::vec3)CachedSceneSpace().Forward();
+  ret.position = (glm::vec3)CachedSceneSpace().translation;
   return ret;
 }
 

@@ -57,6 +57,22 @@ void dg::SceneObject::SetSceneSpace(Transform transform) {
   }
 }
 
+void dg::SceneObject::CacheSceneSpace() {
+  if (parent == nullptr) {
+    xfCachedSceneSpace = transform;
+  } else {
+    xfCachedSceneSpace = parent->xfCachedSceneSpace * transform;
+  }
+
+  for (auto &child : children) {
+    child->CacheSceneSpace();
+  }
+}
+
+dg::Transform dg::SceneObject::CachedSceneSpace() const {
+  return xfCachedSceneSpace;
+}
+
 void dg::SceneObject::AddChild(std::shared_ptr<SceneObject> child) {
   AddChild(child, true);
 }
@@ -135,4 +151,3 @@ void dg::SceneObject::SetParent(
     this->parent = parent;
   }
 }
-

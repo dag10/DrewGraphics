@@ -239,6 +239,7 @@ void dg::VRScene::Initialize() {
       ceilingLightColor, 0.314f, 2.16f, 2.11f);
   flashlight->LookAtDirection(FORWARD);
   flashlight->SetCutoff(glm::radians(35.f));
+  flashlight->SetCastShadows(true);
   Behavior::Attach(
     flashlight, std::make_shared<KeyboardLightController>(window));
   rightController->AddChild(flashlight, false);

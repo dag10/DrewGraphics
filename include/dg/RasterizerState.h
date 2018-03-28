@@ -7,12 +7,16 @@
 #include <memory>
 #include <ostream>
 #include <string>
+#include "dg/Utils.h"
 
 namespace dg {
 
   class RasterizerState {
 
     public:
+
+      typedef std::size_t hash_type;
+      friend struct std::hash<dg::RasterizerState>;
 
       static RasterizerState Default();
       static RasterizerState AdditiveBlending();
@@ -56,9 +60,6 @@ namespace dg {
         // Holding off on declaring the others until I see the utility.
       };
 
-      static RasterizerState Create();
-      static RasterizerState CreateDefault();
-
       RasterizerState() = default;
       RasterizerState(const RasterizerState &);
 
@@ -70,7 +71,7 @@ namespace dg {
       void Set##public_name(attr_type member_name, bool important = false); \
       void Clear##public_name(); \
       attr_type Get##public_name() const; \
-      inline bool Declares##public_name() { \
+      inline bool Declares##public_name() const { \
         return Declares(AttrFlag::public_name); \
       }
 #include "dg/RasterizerStateAttributes.def"
@@ -157,10 +158,29 @@ namespace dg {
 } // namespace dg
 
 namespace std {
+
   std::string to_string(dg::RasterizerState::CullMode cullMode);
   std::string to_string(dg::RasterizerState::DepthFunc depthFunc);
   std::string to_string(dg::RasterizerState::BlendEquation blendEquation);
   std::string to_string(dg::RasterizerState::BlendFunc blendFunc);
 
   std::string to_string(const dg::RasterizerState &state);
+
+  template <>
+  struct hash<dg::RasterizerState> {
+    typedef dg::RasterizerState argument_type;
+    typedef dg::RasterizerState::hash_type result_type;
+    result_type operator()(const argument_type &rs) const noexcept {
+      result_type h = 0;
+      hash_combine(h, rs.declaredAttributes);
+      hash_combine(h, rs.importantAttributes);
+#define STATE_ATTRIBUTE(index, attr_type, public_name, member_name) \
+      if (rs.Declares##public_name()) { \
+        hash_combine(h, rs.member_name); \
+      }
+#include "dg/RasterizerStateAttributes.def"
+      return h;
+    }
+  }; // struct hash
+
 } // namespace std

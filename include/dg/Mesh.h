@@ -13,8 +13,9 @@
 #include <glm/glm.hpp>
 #include <glm/gtx/hash.hpp>
 #include <memory>
-#include <vector>
 #include <unordered_map>
+#include <vector>
+#include "dg/Utils.h"
 
 namespace dg {
 
@@ -217,24 +218,27 @@ namespace dg {
 } // namespace dg
 
 namespace std {
+
   template<> struct hash<dg::Vertex> {
     typedef dg::Vertex argument_type;
     typedef dg::Vertex::hash_type result_type;
-    result_type operator()(argument_type const& v) const noexcept {
+    result_type operator()(const argument_type& v) const noexcept {
       result_type h = 0;
+      std::hash_combine(h, v.attributes);
       if (v.HasAllAttr(dg::Vertex::AttrFlag::POSITION)) {
-        h ^= std::hash<glm::vec3>{}(v.data.position);
+        std::hash_combine(h, v.data.position);
       }
       if (v.HasAllAttr(dg::Vertex::AttrFlag::NORMAL)) {
-        h ^= std::hash<glm::vec3>{}(v.data.normal) << 1;
+        std::hash_combine(h, v.data.normal);
       }
       if (v.HasAllAttr(dg::Vertex::AttrFlag::TEXCOORD)) {
-        h ^= std::hash<glm::vec2>{}(v.data.texCoord) << 2;
+        std::hash_combine(h, v.data.texCoord);
       }
       if (v.HasAllAttr(dg::Vertex::AttrFlag::TANGENT)) {
-        h ^= std::hash<glm::vec3>{}(v.data.tangent) << 3;
+        std::hash_combine(h, v.data.tangent);
       }
       return h;
     }
-  };
-}
+  }; // struct hash
+
+} // namespace std

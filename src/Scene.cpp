@@ -83,6 +83,8 @@ void dg::BaseScene::RenderFrame() {
   ProcessSceneHierarchy();
   RenderLightShadowMap();
 
+  Graphics::Instance->PushRasterizerState(defaultRasterizerState);
+
   if (enableVR) {
     // Wait for "running start", and get latest poses.
     VRManager::Instance->ReadyToRender();
@@ -95,13 +97,13 @@ void dg::BaseScene::RenderFrame() {
   // TODO: If VR, just render a quad of the left eye instead.
   ClearBuffer();
   mainCamera->aspectRatio = window->GetAspectRatio();
-  Graphics::Instance->PushRasterizerState(defaultRasterizerState);
   DrawScene(*mainCamera);
-  Graphics::Instance->PopRasterizerState();
 
   if (enableVR) {
     VRManager::Instance->RenderFinished();
   }
+
+  Graphics::Instance->PopRasterizerState();
 }
 
 void dg::BaseScene::RenderFrame(vr::EVREye eye) {

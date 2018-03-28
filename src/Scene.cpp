@@ -3,6 +3,7 @@
 //
 
 #include "dg/Scene.h"
+#include <algorithm>
 #include <deque>
 #include <iostream>
 #include <vector>
@@ -154,7 +155,7 @@ void dg::BaseScene::ProcessSceneHierarchy() {
   }
 
   // Sort models.
-  sort(currentModels.begin(), currentModels.end(),
+  std::sort(currentModels.begin(), currentModels.end(),
        [](CurrentModel &a, CurrentModel &b) -> bool {
          // First short by render queue order.
          if (a.model->material->queue != b.model->material->queue) {

@@ -449,6 +449,7 @@ del /s $(OutDir)*.obj, $(OutDir)*.pdb, $(OutDir)*.ipdb, $(OutDir)*.iobj</Command
     <ClCompile Include="src\Mesh.cpp" />
     <ClCompile Include="src\Model.cpp" />
     <ClCompile Include="src\opengl\ShaderSource.cpp" />
+    <ClCompile Include="src\RasterizerState.cpp" />
     <ClCompile Include="src\Scene.cpp" />
     <ClCompile Include="src\Behavior.cpp" />
     <ClCompile Include="src\SceneObject.cpp" />
@@ -456,11 +457,12 @@ del /s $(OutDir)*.obj, $(OutDir)*.pdb, $(OutDir)*.ipdb, $(OutDir)*.iobj</Command
     <ClCompile Include="src\scenes\DeepCloningScene.cpp" />
     <ClCompile Include="src\scenes\PortalScene.cpp" />
     <ClCompile Include="src\scenes\QuadScene.cpp" />
+    <ClCompile Include="src\scenes\ShadowScene.cpp" />
     <ClCompile Include="src\scenes\SimpleScene.cpp" />
     <ClCompile Include="src\scenes\TexturesScene.cpp" />
-    <ClCompile Include="src\scenes\TutorialScene.cpp" />
     <ClCompile Include="src\scenes\MeshesScene.cpp" />
     <ClCompile Include="src\scenes\RobotScene.cpp" />
+    <ClCompile Include="src\scenes\TransparencyScene.cpp" />
     <ClCompile Include="src\scenes\VRScene.cpp" />
     <ClCompile Include="src\Shader.cpp" />
     <ClCompile Include="src\Skybox.cpp" />
@@ -498,17 +500,19 @@ del /s $(OutDir)*.obj, $(OutDir)*.pdb, $(OutDir)*.ipdb, $(OutDir)*.iobj</Command
     <ClInclude Include="include\dg\Mesh.h" />
     <ClInclude Include="include\dg\Model.h" />
     <ClInclude Include="include\dg\opengl\ShaderSource.h" />
+    <ClInclude Include="include\dg\RasterizerState.h" />
     <ClInclude Include="include\dg\Scene.h" />
     <ClInclude Include="include\dg\SceneObject.h" />
     <ClInclude Include="include\dg\scenes\CanvasTestScene.h" />
     <ClInclude Include="include\dg\scenes\DeepCloningScene.h" />
     <ClInclude Include="include\dg\scenes\PortalScene.h" />
     <ClInclude Include="include\dg\scenes\QuadScene.h" />
+    <ClInclude Include="include\dg\scenes\ShadowScene.h" />
     <ClInclude Include="include\dg\scenes\SimpleScene.h" />
     <ClInclude Include="include\dg\scenes\TexturesScene.h" />
-    <ClInclude Include="include\dg\scenes\TutorialScene.h" />
     <ClInclude Include="include\dg\scenes\MeshesScene.h" />
     <ClInclude Include="include\dg\scenes\RobotScene.h" />
+    <ClInclude Include="include\dg\scenes\TransparencyScene.h" />
     <ClInclude Include="include\dg\scenes\VRScene.h" />
     <ClInclude Include="include\dg\Shader.h" />
     <ClInclude Include="include\dg\Skybox.h" />
@@ -613,6 +617,7 @@ del /s $(OutDir)*.obj, $(OutDir)*.pdb, $(OutDir)*.ipdb, $(OutDir)*.iobj</Command
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_DirectX|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='VRDemo|x64'">true</ExcludedFromBuild>
     </None>
+    <None Include="assets\shaders\includes\shared_head.glsl" />
     <None Include="assets\shaders\includes\vertex_head.glsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_DirectX|Win32'">true</ExcludedFromBuild>
@@ -733,6 +738,7 @@ del /s $(OutDir)*.obj, $(OutDir)*.pdb, $(OutDir)*.ipdb, $(OutDir)*.iobj</Command
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_DirectX|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='VRDemo|x64'">true</ExcludedFromBuild>
     </None>
+    <None Include="include\dg\RasterizerStateAttributes.def" />
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

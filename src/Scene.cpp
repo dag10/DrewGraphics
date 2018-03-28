@@ -80,10 +80,10 @@ void dg::BaseScene::ClearBuffer() {
 }
 
 void dg::BaseScene::RenderFrame() {
+  Graphics::Instance->PushRasterizerState(defaultRasterizerState);
+
   ProcessSceneHierarchy();
   RenderLightShadowMap();
-
-  Graphics::Instance->PushRasterizerState(defaultRasterizerState);
 
   if (enableVR) {
     // Wait for "running start", and get latest poses.

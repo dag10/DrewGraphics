@@ -2,15 +2,19 @@
 //  FrameBuffer.cpp
 //
 
+#include "dg/FrameBuffer.h"
 #include <cassert>
-#include <iostream>
 #include <memory>
 #include <string>
-
 #include "dg/Exceptions.h"
-#include "dg/FrameBuffer.h"
 
 #pragma region RenderBuffer
+
+std::shared_ptr<dg::RenderBuffer> dg::RenderBuffer::Create(unsigned int width,
+                                                           unsigned int height,
+                                                           GLenum format) {
+  return std::shared_ptr<RenderBuffer>(new RenderBuffer(width, height, format));
+}
 
 dg::RenderBuffer::RenderBuffer(
   unsigned int width, unsigned int height, GLenum format) {
@@ -20,27 +24,11 @@ dg::RenderBuffer::RenderBuffer(
   glBindRenderbuffer(GL_RENDERBUFFER, 0);
 }
 
-dg::RenderBuffer::RenderBuffer(dg::RenderBuffer&& other) {
-  *this = std::move(other);
-}
-
 dg::RenderBuffer::~RenderBuffer() {
   if (bufferHandle != 0) {
     glDeleteRenderbuffers(1, &bufferHandle);
     bufferHandle = 0;
   }
-}
-
-dg::RenderBuffer& dg::RenderBuffer::operator=(dg::RenderBuffer&& other) {
-  swap(*this, other);
-  return *this;
-}
-
-void dg::swap(RenderBuffer& first, RenderBuffer& second) {
-  using std::swap;
-  swap(first.bufferHandle, second.bufferHandle);
-  swap(first.width, second.width);
-  swap(first.height, second.height);
 }
 
 GLuint dg::RenderBuffer::GetHandle() const {
@@ -58,6 +46,13 @@ unsigned int dg::RenderBuffer::GetHeight() const {
 #pragma endregion
 
 #pragma region FrameBuffer
+
+std::shared_ptr<dg::FrameBuffer> dg::FrameBuffer::Create(
+    unsigned int width, unsigned int height, bool depthReadable,
+    bool allowStencil, bool createColorTexture) {
+  return std::shared_ptr<FrameBuffer>(new FrameBuffer(
+      width, height, depthReadable, allowStencil, createColorTexture));
+}
 
 dg::FrameBuffer::FrameBuffer(unsigned int width, unsigned int height,
                              bool depthReadable, bool allowStencil,
@@ -82,11 +77,11 @@ dg::FrameBuffer::FrameBuffer(unsigned int width, unsigned int height,
     }
   } else {
     if (allowStencil) {
-      AttachDepthRenderBuffer(std::make_shared<RenderBuffer>(
-        width, height, GL_DEPTH_STENCIL), true);
+      AttachDepthRenderBuffer(
+          RenderBuffer::Create(width, height, GL_DEPTH_STENCIL), true);
     } else {
-      AttachDepthRenderBuffer(std::make_shared<RenderBuffer>(
-        width, height, GL_DEPTH_COMPONENT), false);
+      AttachDepthRenderBuffer(
+          RenderBuffer::Create(width, height, GL_DEPTH_COMPONENT), false);
     }
   }
 
@@ -96,13 +91,7 @@ dg::FrameBuffer::FrameBuffer(unsigned int width, unsigned int height,
   }
 #elif defined(_DIRECTX)
   // TODO
-  std::cerr << "WARNING: FrameBuffer support not yet implemented for DirectX."
-            << std::endl;
 #endif
-}
-
-dg::FrameBuffer::FrameBuffer(dg::FrameBuffer&& other) {
-  *this = std::move(other);
 }
 
 dg::FrameBuffer::~FrameBuffer() {
@@ -114,21 +103,6 @@ dg::FrameBuffer::~FrameBuffer() {
 #elif defined(_DIRECTX)
   // TODO
 #endif
-}
-
-dg::FrameBuffer& dg::FrameBuffer::operator=(dg::FrameBuffer&& other) {
-  swap(*this, other);
-  return *this;
-}
-
-void dg::swap(FrameBuffer& first, FrameBuffer& second) {
-  using std::swap;
-  swap(first.bufferHandle, second.bufferHandle);
-  swap(first.colorTexture, second.colorTexture);
-  swap(first.depthTexture, second.depthTexture);
-  swap(first.depthRenderBuffer, second.depthRenderBuffer);
-  swap(first.width, second.width);
-  swap(first.height, second.height);
 }
 
 GLuint dg::FrameBuffer::GetHandle() const {

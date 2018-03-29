@@ -102,8 +102,7 @@ void dg::ShadowScene::Initialize() {
 
   // Create custom shadow framebuffer with color map (for special screen
   // quad output).
-  shadowFrameBuffer =
-      std::make_shared<FrameBuffer>(2048, 2048, true, false, true);
+  shadowFrameBuffer = FrameBuffer::Create(2048, 2048, true, false, true);
 }
 
 void dg::ShadowScene::Update() {

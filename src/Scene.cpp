@@ -215,8 +215,7 @@ void dg::BaseScene::RenderLightShadowMap() {
   }
 
   if (shadowFrameBuffer == nullptr) {
-    shadowFrameBuffer =
-        std::make_shared<FrameBuffer>(2048, 2048, true, false, false);
+    shadowFrameBuffer = FrameBuffer::Create(2048, 2048, true, false, false);
   }
 
   SpotLight *spotlight = static_cast<SpotLight*>(shadowCastingLight);

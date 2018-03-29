@@ -51,10 +51,8 @@ void dg::VRManager::CreateFramebuffers() {
     uint32_t vrWidth, vrHeight;
     vrSystem->GetRecommendedRenderTargetSize(&vrWidth, &vrHeight);
 
-    leftFramebuffer = std::make_shared<FrameBuffer>(
-      vrWidth, vrHeight, false, true);
-    rightFramebuffer = std::make_shared<FrameBuffer>(
-      vrWidth, vrHeight, false, true);
+    leftFramebuffer = FrameBuffer::Create(vrWidth, vrHeight, false, true);
+    rightFramebuffer = FrameBuffer::Create(vrWidth, vrHeight, false, true);
 }
 
 dg::VRManager::~VRManager() {

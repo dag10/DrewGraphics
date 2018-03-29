@@ -3,32 +3,34 @@
 //
 #pragma once
 
-#include "dg/Texture.h"
 #include <memory>
 #include <string>
+#include "dg/Texture.h"
 #include "dg/glad/glad.h"
 
 namespace dg {
 
-  // Copy is disabled, only moves are allowed. This prevents us
-  // from leaking or redeleting the openGL resources.
+  // Copy is disabled to prevent resource leaks.
   class RenderBuffer {
 
     public:
-      RenderBuffer(unsigned int width, unsigned int height, GLenum format);
-      RenderBuffer(RenderBuffer& other) = delete;
-      RenderBuffer(RenderBuffer&& other);
-      ~RenderBuffer();
-      RenderBuffer& operator=(RenderBuffer& other) = delete;
-      RenderBuffer& operator=(RenderBuffer&& other);
-      friend void swap(RenderBuffer& first, RenderBuffer& second); // nothrow
 
-      GLuint GetHandle() const;
+     static std::shared_ptr<RenderBuffer> Create(unsigned int width,
+                                                 unsigned int height,
+                                                 GLenum format);
 
-      unsigned int GetWidth() const;
-      unsigned int GetHeight() const;
+     RenderBuffer(RenderBuffer& other) = delete;
+     ~RenderBuffer();
+     RenderBuffer& operator=(RenderBuffer& other) = delete;
+
+     GLuint GetHandle() const;
+
+     unsigned int GetWidth() const;
+     unsigned int GetHeight() const;
 
     private:
+
+      RenderBuffer(unsigned int width, unsigned int height, GLenum format);
 
       GLuint bufferHandle = 0;
       unsigned int width;
@@ -36,41 +38,45 @@ namespace dg {
 
   }; // class RenderBuffer
 
-  // Copy is disabled, only moves are allowed. This prevents us
-  // from leaking or redeleting the openGL resources.
+  // Copy is disabled to prevent resource leaks.
   class FrameBuffer {
 
     public:
-      FrameBuffer(
-        unsigned int width, unsigned int height, bool depthReadable = false,
-        bool allowStencil = false, bool createColorTexture = true);
-      FrameBuffer(FrameBuffer& other) = delete;
-      FrameBuffer(FrameBuffer&& other);
-      ~FrameBuffer();
-      FrameBuffer& operator=(FrameBuffer& other) = delete;
-      FrameBuffer& operator=(FrameBuffer&& other);
-      friend void swap(FrameBuffer& first, FrameBuffer& second); // nothrow
 
-      GLuint GetHandle() const;
-      void Bind() const;
-      static void Unbind();
+     static std::shared_ptr<FrameBuffer> Create(unsigned int width,
+                                                unsigned int height,
+                                                bool depthReadable = false,
+                                                bool allowStencil = false,
+                                                bool createColorTexture = true);
 
-      unsigned int GetWidth() const;
-      unsigned int GetHeight() const;
+     FrameBuffer(FrameBuffer& other) = delete;
+     ~FrameBuffer();
+     FrameBuffer& operator=(FrameBuffer& other) = delete;
 
-      std::shared_ptr<Texture> GetColorTexture() const;
-      std::shared_ptr<Texture> GetDepthTexture() const;
-      std::shared_ptr<RenderBuffer> GetDepthRenderBuffer() const;
+     GLuint GetHandle() const;
+     void Bind() const;
+     static void Unbind();
 
-      void AttachColorTexture(std::shared_ptr<Texture> texture);
-      void AttachDepthTexture(
-        std::shared_ptr<Texture> texture, bool allowStencil);
-      void AttachDepthRenderBuffer(
-        std::shared_ptr<RenderBuffer> buffer, bool allowStencil);
+     unsigned int GetWidth() const;
+     unsigned int GetHeight() const;
 
-      void SetViewport();
+     std::shared_ptr<Texture> GetColorTexture() const;
+     std::shared_ptr<Texture> GetDepthTexture() const;
+     std::shared_ptr<RenderBuffer> GetDepthRenderBuffer() const;
+
+     void AttachColorTexture(std::shared_ptr<Texture> texture);
+     void AttachDepthTexture(std::shared_ptr<Texture> texture,
+                             bool allowStencil);
+     void AttachDepthRenderBuffer(std::shared_ptr<RenderBuffer> buffer,
+                                  bool allowStencil);
+
+     void SetViewport();
 
     private:
+
+      FrameBuffer(
+        unsigned int width, unsigned int height, bool depthReadable,
+        bool allowStencil, bool createColorTexture);
 
       GLuint bufferHandle = 0;
       unsigned int width;

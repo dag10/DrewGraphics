@@ -92,7 +92,7 @@ void dg::TexturesScene::Initialize() {
           glm::vec3(floorSize, floorSize, 1))));
 
   // Create frame buffer.
-  framebuffer = std::make_shared<FrameBuffer>(1024, 1024, true, true);
+  framebuffer = FrameBuffer::Create(1024, 1024, true, true);
 
   // Create material for displaying the framebuffer color buffer.
   StandardMaterial framebufferColorMaterial =

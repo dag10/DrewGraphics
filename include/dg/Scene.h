@@ -9,6 +9,7 @@
 #include <forward_list>
 #include <memory>
 #include <vector>
+#include "dg/FrameBuffer.h"
 #include "dg/Lights.h"
 #include "dg/RasterizerState.h"
 #include "dg/SceneObject.h"
@@ -20,7 +21,6 @@ namespace dg {
   class Window;
   class Skybox;
   class Light;
-  class FrameBuffer;
   class ScreenQuadMaterial;
 
   class BaseScene : public SceneObject {

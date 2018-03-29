@@ -5,11 +5,11 @@
 #pragma once
 
 #include <memory>
+#include "dg/FrameBuffer.h"
 #include "dg/Scene.h"
 
 namespace dg {
 
-  class FrameBuffer;
   class SceneObject;
   class Camera;
 

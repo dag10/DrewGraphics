@@ -9,6 +9,7 @@
 #include "dg/Exceptions.h"
 
 #pragma region RenderBuffer
+#if defined(_OPENGL)
 
 std::shared_ptr<dg::RenderBuffer> dg::RenderBuffer::Create(unsigned int width,
                                                            unsigned int height,
@@ -43,22 +44,46 @@ unsigned int dg::RenderBuffer::GetHeight() const {
   return height;
 }
 
+#endif
 #pragma endregion
 
-#pragma region FrameBuffer
+#pragma region BaseFrameBuffer
 
-std::shared_ptr<dg::FrameBuffer> dg::FrameBuffer::Create(
+std::shared_ptr<dg::FrameBuffer> dg::BaseFrameBuffer::Create(
     unsigned int width, unsigned int height, bool depthReadable,
     bool allowStencil, bool createColorTexture) {
   return std::shared_ptr<FrameBuffer>(new FrameBuffer(
       width, height, depthReadable, allowStencil, createColorTexture));
 }
 
-dg::FrameBuffer::FrameBuffer(unsigned int width, unsigned int height,
-                             bool depthReadable, bool allowStencil,
-                             bool createColorTexture)
-    : width(width), height(height) {
+unsigned int dg::BaseFrameBuffer::GetWidth() const {
+  return width;
+}
+
+unsigned int dg::BaseFrameBuffer::GetHeight() const {
+  return height;
+}
+
+std::shared_ptr<dg::Texture> dg::BaseFrameBuffer::GetColorTexture() const {
+  return colorTexture;
+}
+
+std::shared_ptr<dg::Texture> dg::BaseFrameBuffer::GetDepthTexture() const {
+  return depthTexture;
+}
+
+#pragma endregion
+
 #if defined(_OPENGL)
+#pragma region OpenGL FrameBuffer
+
+dg::OpenGLFrameBuffer::OpenGLFrameBuffer(unsigned int width,
+                                         unsigned int height,
+                                         bool depthReadable, bool allowStencil,
+                                         bool createColorTexture) {
+  this->width = width;
+  this->height = height;
+
   glGenFramebuffers(1, &bufferHandle);
 
   if (createColorTexture) {
@@ -89,117 +114,80 @@ dg::FrameBuffer::FrameBuffer(unsigned int width, unsigned int height,
   if (status != GL_FRAMEBUFFER_COMPLETE) {
     throw FrameBufferException(status);
   }
-#elif defined(_DIRECTX)
-  // TODO
-#endif
 }
 
-dg::FrameBuffer::~FrameBuffer() {
-#if defined(_OPENGL)
+dg::OpenGLFrameBuffer::~OpenGLFrameBuffer() {
   if (bufferHandle != 0) {
     glDeleteFramebuffers(1, &bufferHandle);
     bufferHandle = 0;
   }
-#elif defined(_DIRECTX)
-  // TODO
-#endif
 }
 
-GLuint dg::FrameBuffer::GetHandle() const {
-  return bufferHandle;
-}
-
-void dg::FrameBuffer::Bind() const {
-#if defined(_OPENGL)
-  glBindFramebuffer(GL_FRAMEBUFFER, bufferHandle);
-#elif defined(_DIRECTX)
-  // TODO
-#endif
-}
-
-void dg::FrameBuffer::Unbind() {
-#if defined(_OPENGL)
-  glBindFramebuffer(GL_FRAMEBUFFER, 0);
-#elif defined(_DIRECTX)
-  // TODO
-#endif
-}
-
-unsigned int dg::FrameBuffer::GetWidth() const {
-  return width;
-}
-
-unsigned int dg::FrameBuffer::GetHeight() const {
-  return height;
-}
-
-std::shared_ptr<dg::Texture> dg::FrameBuffer::GetColorTexture() const {
-  return colorTexture;
-}
-
-std::shared_ptr<dg::Texture> dg::FrameBuffer::GetDepthTexture() const {
-  return depthTexture;
-}
-
-std::shared_ptr<dg::RenderBuffer>
-dg::FrameBuffer::GetDepthRenderBuffer() const {
-  return depthRenderBuffer;
-}
-
-void dg::FrameBuffer::AttachColorTexture(std::shared_ptr<Texture> texture) {
+void dg::OpenGLFrameBuffer::AttachColorTexture(std::shared_ptr<Texture> texture) {
   colorTexture = texture;
-  Bind();
-#if defined(_OPENGL)
+  glBindFramebuffer(GL_FRAMEBUFFER, bufferHandle);
   glFramebufferTexture2D(
     GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture->GetHandle(),
     0);
-#elif defined(_DIRECTX)
-  // TODO
-#endif
-  Unbind();
+  glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-void dg::FrameBuffer::AttachDepthTexture(
+void dg::OpenGLFrameBuffer::AttachDepthTexture(
   std::shared_ptr<Texture> texture, bool allowStencil) {
   depthTexture = texture;
-  Bind();
-#if defined(_OPENGL)
+  glBindFramebuffer(GL_FRAMEBUFFER, bufferHandle);
   GLenum format = allowStencil \
     ? GL_DEPTH_STENCIL_ATTACHMENT
     : GL_DEPTH_ATTACHMENT;
   glFramebufferTexture2D(
     GL_FRAMEBUFFER, format, GL_TEXTURE_2D, texture->GetHandle(),
     0);
-#elif defined(_DIRECTX)
-  // TODO
-#endif
-  Unbind();
+  glBindFramebuffer(GL_FRAMEBUFFER, 0);
   depthRenderBuffer = nullptr;
 }
 
-void dg::FrameBuffer::AttachDepthRenderBuffer(
+void dg::OpenGLFrameBuffer::AttachDepthRenderBuffer(
   std::shared_ptr<RenderBuffer> buffer, bool allowStencil) {
   depthRenderBuffer = buffer;
-  Bind();
-#if defined(_OPENGL)
+  glBindFramebuffer(GL_FRAMEBUFFER, bufferHandle);
   GLenum format = allowStencil \
     ? GL_DEPTH_STENCIL_ATTACHMENT
     : GL_DEPTH_ATTACHMENT;
   glFramebufferRenderbuffer(
     GL_FRAMEBUFFER, format, GL_RENDERBUFFER, buffer->GetHandle());
-#elif defined(_DIRECTX)
-  // TODO
-#endif
-  Unbind();
+  glBindFramebuffer(GL_FRAMEBUFFER, 0);
   depthTexture = nullptr;
 }
 
-void dg::FrameBuffer::SetViewport() {
-#if defined(_OPENGL)
-  glViewport(0, 0, width, height);
-#elif defined(_DIRECTX)
-  // TODO
-#endif
+
+GLuint dg::OpenGLFrameBuffer::GetHandle() const {
+  return bufferHandle;
 }
 
 #pragma endregion
+#elif defined(_DIRECTX)
+#pragma region DirectX FrameBuffer
+
+dg::DirectXFrameBuffer::DirectXFrameBuffer(unsigned int width,
+                                           unsigned int height,
+                                           bool depthReadable,
+                                           bool allowStencil,
+                                           bool createColorTexture) {
+  this->width = width;
+  this->height = height;
+
+  // TODO
+}
+
+void dg::DirectXFrameBuffer::AttachColorTexture(
+    std::shared_ptr<Texture> texture) {
+  // TODO
+}
+
+void dg::DirectXFrameBuffer::AttachDepthTexture(
+    std::shared_ptr<Texture> texture, bool allowStencil) {
+  // TODO
+}
+
+#pragma endregion
+#endif

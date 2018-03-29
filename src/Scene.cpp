@@ -109,16 +109,12 @@ void dg::BaseScene::RenderFrame() {
 void dg::BaseScene::RenderFrame(vr::EVREye eye) {
   std::shared_ptr<FrameBuffer> framebuffer =
     VRManager::Instance->GetFramebuffer(eye);
-  framebuffer->Bind();
-  framebuffer->SetViewport();
+  Graphics::Instance->SetRenderTarget(*framebuffer);
   ClearBuffer();
   DrawHiddenAreaMesh(eye);
-
   DrawScene(*mainCamera, true, eye);
-
   VRManager::Instance->SubmitFrame(eye);
-
-  framebuffer->Unbind();
+  Graphics::Instance->SetRenderTarget(*window);
   window->ResetViewport();
 }
 
@@ -227,16 +223,11 @@ void dg::BaseScene::RenderLightShadowMap() {
   lightCamera.farClip = 100;
   shadowCastingLight->SetLightTransform(lightCamera.GetProjectionMatrix() *
                                         lightCamera.GetViewMatrix());
-  shadowFrameBuffer->Bind();
-  shadowFrameBuffer->SetViewport();
-
+  Graphics::Instance->SetRenderTarget(*shadowFrameBuffer);
   Graphics::Instance->ClearDepthStencil(true, false);
-
   DrawScene(lightCamera);
-
-  shadowFrameBuffer->Unbind();
+  Graphics::Instance->SetRenderTarget(*window);
   window->ResetViewport();
-
   shadowCastingLight->SetShadowMap(shadowFrameBuffer->GetDepthTexture());
 }
 

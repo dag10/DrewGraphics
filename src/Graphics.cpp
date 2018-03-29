@@ -5,6 +5,7 @@
 #include "dg/Graphics.h"
 #include <cassert>
 #include "dg/Exceptions.h"
+#include "dg/FrameBuffer.h"
 #include "dg/Mesh.h"
 #include "dg/RasterizerState.h"
 #include "dg/Shader.h"
@@ -100,6 +101,20 @@ void dg::OpenGLGraphics::InitializeResources() {
       "assets/shaders/includes/fragment_head.glsl");
   dg::OpenGLShader::AddFragmentSource(
       "assets/shaders/includes/fragment_main.glsl");
+}
+
+void dg::OpenGLGraphics::SetRenderTarget(const FrameBuffer &frameBuffer) {
+  SetViewport(0, 0, frameBuffer.GetWidth(), frameBuffer.GetHeight());
+  glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer.GetHandle());
+}
+
+void dg::OpenGLGraphics::SetRenderTarget(const Window& window) {
+  SetViewport(0, 0, window.GetWidth(), window.GetHeight());
+  glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void dg::OpenGLGraphics::SetViewport(int x, int y, int width, int height) {
+  glViewport(x, y, width, height);
 }
 
 void dg::OpenGLGraphics::ClearColor(glm::vec3 color, bool clearDepth,
@@ -426,6 +441,18 @@ void dg::DirectXGraphics::OnWindowResize(const Window& window) {
   viewport.MinDepth = 0.0f;
   viewport.MaxDepth = 1.0f;
   context->RSSetViewports(1, &viewport);
+}
+
+void dg::DirectXGraphics::SetRenderTarget(const FrameBuffer &frameBuffer) {
+  // TODO
+}
+
+void dg::DirectXGraphics::SetRenderTarget(const Window& window) {
+  // TODO
+}
+
+void dg::DirectXGraphics::SetViewport(int x, int y, int width, int height) {
+  // TODO
 }
 
 void dg::DirectXGraphics::ClearColor(glm::vec3 color, bool clearDepth,

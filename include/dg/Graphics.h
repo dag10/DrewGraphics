@@ -8,6 +8,7 @@
 #include <glm/glm.hpp>
 #include <memory>
 #include <unordered_map>
+#include "dg/FrameBuffer.h"
 #include "dg/RasterizerState.h"
 
 #if defined(_OPENGL)
@@ -44,6 +45,10 @@ namespace dg {
 
       virtual void OnWindowResize(const Window& window) {};
 
+      virtual void SetRenderTarget(const FrameBuffer &frameBuffer) = 0;
+      virtual void SetRenderTarget(const Window &window) = 0;
+      virtual void SetViewport(int x, int y, int width, int height) = 0;
+
       virtual void ClearColor(glm::vec3 color, bool clearDepth = true,
                               bool clearStencil = true) = 0;
       virtual void ClearDepthStencil(bool clearDepth = true,
@@ -71,6 +76,10 @@ namespace dg {
     public:
 
       OpenGLGraphics(const Window& window);
+
+      virtual void SetRenderTarget(const FrameBuffer &frameBuffer);
+      virtual void SetRenderTarget(const Window &window);
+      virtual void SetViewport(int x, int y, int width, int height);
 
       virtual void ClearColor(glm::vec3 color, bool clearDepth = true,
                               bool clearStencil = true);
@@ -101,6 +110,10 @@ namespace dg {
       virtual ~DirectXGraphics();
 
       virtual void OnWindowResize(const Window& window);
+
+      virtual void SetRenderTarget(const FrameBuffer &frameBuffer);
+      virtual void SetRenderTarget(const Window &window);
+      virtual void SetViewport(int x, int y, int width, int height);
 
       virtual void ClearColor(glm::vec3 color, bool clearDepth = true,
                               bool clearStencil = true);

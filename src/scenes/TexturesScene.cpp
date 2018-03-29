@@ -218,8 +218,7 @@ void dg::TexturesScene::Update() {
 
 void dg::TexturesScene::RenderFrame() {
   // Render scene for framebuffer.
-  framebuffer->Bind();
-  framebuffer->SetViewport();
+  Graphics::Instance->SetRenderTarget(*framebuffer);
   Graphics::Instance->ClearColor(glm::vec3(0,1,1));
   renderQuads->enabled = false;
   dummyRenderQuads->enabled = true;
@@ -228,7 +227,7 @@ void dg::TexturesScene::RenderFrame() {
   Graphics::Instance->PopRasterizerState();
   dummyRenderQuads->enabled = false;
   renderQuads->enabled = true;
-  framebuffer->Unbind();
+  Graphics::Instance->SetRenderTarget(*window);
   window->ResetViewport();
 
   // Render scene for output.

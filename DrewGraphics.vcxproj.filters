@@ -67,6 +67,9 @@
     <Filter Include="Shaders\OpenGL\Includes">
       <UniqueIdentifier>{4d2cf6e3-d0aa-449e-9d21-9870b0f0516c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Shaders\DirectX\Includes">
+      <UniqueIdentifier>{ba40f631-20e0-403c-bf3a-0a5229c29ba3}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Behavior.cpp">
@@ -363,6 +366,15 @@
     </FxCompile>
     <FxCompile Include="assets\shaders\StandardVertexShader.hlsl">
       <Filter>Shaders\DirectX</Filter>
+    </FxCompile>
+    <FxCompile Include="assets\shaders\ScreenQuadPixelShader.hlsl">
+      <Filter>Shaders\DirectX</Filter>
+    </FxCompile>
+    <FxCompile Include="assets\shaders\ScreenQuadVertexShader.hlsl">
+      <Filter>Shaders\DirectX</Filter>
+    </FxCompile>
+    <FxCompile Include="assets\shaders\includes\VertexShaderInput.hlsl">
+      <Filter>Shaders\DirectX\Includes</Filter>
     </FxCompile>
   </ItemGroup>
   <ItemGroup>

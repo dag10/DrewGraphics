@@ -1,14 +1,9 @@
+#include "includes\VertexShaderInput.hlsl"
+
 cbuffer Camera : register(b0) {
   matrix _Matrix_M;
   matrix _Matrix_MVP;
   matrix _Matrix_Normal;
-};
-
-struct VertexShaderInput {
-  float3 position : POSITION;
-  float3 normal : NORMAL;
-  float2 texCoord : TEXCOORD;
-  float3 tangent : TANGENT;
 };
 
 struct VertexToPixel {

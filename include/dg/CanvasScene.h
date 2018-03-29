@@ -24,8 +24,6 @@ namespace dg {
 
     protected:
 
-      virtual void ConfigureBuffer();
-
       std::shared_ptr<Canvas> canvas = nullptr;
       std::shared_ptr<ScreenQuadMaterial> quadMaterial = nullptr;
 

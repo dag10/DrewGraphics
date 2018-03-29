@@ -583,6 +583,26 @@ del /s $(OutDir)*.obj, $(OutDir)*.pdb, $(OutDir)*.ipdb, $(OutDir)*.iobj</Command
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release_DirectX|Win32'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release_DirectX|x64'">Vertex</ShaderType>
     </FxCompile>
+    <FxCompile Include="assets\shaders\UVPixelShader.hlsl">
+      <AllResourcesBound Condition="'$(Configuration)|$(Platform)'=='Debug_DirectX|Win32'">
+      </AllResourcesBound>
+      <AllResourcesBound Condition="'$(Configuration)|$(Platform)'=='Debug_DirectX|x64'">
+      </AllResourcesBound>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug_DirectX|Win32'">5.0</ShaderModel>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug_DirectX|x64'">5.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug_DirectX|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug_DirectX|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="assets\shaders\UVVertexShader.hlsl">
+      <AllResourcesBound Condition="'$(Configuration)|$(Platform)'=='Debug_DirectX|Win32'">
+      </AllResourcesBound>
+      <AllResourcesBound Condition="'$(Configuration)|$(Platform)'=='Debug_DirectX|x64'">
+      </AllResourcesBound>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug_DirectX|Win32'">5.0</ShaderModel>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug_DirectX|x64'">5.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug_DirectX|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug_DirectX|x64'">Vertex</ShaderType>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="assets\shaders\depthreset.f.glsl">

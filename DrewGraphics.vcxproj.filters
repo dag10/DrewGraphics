@@ -376,6 +376,12 @@
     <FxCompile Include="assets\shaders\includes\VertexShaderInput.hlsl">
       <Filter>Shaders\DirectX\Includes</Filter>
     </FxCompile>
+    <FxCompile Include="assets\shaders\UVPixelShader.hlsl">
+      <Filter>Shaders\DirectX</Filter>
+    </FxCompile>
+    <FxCompile Include="assets\shaders\UVVertexShader.hlsl">
+      <Filter>Shaders\DirectX</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="assets\shaders\depthreset.f.glsl">

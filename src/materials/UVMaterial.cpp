@@ -8,8 +8,12 @@ std::shared_ptr<dg::Shader> dg::UVMaterial::uvShader = nullptr;
 
 dg::UVMaterial::UVMaterial() : Material() {
   if (uvShader == nullptr) {
+#if defined(_OPENGL)
     uvShader = dg::Shader::FromFiles("assets/shaders/uv.v.glsl",
                                      "assets/shaders/uv.f.glsl");
+#elif defined(_DIRECTX)
+    uvShader = dg::Shader::FromFiles("UVVertexShader.cso", "UVPixelShader.cso");
+#endif
   }
 
   shader = UVMaterial::uvShader;

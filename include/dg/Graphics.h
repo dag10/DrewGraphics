@@ -7,6 +7,7 @@
 #include <forward_list>
 #include <glm/glm.hpp>
 #include <memory>
+#include <unordered_map>
 #include "dg/RasterizerState.h"
 
 #if defined(_OPENGL)
@@ -121,10 +122,35 @@ namespace dg {
 
     private:
 
+      struct RasterizerStateResources {
+        ID3D11RasterizerState *rsState = NULL;
+        ID3D11DepthStencilState *dsState = NULL;
+        ID3D11BlendState *blendState = NULL;
+
+        ~RasterizerStateResources();
+      };
+
+      std::unordered_map<RasterizerState::hash_type,
+                         std::shared_ptr<RasterizerStateResources>>
+          rasterizerStateResources;
+
+      std::shared_ptr<RasterizerStateResources> CreateRasterizerStateResources(
+          const RasterizerState &state);
+
       const Window& window;
       glm::vec2 contentSize;
 
-  }; // class OpenGLGraphics
+      static D3D11_CULL_MODE CullModeToDXEnum(
+          RasterizerState::CullMode cullMode);
+      static D3D11_DEPTH_WRITE_MASK WriteDepthToDXEnum(bool writeDepth);
+      static D3D11_COMPARISON_FUNC DepthFuncToDXEnum(
+          RasterizerState::DepthFunc depthFunc);
+      static D3D11_BLEND_OP BlendEquationToDXEnum(
+          RasterizerState::BlendEquation blendEquation);
+      static D3D11_BLEND BlendFuncToDXEnum(
+          RasterizerState::BlendFunc blendFunction);
+
+  }; // class DirectXGraphics
 #endif
 
 } // namespace dg

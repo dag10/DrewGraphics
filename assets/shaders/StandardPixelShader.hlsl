@@ -114,12 +114,12 @@ float3 calculateLight(Light light, VertexToPixel input, float3 normal,
 float4 main(VertexToPixel input) : SV_TARGET {
   float2 texCoord = input.texCoord.xy * uvScale;
 
-  float3 diffuseColor =
-      useDiffuseMap ? diffuseTexture.Sample(diffuseTextureSampler, texCoord).rgb
-                    : diffuse.rgb;
+  float4 diffuseColor =
+      useDiffuseMap ? diffuseTexture.Sample(diffuseTextureSampler, texCoord)
+                    : diffuse;
 
   if (!lit) {
-    return float4(diffuseColor, 1);
+    return diffuseColor;
   }
 
   float3 specularColor =
@@ -144,5 +144,5 @@ float4 main(VertexToPixel input) : SV_TARGET {
     cumulative += calculateLight(lights[i], input, normal, diffuseColor, specularColor);
   }
 
-  return float4(cumulative, 1.0);
+  return float4(cumulative, diffuseColor.a);
 }

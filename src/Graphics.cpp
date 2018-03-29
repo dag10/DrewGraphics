@@ -45,8 +45,6 @@ void dg::Graphics::PopRasterizerState() {
 }
 
 void dg::Graphics::ApplyCurrentRasterizerState() {
-  // TODO: Don't set if same as previous state.
-
   if (states.empty()) {
     return;
   }
@@ -430,13 +428,6 @@ void dg::DirectXGraphics::OnWindowResize(const Window& window) {
   context->RSSetViewports(1, &viewport);
 }
 
-void dg::DirectXGraphics::Clear(glm::vec3 color) {
-  const float colorArray[4] = { color.x, color.y, color.z, 0 };
-  context->ClearRenderTargetView(backBufferRTV, colorArray);
-  context->ClearDepthStencilView(
-      depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
-}
-
 void dg::DirectXGraphics::ClearColor(glm::vec3 color, bool clearDepth,
                                      bool clearStencil) {
   const float colorArray[4] = { color.x, color.y, color.z, 0 };
@@ -453,16 +444,185 @@ void dg::DirectXGraphics::ClearColor(glm::vec3 color, bool clearDepth,
   }
 }
 
-void dg::DirectXGLGraphics::ClearDepthStencil(bool clearDepth,
+void dg::DirectXGraphics::ClearDepthStencil(bool clearDepth,
                                               bool clearStencil) {
   context->ClearDepthStencilView(
       depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 }
 
 
-void dg::OpenGLGraphics::ApplyRasterizerState(const RasterizerState &state) {
-  throw std::runtime_error("TODO: Implement ApplyRasterizerState for DirectX.");
-  // TODO
+void dg::DirectXGraphics::ApplyRasterizerState(const RasterizerState &state) {
+  auto hash = std::hash<RasterizerState>{}(state);
+  auto stateResourcesIter = rasterizerStateResources.find(hash);
+  RasterizerStateResources *stateResourcesPtr;
+  if (stateResourcesIter != rasterizerStateResources.end()) {
+    stateResourcesPtr = stateResourcesIter->second.get();
+  } else {
+    rasterizerStateResources[hash] = CreateRasterizerStateResources(state);
+    stateResourcesPtr = rasterizerStateResources[hash].get();
+  }
+
+  context->RSSetState(stateResourcesPtr->rsState);
+  context->OMSetDepthStencilState(stateResourcesPtr->dsState, 0);
+  context->OMSetBlendState(stateResourcesPtr->blendState, NULL, 0xffffffff);
+}
+
+std::shared_ptr<dg::DirectXGraphics::RasterizerStateResources>
+dg::DirectXGraphics::CreateRasterizerStateResources(
+    const RasterizerState& state) {
+  auto resources =
+      std::shared_ptr<RasterizerStateResources>(new RasterizerStateResources());
+
+  CD3D11_RASTERIZER_DESC rasterizerDesc(D3D11_DEFAULT);
+  rasterizerDesc.CullMode = CullModeToDXEnum(state.GetCullMode());
+  HRESULT hr =
+      device->CreateRasterizerState(&rasterizerDesc, &resources->rsState);
+  if (FAILED(hr)) {
+    throw std::runtime_error(
+        "Failed to create DirectX RasterizerState resource for state:\n" +
+        std::to_string(state));
+  }
+
+  CD3D11_DEPTH_STENCIL_DESC depthStencilDesc(D3D11_DEFAULT);
+  bool writeDepth = state.GetWriteDepth();
+  auto depthFunc = state.GetDepthFunc();
+  if (!writeDepth && depthFunc == RasterizerState::DepthFunc::ALWAYS) {
+    depthStencilDesc.DepthEnable = false;
+  } else {
+    depthStencilDesc.DepthEnable = true;
+    depthStencilDesc.DepthWriteMask = WriteDepthToDXEnum(writeDepth);
+    depthStencilDesc.DepthFunc = DepthFuncToDXEnum(depthFunc);
+  }
+  hr = device->CreateDepthStencilState(&depthStencilDesc, &resources->dsState);
+  if (FAILED(hr)) {
+    throw std::runtime_error(
+        "Failed to create DirectX DepthStencilState resource for state:\n" +
+        std::to_string(state));
+  }
+
+  CD3D11_BLEND_DESC blendDesc(D3D11_DEFAULT);
+  if (state.GetBlendEnabled()) {
+    blendDesc.RenderTarget->BlendEnable = true;
+    blendDesc.IndependentBlendEnable = true;
+    blendDesc.RenderTarget->BlendOp =
+        BlendEquationToDXEnum(state.GetRGBBlendEquation());
+    blendDesc.RenderTarget->BlendOpAlpha =
+        BlendEquationToDXEnum(state.GetAlphaBlendEquation());
+    blendDesc.RenderTarget->SrcBlend =
+        BlendFuncToDXEnum(state.GetSrcRGBBlendFunc());
+    blendDesc.RenderTarget->SrcBlendAlpha =
+        BlendFuncToDXEnum(state.GetSrcAlphaBlendFunc());
+    blendDesc.RenderTarget->DestBlend =
+        BlendFuncToDXEnum(state.GetDstRGBBlendFunc());
+    blendDesc.RenderTarget->DestBlendAlpha =
+        BlendFuncToDXEnum(state.GetDstAlphaBlendFunc());
+    blendDesc.RenderTarget->RenderTargetWriteMask =
+        D3D11_COLOR_WRITE_ENABLE_ALL;
+  } else {
+    blendDesc.RenderTarget->BlendEnable = false;
+  }
+  hr = device->CreateBlendState(&blendDesc, &resources->blendState);
+  if (FAILED(hr)) {
+    throw std::runtime_error(
+        "Failed to create DirectX BlendState resource for state:\n" +
+        std::to_string(state));
+  }
+
+  return resources;
+}
+
+D3D11_CULL_MODE dg::DirectXGraphics::CullModeToDXEnum(
+    RasterizerState::CullMode cullMode) {
+  switch (cullMode) {
+    case RasterizerState::CullMode::OFF:
+      return D3D11_CULL_NONE;
+    case RasterizerState::CullMode::FRONT:
+      return D3D11_CULL_FRONT;
+    case RasterizerState::CullMode::BACK:
+      return D3D11_CULL_BACK;
+  }
+}
+
+D3D11_DEPTH_WRITE_MASK dg::DirectXGraphics::WriteDepthToDXEnum(
+    bool writeDepth) {
+  return writeDepth ? D3D11_DEPTH_WRITE_MASK_ALL : D3D11_DEPTH_WRITE_MASK_ZERO;
+}
+
+D3D11_COMPARISON_FUNC dg::DirectXGraphics::DepthFuncToDXEnum(
+    RasterizerState::DepthFunc depthFunc) {
+  switch (depthFunc) {
+    case RasterizerState::DepthFunc::ALWAYS:
+      return D3D11_COMPARISON_ALWAYS;
+    case RasterizerState::DepthFunc::LESS:
+      return D3D11_COMPARISON_LESS;
+    case RasterizerState::DepthFunc::EQUAL:
+      return D3D11_COMPARISON_EQUAL;
+    case RasterizerState::DepthFunc::LEQUAL:
+      return D3D11_COMPARISON_LESS_EQUAL;
+    case RasterizerState::DepthFunc::GREATER:
+      return D3D11_COMPARISON_GREATER;
+    case RasterizerState::DepthFunc::NOTEQUAL:
+      return D3D11_COMPARISON_NOT_EQUAL;
+    case RasterizerState::DepthFunc::GEQUAL:
+      return D3D11_COMPARISON_GREATER_EQUAL;
+  }
+}
+
+D3D11_BLEND_OP dg::DirectXGraphics::BlendEquationToDXEnum(
+    RasterizerState::BlendEquation blendEquation) {
+  switch (blendEquation) {
+    case RasterizerState::BlendEquation::ADD:
+      return D3D11_BLEND_OP_ADD;
+    case RasterizerState::BlendEquation::SUBTRACT:
+      return D3D11_BLEND_OP_SUBTRACT;
+    case RasterizerState::BlendEquation::REVERSE_SUBTRACT:
+      return D3D11_BLEND_OP_REV_SUBTRACT;
+    case RasterizerState::BlendEquation::MIN:
+      return D3D11_BLEND_OP_MIN;
+    case RasterizerState::BlendEquation::MAX:
+      return D3D11_BLEND_OP_MAX;
+  }
+}
+
+D3D11_BLEND dg::DirectXGraphics::BlendFuncToDXEnum(
+    RasterizerState::BlendFunc blendFunction) {
+  switch (blendFunction) {
+    case RasterizerState::BlendFunc::ZERO:
+      return D3D11_BLEND_ZERO;
+    case RasterizerState::BlendFunc::ONE:
+      return D3D11_BLEND_ONE;
+    case RasterizerState::BlendFunc::SRC_COLOR:
+      return D3D11_BLEND_SRC_COLOR;
+    case RasterizerState::BlendFunc::ONE_MINUS_SRC_COLOR:
+      return D3D11_BLEND_INV_SRC_COLOR;
+    case RasterizerState::BlendFunc::DST_COLOR:
+      return D3D11_BLEND_DEST_COLOR;
+    case RasterizerState::BlendFunc::ONE_MINUS_DST_COLOR:
+      return D3D11_BLEND_INV_DEST_COLOR;
+    case RasterizerState::BlendFunc::SRC_ALPHA:
+      return D3D11_BLEND_SRC_ALPHA;
+    case RasterizerState::BlendFunc::ONE_MINUS_SRC_ALPHA:
+      return D3D11_BLEND_INV_SRC_ALPHA;
+    case RasterizerState::BlendFunc::DST_ALPHA:
+      return D3D11_BLEND_DEST_ALPHA;
+    case RasterizerState::BlendFunc::ONE_MINUS_DST_ALPHA:
+      return D3D11_BLEND_INV_DEST_ALPHA;
+  }
+}
+
+dg::DirectXGraphics::RasterizerStateResources::~RasterizerStateResources() {
+  if (rsState != NULL) {
+    rsState->Release();
+    rsState = NULL;
+  }
+  if (dsState != NULL) {
+    dsState->Release();
+    dsState = NULL;
+  }
+  if (blendState != NULL) {
+    blendState->Release();
+    blendState = NULL;
+  }
 }
 
 #endif

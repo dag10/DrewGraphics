@@ -228,7 +228,6 @@ void dg::TexturesScene::RenderFrame() {
   dummyRenderQuads->enabled = false;
   renderQuads->enabled = true;
   Graphics::Instance->SetRenderTarget(*window);
-  window->ResetViewport();
 
   // Render scene for output.
   Scene::RenderFrame();

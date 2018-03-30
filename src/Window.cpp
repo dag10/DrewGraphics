@@ -331,20 +331,11 @@ void dg::OpenGLWindow::StartRender() {
   assert(glfwWindow != nullptr);
 
   UseContext();
-  ResetViewport();
 }
 
 void dg::OpenGLWindow::FinishRender() {
   assert(glfwWindow != nullptr);
   glfwSwapBuffers(glfwWindow);
-}
-
-void dg::OpenGLWindow::ResetViewport() {
-  // Get the latest true pixel dimension of the window. This
-  // takes into account any DPIs or current window size.
-  int width, height;
-  glfwGetFramebufferSize(glfwWindow, &width, &height);
-  glViewport(0, 0, width, height);
 }
 
 glm::vec2 dg::OpenGLWindow::GetContentSize() const {
@@ -376,6 +367,12 @@ glm::vec2 dg::OpenGLWindow::GetContentScale() const {
     glfwGetWindowContentScale(glfwWindow, &x, &y);
   }
   return glm::vec2(x, y);
+}
+
+glm::vec2 dg::OpenGLWindow::GetFramebufferSize() const {
+  int width, height;
+  glfwGetFramebufferSize(glfwWindow, &width, &height);
+  return glm::vec2(width, height);
 }
 
 #pragma endregion
@@ -781,16 +778,11 @@ void dg::Win32Window::SetTitle(const std::string& title) {
 
 void dg::Win32Window::StartRender() {
   assert(hWnd != NULL);
-  ResetViewport();
 }
 
 void dg::Win32Window::FinishRender() {
-  assert(hWnd != nullptr);
+  assert(hWnd != NULL);
   Graphics::Instance->swapChain->Present(0, 0);
-}
-
-void dg::Win32Window::ResetViewport() {
-  // TODO
 }
 
 glm::vec2 dg::Win32Window::GetContentSize() const {
@@ -799,6 +791,10 @@ glm::vec2 dg::Win32Window::GetContentSize() const {
 
 void dg::Win32Window::SetClientSize(glm::vec2 size) {
   // TODO: Set client size
+}
+
+glm::vec2 dg::Win32Window::GetFramebufferSize() const {
+  return GetContentSize();
 }
 
 #endif

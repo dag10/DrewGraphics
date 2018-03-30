@@ -27,13 +27,8 @@ void dg::CanvasScene::Initialize() {
 
 void dg::CanvasScene::RenderFrame() {
   Graphics::Instance->PushRasterizerState(defaultRasterizerState);
-  window->ResetViewport();
-
   ClearBuffer();
-
-  // In case the canvas is ever recreated.
   quadMaterial->SetTexture(canvas->GetTexture());
-
   quadMaterial->Use();
   Mesh::Quad->Draw();
   Graphics::Instance->PushRasterizerState(defaultRasterizerState);

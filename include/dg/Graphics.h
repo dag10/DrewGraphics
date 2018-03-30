@@ -61,6 +61,8 @@ namespace dg {
 
     protected:
 
+      Graphics() = default;
+
       virtual void InitializeGraphics() = 0;
       virtual void InitializeResources();
       virtual void ApplyRasterizerState(const RasterizerState &state) = 0;

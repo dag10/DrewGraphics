@@ -69,17 +69,19 @@ namespace dg {
       virtual void StartRender() = 0;
       virtual void FinishRender() = 0;
 
-      virtual void ResetViewport() = 0;
-
       float GetWidth() const;
       float GetHeight() const;
 
       // Returns the size of the window as if monitor is 1x DPI scale,
       // even if it's high-DPI.
       virtual glm::vec2 GetContentSize() const = 0;
+
       // Sets the size of the window as if monitor is 1x DPI scale, even if
       // it's high-DPI.
       virtual void SetClientSize(glm::vec2 size) = 0;
+
+      // Gets the dimensions of the framebuffer.
+      virtual glm::vec2 GetFramebufferSize() const = 0;
 
       float GetAspectRatio() const;
 
@@ -154,14 +156,16 @@ namespace dg {
       virtual void StartRender();
       virtual void FinishRender();
 
-      virtual void ResetViewport();
-
       // Returns the size of the window as if monitor is 1x DPI scale,
       // even if it's high-DPI.
       virtual glm::vec2 GetContentSize() const;
+
       // Sets the size of the window as if monitor is 1x DPI scale, even if
       // it's high-DPI.
       virtual void SetClientSize(glm::vec2 size);
+
+      // Gets the dimensions of the framebuffer.
+      virtual glm::vec2 GetFramebufferSize() const;
 
     private:
 
@@ -232,14 +236,16 @@ namespace dg {
       virtual void StartRender();
       virtual void FinishRender();
 
-      virtual void ResetViewport();
-
       // Returns the size of the window as if monitor is 1x DPI scale,
       // even if it's high-DPI.
       virtual glm::vec2 GetContentSize() const;
+
       // Sets the size of the window as if monitor is 1x DPI scale, even if
       // it's high-DPI.
       virtual void SetClientSize(glm::vec2 size);
+
+      // Gets the dimensions of the framebuffer.
+      virtual glm::vec2 GetFramebufferSize() const;
 
     private:
 

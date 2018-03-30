@@ -104,13 +104,14 @@ void dg::OpenGLGraphics::InitializeResources() {
 }
 
 void dg::OpenGLGraphics::SetRenderTarget(FrameBuffer &frameBuffer) {
-  SetViewport(0, 0, frameBuffer.GetWidth(), frameBuffer.GetHeight());
   glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer.GetHandle());
+  SetViewport(0, 0, frameBuffer.GetWidth(), frameBuffer.GetHeight());
 }
 
 void dg::OpenGLGraphics::SetRenderTarget(Window& window) {
-  SetViewport(0, 0, window.GetWidth(), window.GetHeight());
   glBindFramebuffer(GL_FRAMEBUFFER, 0);
+  glm::vec2 size = window.GetFramebufferSize();
+  SetViewport(0, 0, size.x, size.y);
 }
 
 void dg::OpenGLGraphics::SetViewport(int x, int y, int width, int height) {

@@ -115,7 +115,6 @@ void dg::BaseScene::RenderFrame(vr::EVREye eye) {
   DrawScene(*mainCamera, true, eye);
   VRManager::Instance->SubmitFrame(eye);
   Graphics::Instance->SetRenderTarget(*window);
-  window->ResetViewport();
 }
 
 void dg::BaseScene::ProcessSceneHierarchy() {
@@ -227,7 +226,6 @@ void dg::BaseScene::RenderLightShadowMap() {
   Graphics::Instance->ClearDepthStencil(true, false);
   DrawScene(lightCamera);
   Graphics::Instance->SetRenderTarget(*window);
-  window->ResetViewport();
   shadowCastingLight->SetShadowMap(shadowFrameBuffer->GetDepthTexture());
 }
 

@@ -18,6 +18,7 @@ dg::RasterizerState dg::RasterizerState::Default() {
   state.SetDstRGBBlendFunc(RasterizerState::BlendFunc::ZERO);
   state.SetSrcAlphaBlendFunc(RasterizerState::BlendFunc::ONE);
   state.SetDstAlphaBlendFunc(RasterizerState::BlendFunc::ZERO);
+  state.SetFlipRenderY(false);
   return state;
 }
 

@@ -23,9 +23,7 @@ std::shared_ptr<dg::Texture> dg::BaseTexture::FromPath(const std::string& path) 
   int width;
   int height;
 
-#if defined(_OPENGL)
   stbi_set_flip_vertically_on_load(true);
-#endif
 
   std::unique_ptr<stbi_uc[]> pixels = std::unique_ptr<stbi_uc[]>(stbi_load(
     path.c_str(), &width, &height, &nrChannels, 4));

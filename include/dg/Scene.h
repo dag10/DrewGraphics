@@ -53,6 +53,8 @@ namespace dg {
 
       // Pipeline functions for overriding in special cases.
       virtual void RenderFrame(vr::EVREye eye);
+      virtual void RenderFrameBuffer(FrameBuffer &frameBuffer,
+                                     const Camera &camera);
       virtual void ProcessSceneHierarchy();
       virtual void RenderLightShadowMap();
       virtual void DrawScene(
@@ -66,6 +68,7 @@ namespace dg {
       virtual void DrawHiddenAreaMesh(vr::EVREye eye);
 
       RasterizerState defaultRasterizerState;
+      RasterizerState renderingToFrameBufferRasterizerState;
 
       std::shared_ptr<Camera> mainCamera;
       std::shared_ptr<Window> window = nullptr;

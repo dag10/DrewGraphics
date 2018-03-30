@@ -63,7 +63,7 @@ void dg::Graphics::ApplyCurrentRasterizerState() {
 
 const dg::RasterizerState *dg::Graphics::GetEffectiveRasterizerState() const {
   if (states.empty()) {
-    return nullptr;
+    return &emptyRasterizerState;
   } else {
     return states.front().get();
   }
@@ -517,6 +517,7 @@ dg::DirectXGraphics::CreateRasterizerStateResources(
 
   CD3D11_RASTERIZER_DESC rasterizerDesc(D3D11_DEFAULT);
   rasterizerDesc.CullMode = CullModeToDXEnum(state.GetCullMode());
+  rasterizerDesc.FrontCounterClockwise = state.GetFlipRenderY();
   HRESULT hr =
       device->CreateRasterizerState(&rasterizerDesc, &resources->rsState);
   if (FAILED(hr)) {

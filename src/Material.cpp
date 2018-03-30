@@ -3,6 +3,8 @@
 //
 
 #include "dg/Material.h"
+#include <glm/gtc/matrix_transform.hpp>
+#include "dg/Graphics.h"
 
 dg::Material::Material(Material& other) {
   this->shader = other.shader;
@@ -111,6 +113,10 @@ void dg::Material::SendCameraPosition(glm::vec3 position) {
 }
 
 void dg::Material::SendMatrixMVP(glm::mat4x4 mvp) {
+  static glm::mat4x4 xfFlipY = glm::scale(glm::mat4x4(1), glm::vec3(1, -1, 1));
+  if (Graphics::Instance->GetEffectiveRasterizerState()->GetFlipRenderY()) {
+    mvp = xfFlipY * mvp;
+  }
   shader->SetMat4("_Matrix_MVP", mvp);
 }
 

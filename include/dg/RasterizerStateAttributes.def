@@ -31,5 +31,6 @@ STATE_ATTRIBUTE( 8, dg::RasterizerState::BlendFunc,
                     SrcAlphaBlendFunc, srcAlphaBlendFunc )
 STATE_ATTRIBUTE( 9, dg::RasterizerState::BlendFunc,
                     DstAlphaBlendFunc, dstAlphaBlendFunc )
+STATE_ATTRIBUTE( 10, bool, FlipRenderY, flipRenderY )
 
 #undef STATE_ATTRIBUTE

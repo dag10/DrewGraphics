@@ -218,16 +218,11 @@ void dg::TexturesScene::Update() {
 
 void dg::TexturesScene::RenderFrame() {
   // Render scene for framebuffer.
-  Graphics::Instance->SetRenderTarget(*framebuffer);
-  Graphics::Instance->ClearColor(glm::vec3(0,1,1));
   renderQuads->enabled = false;
   dummyRenderQuads->enabled = true;
-  Graphics::Instance->PushRasterizerState(defaultRasterizerState);
-  DrawScene(*virtualCamera);
-  Graphics::Instance->PopRasterizerState();
+  RenderFrameBuffer(*framebuffer, *virtualCamera);
   dummyRenderQuads->enabled = false;
   renderQuads->enabled = true;
-  Graphics::Instance->SetRenderTarget(*window);
 
   // Render scene for output.
   Scene::RenderFrame();

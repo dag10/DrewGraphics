@@ -24,6 +24,9 @@ dg::BaseScene::~BaseScene() {}
 
 void dg::BaseScene::Initialize() {
   defaultRasterizerState = RasterizerState::Default();
+#if defined(_DIRECTX)
+  renderingToFrameBufferRasterizerState.SetFlipRenderY(true, true);
+#endif
 
   if (enableVR) {
     hiddenAreaMeshMaterial = std::make_shared<ScreenQuadMaterial>(
@@ -114,6 +117,19 @@ void dg::BaseScene::RenderFrame(vr::EVREye eye) {
   DrawHiddenAreaMesh(eye);
   DrawScene(*mainCamera, true, eye);
   VRManager::Instance->SubmitFrame(eye);
+  Graphics::Instance->SetRenderTarget(*window);
+}
+
+void dg::BaseScene::RenderFrameBuffer(FrameBuffer &frameBuffer,
+                                      const Camera &camera) {
+  Graphics::Instance->SetRenderTarget(frameBuffer);
+  Graphics::Instance->PushRasterizerState(defaultRasterizerState);
+  Graphics::Instance->PushRasterizerState(
+      renderingToFrameBufferRasterizerState);
+  ClearBuffer();
+  DrawScene(camera);
+  Graphics::Instance->PopRasterizerState();
+  Graphics::Instance->PopRasterizerState();
   Graphics::Instance->SetRenderTarget(*window);
 }
 
@@ -223,8 +239,12 @@ void dg::BaseScene::RenderLightShadowMap() {
   shadowCastingLight->SetLightTransform(lightCamera.GetProjectionMatrix() *
                                         lightCamera.GetViewMatrix());
   Graphics::Instance->SetRenderTarget(*shadowFrameBuffer);
+  Graphics::Instance->PushRasterizerState(defaultRasterizerState);
+  Graphics::Instance->PushRasterizerState(renderingToFrameBufferRasterizerState);
   Graphics::Instance->ClearDepthStencil(true, false);
   DrawScene(lightCamera);
+  Graphics::Instance->PopRasterizerState();
+  Graphics::Instance->PopRasterizerState();
   Graphics::Instance->SetRenderTarget(*window);
   shadowCastingLight->SetShadowMap(shadowFrameBuffer->GetDepthTexture());
 }

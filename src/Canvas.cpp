@@ -59,10 +59,6 @@ void dg::Canvas::SetPixel(
     throw std::runtime_error("Canvas SetPixel() coordinates out of bounds.");
   }
 
-#if defined(_DIRECTX)
-  y = GetHeight() - y - 1;
-#endif
-
   Pixel *pixel = pixels + (GetWidth() * y) + x;
   pixel->red = red;
   pixel->green = green;

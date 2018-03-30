@@ -6,7 +6,12 @@
 #include <memory>
 #include <string>
 #include "dg/Texture.h"
+
+#if defined(_OPENGL)
 #include "dg/glad/glad.h"
+#elif defined(_DIRECTX)
+#include <d3d11.h>
+#endif
 
 namespace dg {
 
@@ -71,10 +76,6 @@ namespace dg {
 
     BaseFrameBuffer() {}
 
-    virtual void AttachColorTexture(std::shared_ptr<Texture> texture) = 0;
-    virtual void AttachDepthTexture(std::shared_ptr<Texture> texture,
-                                    bool allowStencil) = 0;
-
     unsigned int width = 0;
     unsigned int height = 0;
 
@@ -92,10 +93,6 @@ namespace dg {
 
     virtual ~OpenGLFrameBuffer();
 
-    virtual void AttachColorTexture(std::shared_ptr<Texture> texture);
-    virtual void AttachDepthTexture(std::shared_ptr<Texture> texture,
-                                    bool allowStencil);
-
     GLuint GetHandle() const;
 
    private:
@@ -104,6 +101,10 @@ namespace dg {
                       bool depthReadable, bool allowStencil,
                       bool createColorTexture);
 
+
+    void AttachColorTexture(std::shared_ptr<Texture> texture);
+    void AttachDepthTexture(std::shared_ptr<Texture> texture,
+                            bool allowStencil);
     void AttachDepthRenderBuffer(std::shared_ptr<RenderBuffer> buffer,
                                  bool allowStencil);
 
@@ -117,15 +118,21 @@ namespace dg {
   class DirectXFrameBuffer : public BaseFrameBuffer {
     friend class BaseFrameBuffer;
 
+   public:
+
+    virtual ~DirectXFrameBuffer();
+
     DirectXFrameBuffer(unsigned int width, unsigned int height,
                        bool depthReadable, bool allowStencil,
                        bool createColorTexture);
 
-    virtual void AttachColorTexture(std::shared_ptr<Texture> texture);
-    virtual void AttachDepthTexture(std::shared_ptr<Texture> texture,
-                                    bool allowStencil);
+    ID3D11RenderTargetView *GetRenderTargetView();
+    ID3D11DepthStencilView *GetDepthStencilView();
 
-    // TODO
+   private:
+
+    ID3D11RenderTargetView *renderTargetView = NULL;
+    ID3D11DepthStencilView *depthStencilView = NULL;
 
   }; // class DirectXFrameBuffer
 

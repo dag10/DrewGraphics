@@ -38,15 +38,15 @@ namespace dg {
 
       static std::unique_ptr<graphics_class> Instance;
 
-      static void Initialize(const Window& window);
+      static void Initialize(Window& window);
       static void Shutdown();
 
       virtual ~Graphics() = default;
 
-      virtual void OnWindowResize(const Window& window) {};
+      virtual void OnWindowResize(Window& window) {};
 
-      virtual void SetRenderTarget(const FrameBuffer &frameBuffer) = 0;
-      virtual void SetRenderTarget(const Window &window) = 0;
+      virtual void SetRenderTarget(FrameBuffer &frameBuffer) = 0;
+      virtual void SetRenderTarget(Window &window) = 0;
       virtual void SetViewport(int x, int y, int width, int height) = 0;
 
       virtual void ClearColor(glm::vec3 color, bool clearDepth = true,
@@ -75,10 +75,10 @@ namespace dg {
 
     public:
 
-      OpenGLGraphics(const Window& window);
+      OpenGLGraphics(Window& window);
 
-      virtual void SetRenderTarget(const FrameBuffer &frameBuffer);
-      virtual void SetRenderTarget(const Window &window);
+      virtual void SetRenderTarget(FrameBuffer &frameBuffer);
+      virtual void SetRenderTarget(Window &window);
       virtual void SetViewport(int x, int y, int width, int height);
 
       virtual void ClearColor(glm::vec3 color, bool clearDepth = true,
@@ -106,13 +106,13 @@ namespace dg {
 
     public:
 
-      DirectXGraphics(const Window& window);
+      DirectXGraphics(Window& window);
       virtual ~DirectXGraphics();
 
       virtual void OnWindowResize(const Window& window);
 
-      virtual void SetRenderTarget(const FrameBuffer &frameBuffer);
-      virtual void SetRenderTarget(const Window &window);
+      virtual void SetRenderTarget(FrameBuffer &frameBuffer);
+      virtual void SetRenderTarget(Window &window);
       virtual void SetViewport(int x, int y, int width, int height);
 
       virtual void ClearColor(glm::vec3 color, bool clearDepth = true,
@@ -125,8 +125,11 @@ namespace dg {
       D3D_FEATURE_LEVEL dxFeatureLevel;
       IDXGISwapChain *swapChain;
 
-      ID3D11RenderTargetView *backBufferRTV;
-      ID3D11DepthStencilView *depthStencilView;
+      ID3D11RenderTargetView *windowRenderTargetView;
+      ID3D11DepthStencilView *windowDepthStencilView;
+
+      ID3D11RenderTargetView *currentRenderTargetView = NULL;
+      ID3D11DepthStencilView *currentDepthStencilView = NULL;
 
     protected:
 
@@ -150,7 +153,7 @@ namespace dg {
       std::shared_ptr<RasterizerStateResources> CreateRasterizerStateResources(
           const RasterizerState &state);
 
-      const Window& window;
+      Window& window;
       glm::vec2 contentSize;
 
       static D3D11_CULL_MODE CullModeToDXEnum(

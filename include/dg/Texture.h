@@ -44,11 +44,11 @@ namespace dg {
   // to make the engine more API agnostic.
   struct TextureOptions {
     TextureWrap wrap = TextureWrap::REPEAT;
-
     TextureInterpolation interpolation = TextureInterpolation::LINEAR;
     TexturePixelFormat format = TexturePixelFormat::RGBA;
     TexturePixelType type = TexturePixelType::BYTE;
     bool mipmap = false;
+    bool shaderReadable = true;
     unsigned int width;
     unsigned int height;
 
@@ -60,9 +60,12 @@ namespace dg {
     GLenum GetOpenGLExternalFormat() const;
     GLenum GetOpenGLType() const;
 #elif defined(_DIRECTX)
-    DXGI_FORMAT GetDirectXFormat() const;
+    DXGI_FORMAT GetDirectXInternalFormat() const;
+    DXGI_FORMAT GetDirectXShaderFormat() const;
+    DXGI_FORMAT GetDirectXDepthStencilFormat() const;
     D3D11_TEXTURE_ADDRESS_MODE GetDirectXAddressMode() const;
     D3D11_FILTER GetDirectXFilter() const;
+    D3D11_BIND_FLAG GetDirectXBind() const;
     unsigned int GetDirectXBitsPerPixel() const;
 #endif
   };
@@ -85,8 +88,10 @@ namespace dg {
 
       static std::shared_ptr<Texture> FromPath(const std::string& path);
       static std::shared_ptr<Texture> Generate(TextureOptions options);
-      static std::shared_ptr<Texture> DepthTexture(
-          unsigned int width, unsigned int height, bool allowStencil);
+      static std::shared_ptr<Texture> DepthTexture(unsigned int width,
+                                                   unsigned int height,
+                                                   bool allowStencil,
+                                                   bool shaderReabable);
 
       BaseTexture() = delete;
 

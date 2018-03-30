@@ -853,6 +853,9 @@ void dg::DirectXMesh::FinishBuilding() {
   int numVertices = (int)vertexPositions.size();
   for (int i = 0; i < numVertices; i++) {
     vertices[i] = GetVertex(i).data;
+
+    // Flip Y texCoord since DirectX is flipped.
+    vertices[i].texCoord.y = 1.f - vertices[i].texCoord.y;
   }
 
   D3D11_BUFFER_DESC vbd;

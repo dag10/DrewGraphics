@@ -7,6 +7,7 @@
 #include <memory>
 #include <string>
 #include "dg/Exceptions.h"
+#include "dg/Graphics.h"
 
 #pragma region RenderBuffer
 #if defined(_OPENGL)
@@ -96,9 +97,11 @@ dg::OpenGLFrameBuffer::OpenGLFrameBuffer(unsigned int width,
 
   if (depthReadable) {
     if (allowStencil) {
-      AttachDepthTexture(Texture::DepthTexture(width, height, true), true);
+      AttachDepthTexture(Texture::DepthTexture(width, height, true, true),
+                         true);
     } else {
-      AttachDepthTexture(Texture::DepthTexture(width, height, false), false);
+      AttachDepthTexture(Texture::DepthTexture(width, height, false, true),
+                         false);
     }
   } else {
     if (allowStencil) {
@@ -176,17 +179,52 @@ dg::DirectXFrameBuffer::DirectXFrameBuffer(unsigned int width,
   this->width = width;
   this->height = height;
 
-  // TODO
+  depthTexture =
+      Texture::DepthTexture(width, height, allowStencil, depthReadable);
+
+  if (createColorTexture) {
+    TextureOptions texOpts;
+    texOpts.width = width;
+    texOpts.height = height;
+    texOpts.wrap = TextureWrap::CLAMP_EDGE;
+    colorTexture = Texture::Generate(texOpts);
+
+    Graphics::Instance->device->CreateRenderTargetView(
+        colorTexture->GetTexture(), 0, &renderTargetView);
+  }
+
+  D3D11_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc = {};
+  depthStencilViewDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+  depthStencilViewDesc.Texture2D.MipSlice = 0;
+  depthStencilViewDesc.Format =
+      depthTexture->GetOptions().GetDirectXDepthStencilFormat();
+
+  ID3D11Texture2D *depthTex = depthTexture->GetTexture();
+  HRESULT hr = Graphics::Instance->device->CreateDepthStencilView(
+      depthTex, &depthStencilViewDesc, &depthStencilView);
+
+  if (FAILED(hr)) {
+    throw EngineError("Failed to create FrameBuffer's DepthStencilView.");
+  }
 }
 
-void dg::DirectXFrameBuffer::AttachColorTexture(
-    std::shared_ptr<Texture> texture) {
-  // TODO
+dg::DirectXFrameBuffer::~DirectXFrameBuffer() {
+  if (renderTargetView != NULL) {
+    renderTargetView->Release();
+    renderTargetView = NULL;
+  }
+  if (depthStencilView != NULL) {
+    depthStencilView->Release();
+    depthStencilView = NULL;
+  }
 }
 
-void dg::DirectXFrameBuffer::AttachDepthTexture(
-    std::shared_ptr<Texture> texture, bool allowStencil) {
-  // TODO
+ID3D11RenderTargetView *dg::DirectXFrameBuffer::GetRenderTargetView() {
+  return renderTargetView;
+}
+
+ID3D11DepthStencilView *dg::DirectXFrameBuffer::GetDepthStencilView() {
+  return depthStencilView;
 }
 
 #pragma endregion

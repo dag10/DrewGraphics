@@ -23,7 +23,10 @@ std::shared_ptr<dg::Texture> dg::BaseTexture::FromPath(const std::string& path) 
   int width;
   int height;
 
+#if defined(_OPENGL)
   stbi_set_flip_vertically_on_load(true);
+#endif
+
   std::unique_ptr<stbi_uc[]> pixels = std::unique_ptr<stbi_uc[]>(stbi_load(
     path.c_str(), &width, &height, &nrChannels, 4));
 
@@ -50,22 +53,40 @@ std::shared_ptr<dg::Texture> dg::BaseTexture::Generate(TextureOptions options) {
 }
 
 std::shared_ptr<dg::Texture> dg::BaseTexture::DepthTexture(
-    unsigned int width, unsigned int height, bool allowStencil) {
-
+    unsigned int width, unsigned int height, bool allowStencil,
+    bool shaderReadable) {
   TextureOptions texOpts;
   texOpts.width = width;
   texOpts.height = height;
-  texOpts.format = allowStencil \
-      ? TexturePixelFormat::DEPTH_STENCIL
-      : TexturePixelFormat::DEPTH;
-  texOpts.type = TexturePixelType::INT;
+  texOpts.format = allowStencil ? TexturePixelFormat::DEPTH_STENCIL
+                                : TexturePixelFormat::DEPTH;
+  texOpts.type = allowStencil ? TexturePixelType::INT : TexturePixelType::FLOAT;
   texOpts.wrap = TextureWrap::CLAMP_EDGE;
   texOpts.mipmap = false;
+  texOpts.shaderReadable = shaderReadable;
 
   return Generate(texOpts);
 }
 
-dg::BaseTexture::BaseTexture(TextureOptions options) : options(options) {}
+dg::BaseTexture::BaseTexture(TextureOptions options) : options(options) {
+  if (options.format == TexturePixelFormat::DEPTH ||
+      options.format == TexturePixelFormat::DEPTH_STENCIL) {
+    if (options.type == TexturePixelType::BYTE) {
+      throw EngineError(
+          "Cannot create a depth[+stencil] Texture with byte type.");
+    }
+    if (options.mipmap) {
+      throw EngineError(
+          "Cannot create a depth[+stencil] Texture with mipmap enabled.");
+    }
+  }
+  if (options.format == TexturePixelFormat::DEPTH) {
+    if (options.type == TexturePixelType::INT) {
+      throw EngineError(
+          "Cannot create a depth-only Texture with int type. Must use float.");
+    }
+  }
+}
 
 const dg::TextureOptions dg::BaseTexture::GetOptions() const {
   return options;
@@ -195,17 +216,20 @@ ID3D11Texture2D *dg::DirectXTexture::GetTexture() const {
 void dg::DirectXTexture::GenerateImage(void *pixels) {
   assert(texture == nullptr);
 
-  auto format = options.GetDirectXFormat();
+  auto internalFormat = options.GetDirectXInternalFormat();
 
   D3D11_TEXTURE2D_DESC desc = {};
   desc.Width = options.width;
   desc.Height = options.height;
   desc.MipLevels = options.mipmap ? 0 : 1;
   desc.ArraySize = 1;
-  desc.Format = format;
+  desc.Format = internalFormat;
   desc.SampleDesc.Count = 1;
   desc.Usage = D3D11_USAGE_DEFAULT;
-  desc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_RENDER_TARGET;
+  desc.BindFlags = options.GetDirectXBind();
+  if (options.shaderReadable) {
+    desc.BindFlags |= D3D11_BIND_SHADER_RESOURCE;
+  }
   if (options.mipmap) {
     desc.MiscFlags |= D3D11_RESOURCE_MISC_GENERATE_MIPS;
   }
@@ -214,23 +238,25 @@ void dg::DirectXTexture::GenerateImage(void *pixels) {
       Graphics::Instance->device->CreateTexture2D(&desc, nullptr, &texture);
 
   if (FAILED(hr)) {
-    throw EngineError("Failed to load texture.");
+    throw EngineError("Failed to create texture.");
   }
 
   if (pixels != nullptr) {
     UpdateData(pixels, false);
   }
 
-  D3D11_SHADER_RESOURCE_VIEW_DESC SRVDesc = {};
-  SRVDesc.Format = format;
-  SRVDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
-  SRVDesc.Texture2D.MipLevels = -1;
+  if (options.shaderReadable) {
+    D3D11_SHADER_RESOURCE_VIEW_DESC SRVDesc = {};
+    SRVDesc.Format = options.GetDirectXShaderFormat();
+    SRVDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+    SRVDesc.Texture2D.MipLevels = -1;
 
-  hr = Graphics::Instance->device->CreateShaderResourceView(texture, &SRVDesc,
-                                                            &srv);
+    hr = Graphics::Instance->device->CreateShaderResourceView(texture, &SRVDesc,
+      &srv);
 
-  if (FAILED(hr)) {
-    throw EngineError("Failed to create shader resource view.");
+    if (FAILED(hr)) {
+      throw EngineError("Failed to create shader resource view.");
+    }
   }
 
   D3D11_SAMPLER_DESC samplerDesc = {};
@@ -245,7 +271,7 @@ void dg::DirectXTexture::GenerateImage(void *pixels) {
     throw EngineError("Failed to create sampler.");
   }
 
-  if (options.mipmap) {
+  if (options.mipmap && srv != NULL) {
     Graphics::Instance->context->GenerateMips(srv);
   }
 }
@@ -336,9 +362,9 @@ GLenum dg::TextureOptions::GetOpenGLType() const {
 
 #elif defined(_DIRECTX)
 
-DXGI_FORMAT dg::TextureOptions::GetDirectXFormat() const {
+DXGI_FORMAT dg::TextureOptions::GetDirectXInternalFormat() const {
   switch (format) {
-    case TexturePixelFormat::RGBA: {
+    case TexturePixelFormat::RGBA:
       switch (type) {
         case TexturePixelType::BYTE:
           return DXGI_FORMAT_R8G8B8A8_UNORM;
@@ -347,14 +373,82 @@ DXGI_FORMAT dg::TextureOptions::GetDirectXFormat() const {
         case TexturePixelType::FLOAT:
           return DXGI_FORMAT_R32G32B32A32_FLOAT;
       }
-    }
+      return DXGI_FORMAT_UNKNOWN;
     case TexturePixelFormat::DEPTH:
+      switch (type) {
+        case TexturePixelType::BYTE:
+        case TexturePixelType::INT:
+          return DXGI_FORMAT_UNKNOWN;
+        case TexturePixelType::FLOAT:
+          return DXGI_FORMAT_R32_TYPELESS;
+      }
+      return DXGI_FORMAT_UNKNOWN;
     case TexturePixelFormat::DEPTH_STENCIL:
-      break;
+      switch (type) {
+        case TexturePixelType::BYTE:
+          return DXGI_FORMAT_UNKNOWN;
+        case TexturePixelType::INT:
+          return DXGI_FORMAT_R24G8_TYPELESS;
+        case TexturePixelType::FLOAT:
+          return DXGI_FORMAT_R32G8X24_TYPELESS;
+      }
+      return DXGI_FORMAT_UNKNOWN;
   }
+}
 
-  throw std::runtime_error(
-      "Depth texture format not implemented for DirectX build.");
+DXGI_FORMAT dg::TextureOptions::GetDirectXShaderFormat() const {
+  if (!shaderReadable) {
+    return DXGI_FORMAT_UNKNOWN;
+  }
+  switch (format) {
+    case TexturePixelFormat::RGBA:
+      return GetDirectXInternalFormat();
+    case TexturePixelFormat::DEPTH:
+      switch (type) {
+        case TexturePixelType::BYTE:
+        case TexturePixelType::INT:
+          return DXGI_FORMAT_UNKNOWN;
+        case TexturePixelType::FLOAT:
+          return DXGI_FORMAT_R32_FLOAT;
+      }
+      return DXGI_FORMAT_UNKNOWN;
+    case TexturePixelFormat::DEPTH_STENCIL:
+      switch (type) {
+        case TexturePixelType::BYTE:
+          return DXGI_FORMAT_UNKNOWN;
+        case TexturePixelType::INT:
+          return DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
+        case TexturePixelType::FLOAT:
+          return DXGI_FORMAT_R32_FLOAT_X8X24_TYPELESS;
+      }
+      return DXGI_FORMAT_UNKNOWN;
+  }
+}
+
+DXGI_FORMAT dg::TextureOptions::GetDirectXDepthStencilFormat() const {
+  switch (format) {
+    case TexturePixelFormat::RGBA:
+      return DXGI_FORMAT_UNKNOWN;
+    case TexturePixelFormat::DEPTH:
+      switch (type) {
+        case TexturePixelType::BYTE:
+        case TexturePixelType::INT:
+          return DXGI_FORMAT_UNKNOWN;
+        case TexturePixelType::FLOAT:
+          return DXGI_FORMAT_D32_FLOAT;
+      }
+      return DXGI_FORMAT_UNKNOWN;
+    case TexturePixelFormat::DEPTH_STENCIL:
+      switch (type) {
+        case TexturePixelType::BYTE:
+          return DXGI_FORMAT_UNKNOWN;
+        case TexturePixelType::INT:
+          return DXGI_FORMAT_D24_UNORM_S8_UINT;
+        case TexturePixelType::FLOAT:
+          return DXGI_FORMAT_D32_FLOAT_S8X24_UINT;
+      }
+      return DXGI_FORMAT_UNKNOWN;
+  }
 }
 
 D3D11_TEXTURE_ADDRESS_MODE dg::TextureOptions::GetDirectXAddressMode() const {
@@ -379,12 +473,34 @@ D3D11_FILTER dg::TextureOptions::GetDirectXFilter() const {
   }
 }
 
+D3D11_BIND_FLAG dg::TextureOptions::GetDirectXBind() const {
+  switch (format) {
+    case TexturePixelFormat::DEPTH:
+    case TexturePixelFormat::DEPTH_STENCIL:
+      return D3D11_BIND_DEPTH_STENCIL;
+      break;
+    case TexturePixelFormat::RGBA:
+      return D3D11_BIND_RENDER_TARGET;
+      break;
+  }
+}
+
 unsigned int dg::TextureOptions::GetDirectXBitsPerPixel() const {
-  DXGI_FORMAT format = GetDirectXFormat();
+  DXGI_FORMAT format = GetDirectXInternalFormat();
   switch (format) {
     case DXGI_FORMAT_R8G8B8A8_UINT:
     case DXGI_FORMAT_R8G8B8A8_UNORM:
-      return 8 * 4;
+    case DXGI_FORMAT_R24G8_TYPELESS:
+    case DXGI_FORMAT_R24_UNORM_X8_TYPELESS:
+    case DXGI_FORMAT_D24_UNORM_S8_UINT:
+    case DXGI_FORMAT_R32_TYPELESS:
+    case DXGI_FORMAT_R32_FLOAT:
+    case DXGI_FORMAT_D32_FLOAT:
+      return 32;
+    case DXGI_FORMAT_R32G8X24_TYPELESS:
+    case DXGI_FORMAT_R32_FLOAT_X8X24_TYPELESS:
+    case DXGI_FORMAT_D32_FLOAT_S8X24_UINT:
+      return 64;
     case DXGI_FORMAT_R32G32B32_UINT:
     case DXGI_FORMAT_R32G32B32_FLOAT:
       return 32 * 3;
@@ -398,4 +514,3 @@ unsigned int dg::TextureOptions::GetDirectXBitsPerPixel() const {
 #endif
 
 #pragma endregion
-

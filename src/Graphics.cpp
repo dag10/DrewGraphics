@@ -19,7 +19,7 @@
 
 std::unique_ptr<dg::Graphics::graphics_class> dg::Graphics::Instance;
 
-void dg::Graphics::Initialize(const Window& window) {
+void dg::Graphics::Initialize(Window& window) {
   assert(Instance == nullptr);
   Instance = std::unique_ptr<graphics_class>(new graphics_class(window));
   Instance->InitializeGraphics();
@@ -80,7 +80,7 @@ void dg::Graphics::Shutdown() {
 #pragma region OpenGL Graphics
 #if defined(_OPENGL)
 
-dg::OpenGLGraphics::OpenGLGraphics(const Window& window) {}
+dg::OpenGLGraphics::OpenGLGraphics(Window& window) {}
 
 void dg::OpenGLGraphics::InitializeGraphics() {
   // Load GLAD procedures.
@@ -103,12 +103,12 @@ void dg::OpenGLGraphics::InitializeResources() {
       "assets/shaders/includes/fragment_main.glsl");
 }
 
-void dg::OpenGLGraphics::SetRenderTarget(const FrameBuffer &frameBuffer) {
+void dg::OpenGLGraphics::SetRenderTarget(FrameBuffer &frameBuffer) {
   SetViewport(0, 0, frameBuffer.GetWidth(), frameBuffer.GetHeight());
   glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer.GetHandle());
 }
 
-void dg::OpenGLGraphics::SetRenderTarget(const Window& window) {
+void dg::OpenGLGraphics::SetRenderTarget(Window& window) {
   SetViewport(0, 0, window.GetWidth(), window.GetHeight());
   glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
@@ -266,7 +266,7 @@ GLenum dg::OpenGLGraphics::ToGLEnum(
 #pragma region DirectX Graphics
 #if defined(_DIRECTX)
 
-dg::DirectXGraphics::DirectXGraphics(const Window& window) : window(window) {}
+dg::DirectXGraphics::DirectXGraphics(Window& window) : window(window) {}
 
 void dg::DirectXGraphics::InitializeGraphics() {
   unsigned int deviceFlags = 0;
@@ -324,7 +324,7 @@ void dg::DirectXGraphics::InitializeGraphics() {
   // Now that we have the texture, create a render target view
   // for the back buffer so we can render into it.  Then release
   // our local reference to the texture, since we have the view.
-  device->CreateRenderTargetView(backBufferTexture, 0, &backBufferRTV);
+  device->CreateRenderTargetView(backBufferTexture, 0, &windowRenderTargetView);
   backBufferTexture->Release();
 
   // Set up the description of the texture to use for the depth buffer
@@ -345,31 +345,32 @@ void dg::DirectXGraphics::InitializeGraphics() {
   // release our reference to the texture
   ID3D11Texture2D* depthBufferTexture;
   device->CreateTexture2D(&depthStencilDesc, 0, &depthBufferTexture);
-  device->CreateDepthStencilView(depthBufferTexture, 0, &depthStencilView);
+  device->CreateDepthStencilView(depthBufferTexture, 0, &windowDepthStencilView);
   depthBufferTexture->Release();
 
   // Bind the views to the pipeline, so rendering properly
   // uses their underlying textures
-  context->OMSetRenderTargets(1, &backBufferRTV, depthStencilView);
+  //context->OMSetRenderTargets(1, &windowRenderTargetView, windowDepthStencilView);
+  SetRenderTarget(window);
 
   // Lastly, set up a viewport so we render into
   // to correct portion of the window
-  D3D11_VIEWPORT viewport = {};
-  viewport.TopLeftX = 0;
-  viewport.TopLeftY = 0;
-  viewport.Width = contentSize.x;
-  viewport.Height = contentSize.y;
-  viewport.MinDepth = 0.0f;
-  viewport.MaxDepth = 1.0f;
-  context->RSSetViewports(1, &viewport);
+  //D3D11_VIEWPORT viewport = {};
+  //viewport.TopLeftX = 0;
+  //viewport.TopLeftY = 0;
+  //viewport.Width = contentSize.x;
+  //viewport.Height = contentSize.y;
+  //viewport.MinDepth = 0.0f;
+  //viewport.MaxDepth = 1.0f;
+  //context->RSSetViewports(1, &viewport);
 }
 
 dg::DirectXGraphics::~DirectXGraphics() {
-  if (depthStencilView) {
-    depthStencilView->Release();
+  if (windowDepthStencilView) {
+    windowDepthStencilView->Release();
   }
-  if (backBufferRTV) {
-    backBufferRTV->Release();
+  if (windowRenderTargetView) {
+    windowRenderTargetView->Release();
   }
   if (swapChain) {
     swapChain->Release();
@@ -386,11 +387,11 @@ void dg::DirectXGraphics::OnWindowResize(const Window& window) {
   contentSize = window.GetContentSize();
 
   // Release existing DirectX views and buffers.
-  if (depthStencilView) {
-    depthStencilView->Release();
+  if (windowDepthStencilView) {
+    windowDepthStencilView->Release();
   }
-  if (backBufferRTV) {
-    backBufferRTV->Release();
+  if (windowRenderTargetView) {
+    windowRenderTargetView->Release();
   }
 
   // Resize the underlying swap chain buffers.
@@ -403,7 +404,7 @@ void dg::DirectXGraphics::OnWindowResize(const Window& window) {
   ID3D11Texture2D* backBufferTexture;
   swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D),
                        reinterpret_cast<void**>(&backBufferTexture));
-  device->CreateRenderTargetView(backBufferTexture, 0, &backBufferRTV);
+  device->CreateRenderTargetView(backBufferTexture, 0, &windowRenderTargetView);
   backBufferTexture->Release();
 
   // Set up the description of the texture to use for the depth buffer
@@ -424,41 +425,53 @@ void dg::DirectXGraphics::OnWindowResize(const Window& window) {
   // release our reference to the texture
   ID3D11Texture2D* depthBufferTexture;
   device->CreateTexture2D(&depthStencilDesc, 0, &depthBufferTexture);
-  device->CreateDepthStencilView(depthBufferTexture, 0, &depthStencilView);
+  device->CreateDepthStencilView(depthBufferTexture, 0, &windowDepthStencilView);
   depthBufferTexture->Release();
 
   // Bind the views to the pipeline, so rendering properly
   // uses their underlying textures
-  context->OMSetRenderTargets(1, &backBufferRTV, depthStencilView);
+  //context->OMSetRenderTargets(1, &windowRenderTargetView, windowDepthStencilView);
 
   // Lastly, set up a viewport so we render into
   // to correct portion of the window
+  //SetViewport(0, 0, contentSize.x, contentSize.y);
+
+  if (currentRenderTargetView == windowRenderTargetView) {
+    SetViewport(0, 0, contentSize.x, contentSize.y);
+  }
+}
+
+void dg::DirectXGraphics::SetRenderTarget(FrameBuffer &frameBuffer) {
+  SetViewport(0, 0, frameBuffer.GetWidth(), frameBuffer.GetHeight());
+  currentRenderTargetView = frameBuffer.GetRenderTargetView();
+  currentDepthStencilView = frameBuffer.GetDepthStencilView();
+  context->OMSetRenderTargets(1, &currentRenderTargetView,
+                              currentDepthStencilView);
+}
+
+void dg::DirectXGraphics::SetRenderTarget(Window& window) {
+  SetViewport(0, 0, window.GetWidth(), window.GetHeight());
+  currentRenderTargetView = windowRenderTargetView;
+  currentDepthStencilView = windowDepthStencilView;
+  context->OMSetRenderTargets(1, &currentRenderTargetView,
+                              currentDepthStencilView);
+}
+
+void dg::DirectXGraphics::SetViewport(int x, int y, int width, int height) {
   D3D11_VIEWPORT viewport = {};
-  viewport.TopLeftX = 0;
-  viewport.TopLeftY = 0;
-  viewport.Width = contentSize.x;
-  viewport.Height = contentSize.y;
+  viewport.TopLeftX = x;
+  viewport.TopLeftY = y;
+  viewport.Width = width;
+  viewport.Height = height;
   viewport.MinDepth = 0.0f;
   viewport.MaxDepth = 1.0f;
   context->RSSetViewports(1, &viewport);
 }
 
-void dg::DirectXGraphics::SetRenderTarget(const FrameBuffer &frameBuffer) {
-  // TODO
-}
-
-void dg::DirectXGraphics::SetRenderTarget(const Window& window) {
-  // TODO
-}
-
-void dg::DirectXGraphics::SetViewport(int x, int y, int width, int height) {
-  // TODO
-}
-
 void dg::DirectXGraphics::ClearColor(glm::vec3 color, bool clearDepth,
                                      bool clearStencil) {
   const float colorArray[4] = { color.x, color.y, color.z, 0 };
-  context->ClearRenderTargetView(backBufferRTV, colorArray);
+  context->ClearRenderTargetView(currentRenderTargetView, colorArray);
   if (clearDepth || clearStencil) {
     int clearBits = 0;
     if (clearDepth) {
@@ -467,14 +480,15 @@ void dg::DirectXGraphics::ClearColor(glm::vec3 color, bool clearDepth,
     if (clearStencil) {
       clearBits |= D3D11_CLEAR_STENCIL;
     }
-    context->ClearDepthStencilView(depthStencilView, clearBits, 1.0f, 0);
+    context->ClearDepthStencilView(currentDepthStencilView, clearBits, 1.0f, 0);
   }
 }
 
 void dg::DirectXGraphics::ClearDepthStencil(bool clearDepth,
                                               bool clearStencil) {
-  context->ClearDepthStencilView(
-      depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+  context->ClearDepthStencilView(currentDepthStencilView,
+                                 D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f,
+                                 0);
 }
 
 

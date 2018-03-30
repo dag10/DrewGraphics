@@ -41,6 +41,10 @@ void dg::Skybox::Draw(const Camera& camera, vr::EVREye eye) {
 void dg::Skybox::Draw(const Camera& camera, glm::mat4x4 projection) {
   glm::mat4x4 view = camera.GetViewMatrix();
 
+  model.transform.scale =
+      glm::vec3((camera.nearClip + camera.farClip) * 0.5f) * 2.f;
+  model.CacheSceneSpace();
+
   // Remove translation component from view transform.
   view[3][0] = view[3][1] = view[3][2] = 0;
 

@@ -15,6 +15,8 @@
 #include "dg/behaviors/KeyboardLightController.h"
 #include "dg/materials/StandardMaterial.h"
 #include "dg/materials/UVMaterial.h"
+#include "dg/vr/VRRenderModel.h"
+#include "dg/vr/VRTrackedObject.h"
 
 std::unique_ptr<dg::RobotScene> dg::RobotScene::Make() {
   return std::unique_ptr<dg::RobotScene>(new dg::RobotScene(false));
@@ -62,6 +64,18 @@ void dg::RobotScene::Initialize() {
   if (enableVR) {
     vrContainer->transform.scale *= 2.f;
   }
+
+  // Add objects to follow OpenVR tracked devices.
+  auto leftController = std::make_shared<SceneObject>();
+  vrContainer->AddChild(leftController);
+  Behavior::Attach(leftController, std::make_shared<VRTrackedObject>(
+    vr::ETrackedControllerRole::TrackedControllerRole_LeftHand));
+  Behavior::Attach(leftController, std::make_shared<VRRenderModel>());
+  auto rightController = std::make_shared<SceneObject>();
+  Behavior::Attach(rightController, std::make_shared<VRTrackedObject>(
+    vr::ETrackedControllerRole::TrackedControllerRole_RightHand));
+  Behavior::Attach(rightController, std::make_shared<VRRenderModel>());
+  vrContainer->AddChild(rightController);
 
   // Create sky light.
   auto skylight = std::make_shared<DirectionalLight>(
@@ -415,10 +429,14 @@ void dg::RobotScene::Initialize() {
   flashlight->SetFeather(glm::radians(2.f));
   flashlight->SetCutoff(glm::radians(25.f));
   flashlight->SetCastShadows(true);
-  flashlight->transform = Transform::T(glm::vec3(0.1f, -0.1f, 0));
   Behavior::Attach(
     flashlight, std::make_shared<KeyboardLightController>(window));
-  mainCamera->AddChild(flashlight, false);
+  if (enableVR) {
+    rightController->AddChild(flashlight, false);
+  } else {
+    flashlight->transform = Transform::T(glm::vec3(0.1f, -0.1f, 0));
+    mainCamera->AddChild(flashlight, false);
+  }
 }
 
 void dg::RobotScene::Update() {

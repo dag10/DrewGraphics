@@ -41,7 +41,6 @@ namespace dg {
       void RenderFinished();
 
       // These methods should only be called from
-      // VRTrackedObject::Initialize().
       void RegisterTrackedObject(VRTrackedObject *object);
       void DeregisterTrackedObject(VRTrackedObject *object);
 

@@ -191,13 +191,13 @@ void dg::VRManager::SubmitFrame(vr::EVREye eye) {
 #if defined(_OPENGL)
   frameTexture.eType = vr::ETextureType::TextureType_OpenGL;
   frameTexture.handle =
-    (void *)(long)GetFramebuffer(eye)->GetColorTexture()->GetHandle();
+      (void *)(long)GetFramebuffer(eye)->GetColorTexture()->GetHandle();
 #elif defined(_DIRECTX)
   frameTexture.eType = vr::ETextureType::TextureType_DirectX;
   frameTexture.handle = GetFramebuffer(eye)->GetColorTexture()->GetTexture();
 #endif
-  vrCompositor->Submit(
-    eye, &frameTexture, nullptr, vr::EVRSubmitFlags::Submit_Default);
+  vrCompositor->Submit(eye, &frameTexture, nullptr,
+                       vr::EVRSubmitFlags::Submit_Default);
 }
 
 std::shared_ptr<dg::Mesh> dg::VRManager::GetRenderModelMesh(

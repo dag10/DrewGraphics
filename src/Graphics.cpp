@@ -316,54 +316,23 @@ void dg::DirectXGraphics::InitializeGraphics() {
     throw std::runtime_error("Failed to create D3D11 device and swap chain.");
   }
 
-  // The above function created the back buffer render target
-  // for us, but we need a reference to it
   ID3D11Texture2D* backBufferTexture;
   swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D),
                        (void**)&backBufferTexture);
-
-  // Now that we have the texture, create a render target view
-  // for the back buffer so we can render into it.  Then release
-  // our local reference to the texture, since we have the view.
   device->CreateRenderTargetView(backBufferTexture, 0, &windowRenderTargetView);
   backBufferTexture->Release();
 
-  // Set up the description of the texture to use for the depth buffer
-  D3D11_TEXTURE2D_DESC depthStencilDesc = {};
-  depthStencilDesc.Width = (unsigned int)contentSize.x;
-  depthStencilDesc.Height = (unsigned int)contentSize.y;
-  depthStencilDesc.MipLevels = 1;
-  depthStencilDesc.ArraySize = 1;
-  depthStencilDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
-  depthStencilDesc.Usage = D3D11_USAGE_DEFAULT;
-  depthStencilDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
-  depthStencilDesc.CPUAccessFlags = 0;
-  depthStencilDesc.MiscFlags = 0;
-  depthStencilDesc.SampleDesc.Count = 1;
-  depthStencilDesc.SampleDesc.Quality = 0;
+  auto depthTexture = Texture::DepthTexture(
+      (unsigned int)contentSize.x, (unsigned int)contentSize.y, true, false);
+  D3D11_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc = {};
+  depthStencilViewDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+  depthStencilViewDesc.Format =
+      depthTexture->GetOptions().GetDirectXDepthStencilFormat();
+  device->CreateDepthStencilView(depthTexture->GetTexture(),
+                                 &depthStencilViewDesc,
+                                 &windowDepthStencilView);
 
-  // Create the depth buffer and its view, then
-  // release our reference to the texture
-  ID3D11Texture2D* depthBufferTexture;
-  device->CreateTexture2D(&depthStencilDesc, 0, &depthBufferTexture);
-  device->CreateDepthStencilView(depthBufferTexture, 0, &windowDepthStencilView);
-  depthBufferTexture->Release();
-
-  // Bind the views to the pipeline, so rendering properly
-  // uses their underlying textures
-  //context->OMSetRenderTargets(1, &windowRenderTargetView, windowDepthStencilView);
   SetRenderTarget(window);
-
-  // Lastly, set up a viewport so we render into
-  // to correct portion of the window
-  //D3D11_VIEWPORT viewport = {};
-  //viewport.TopLeftX = 0;
-  //viewport.TopLeftY = 0;
-  //viewport.Width = contentSize.x;
-  //viewport.Height = contentSize.y;
-  //viewport.MinDepth = 0.0f;
-  //viewport.MaxDepth = 1.0f;
-  //context->RSSetViewports(1, &viewport);
 }
 
 dg::DirectXGraphics::~DirectXGraphics() {
@@ -385,9 +354,9 @@ dg::DirectXGraphics::~DirectXGraphics() {
 }
 
 void dg::DirectXGraphics::OnWindowResize(const Window& window) {
+  bool windowIsTarget = (currentRenderTargetView == windowRenderTargetView);
   contentSize = window.GetContentSize();
 
-  // Release existing DirectX views and buffers.
   if (windowDepthStencilView) {
     windowDepthStencilView->Release();
   }
@@ -395,49 +364,27 @@ void dg::DirectXGraphics::OnWindowResize(const Window& window) {
     windowRenderTargetView->Release();
   }
 
-  // Resize the underlying swap chain buffers.
   swapChain->ResizeBuffers(1, (unsigned int)contentSize.x,
                            (unsigned int)contentSize.y,
                            DXGI_FORMAT_R8G8B8A8_UNORM, 0);
 
-  // Recreate the render target view for the back buffer
-  // texture, then release our local texture reference.
   ID3D11Texture2D* backBufferTexture;
   swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D),
                        reinterpret_cast<void**>(&backBufferTexture));
   device->CreateRenderTargetView(backBufferTexture, 0, &windowRenderTargetView);
   backBufferTexture->Release();
 
-  // Set up the description of the texture to use for the depth buffer
-  D3D11_TEXTURE2D_DESC depthStencilDesc;
-  depthStencilDesc.Width = (unsigned int)contentSize.x;
-  depthStencilDesc.Height = (unsigned int)contentSize.y;
-  depthStencilDesc.MipLevels = 1;
-  depthStencilDesc.ArraySize = 1;
-  depthStencilDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
-  depthStencilDesc.Usage = D3D11_USAGE_DEFAULT;
-  depthStencilDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
-  depthStencilDesc.CPUAccessFlags = 0;
-  depthStencilDesc.MiscFlags = 0;
-  depthStencilDesc.SampleDesc.Count = 1;
-  depthStencilDesc.SampleDesc.Quality = 0;
+  auto depthTexture = Texture::DepthTexture(
+      (unsigned int)contentSize.x, (unsigned int)contentSize.y, true, false);
+  D3D11_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc = {};
+  depthStencilViewDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+  depthStencilViewDesc.Format =
+      depthTexture->GetOptions().GetDirectXDepthStencilFormat();
+  device->CreateDepthStencilView(depthTexture->GetTexture(),
+                                 &depthStencilViewDesc,
+                                 &windowDepthStencilView);
 
-  // Create the depth buffer and its view, then
-  // release our reference to the texture
-  ID3D11Texture2D* depthBufferTexture;
-  device->CreateTexture2D(&depthStencilDesc, 0, &depthBufferTexture);
-  device->CreateDepthStencilView(depthBufferTexture, 0, &windowDepthStencilView);
-  depthBufferTexture->Release();
-
-  // Bind the views to the pipeline, so rendering properly
-  // uses their underlying textures
-  //context->OMSetRenderTargets(1, &windowRenderTargetView, windowDepthStencilView);
-
-  // Lastly, set up a viewport so we render into
-  // to correct portion of the window
-  //SetViewport(0, 0, contentSize.x, contentSize.y);
-
-  if (currentRenderTargetView == windowRenderTargetView) {
+  if (windowIsTarget) {
     SetViewport(0, 0, contentSize.x, contentSize.y);
   }
 }

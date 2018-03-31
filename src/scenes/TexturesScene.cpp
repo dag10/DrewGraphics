@@ -152,8 +152,8 @@ void dg::TexturesScene::Initialize() {
 
   // Create custom texture using a Canvas.
   Canvas canvas(128, 128);
-  for (int i = 0; i < canvas.GetWidth(); i++) {
-    for (int j = 0; j < canvas.GetHeight(); j++) {
+  for (int i = 0; i < (int)canvas.GetWidth(); i++) {
+    for (int j = 0; j < (int)canvas.GetHeight(); j++) {
       if ((i + j) % 2 == 0) {
         canvas.SetPixel(i, j, 0, 0, 0);
       } else {

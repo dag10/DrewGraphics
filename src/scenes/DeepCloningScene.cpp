@@ -142,8 +142,8 @@ std::shared_ptr<dg::SceneObject> dg::DeepCloningScene::BuildWidget(
   auto widget = std::make_shared<SceneObject>();
 
   static std::shared_ptr<StandardMaterial> baseMaterial =
-    std::make_shared<StandardMaterial>(
-        StandardMaterial::WithColor(glm::vec3(0.8)));
+      std::make_shared<StandardMaterial>(
+          StandardMaterial::WithColor(glm::vec3(0.8f)));
 
   std::shared_ptr<StandardMaterial> buttonMaterial =
     std::make_shared<StandardMaterial>();

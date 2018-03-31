@@ -41,8 +41,8 @@ void dg::ShadowScene::Initialize() {
       Texture::FromPath("assets/textures/hardwood.jpg");
 
   // Create ceiling light source.
-  spotlight = std::make_shared<SpotLight>(glm::vec3(1.0f, 0.93f, 0.86f), 0.31,
-                                          0.91, 0.86);
+  spotlight = std::make_shared<SpotLight>(glm::vec3(1.0f, 0.93f, 0.86f), 0.31f,
+                                          0.91f, 0.86f);
   spotlight->transform.translation = glm::vec3(1.4f, 1.2f, 0);
   spotlight->LookAtPoint({0, 0, 0});
   spotlight->SetCastShadows(true);

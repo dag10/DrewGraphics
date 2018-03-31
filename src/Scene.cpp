@@ -234,7 +234,7 @@ void dg::Scene::RenderLightShadowMap() {
   Camera lightCamera;
   lightCamera.transform = spotlight->CachedSceneSpace();
   lightCamera.fov = spotlight->GetCutoff() * 2;
-  lightCamera.nearClip = 0.01;
+  lightCamera.nearClip = 0.01f;
   lightCamera.farClip = 100;
   shadowCastingLight->SetLightTransform(lightCamera.GetProjectionMatrix() *
                                         lightCamera.GetViewMatrix());

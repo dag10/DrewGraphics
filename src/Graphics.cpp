@@ -115,7 +115,7 @@ void dg::OpenGLGraphics::SetRenderTarget(FrameBuffer &frameBuffer) {
 void dg::OpenGLGraphics::SetRenderTarget(Window& window) {
   glBindFramebuffer(GL_FRAMEBUFFER, 0);
   glm::vec2 size = window.GetFramebufferSize();
-  SetViewport(0, 0, size.x, size.y);
+  SetViewport(0, 0, (int)size.x, (int)size.y);
 }
 
 void dg::OpenGLGraphics::SetViewport(int x, int y, int width, int height) {
@@ -203,6 +203,7 @@ GLenum dg::OpenGLGraphics::ToGLEnum(RasterizerState::CullMode cullMode) {
     case RasterizerState::CullMode::BACK:
       return GL_BACK;
   }
+  return GL_NONE;
 }
 
 GLenum dg::OpenGLGraphics::ToGLEnum(RasterizerState::DepthFunc depthFunc) {
@@ -222,6 +223,7 @@ GLenum dg::OpenGLGraphics::ToGLEnum(RasterizerState::DepthFunc depthFunc) {
     case RasterizerState::DepthFunc::GEQUAL:
       return GL_GEQUAL;
   }
+  return GL_NONE;
 }
 
 GLenum dg::OpenGLGraphics::ToGLEnum(
@@ -238,6 +240,7 @@ GLenum dg::OpenGLGraphics::ToGLEnum(
     case RasterizerState::BlendEquation::MAX:
       return GL_MAX;
   }
+  return GL_NONE;
 }
 
 GLenum dg::OpenGLGraphics::ToGLEnum(
@@ -264,6 +267,7 @@ GLenum dg::OpenGLGraphics::ToGLEnum(
     case RasterizerState::BlendFunc::ONE_MINUS_DST_ALPHA:
       return GL_ONE_MINUS_DST_ALPHA;
   }
+  return GL_NONE;
 }
 
 #endif
@@ -391,7 +395,7 @@ void dg::DirectXGraphics::OnWindowResize(const Window& window) {
                                  &windowDepthStencilView);
 
   if (windowIsTarget) {
-    SetViewport(0, 0, contentSize.x, contentSize.y);
+    SetViewport(0, 0, (int)contentSize.x, (int)contentSize.y);
   }
 }
 
@@ -404,7 +408,7 @@ void dg::DirectXGraphics::SetRenderTarget(FrameBuffer &frameBuffer) {
 }
 
 void dg::DirectXGraphics::SetRenderTarget(Window& window) {
-  SetViewport(0, 0, window.GetWidth(), window.GetHeight());
+  SetViewport(0, 0, (int)window.GetWidth(), (int)window.GetHeight());
   currentRenderTargetView = windowRenderTargetView;
   currentDepthStencilView = windowDepthStencilView;
   context->OMSetRenderTargets(1, &currentRenderTargetView,
@@ -413,10 +417,10 @@ void dg::DirectXGraphics::SetRenderTarget(Window& window) {
 
 void dg::DirectXGraphics::SetViewport(int x, int y, int width, int height) {
   D3D11_VIEWPORT viewport = {};
-  viewport.TopLeftX = x;
-  viewport.TopLeftY = y;
-  viewport.Width = width;
-  viewport.Height = height;
+  viewport.TopLeftX = (float)x;
+  viewport.TopLeftY = (float)y;
+  viewport.Width = (float)width;
+  viewport.Height = (float)height;
   viewport.MinDepth = 0.0f;
   viewport.MaxDepth = 1.0f;
   context->RSSetViewports(1, &viewport);
@@ -537,6 +541,8 @@ D3D11_CULL_MODE dg::DirectXGraphics::CullModeToDXEnum(
     case RasterizerState::CullMode::BACK:
       return D3D11_CULL_BACK;
   }
+  throw EngineError("Can't get D3D11_CULL_MODE for unknown CullMode: " +
+                    std::to_string((int)cullMode));
 }
 
 D3D11_DEPTH_WRITE_MASK dg::DirectXGraphics::WriteDepthToDXEnum(
@@ -562,6 +568,8 @@ D3D11_COMPARISON_FUNC dg::DirectXGraphics::DepthFuncToDXEnum(
     case RasterizerState::DepthFunc::GEQUAL:
       return D3D11_COMPARISON_GREATER_EQUAL;
   }
+  throw EngineError("Can't get D3D11_DEPTH_WRITE_MASK for unknown DepthFunc: " +
+                    std::to_string((int)depthFunc));
 }
 
 D3D11_BLEND_OP dg::DirectXGraphics::BlendEquationToDXEnum(
@@ -578,6 +586,8 @@ D3D11_BLEND_OP dg::DirectXGraphics::BlendEquationToDXEnum(
     case RasterizerState::BlendEquation::MAX:
       return D3D11_BLEND_OP_MAX;
   }
+  throw EngineError("Can't get D3D11_BLEND_OP for unknown BlendEquation: " +
+                    std::to_string((int)blendEquation));
 }
 
 D3D11_BLEND dg::DirectXGraphics::BlendFuncToDXEnum(
@@ -604,6 +614,8 @@ D3D11_BLEND dg::DirectXGraphics::BlendFuncToDXEnum(
     case RasterizerState::BlendFunc::ONE_MINUS_DST_ALPHA:
       return D3D11_BLEND_INV_DEST_ALPHA;
   }
+  throw EngineError("Can't get D3D11_BLEND for unknown BlendFunc: " +
+                    std::to_string((int)blendFunction));
 }
 
 dg::DirectXGraphics::RasterizerStateResources::~RasterizerStateResources() {

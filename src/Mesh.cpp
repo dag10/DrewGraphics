@@ -158,7 +158,7 @@ void dg::Mesh::AddTriangle(Vertex v1, Vertex v2, Vertex v3, Winding winding) {
       if (!!(attributes & Flag::TANGENT)) {
         vertexTangents.push_back(v[i]->data.tangent);
       }
-      index = vertexPositions.size() - 1;
+      index = (unsigned int)vertexPositions.size() - 1;
       vertexMap[hash] = index;
     } else {
       index = pair->second;
@@ -901,7 +901,7 @@ void dg::DirectXMesh::Draw() const {
   Graphics::Instance->context->IASetIndexBuffer(
     indexBuffer, DXGI_FORMAT_R32_UINT, 0);
 
-  Graphics::Instance->context->DrawIndexed(indices.size(), 0, 0);
+  Graphics::Instance->context->DrawIndexed((unsigned int)indices.size(), 0, 0);
 }
 
 bool dg::DirectXMesh::IsDrawable() const {

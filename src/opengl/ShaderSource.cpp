@@ -63,7 +63,8 @@ void dg::ShaderSource::CompileShader() {
     codeStrings.push_back(head.c_str());
   }
   codeStrings.push_back(code.c_str());
-  glShaderSource(shaderHandle, codeStrings.size(), codeStrings.data(), NULL);
+  glShaderSource(shaderHandle, (GLsizei)codeStrings.size(), codeStrings.data(),
+                 NULL);
   glCompileShader(shaderHandle);
   CheckCompileErrors();
 }

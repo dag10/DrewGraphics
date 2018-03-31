@@ -136,12 +136,13 @@ float4 main(VertexToPixel input) : SV_TARGET {
     // to world space by left-multiplying the world-space basis vectors of
     // this fragment's tangent space.
     normal = normalize(
-        mul(normal, float3x4(input.tangent, input.bitangent, input.normal)));
+        mul(normal, float3x4(input.tangent, input.bitangent, input.normal)).xyz);
   }
 
   float3 cumulative = float3(0, 0, 0);
   for (int i = 0; i < MAX_LIGHTS; i++) {
-    cumulative += calculateLight(lights[i], input, normal, diffuseColor, specularColor);
+    cumulative += calculateLight(
+      lights[i], input, normal, diffuseColor.rgb, specularColor);
   }
 
   return float4(cumulative, diffuseColor.a);

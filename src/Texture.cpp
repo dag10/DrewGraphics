@@ -193,7 +193,7 @@ dg::DirectXTexture::~DirectXTexture() {
 void dg::DirectXTexture::UpdateData(const void *pixels, bool genMipMap) {
   size_t rowPitch = (options.width * options.GetDirectXBitsPerPixel() + 7) / 8;
   Graphics::Instance->context->UpdateSubresource(texture, 0, NULL, pixels,
-                                                 rowPitch, 0);
+                                                 (unsigned int)rowPitch, 0);
   if (options.mipmap && genMipMap) {
     Graphics::Instance->context->GenerateMips(srv);
   }
@@ -392,6 +392,7 @@ DXGI_FORMAT dg::TextureOptions::GetDirectXInternalFormat() const {
       }
       return DXGI_FORMAT_UNKNOWN;
   }
+  return DXGI_FORMAT_UNKNOWN;
 }
 
 DXGI_FORMAT dg::TextureOptions::GetDirectXShaderFormat() const {
@@ -421,6 +422,7 @@ DXGI_FORMAT dg::TextureOptions::GetDirectXShaderFormat() const {
       }
       return DXGI_FORMAT_UNKNOWN;
   }
+  return DXGI_FORMAT_UNKNOWN;
 }
 
 DXGI_FORMAT dg::TextureOptions::GetDirectXDepthStencilFormat() const {
@@ -447,6 +449,7 @@ DXGI_FORMAT dg::TextureOptions::GetDirectXDepthStencilFormat() const {
       }
       return DXGI_FORMAT_UNKNOWN;
   }
+  return DXGI_FORMAT_UNKNOWN;
 }
 
 D3D11_TEXTURE_ADDRESS_MODE dg::TextureOptions::GetDirectXAddressMode() const {
@@ -458,6 +461,9 @@ D3D11_TEXTURE_ADDRESS_MODE dg::TextureOptions::GetDirectXAddressMode() const {
     case TextureWrap::CLAMP_BORDER:
       return D3D11_TEXTURE_ADDRESS_BORDER;
   }
+  throw EngineError(
+      "Can't get D3D11_TEXTURE_ADDRESS_MODE for unknown TextureWrap: " +
+      std::to_string((int)wrap));
 }
 
 D3D11_FILTER dg::TextureOptions::GetDirectXFilter() const {
@@ -469,6 +475,9 @@ D3D11_FILTER dg::TextureOptions::GetDirectXFilter() const {
       return D3D11_FILTER_MIN_MAG_MIP_LINEAR;
     }
   }
+  throw EngineError(
+      "Can't get D3D11_FILTER for unknown TextureInterpolration: " +
+      std::to_string((int)interpolation));
 }
 
 D3D11_BIND_FLAG dg::TextureOptions::GetDirectXBind() const {
@@ -481,6 +490,9 @@ D3D11_BIND_FLAG dg::TextureOptions::GetDirectXBind() const {
       return D3D11_BIND_RENDER_TARGET;
       break;
   }
+  throw EngineError(
+      "Can't get D3D11_BIND_FLAG for unknown TexturePixelFormat: " +
+      std::to_string((int)format));
 }
 
 unsigned int dg::TextureOptions::GetDirectXBitsPerPixel() const {

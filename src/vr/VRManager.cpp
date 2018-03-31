@@ -67,8 +67,8 @@ void dg::VRManager::ReadyToRender() {
   // Block until OpenVR's "running start" thinks we should begin our render
   // commands. This also loads in the tracked device poses for the upcoming
   // render and predicted poses for the upcoming frame.
-  vrCompositor->WaitGetPoses(
-    poses.data(), poses.size(), nextPoses.data(), nextPoses.size());
+  vrCompositor->WaitGetPoses(poses.data(), (unsigned int)poses.size(),
+                             nextPoses.data(), (unsigned int)nextPoses.size());
   UpdatePoses();
 }
 
@@ -157,7 +157,7 @@ void dg::VRManager::UpdateRenderModelList() {
   for (unsigned int i = 0; i < numModels; i++) {
     size_t size = vrRenderModels->GetRenderModelName(i, nullptr, 0);
     std::vector<char> nameBuff(size);
-    vrRenderModels->GetRenderModelName(i, nameBuff.data(), size);
+    vrRenderModels->GetRenderModelName(i, nameBuff.data(), (unsigned int)size);
     std::string name(nameBuff.data());
 
     auto rmInfo = std::make_shared<RenderModelInfo>();

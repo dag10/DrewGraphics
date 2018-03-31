@@ -276,8 +276,8 @@ void dg::DirectXShader::SetTexture(
 
 void dg::DirectXShader::SetData(
     const std::string& name, void *data, size_t size) {
-  vertexShader->SetData(name, data, size);
-  pixelShader->SetData(name, data, size);
+  vertexShader->SetData(name, data, (unsigned int)size);
+  pixelShader->SetData(name, data, (unsigned int)size);
 }
 
 #pragma endregion

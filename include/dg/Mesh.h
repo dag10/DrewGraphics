@@ -128,6 +128,7 @@ namespace dg {
       const Vertex GetVertex(int i) const;
 
       virtual void Draw() const;
+      virtual bool IsDrawable() const = 0;
 
     protected:
 
@@ -176,6 +177,7 @@ namespace dg {
       virtual void FinishBuilding();
 
       virtual void Draw() const;
+      virtual bool IsDrawable() const;
 
     private:
 
@@ -202,6 +204,7 @@ namespace dg {
       virtual void FinishBuilding();
 
       virtual void Draw() const;
+      virtual bool IsDrawable() const;
 
     private:
 

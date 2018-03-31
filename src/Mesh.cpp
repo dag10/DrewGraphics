@@ -827,6 +827,10 @@ void dg::OpenGLMesh::Draw() const {
   glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, (void*)0);
 }
 
+bool dg::OpenGLMesh::IsDrawable() const {
+  return (VAO != 0);
+}
+
 #endif
 #pragma endregion
 #pragma region DirectX Mesh
@@ -898,6 +902,10 @@ void dg::DirectXMesh::Draw() const {
     indexBuffer, DXGI_FORMAT_R32_UINT, 0);
 
   Graphics::Instance->context->DrawIndexed(indices.size(), 0, 0);
+}
+
+bool dg::DirectXMesh::IsDrawable() const {
+  return (vertexBuffer != NULL && indexBuffer != NULL);
 }
 
 #endif

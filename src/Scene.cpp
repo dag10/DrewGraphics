@@ -312,9 +312,12 @@ bool dg::BaseScene::AutomaticWindowTitle() const {
 }
 
 void dg::BaseScene::DrawHiddenAreaMesh(vr::EVREye eye) {
-  Graphics::Instance->PushRasterizerState(
-      hiddenAreaMeshMaterial->rasterizerOverride);
-  hiddenAreaMeshMaterial->Use();
-  VRManager::Instance->GetHiddenAreaMesh(eye)->Draw();
-  Graphics::Instance->PopRasterizerState();
+  auto mesh = VRManager::Instance->GetHiddenAreaMesh(eye);
+  if (mesh != nullptr && mesh->IsDrawable()) {
+    Graphics::Instance->PushRasterizerState(
+        hiddenAreaMeshMaterial->rasterizerOverride);
+    hiddenAreaMeshMaterial->Use();
+    mesh->Draw();
+    Graphics::Instance->PopRasterizerState();
+  }
 }

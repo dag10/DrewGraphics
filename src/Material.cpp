@@ -8,6 +8,10 @@ dg::Material::Material(Material& other) {
   this->shader = other.shader;
   this->properties = other.properties;
   this->highestTexUnitHint = other.highestTexUnitHint;
+  this->reflection = other.reflection;
+  this->reflectionBlendMode = other.reflectionBlendMode;
+  this->transmission = other.transmission;
+  this->maxDepth = other.maxDepth;
 }
 
 dg::Material::Material(Material&& other) {
@@ -29,6 +33,10 @@ void dg::swap(Material& first, Material& second) {
   swap(first.shader, second.shader);
   swap(first.properties, second.properties);
   swap(first.highestTexUnitHint, second.highestTexUnitHint);
+  swap(first.reflection, second.reflection);
+  swap(first.reflectionBlendMode, second.reflectionBlendMode);
+  swap(first.transmission, second.transmission);
+  swap(first.maxDepth, second.maxDepth);
 }
 
 void dg::Material::SetProperty(const std::string& name, bool value) {
@@ -165,6 +173,22 @@ void dg::Material::ClearLights() {
 void dg::Material::ClearLight(int index) {
   lights[index].type = Light::LightType::NONE;
   Light::ClearMaterialProperties(index, *this);
+}
+
+void dg::Material::SetReflection(float reflection) {
+  this->reflection = reflection;
+}
+
+void dg::Material::SetReflectionBlending(ReflectionBlendMode mode) {
+  this->reflectionBlendMode = mode;
+}
+
+void dg::Material::SetTransmission(float transmission) {
+  this->transmission = transmission;
+}
+
+void dg::Material::SetMaxDepth(int maxDepth) {
+  this->maxDepth = maxDepth;
 }
 
 void dg::Material::SetInvPortal(glm::mat4x4 invPortal) {

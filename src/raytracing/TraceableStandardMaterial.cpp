@@ -27,7 +27,7 @@ dg::TraceableStandardMaterial dg::TraceableStandardMaterial::WithTexture(
 }
 
 dg::TraceableStandardMaterial::TraceableStandardMaterial()
-    : StandardMaterial() {}
+    : StandardMaterial(), TraceableMaterial() {}
 
 dg::TraceableStandardMaterial::TraceableStandardMaterial(
     TraceableStandardMaterial &other)
@@ -58,9 +58,8 @@ void dg::swap(TraceableStandardMaterial &first,
 
 glm::vec3 dg::TraceableStandardMaterial::CalculateLight(
     const Light::ShaderData &light, glm::vec3 normal, glm::vec3 diffuseColor,
-    glm::vec3 specularColor, glm::vec3 scenePos, glm::vec3 cameraPos) const {
-
-  float shininess = GetRequiredProperty("_Material.shininess")->value._float;
+    glm::vec3 specularColor, glm::vec3 scenePos, glm::vec3 cameraPos,
+    float shininess) {
 
   if (light.type == Light::LightType::NONE) {
     return glm::vec3(0);
@@ -114,6 +113,7 @@ glm::vec3 dg::TraceableStandardMaterial::Shade(const RayResult& rayres) const {
       GetRequiredProperty("_Material.diffuse")->value._vec3;
   glm::vec3 specularColor =
       GetRequiredProperty("_Material.specular")->value._vec3;
+  float shininess = GetRequiredProperty("_Material.shininess")->value._float;
   glm::vec3 scenePos =
       rayres.ray.origin + rayres.ray.direction * rayres.distance;
   glm::vec3 cameraPos = GetRequiredProperty("_CameraPosition")->value._vec3;
@@ -128,7 +128,7 @@ glm::vec3 dg::TraceableStandardMaterial::Shade(const RayResult& rayres) const {
       continue;
     }
     cumulative += CalculateLight(light.second, normal, diffuseColor,
-                                 specularColor, scenePos, cameraPos);
+                                 specularColor, scenePos, cameraPos, shininess);
   }
 
   return cumulative;

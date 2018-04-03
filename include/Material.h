@@ -11,6 +11,11 @@
 
 namespace dg {
 
+  enum class ReflectionBlendMode {
+    Additive,
+    Weighted,
+  };
+
   // Same as ShaderProperty, except it can own the texture.
   struct MaterialProperty {
     ShaderPropertyType type = PROPERTY_NULL;
@@ -63,6 +68,12 @@ namespace dg {
       void ClearLights();
       void ClearLight(int index);
 
+      // I have to put some raytracing-specific properties here.
+      void SetReflection(float reflection);
+      void SetReflectionBlending(ReflectionBlendMode mode);
+      void SetTransmission(float transmission);
+      void SetMaxDepth(int maxDepth);
+
       // Portal world-to-local transform, for back-of-portal fragment culling.
       // Set this if we're currently rendering "through" a portal, and set
       // to zeros if we're not rendering through a portal.
@@ -71,6 +82,11 @@ namespace dg {
       void Use() const;
 
       std::unordered_map<int, Light::ShaderData> lights;
+
+      float reflection = 0;
+      float transmission = 0;
+      int maxDepth = 5;
+      ReflectionBlendMode reflectionBlendMode = ReflectionBlendMode::Weighted;
 
     private:
 

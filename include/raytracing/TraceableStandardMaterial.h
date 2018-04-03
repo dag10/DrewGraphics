@@ -31,11 +31,10 @@ class TraceableStandardMaterial : public StandardMaterial,
 
     virtual glm::vec3 Shade(const RayResult& rayres) const;
 
-  private:
-
-      glm::vec3 CalculateLight(const Light::ShaderData &light, glm::vec3 normal,
-                               glm::vec3 diffuseColor, glm::vec3 specularColor,
-                               glm::vec3 scenePos, glm::vec3 cameraPos) const;
+    static glm::vec3 CalculateLight(const Light::ShaderData &light,
+                                    glm::vec3 normal, glm::vec3 diffuseColor,
+                                    glm::vec3 specularColor, glm::vec3 scenePos,
+                                    glm::vec3 cameraPos, float shininess);
 
   }; // class Material
 

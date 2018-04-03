@@ -45,6 +45,17 @@ dg::Ray dg::Ray::TransformedBy(glm::mat4 xf) const {
   return ret;
 }
 
+bool dg::Ray::operator==(const Ray& rhs) const {
+  return \
+    origin == rhs.origin &&
+    direction == rhs.direction &&
+    scaleFromParent == rhs.scaleFromParent;
+}
+
+bool dg::Ray::operator!=(const Ray& rhs) const {
+  return !operator==(rhs);
+}
+
 // https://en.wikipedia.org/wiki/M%C3%B6ller%E2%80%93Trumbore_intersection_algorithm#C++_Implementation
 dg::RayResult dg::Ray::IntersectTriangle(
     glm::vec3 v1, glm::vec3 v2, glm::vec3 v3) const {
@@ -205,6 +216,11 @@ dg::Ray dg::RayResult::GetReflectedRay() const {
   Ray ret;
   ret.origin = GetIntersectionPoint();
   ret.direction = glm::reflect(ray.direction, normal);
+
+  // Move ray slightly out of originating point to prevent intersection with
+  // self.
+  ret.origin += ret.direction * 0.0001f;
+
   return ret;
 }
 

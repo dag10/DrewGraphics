@@ -13,7 +13,7 @@
 namespace dg {
 
 class TraceableCheckerboardMaterial : public CheckerboardMaterial,
-                                  public TraceableMaterial {
+                                      public TraceableMaterial {
   public:
 
     TraceableCheckerboardMaterial();

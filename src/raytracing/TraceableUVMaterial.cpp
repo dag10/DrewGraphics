@@ -6,7 +6,7 @@
 #include <raytracing/Rays.h>
 
 dg::TraceableUVMaterial::TraceableUVMaterial()
-    : UVMaterial() {}
+    : UVMaterial(), TraceableMaterial() {}
 
 dg::TraceableUVMaterial::TraceableUVMaterial(
     TraceableUVMaterial &other)

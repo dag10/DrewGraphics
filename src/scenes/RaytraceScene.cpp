@@ -25,8 +25,8 @@ void dg::RaytraceScene::Initialize() {
   window->LockCursor();
 
   // Create skybox.
-  skybox = std::unique_ptr<Skybox>(new Skybox(std::make_shared<Texture>(
-          Texture::FromPath("assets/textures/skybox_daylight.png"))));
+  //skybox = std::unique_ptr<Skybox>(new Skybox(std::make_shared<Texture>(
+          //Texture::FromPath("assets/textures/skybox_daylight.png"))));
 
   // Create directinal light.
   auto directionalLight = std::make_shared<DirectionalLight>(
@@ -41,18 +41,14 @@ void dg::RaytraceScene::Initialize() {
   glm::vec2 floorSize(12, 28);
   TraceableCheckerboardMaterial floorMaterial;
   floorMaterial.SetSize(floorSize);
-  floorMaterial.SetColorA(glm::vec3(1, 0, 0));
-  floorMaterial.SetColorA(glm::vec3(1, 0, 1));
-  TraceableStandardMaterial solidFloorMaterial =
-      TraceableStandardMaterial::WithColor(glm::vec3(0.5));
-  solidFloorMaterial.SetSpecular(0.1);
-  solidFloorMaterial.SetShininess(64);
+  floorMaterial.SetReflection(0.1f);
+  floorMaterial.SetColorB(glm::vec3(1, 1, 0));
+  floorMaterial.SetColorB(glm::vec3(1, 1, 0));
 
   // Create floor plane.
   AddChild(std::make_shared<TraceableModel>(
         dg::Mesh::Quad,
         std::make_shared<TraceableCheckerboardMaterial>(floorMaterial),
-        //std::make_shared<TraceableStandardMaterial>(solidFloorMaterial),
         Transform::RS(
           glm::quat(glm::radians(glm::vec3(-90, 0, 0))),
           glm::vec3(floorSize.x, floorSize.y, 1))));
@@ -65,18 +61,24 @@ void dg::RaytraceScene::Initialize() {
 
   // Create front sphere.
   sphereMaterial.SetDiffuse(glm::vec3(0.7, 0.3, 0.3));
+  sphereMaterial.SetReflection(0.03f);
   AddChild(std::make_shared<TraceableModel>(
       dg::Mesh::Sphere,
-      //std::make_shared<TraceableStandardMaterial>(sphereMaterial),
-      std::make_shared<TraceableUVMaterial>(),
+      std::make_shared<TraceableStandardMaterial>(sphereMaterial),
       Transform::TS(glm::vec3(-3, 2, 0), glm::vec3(2.5))));
 
   // Create back sphere.
-  sphereMaterial.SetDiffuse(glm::vec3(0.3, 0.7, 0.3));
+  //sphereMaterial.SetDiffuse(glm::vec3(0.3, 0.7, 0.3));
+  sphereMaterial.SetDiffuse(glm::vec3(0.1));
+  sphereMaterial.SetSpecular(glm::vec3(1));
+  sphereMaterial.SetReflection(1);
+  sphereMaterial.SetReflectionBlending(ReflectionBlendMode::Additive);
+  //sphereMaterial.SetDiffuse(glm::vec3(1.5));
+  //sphereMaterial.SetReflection(0.9);
   AddChild(std::make_shared<TraceableModel>(
       dg::Mesh::Sphere,
-      //std::make_shared<TraceableStandardMaterial>(sphereMaterial),
-      std::make_shared<TraceableCheckerboardMaterial>(floorMaterial),
+      //std::make_shared<TraceableCheckerboardMaterial>(floorMaterial),
+      std::make_shared<TraceableStandardMaterial>(sphereMaterial),
       Transform::TS(glm::vec3(-1, 1.5, -2), glm::vec3(2.5))));
 
   // Create camera.
@@ -138,6 +140,12 @@ void dg::RaytraceScene::RenderFrame() {
   }
 
   Scene::RenderFrame();
+}
+
+void dg::RaytraceScene::ClearBuffer() {
+  glm::vec3 background = glm::vec3(115, 163, 225) / 255.f;
+  glClearColor(background.r, background.g, background.b, 1);
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 }
 
 void dg::RaytraceScene::ConfigureBuffer() {

@@ -2,18 +2,19 @@
 //  raytracer/Renderer.cpp
 //
 
-#include <raytracing/Renderer.h>
-#include <raytracing/TraceableModel.h>
-#include <raytracing/TraceableMaterial.h>
-#include <Texture.h>
 #include <Canvas.h>
 #include <Scene.h>
+#include <Texture.h>
+#include <raytracing/Renderer.h>
+#include <raytracing/TraceableMaterial.h>
+#include <raytracing/TraceableModel.h>
+#include <forward_list>
 #include <glm/gtc/matrix_access.hpp>
 #include <iostream>
 
 dg::Renderer::Renderer(unsigned int width, unsigned int height, Scene *scene)
   : scene(scene) {
-  const float resScale = 0.5;
+  const float resScale = 2;
   width *= resScale;
   height *= resScale;
   canvas = std::make_shared<Canvas>(width, height);
@@ -70,13 +71,59 @@ void dg::Renderer::Render() {
           halfPixelUp + halfPixelRight + planeCenter +
           (i * planeRight) + (j * planeUp));
 
-      Ray ray(
+      // Bounce the ray around the scene.
+      Ray initialRay(
         xfCamera.translation,
         glm::normalize(xfPixel_SS.translation - xfCamera.translation)
       );
-      RayResult res = TraceRay(ray);
-      Pixel pixel = RenderPixel(res);
-      canvas->SetPixel(x, y, pixel.red, pixel.green, pixel.blue);
+      std::forward_list<RayResult> results;
+      Ray ray = initialRay;
+      int maxDepth = 20;
+      while (maxDepth > 0) {
+        maxDepth--;
+        RayResult res = TraceRay(ray);
+        results.push_front(res);
+        if (res.hit && res.model->material->reflection > 0) {
+          ray = res.GetReflectedRay();
+          maxDepth = std::min(maxDepth, res.model->material->maxDepth);
+        } else {
+          break;
+        }
+      }
+
+      // Construct the final color of the ray by looking at its hits
+      // in reverse order.
+      glm::vec3 color(0.f);
+      bool isInitial = true;
+      while (!results.empty()) {
+        auto &res = results.front();
+        float weight = isInitial ? 1 : (1.f - res.model->material->reflection);
+        switch (res.model->material->reflectionBlendMode) {
+          case ReflectionBlendMode::Additive:
+            color *= (1.f - weight);
+            color += ShadeRayResult(res);
+            break;
+          case ReflectionBlendMode::Weighted:
+            color *= (1.f - weight);
+            color += weight * ShadeRayResult(res);
+            break;
+        }
+        results.pop_front();
+        isInitial = false;
+      }
+
+      // We don't have tone management, yet, but clip out of range colors
+      // to white.
+      if (color.r > 1) {
+        color /= color.r;
+      }
+      if (color.g > 1) {
+        color /= color.g;
+      }
+      if (color.b > 1) {
+        color /= color.b;
+      }
+      canvas->SetPixel(x, y, color.r * 255, color.g * 255, color.b * 255);
     }
   }
   canvas->Submit();
@@ -154,7 +201,7 @@ dg::RayResult dg::Renderer::TraceRay(Ray ray) {
   return shortest;
 }
 
-dg::Renderer::Pixel dg::Renderer::RenderPixel(RayResult rayres) {
+glm::vec3 dg::Renderer::ShadeRayResult(RayResult rayres) {
   if (rayres.hit) {
     glm::vec3 color;
 
@@ -169,9 +216,12 @@ dg::Renderer::Pixel dg::Renderer::RenderPixel(RayResult rayres) {
       }
     }
 
-    return Pixel(color);
+    return color;
   }
 
+  // Background color.
+  return glm::vec3(115, 163, 225) / 255.f;
+
   // Encode direction as pixel.
-  return Pixel((rayres.ray.direction + 1.f) * 0.5f);
+  //return (rayres.ray.direction + 1.f) * 0.5f;
 }

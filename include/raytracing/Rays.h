@@ -37,6 +37,8 @@ namespace dg {
       RayResult IntersectSphere(float radius) const;
       RayResult IntersectLight(const Light::ShaderData& lightData) const;
 
+      bool operator==(const Ray& rhs) const;
+      bool operator!=(const Ray& rhs) const;
   };
 
   class RayResult {

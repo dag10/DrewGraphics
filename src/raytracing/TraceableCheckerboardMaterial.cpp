@@ -2,11 +2,12 @@
 //  raytracing/TraceableCheckerboardMaterial.cpp
 //
 
-#include <raytracing/TraceableCheckerboardMaterial.h>
 #include <raytracing/Rays.h>
+#include <raytracing/TraceableCheckerboardMaterial.h>
+#include <raytracing/TraceableStandardMaterial.h>
 
 dg::TraceableCheckerboardMaterial::TraceableCheckerboardMaterial()
-    : CheckerboardMaterial() {}
+    : CheckerboardMaterial(), TraceableMaterial() {}
 
 dg::TraceableCheckerboardMaterial::TraceableCheckerboardMaterial(
     TraceableCheckerboardMaterial &other)
@@ -44,5 +45,27 @@ glm::vec3 dg::TraceableCheckerboardMaterial::Shade(
 
   glm::vec2 coord = rayres.interpolatedVertex.texCoord * _Size;
   int parity = int(coord.x) % 2 ^ int(coord.y) % 2;
-  return _Colors[parity];
+  glm::vec3 diffuseColor = _Colors[parity];
+  glm::vec3 specularColor(0);
+  float shininess = 0;
+  glm::vec3 scenePos =
+      rayres.ray.origin + rayres.ray.direction * rayres.distance;
+  glm::vec3 cameraPos = GetRequiredProperty("_CameraPosition")->value._vec3;
+  glm::vec3 normal = rayres.normal;
+
+  auto mutLightDirectIllumination =
+      (std::unordered_map<int, bool> &)rayres.lightDirectIllumination;
+
+  glm::vec3 cumulative(0);
+  for (auto& light : lights) {
+    glm::vec3 lightVal = TraceableStandardMaterial::CalculateLight(
+        light.second, normal, diffuseColor, specularColor, scenePos, cameraPos,
+        shininess);
+    if (!mutLightDirectIllumination[light.first]) {
+      lightVal *= 0.5f;
+    }
+    cumulative += lightVal;
+  }
+
+  return cumulative;
 }

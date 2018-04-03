@@ -18,14 +18,52 @@
 
 dg::Vertex dg::Vertex::Interpolate(glm::vec3 position, const Vertex &v1,
                                    const Vertex &v2, const Vertex &v3) {
-  float d1 = glm::distance(position, v1.position);
-  float d2 = glm::distance(position, v2.position);
-  float d3 = glm::distance(position, v3.position);
-  float d12 = glm::distance(v1.position, v2.position);
-  float d23 = glm::distance(v2.position, v3.position);
-  float d31 = glm::distance(v3.position, v1.position);
-  // TODO: How do I calculate the area of a triangle?
-  return v1;
+  assert(v1.attributes == v2.attributes && v2.attributes == v3.attributes);
+
+  glm::vec3 p1 = v2.position - v1.position;
+  glm::vec3 p2 = v3.position - v1.position;
+  glm::vec3 p3 = position - v1.position;
+  float d11 = glm::dot(p1, p1);
+  float d12 = glm::dot(p1, p2);
+  float d22 = glm::dot(p2, p2);
+  float d31 = glm::dot(p3, p1);
+  float d32 = glm::dot(p3, p2);
+  float denom = 1.f / (d11 * d22 - d12 * d12);
+  float w2 = (d22 * d31 - d12 * d32) * denom;
+  float w3 = (d11 * d32 - d12 * d31) * denom;
+  float w1 = 1.0f - w2 - w3;
+
+  Vertex ret(v1.attributes);
+
+  if (ret.HasAllAttr(Vertex::AttrFlag::POSITION)) {
+    ret.position = glm::vec3(0);
+    ret.position += w1 * v1.position;
+    ret.position += w2 * v2.position;
+    ret.position += w3 * v3.position;
+  }
+
+  if (ret.HasAllAttr(Vertex::AttrFlag::NORMAL)) {
+    ret.normal = glm::vec3(0);
+    ret.normal += w1 * v1.normal;
+    ret.normal += w2 * v2.normal;
+    ret.normal += w3 * v3.normal;
+  }
+
+  if (ret.HasAllAttr(Vertex::AttrFlag::TEXCOORD)) {
+    ret.texCoord = glm::vec2(0);
+    ret.texCoord += w1 * v1.texCoord;
+    ret.texCoord += w2 * v2.texCoord;
+    ret.texCoord += w3 * v3.texCoord;
+  }
+
+  if (ret.HasAllAttr(Vertex::AttrFlag::TANGENT)) {
+    ret.tangent = glm::vec3(0);
+    ret.tangent += w1 * v1.tangent;
+    ret.tangent += w2 * v2.tangent;
+    ret.tangent += w3 * v3.tangent;
+  }
+
+  return ret;
 }
 
 dg::Mesh *dg::Mesh::lastDrawnMesh = nullptr;

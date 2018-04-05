@@ -21,8 +21,7 @@
 
 namespace dg {
 
-  // Copy is disabled, only moves are allowed. This prevents us
-  // from leaking or redeleting the GLFW window resource.
+  // Copy is disabled to maintain single ownership of resources.
   class Window {
 
     public:
@@ -33,13 +32,9 @@ namespace dg {
       typedef HWND handle_type;
 #endif
 
-      // TODO: Make these protected :)
       Window(Window& other) = delete;
-      Window(Window&& other);
-      virtual ~Window() = default;
       Window& operator=(Window& other) = delete;
-      Window& operator=(Window&& other);
-      friend void swap(Window& first, Window& second); // nothrow
+      virtual ~Window() = default;
 
       virtual void PollEvents() = 0;
 
@@ -130,11 +125,8 @@ namespace dg {
           unsigned int width, unsigned int height, std::string title);
 
       OpenGLWindow(OpenGLWindow& other) = delete;
-      OpenGLWindow(OpenGLWindow&& other);
-      virtual ~OpenGLWindow();
       OpenGLWindow& operator=(OpenGLWindow& other) = delete;
-      OpenGLWindow& operator=(OpenGLWindow&& other);
-      friend void swap(OpenGLWindow& first, OpenGLWindow& second); // nothrow
+      virtual ~OpenGLWindow();
 
       virtual void PollEvents();
 
@@ -212,10 +204,7 @@ namespace dg {
         int bufferLines, int bufferColumns, int windowLines, int windowColumns);
 
       Win32Window(Win32Window& other) = delete;
-      Win32Window(Win32Window&& other);
       Win32Window& operator=(Win32Window& other) = delete;
-      Win32Window& operator=(Win32Window&& other);
-      friend void swap(Win32Window& first, Win32Window& second); // nothrow
 
       virtual void PollEvents();
       virtual handle_type GetHandle() const;

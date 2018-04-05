@@ -61,10 +61,6 @@ const std::string dg::Window::GetTitle() const {
   return title;
 }
 
-dg::Window::Window(dg::Window&& other) {
-  *this = std::move(other);
-}
-
 float dg::Window::GetWidth() const {
   return GetContentSize().x;
 }
@@ -79,24 +75,6 @@ float dg::Window::GetAspectRatio() const {
     return 1;
   }
   return size.x / size.y;
-}
-
-dg::Window& dg::Window::operator=(dg::Window&& other) {
-  swap(*this, other);
-  return *this;
-}
-
-void dg::swap(dg::Window& first, dg::Window& second) {
-  using std::swap;
-  swap(first.lastKeyStates, second.lastKeyStates);
-  swap(first.currentKeyStates, second.currentKeyStates);
-  swap(first.lastMouseButtonStates, second.lastMouseButtonStates);
-  swap(first.currentMouseButtonStates, second.currentMouseButtonStates);
-  swap(first.title, second.title);
-  swap(first.hasInitialCursorPosition, second.hasInitialCursorPosition);
-  swap(first.lastCursorPosition, second.lastCursorPosition);
-  swap(first.currentCursorPosition, second.currentCursorPosition);
-  swap(first.cursorDelta, second.cursorDelta);
 }
 
 #pragma endregion
@@ -130,10 +108,6 @@ void dg::OpenGLWindow::InitializeGLFW() {
 
 dg::OpenGLWindow::OpenGLWindow() : Window() {}
 
-dg::OpenGLWindow::OpenGLWindow(dg::OpenGLWindow&& other) {
-  *this = std::move(other);
-}
-
 dg::OpenGLWindow::~OpenGLWindow() {
   if (glfwWindow != nullptr) {
     windowMap.erase(glfwWindow);
@@ -143,16 +117,6 @@ dg::OpenGLWindow::~OpenGLWindow() {
   if (windowMap.empty()) {
     glfwTerminate();
   }
-}
-
-dg::OpenGLWindow& dg::OpenGLWindow::operator=(dg::OpenGLWindow&& other) {
-  swap(*this, other);
-  return *this;
-}
-
-void dg::swap(dg::OpenGLWindow& first, dg::OpenGLWindow& second) {
-  using std::swap;
-  swap(first.glfwWindow, second.glfwWindow);
 }
 
 std::shared_ptr<dg::Window> dg::OpenGLWindow::Open(

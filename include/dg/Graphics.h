@@ -67,7 +67,7 @@ namespace dg {
       virtual void InitializeResources();
       virtual void ApplyRasterizerState(const RasterizerState &state) = 0;
 
-      const RasterizerState emptyRasterizerState;
+      const RasterizerState emptyRasterizerState = RasterizerState();
       std::forward_list<std::unique_ptr<RasterizerState>> states;
 
   }; // class Graphics

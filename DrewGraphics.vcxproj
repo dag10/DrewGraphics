@@ -453,6 +453,7 @@ del /s $(OutDir)*.obj, $(OutDir)*.pdb, $(OutDir)*.ipdb, $(OutDir)*.iobj</Command
     <ClCompile Include="src\Scene.cpp" />
     <ClCompile Include="src\Behavior.cpp" />
     <ClCompile Include="src\SceneObject.cpp" />
+    <ClCompile Include="src\scenes\BoundsScene.cpp" />
     <ClCompile Include="src\scenes\CanvasTestScene.cpp" />
     <ClCompile Include="src\scenes\DeepCloningScene.cpp" />
     <ClCompile Include="src\scenes\PortalScene.cpp" />
@@ -503,6 +504,7 @@ del /s $(OutDir)*.obj, $(OutDir)*.pdb, $(OutDir)*.ipdb, $(OutDir)*.iobj</Command
     <ClInclude Include="include\dg\RasterizerState.h" />
     <ClInclude Include="include\dg\Scene.h" />
     <ClInclude Include="include\dg\SceneObject.h" />
+    <ClInclude Include="include\dg\scenes\BoundsScene.h" />
     <ClInclude Include="include\dg\scenes\CanvasTestScene.h" />
     <ClInclude Include="include\dg\scenes\DeepCloningScene.h" />
     <ClInclude Include="include\dg\scenes\PortalScene.h" />

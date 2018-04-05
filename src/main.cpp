@@ -36,6 +36,7 @@
 #include "dg/InputCodes.h"
 #include "dg/Window.h"
 
+#include "dg/scenes/BoundsScene.h"
 #include "dg/scenes/CanvasTestScene.h"
 #include "dg/scenes/DeepCloningScene.h"
 #include "dg/scenes/MeshesScene.h"
@@ -81,6 +82,7 @@ std::unique_ptr<Scene> PromptForScene(
   constructors["textures"]     = dg::TexturesScene::Make;
   constructors["meshes"]       = dg::MeshesScene::Make;
   constructors["meshes-vr"]    = dg::MeshesScene::MakeVR;
+  constructors["bounds"]       = dg::BoundsScene::Make;
   constructors["robot"]        = dg::RobotScene::Make;
   constructors["robot-vr"]     = dg::RobotScene::MakeVR;
   constructors["quad"]         = dg::QuadScene::Make;

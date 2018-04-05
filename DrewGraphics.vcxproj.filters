@@ -141,6 +141,9 @@
     <ClCompile Include="src\materials\UVMaterial.cpp">
       <Filter>Source Files\materials</Filter>
     </ClCompile>
+    <ClCompile Include="src\scenes\BoundsScene.cpp">
+      <Filter>Source Files\scenes</Filter>
+    </ClCompile>
     <ClCompile Include="src\scenes\MeshesScene.cpp">
       <Filter>Source Files\scenes</Filter>
     </ClCompile>
@@ -286,6 +289,9 @@
     </ClInclude>
     <ClInclude Include="include\dg\materials\UVMaterial.h">
       <Filter>Header Files\materials</Filter>
+    </ClInclude>
+    <ClInclude Include="include\dg\scenes\BoundsScene.h">
+      <Filter>Header Files\scenes</Filter>
     </ClInclude>
     <ClInclude Include="include\dg\scenes\MeshesScene.h">
       <Filter>Header Files\scenes</Filter>

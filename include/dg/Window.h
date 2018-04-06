@@ -32,6 +32,10 @@ namespace dg {
       typedef HWND handle_type;
 #endif
 
+      static std::shared_ptr<Window> Open(unsigned int width,
+                                          unsigned int height,
+                                          std::string title);
+
       Window(Window& other) = delete;
       Window& operator=(Window& other) = delete;
       virtual ~Window() = default;
@@ -194,11 +198,13 @@ namespace dg {
 
     public:
 
+      static void SetHInstance(HINSTANCE hInstance);
+
       // Opens a window with a title and size.
       // Sizes are assuming 1x DPI scale, even if on a higher-DPI display.
-      static std::shared_ptr<Window> Open(
-          unsigned int width, unsigned int height, std::string title,
-          HINSTANCE hInstance);
+      static std::shared_ptr<Window> Open(unsigned int width,
+                                          unsigned int height,
+                                          std::string title);
 
       static void dg::Win32Window::CreateConsoleWindow(
         int bufferLines, int bufferColumns, int windowLines, int windowColumns);
@@ -238,6 +244,7 @@ namespace dg {
 
     private:
 
+      static HINSTANCE nextHInstance;
       static std::map<HWND, std::weak_ptr<Win32Window>> windowMap;
 
       virtual void Open(int width, int height);

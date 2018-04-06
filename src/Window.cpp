@@ -14,6 +14,16 @@
 
 #pragma region Base Window
 
+std::shared_ptr<dg::Window> dg::Window::Open(unsigned int width,
+                                             unsigned int height,
+                                             std::string title) {
+#if defined(_OPENGL)
+    return dg::OpenGLWindow::Open(width, height, title);
+#elif defined(_DIRECTX)
+    return dg::Win32Window::Open(width, height, title);
+#endif
+}
+
 void dg::Window::HandleKey(Key key, InputState action) {
   currentKeyStates[(int)key] = (InputState)action;
 }
@@ -344,7 +354,12 @@ glm::vec2 dg::OpenGLWindow::GetFramebufferSize() const {
 #pragma region Win32 Window
 #if defined(_DIRECTX)
 
+HINSTANCE dg::Win32Window::nextHInstance = NULL;
 std::map<HWND, std::weak_ptr<dg::Win32Window>> dg::Win32Window::windowMap;
+
+void dg::Win32Window::SetHInstance(HINSTANCE hInstance) {
+  nextHInstance = hInstance;
+}
 
 void dg::Win32Window::CreateConsoleWindow(
     int bufferLines, int bufferColumns, int windowLines, int windowColumns) {
@@ -376,36 +391,13 @@ void dg::Win32Window::CreateConsoleWindow(
 
 dg::Win32Window::Win32Window() : Window() {}
 
-dg::Win32Window::Win32Window(dg::Win32Window&& other) {
-  *this = std::move(other);
-}
-
-dg::Win32Window& dg::Win32Window::operator=(dg::Win32Window&& other) {
-  swap(*this, other);
-  return *this;
-}
-
-void dg::swap(dg::Win32Window& first, dg::Win32Window& second) {
-  using std::swap;
-  swap((Window&)first, (Window&)second);
-  swap(first.hInstance, second.hInstance);
-  swap(first.hWnd, second.hWnd);
-  swap(first.width, second.width);
-  swap(first.height, second.height);
-  swap(first.shouldClose, second.shouldClose);
-  swap(first.cursorIsLocked, second.cursorIsLocked);
-  swap(first.cursorWasLocked, second.cursorWasLocked);
-  swap(first.cursorLockOffset, second.cursorLockOffset);
-}
-
-std::shared_ptr<dg::Window> dg::Win32Window::Open(
-    unsigned int width, unsigned int height, std::string title,
-    HINSTANCE hInstance) {
-
+std::shared_ptr<dg::Window> dg::Win32Window::Open(unsigned int width,
+                                                  unsigned int height,
+                                                  std::string title) {
   std::shared_ptr<Win32Window> window =
       std::shared_ptr<Win32Window>(new Win32Window());
 
-  window->hInstance = hInstance;
+  window->hInstance = nextHInstance;
   window->width = width;
   window->height = height;
   window->title = title;

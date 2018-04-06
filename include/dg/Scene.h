@@ -23,12 +23,12 @@ namespace dg {
   class Light;
   class ScreenQuadMaterial;
 
-  class BaseScene : public SceneObject {
+  class Scene : public SceneObject {
 
     public:
 
-      BaseScene();
-      virtual ~BaseScene();
+      Scene();
+      virtual ~Scene();
 
       virtual void Initialize();
       virtual void Update();
@@ -85,8 +85,6 @@ namespace dg {
       Light *shadowCastingLight = nullptr;
       std::shared_ptr<FrameBuffer> shadowFrameBuffer = nullptr;
 
-  }; // class BaseScene
-
-  using Scene = BaseScene;
+  }; // class Scene
 
 } // namespace dg

@@ -59,7 +59,11 @@ namespace dg {
       void ApplyCurrentRasterizerState();
       const RasterizerState *GetEffectiveRasterizerState() const;
 
+      static const std::string &GetAPIName();
+
     protected:
+
+      static const std::string apiName;
 
       Graphics() = default;
 

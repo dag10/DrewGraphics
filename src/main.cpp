@@ -2,38 +2,25 @@
 //  main.cpp
 //
 
-#if !defined(_OPENGL) & defined(_OPENGL)
-#error "No graphics platform specified. Define either _OPENGL or _DIRECTX."
-#endif
-
-#if defined(_OPENGL)
-#include "dg/glad/glad.h"
-
-#include <GLFW/glfw3.h>
-#endif
-
+// TODO: Delete unused includes.
 #if defined(_WIN32)
 #include <Windows.h>
 #endif
 
+// TODO: Delete unused includes.
 #if defined(_DIRECTX)
 #include <Windows.Foundation.h>
 #include <wrl\wrappers\corewrappers.h>
 #include <wrl\client.h>
 #include <stdio.h>
-#pragma comment(lib, "runtimeobject.lib")
 #endif
 
 #include <functional>
 #include <iostream>
 #include <map>
 #include <memory>
-#include <ostream>
-#include <sstream>
-#include "dg/EngineTime.h"
+#include "dg/Engine.h"
 #include "dg/Exceptions.h"
-#include "dg/Graphics.h"
-#include "dg/InputCodes.h"
 #include "dg/Window.h"
 
 #include "dg/scenes/BoundsScene.h"
@@ -51,26 +38,8 @@
 
 using namespace dg;
 
-static std::shared_ptr<dg::Window> window;
-
-[[noreturn]] void terminateWithError(const std::string &error) {
-  std::cerr << error << std::endl;
-  if (window != nullptr) {
-    window->Hide();
-  }
-  // If on Windows, make sure we show a minimized console window
-  // and wait for the user to press enter before quitting.
-#if defined(_MSC_VER)
-  ShowWindow(GetConsoleWindow(), SW_RESTORE);
-  std::cerr << std::endl;
-  system("pause");
-#endif
-  Graphics::Shutdown();
-  exit(-1);
-}
-
 std::unique_ptr<Scene> PromptForScene(
-  const std::string& launchArg, std::string *chosenName = nullptr) {
+  const std::string& launchArg) {
   std::map<
     std::string,
     std::function<std::unique_ptr<dg::Scene>()>> constructors;
@@ -112,177 +81,76 @@ std::unique_ptr<Scene> PromptForScene(
               << "Choose a scene: ";
     std::cin >> sceneName;
     if (std::cin.eof() || sceneName == "exit") {
-      *chosenName = "";
       return nullptr;
     }
     std::cout << std::endl;
   }
-  *chosenName = sceneName;
   return constructors[sceneName]();
 }
 
-#if defined(_WIN32)
-static void FixCurrentDirectory() {
-  // Get the real, full path to this executable, end the string before
-  // the filename itself and then set that as the current directory
-  char currentDir[1024] = {};
-  GetModuleFileName(0, currentDir, 1024);
-  char* lastSlash = strrchr(currentDir, '\\');
-  if (lastSlash) {
-    *lastSlash = '\0';
-    SetCurrentDirectory(currentDir);
+static void RunEngine(std::string sceneName) {
+  std::shared_ptr<Scene> scene = PromptForScene(sceneName);
+  if (scene == nullptr) {
+    return;
   }
-}
+
+  std::shared_ptr<Window> window = nullptr;
+
+  try {
+    window = dg::Window::Open(800, 600, "Drew Graphics");
+    Engine engine(window);
+
+    engine.Initialize();
+    engine.StartScene(scene);
+
+    // Minimize the console window on Windows.
+#ifdef _MSC_VER
+#ifndef DEFAULT_SCENE
+    ShowWindow(GetConsoleWindow(), SW_MINIMIZE);
+#endif
 #endif
 
-#if defined(_DIRECTX)
-static void InitializeWRL() {
-# if (_WIN32_WINNT >= 0x0A00 /*_WIN32_WINNT_WIN10*/)
-  Microsoft::WRL::Wrappers::RoInitializeWrapper initialize(
-      RO_INIT_MULTITHREADED);
-  if (FAILED(initialize)) {
-    terminateWithError("Failed to initialize Windows runtime.");
-  }
-# else
-  HRESULT hr = CoInitializeEx(nullptr, COINITBASE_MULTITHREADED);
-  if (FAILED(hr)) {
-    terminateWithError("Failed to initialize Windows runtime.");
-  }
-# endif
-}
+    while (!engine.ShouldQuit()) {
+      engine.Update();
+    }
+  } catch (const std::exception &e) {
+    std::cerr << e.what() << std::endl;
+    if (window != nullptr) {
+      window->Hide();
+    }
+    // If on Windows, make sure we show a minimized console window
+    // and wait for the user to press enter before quitting.
+#if defined(_MSC_VER)
+    ShowWindow(GetConsoleWindow(), SW_RESTORE);
+    std::cerr << std::endl;
+    system("pause");
 #endif
+    exit(-1);
+  }
+}
 
 #if defined(_OPENGL)
+
 int main(int argc, const char* argv[]) {
+  RunEngine((argc > 1) ? std::string(argv[1]) : "");
+  return 0;
+}
+
 #elif defined(_DIRECTX)
+
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
                    LPSTR lpCmdLine, int nCmdShow) {
+
+  Win32Window::SetHInstance(hInstance);
   Win32Window::CreateConsoleWindow(500, 120, 32, 120);
+
 # if defined(_MSC_VER) & defined(_DEBUG)
   // Enable memory leak detection.
   _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 # endif
-#endif
 
-#if defined(_WIN32)
-  FixCurrentDirectory();
-#endif
-
-#if defined(_DIRECTX)
-  InitializeWRL();
-#endif
-
-  // Find intended scene.
-  std::string sceneName;
-#if defined(_OPENGL)
-  std::string sceneArg = (argc > 1) ? std::string(argv[1]) : "";
-#elif defined(_DIRECTX)
-  std::string sceneArg = std::string(lpCmdLine);
-#endif
-  std::unique_ptr<Scene> scene = PromptForScene(sceneArg, &sceneName);
-  if (scene == nullptr) {
-    return 0;
-  }
-
-  // Create window.
-  try {
-#if defined(_OPENGL)
-    window = dg::OpenGLWindow::Open(800, 600, "Drew Graphics");
-#elif defined(_DIRECTX)
-    window = dg::Win32Window::Open(800, 600, "Drew Graphics", hInstance);
-#endif
-  } catch (const EngineError& e) {
-    terminateWithError(
-        "Failed to open window: " + std::string(e.what()));
-  }
-
-  // Initialize graphics.
-  try {
-    Graphics::Initialize(*window);
-  } catch (const EngineError& e) {
-    terminateWithError(
-        "Failed to initialize graphics: " + std::string(e.what()));
-  }
-
-  // Initialize scene.
-  try {
-    scene->SetWindow(window);
-    scene->Initialize();
-  } catch (const EngineError& e) {
-    std::cerr << "Failed to initialize scene: ";
-    terminateWithError(e.what());
-  }
-
-  // Minimize the console window on Windows.
-#ifdef _MSC_VER
-#ifndef DEFAULT_SCENE
-  ShowWindow(GetConsoleWindow(), SW_MINIMIZE);
-#endif
-#endif
-
-  // Set up timing.
-  dg::Time::Reset();
-  double lastWindowUpdateTime = 0;
-
-  // Application loop.
-  bool cursorWasLocked = false;
-  while(!window->ShouldClose()) {
-    dg::Time::Update();
-    window->PollEvents();
-    try {
-      scene->Update();
-    } catch (const EngineError& e) {
-      std::cerr << "Failed to update scene: ";
-      terminateWithError(e.what());
-    }
-
-    // Handle escape key to release cursor or quit app.
-    if (window->IsKeyJustPressed(dg::Key::ESCAPE) ||
-        window->IsKeyJustPressed(dg::Key::Q)) {
-      if (window->IsCursorLocked()) {
-        cursorWasLocked = true;
-        window->UnlockCursor();
-      } else {
-        window->SetShouldClose(true);
-      }
-    }
-
-    // Handle click to regain cursor focus.
-    if (cursorWasLocked && !window->IsCursorLocked() &&
-        window->IsMouseButtonJustPressed(dg::BUTTON_LEFT)) {
-      window->LockCursor();
-    }
-
-    // Update window title every 0.1 seconds.
-    const float titleUpdateFreq = 0.1f;
-    if (dg::Time::Elapsed > lastWindowUpdateTime + titleUpdateFreq) {
-      if (scene->AutomaticWindowTitle()) {
-#if defined(_OPENGL)
-        std::string platform = "OpenGL";
-#elif defined(_DIRECTX)
-        std::string platform = "DirectX";
-#endif
-        window->SetTitle(((std::ostringstream&)(std::ostringstream()
-          << "Drew Graphics | "
-          << platform << " | "
-          << sceneName << " | "
-          << (int)(1.0 / dg::Time::Delta) << " FPS | "
-          << dg::Time::AverageFrameRate << " average FPS")).str());
-      }
-      lastWindowUpdateTime = dg::Time::Elapsed;
-    }
-
-    window->StartRender();
-    try {
-      scene->RenderFrame();
-    } catch (const EngineError& e) {
-      std::cerr << "Failed to render scene: ";
-      terminateWithError(e.what());
-    }
-    window->FinishRender();
-  }
-
-  Graphics::Shutdown();
-  window = nullptr;
+  RunEngine(std::string(lpCmdLine));
   return 0;
 }
+
+#endif

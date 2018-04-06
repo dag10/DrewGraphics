@@ -75,10 +75,14 @@ void dg::Graphics::Shutdown() {
   }
 }
 
+const std::string &dg::Graphics::GetAPIName() { return apiName; }
+
 #pragma endregion
 
 #pragma region OpenGL Graphics
 #if defined(_OPENGL)
+
+const std::string dg::Graphics::apiName = "OpenGL";
 
 dg::OpenGLGraphics::OpenGLGraphics(Window& window) {}
 
@@ -266,6 +270,8 @@ GLenum dg::OpenGLGraphics::ToGLEnum(
 #pragma endregion
 #pragma region DirectX Graphics
 #if defined(_DIRECTX)
+
+const std::string dg::Graphics::apiName = "DirectX";
 
 dg::DirectXGraphics::DirectXGraphics(Window& window) : window(window) {}
 

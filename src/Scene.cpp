@@ -19,10 +19,10 @@
 #include "dg/vr/VRManager.h"
 #include "dg/vr/VRTrackedObject.h"
 
-dg::BaseScene::BaseScene() : SceneObject() {}
-dg::BaseScene::~BaseScene() {}
+dg::Scene::Scene() : SceneObject() {}
+dg::Scene::~Scene() {}
 
-void dg::BaseScene::Initialize() {
+void dg::Scene::Initialize() {
   defaultRasterizerState = RasterizerState::Default();
 #if defined(_DIRECTX)
   renderingToFrameBufferRasterizerState.SetFlipRenderY(true, true);
@@ -61,7 +61,7 @@ void dg::BaseScene::Initialize() {
   }
 }
 
-void dg::BaseScene::Update() {
+void dg::Scene::Update() {
   // Traverse the scene hierarchy and update all behaviors on all objects.
   std::forward_list<SceneObject*> remainingObjects;
   remainingObjects.push_front((SceneObject*)this);
@@ -78,11 +78,11 @@ void dg::BaseScene::Update() {
   }
 }
 
-void dg::BaseScene::ClearBuffer() {
+void dg::Scene::ClearBuffer() {
   Graphics::Instance->ClearColor(glm::vec3(0));
 }
 
-void dg::BaseScene::RenderFrame() {
+void dg::Scene::RenderFrame() {
   Graphics::Instance->PushRasterizerState(defaultRasterizerState);
 
   ProcessSceneHierarchy();
@@ -109,7 +109,7 @@ void dg::BaseScene::RenderFrame() {
   Graphics::Instance->PopRasterizerState();
 }
 
-void dg::BaseScene::RenderFrame(vr::EVREye eye) {
+void dg::Scene::RenderFrame(vr::EVREye eye) {
   std::shared_ptr<FrameBuffer> framebuffer =
     VRManager::Instance->GetFramebuffer(eye);
   Graphics::Instance->SetRenderTarget(*framebuffer);
@@ -120,7 +120,7 @@ void dg::BaseScene::RenderFrame(vr::EVREye eye) {
   Graphics::Instance->SetRenderTarget(*window);
 }
 
-void dg::BaseScene::RenderFrameBuffer(FrameBuffer &frameBuffer,
+void dg::Scene::RenderFrameBuffer(FrameBuffer &frameBuffer,
                                       const Camera &camera) {
   Graphics::Instance->SetRenderTarget(frameBuffer);
   Graphics::Instance->PushRasterizerState(defaultRasterizerState);
@@ -133,7 +133,7 @@ void dg::BaseScene::RenderFrameBuffer(FrameBuffer &frameBuffer,
   Graphics::Instance->SetRenderTarget(*window);
 }
 
-void dg::BaseScene::ProcessSceneHierarchy() {
+void dg::Scene::ProcessSceneHierarchy() {
   currentModels.clear();
   currentLights.clear();
 
@@ -205,7 +205,7 @@ void dg::BaseScene::ProcessSceneHierarchy() {
   }
 }
 
-void dg::BaseScene::RenderLightShadowMap() {
+void dg::Scene::RenderLightShadowMap() {
   if (shadowCastingLight == nullptr) {
     return;
   }
@@ -249,7 +249,7 @@ void dg::BaseScene::RenderLightShadowMap() {
   shadowCastingLight->SetShadowMap(shadowFrameBuffer->GetDepthTexture());
 }
 
-void dg::BaseScene::DrawScene(
+void dg::Scene::DrawScene(
   const Camera& camera, bool renderForVR, vr::EVREye eye) {
 
   // Render skybox.
@@ -292,7 +292,7 @@ void dg::BaseScene::DrawScene(
   }
 }
 
-void dg::BaseScene::PrepareModelForDraw(
+void dg::Scene::PrepareModelForDraw(
     const Model& model, glm::vec3 cameraPosition, glm::mat4x4 view,
     glm::mat4x4 projection,
     const Light::ShaderData (&lights)[Light::MAX_LIGHTS]) const {
@@ -307,11 +307,11 @@ void dg::BaseScene::PrepareModelForDraw(
   }
 }
 
-bool dg::BaseScene::AutomaticWindowTitle() const {
+bool dg::Scene::AutomaticWindowTitle() const {
   return true;
 }
 
-void dg::BaseScene::DrawHiddenAreaMesh(vr::EVREye eye) {
+void dg::Scene::DrawHiddenAreaMesh(vr::EVREye eye) {
   auto mesh = VRManager::Instance->GetHiddenAreaMesh(eye);
   if (mesh != nullptr && mesh->IsDrawable()) {
     Graphics::Instance->PushRasterizerState(

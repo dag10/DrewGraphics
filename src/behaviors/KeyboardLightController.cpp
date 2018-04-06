@@ -10,15 +10,14 @@
 #include <iostream>
 
 dg::KeyboardLightController::KeyboardLightController(
-  std::weak_ptr<Window> window) : window(window), Behavior() {}
+  std::weak_ptr<Window> window) : Behavior(), window(window) {}
 
 dg::KeyboardLightController::KeyboardLightController(
     std::weak_ptr<Window> window,
     Key ambientModifierKey, Key diffuseModifierKey, Key specularModifierKey)
-  : window(window), ambientModifierKey(ambientModifierKey),
+  : Behavior(), ambientModifierKey(ambientModifierKey),
     diffuseModifierKey(diffuseModifierKey),
-    specularModifierKey(specularModifierKey),
-    Behavior() {}
+    specularModifierKey(specularModifierKey), window(window) {}
 
 void dg::KeyboardLightController::Update() {
   Behavior::Update();

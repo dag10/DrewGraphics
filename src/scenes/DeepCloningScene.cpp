@@ -201,7 +201,7 @@ std::shared_ptr<dg::SceneObject> dg::DeepCloningScene::BuildWidget(
 dg::DeepCloning::WidgetBehavior::WidgetBehavior(
     std::weak_ptr<Window> window,
     std::weak_ptr<Model> button, std::weak_ptr<Light> light)
-  : window(window), button(button), light(light), Behavior() {
+  : Behavior(), window(window), button(button), light(light) {
 }
 
 void WidgetBehavior::Start() {

@@ -7,11 +7,11 @@
 #include "dg/vr/VRManager.h"
 
 dg::VRTrackedObject::VRTrackedObject(vr::ETrackedControllerRole role)
-  : role(role), Behavior() {}
+  : Behavior(), role(role) {}
 
 dg::VRTrackedObject::VRTrackedObject(int deviceIndex)
-  : role(vr::ETrackedControllerRole::TrackedControllerRole_Invalid),
-  deviceIndex(deviceIndex), Behavior() {}
+  : Behavior(), role(vr::ETrackedControllerRole::TrackedControllerRole_Invalid),
+  deviceIndex(deviceIndex) {}
 
 dg::VRTrackedObject::~VRTrackedObject() {
   if (VRManager::Instance != nullptr) {

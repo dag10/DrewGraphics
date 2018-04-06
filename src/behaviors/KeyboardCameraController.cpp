@@ -10,7 +10,7 @@ dg::KeyboardCameraController::KeyboardCameraController(
     std::weak_ptr<Window> window) : window(window) {}
 
 dg::KeyboardCameraController::KeyboardCameraController(
-    std::weak_ptr<Window> window, float speed) : window(window), speed(speed) {}
+    std::weak_ptr<Window> window, float speed) : speed(speed), window(window) {}
 
 void dg::KeyboardCameraController::Start() {
   Behavior::Start();
@@ -28,7 +28,6 @@ void dg::KeyboardCameraController::Update() {
   auto window = this->window.lock();
   if (!sceneObject || !window) return;
 
-  const float rotationSpeed = 90; // degrees per second
   const float cursorRotationSpeed = 0.3f; // degrees per cursor pixels moved
 
   // If C is tapped, print out the sceneObject position and orientation.

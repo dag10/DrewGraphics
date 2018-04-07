@@ -37,7 +37,7 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{870B3FE2-59E4-46C3-B079-EA79D8C735BF}</ProjectGuid>
-    <RootNamespace>DrewGraphics</RootNamespace>
+    <RootNamespace>Engine</RootNamespace>
     <WindowsTargetPlatformVersion>10.0.15063.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -128,44 +128,60 @@
     <LibraryPath>$(SolutionDir)external\glfw\build\src\Debug;$(LibraryPath);$(SolutionDir)external\openvr\lib\win32</LibraryPath>
     <ReferencePath>$(SolutionDir)external\openvr\bin\win32;$(ReferencePath)</ReferencePath>
     <ExecutablePath>$(ExecutablePath)</ExecutablePath>
+    <OutDir>$(ProjectDir)bin\$(Configuration)\$(Platform)\</OutDir>
+    <IntDir>$(ProjectDir)obj\$(Configuration)\$(Platform)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug_DX|Win32'">
     <IncludePath>$(SolutionDir)external\glm;$(ProjectDir)include;$(SolutionDir)external\openvr\headers;$(IncludePath)</IncludePath>
     <LibraryPath>$(LibraryPath);$(SolutionDir)external\openvr\lib\win32</LibraryPath>
     <ReferencePath>$(SolutionDir)external\openvr\bin\win32;$(ReferencePath)</ReferencePath>
     <ExecutablePath>$(ExecutablePath)</ExecutablePath>
+    <OutDir>$(ProjectDir)bin\$(Configuration)\$(Platform)\</OutDir>
+    <IntDir>$(ProjectDir)obj\$(Configuration)\$(Platform)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release_GL|Win32'">
     <IncludePath>$(SolutionDir)external\glfw\include;$(SolutionDir)external\glm;$(ProjectDir)include;$(SolutionDir)external\openvr\headers;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)external\glfw\build\src\Release;$(LibraryPath);$(SolutionDir)external\openvr\lib\win32</LibraryPath>
     <ReferencePath>$(SolutionDir)external\openvr\bin\win32;$(ReferencePath)</ReferencePath>
     <ExecutablePath>$(ExecutablePath)</ExecutablePath>
+    <OutDir>$(ProjectDir)bin\$(Configuration)\$(Platform)\</OutDir>
+    <IntDir>$(ProjectDir)obj\$(Configuration)\$(Platform)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release_DX|Win32'">
     <IncludePath>$(SolutionDir)external\glm;$(ProjectDir)include;$(SolutionDir)external\openvr\headers;$(IncludePath)</IncludePath>
     <LibraryPath>$(LibraryPath);$(SolutionDir)external\openvr\lib\win32</LibraryPath>
     <ReferencePath>$(SolutionDir)external\openvr\bin\win32;$(ReferencePath)</ReferencePath>
     <ExecutablePath>$(ExecutablePath)</ExecutablePath>
+    <OutDir>$(ProjectDir)bin\$(Configuration)\$(Platform)\</OutDir>
+    <IntDir>$(ProjectDir)obj\$(Configuration)\$(Platform)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug_GL|x64'">
     <IncludePath>$(SolutionDir)external\glfw\include;$(SolutionDir)external\glm;$(ProjectDir)include;$(SolutionDir)external\openvr\headers;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)external\glfw\build\src\Debug;$(LibraryPath);$(SolutionDir)external\openvr\lib\win64</LibraryPath>
     <ReferencePath>$(SolutionDir)external\openvr\bin\win64;$(ReferencePath)</ReferencePath>
+    <OutDir>$(ProjectDir)bin\$(Configuration)\$(Platform)\</OutDir>
+    <IntDir>$(ProjectDir)obj\$(Configuration)\$(Platform)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug_DX|x64'">
     <IncludePath>$(SolutionDir)external\glm;$(ProjectDir)include;$(SolutionDir)external\openvr\headers;$(IncludePath)</IncludePath>
     <LibraryPath>$(LibraryPath);$(SolutionDir)external\openvr\lib\win64</LibraryPath>
     <ReferencePath>$(SolutionDir)external\openvr\bin\win64;$(ReferencePath)</ReferencePath>
+    <OutDir>$(ProjectDir)bin\$(Configuration)\$(Platform)\</OutDir>
+    <IntDir>$(ProjectDir)obj\$(Configuration)\$(Platform)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release_GL|x64'">
     <IncludePath>$(SolutionDir)external\glfw\include;$(SolutionDir)external\glm;$(ProjectDir)include;$(SolutionDir)external\openvr\headers;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)external\glfw\build\src\Release;$(LibraryPath);$(SolutionDir)external\openvr\lib\win64</LibraryPath>
     <ReferencePath>$(SolutionDir)external\openvr\bin\win64;$(ReferencePath)</ReferencePath>
+    <OutDir>$(ProjectDir)bin\$(Configuration)\$(Platform)\</OutDir>
+    <IntDir>$(ProjectDir)obj\$(Configuration)\$(Platform)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release_DX|x64'">
     <IncludePath>$(SolutionDir)external\glm;$(ProjectDir)include;$(SolutionDir)external\openvr\headers;$(IncludePath)</IncludePath>
     <LibraryPath>$(LibraryPath);$(SolutionDir)external\openvr\lib\win64</LibraryPath>
     <ReferencePath>$(SolutionDir)external\openvr\bin\win64;$(ReferencePath)</ReferencePath>
+    <OutDir>$(ProjectDir)bin\$(Configuration)\$(Platform)\</OutDir>
+    <IntDir>$(ProjectDir)obj\$(Configuration)\$(Platform)\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug_GL|Win32'">
     <ClCompile>

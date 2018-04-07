@@ -4,7 +4,13 @@
 
 #include "dg/Engine.h"
 #include "dg/Scene.h"
+#include "dg/Utils.h"
 #include "dg/Window.h"
+
+#if defined(__APPLE__)
+#include <mach-o/dyld.h>
+#include <unistd.h>
+#endif
 
 dg::BaseEngine *dg::BaseEngine::instance = nullptr;
 
@@ -136,16 +142,27 @@ void dg::BaseEngine::StartNextScene() {
 }
 
 void dg::BaseEngine::FixCurrentDirectory() {
+  char currentDir[2048] = {};
+
 #if defined(_WIN32)
-  // Get the real, full path to this executable, end the string before
-  // the filename itself and then set that as the current directory
-  char currentDir[1024] = {};
   GetModuleFileName(0, currentDir, 1024);
-  char* lastSlash = strrchr(currentDir, '\\');
-  if (lastSlash) {
-    *lastSlash = '\0';
-    SetCurrentDirectory(currentDir);
+#elif defined(__APPLE__)
+  uint32_t size = sizeof(currentDir);
+  if (_NSGetExecutablePath(currentDir, &size) != 0) {
+    throw std::runtime_error("Cannot find executable path");
   }
+#endif
+
+  char* lastSlash = strrchr(currentDir, dg::PathSeparator());
+  if (lastSlash == nullptr) {
+    throw std::runtime_error("Cannot determine executable directory");
+  }
+  *lastSlash = '\0';
+
+#if defined(_WIN32)
+  SetCurrentDirectory(currentDir);
+#elif defined(__APPLE__)
+  chdir(currentDir);
 #endif
 }
 

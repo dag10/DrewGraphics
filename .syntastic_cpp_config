@@ -1,6 +1,0 @@
--std=c++1z
--Iinclude/
--Iexternal/openvr/headers
--Iexternal/glm
--D_OPENGL
-

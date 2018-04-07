@@ -1,0 +1,7 @@
+-std=c++1z
+-Iinclude/
+-I../Engine/include/
+-I../external/openvr/headers
+-I../external/glm
+-D_OPENGL
+

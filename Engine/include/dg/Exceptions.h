@@ -18,8 +18,9 @@ class EngineError : public std::runtime_error {
 
 class OpenVRError : public EngineError {
   public:
-    OpenVRError(vr::EVRInitError error) : EngineError(
-      VR_GetVRInitErrorAsSymbol(error)) { };
+    OpenVRError(const std::string &msg) : EngineError(msg){};
+    OpenVRError(vr::EVRInitError error)
+        : EngineError(VR_GetVRInitErrorAsSymbol(error)){};
 };
 
 class ShaderCompileError : public EngineError {

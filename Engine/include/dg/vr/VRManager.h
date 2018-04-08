@@ -32,6 +32,7 @@ namespace dg {
       virtual ~VRManager();
 
       virtual void Initialize();
+      void StartOpenVR();
 
       // To be called by the scene when the update is finished and
       // it's ready to render. This will block until OpenVR's "running start".
@@ -62,7 +63,6 @@ namespace dg {
         vr::RenderModel_t *data = nullptr;
       };
 
-      void StartOpenVR();
       void CreateFramebuffers();
       void UpdatePoses();
 

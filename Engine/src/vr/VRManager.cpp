@@ -20,16 +20,15 @@ void dg::VRManager::Initialize() {
   }
 
   Instance = this;
-  StartOpenVR();
 }
 
 void dg::VRManager::StartOpenVR() {
   if (!vr::VR_IsRuntimeInstalled()) {
-    throw std::runtime_error("Please install the OpenVR Runtime.");
+    throw OpenVRError("Please install the OpenVR Runtime.");
   }
 
   if (!vr::VR_IsHmdPresent()) {
-    throw std::runtime_error("No VR headset is detected.");
+    throw OpenVRError("No VR headset is detected.");
   }
 
   vr::HmdError hmdError;

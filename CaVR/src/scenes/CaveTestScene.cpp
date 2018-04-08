@@ -13,6 +13,7 @@
 #include "dg/Skybox.h"
 #include "dg/Texture.h"
 #include "dg/Transform.h"
+#include "dg/behaviors/KeyboardCameraController.h"
 #include "dg/behaviors/KeyboardLightController.h"
 #include "dg/materials/StandardMaterial.h"
 #include "dg/vr/VRManager.h"
@@ -73,6 +74,16 @@ void cavr::CaveTestScene::Initialize() {
           vr::ETrackedControllerRole::TrackedControllerRole_RightHand));
   dg::Behavior::Attach(rightController, std::make_shared<dg::VRRenderModel>());
   vrContainer->AddChild(rightController);
+
+  // If VR could not enable, position the camera in a useful place for
+  // development and make it controllable with keyboard and mouse.
+  if (!enableVR) {
+    window->LockCursor();
+    mainCamera->transform = dg::Transform::T(glm::vec3(2.f, 1.83f, -1.2f));
+    mainCamera->LookAtPoint(glm::vec3(0, 0, 0));
+    dg::Behavior::Attach(
+        mainCamera, std::make_shared<dg::KeyboardCameraController>(window));
+  }
 }
 
 void cavr::CaveTestScene::Update() {

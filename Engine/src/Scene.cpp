@@ -8,6 +8,7 @@
 #include <iostream>
 #include <vector>
 #include "dg/Camera.h"
+#include "dg/Exceptions.h"
 #include "dg/FrameBuffer.h"
 #include "dg/Graphics.h"
 #include "dg/Lights.h"
@@ -29,6 +30,23 @@ void dg::Scene::Initialize() {
 #endif
 
   if (enableVR) {
+    // Create container for OpenVR behaviors and tracked devices.
+    auto vrContainer = std::make_shared<SceneObject>();
+    Behavior::Attach(vrContainer, std::make_shared<VRManager>());
+
+    // Try to initialize OpenVR. If that fails, fall back to non-VR mode.
+    try {
+      VRManager::Instance->StartOpenVR();
+    } catch (const OpenVRError &e) {
+      std::cerr << "Failed to initialize VR: " << e.what() << std::endl
+                << std::endl;
+      enableVR = false;
+      goto vrFailed;
+    }
+
+    this->vrContainer = vrContainer;
+    AddChild(vrContainer);
+
     hiddenAreaMeshMaterial = std::make_shared<ScreenQuadMaterial>(
       glm::vec3(0), glm::vec2(2), glm::vec2(-1));
     hiddenAreaMeshMaterial->rasterizerOverride.SetDepthFunc(
@@ -41,12 +59,8 @@ void dg::Scene::Initialize() {
     // "running start" in 90hz anyway.
     glfwSwapInterval(0);
 #endif
-
-    // Create container for OpenVR behaviors and tracked devices.
-    vrContainer = std::make_shared<SceneObject>();
-    Behavior::Attach(vrContainer, std::make_shared<VRManager>());
-    AddChild(vrContainer);
   }
+vrFailed:
 
   // Create camera.
   mainCamera = std::make_shared<Camera>();

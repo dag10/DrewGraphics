@@ -5,7 +5,7 @@
 #pragma once
 
 #if defined(_OPENGL)
-#include "dg/glad/glad.h"
+#include "dg/opengl/glad/glad.h"
 #elif defined(_DIRECTX)
 #include <d3d11.h>
 #endif

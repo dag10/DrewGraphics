@@ -7,7 +7,7 @@
 #include <glm/glm.hpp>
 #include <string>
 #include <vector>
-#include "dg/glad/glad.h"
+#include "dg/opengl/glad/glad.h"
 
 namespace dg {
 

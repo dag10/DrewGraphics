@@ -7,7 +7,7 @@
 #include <stdexcept>
 #include <string>
 #include <openvr.h>
-#include "dg/glad/glad.h"
+#include "dg/opengl/glad/glad.h"
 
 namespace dg {
 

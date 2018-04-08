@@ -12,7 +12,7 @@
 #include "dg/RasterizerState.h"
 
 #if defined(_OPENGL)
-#include "dg/glad/glad.h"
+#include "dg/opengl/glad/glad.h"
 
 #include <GLFW/glfw3.h>
 #elif defined(_DIRECTX)

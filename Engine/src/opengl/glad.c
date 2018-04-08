@@ -7,7 +7,7 @@
     APIs: gl=3.3
     Profile: compatibility
     Extensions:
-        
+
     Loader: True
     Local files: False
     Omit khrplatform: False
@@ -21,7 +21,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "dg/glad/glad.h"
+#include "dg/opengl/glad/glad.h"
 
 static void* get_proc(const char *namez);
 

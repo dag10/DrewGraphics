@@ -353,6 +353,32 @@ xcopy /d /y /e "$(ProjectDir)assets" "$(OutDir)assets"</Command>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\scenes\BoundsScene.cpp" />
+    <ClCompile Include="src\scenes\CanvasTestScene.cpp" />
+    <ClCompile Include="src\scenes\DeepCloningScene.cpp" />
+    <ClCompile Include="src\scenes\MeshesScene.cpp" />
+    <ClCompile Include="src\scenes\PortalScene.cpp" />
+    <ClCompile Include="src\scenes\QuadScene.cpp" />
+    <ClCompile Include="src\scenes\RobotScene.cpp" />
+    <ClCompile Include="src\scenes\ShadowScene.cpp" />
+    <ClCompile Include="src\scenes\SimpleScene.cpp" />
+    <ClCompile Include="src\scenes\TexturesScene.cpp" />
+    <ClCompile Include="src\scenes\TransparencyScene.cpp" />
+    <ClCompile Include="src\scenes\VRScene.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="include\dg\scenes\BoundsScene.h" />
+    <ClInclude Include="include\dg\scenes\CanvasTestScene.h" />
+    <ClInclude Include="include\dg\scenes\DeepCloningScene.h" />
+    <ClInclude Include="include\dg\scenes\MeshesScene.h" />
+    <ClInclude Include="include\dg\scenes\PortalScene.h" />
+    <ClInclude Include="include\dg\scenes\QuadScene.h" />
+    <ClInclude Include="include\dg\scenes\RobotScene.h" />
+    <ClInclude Include="include\dg\scenes\ShadowScene.h" />
+    <ClInclude Include="include\dg\scenes\SimpleScene.h" />
+    <ClInclude Include="include\dg\scenes\TexturesScene.h" />
+    <ClInclude Include="include\dg\scenes\TransparencyScene.h" />
+    <ClInclude Include="include\dg\scenes\VRScene.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

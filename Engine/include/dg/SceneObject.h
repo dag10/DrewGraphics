@@ -3,7 +3,7 @@
 //
 #pragma once
 
-#include "dg/glad/glad.h"
+#include "dg/opengl/glad/glad.h"
 
 #include "dg/Transform.h"
 #include "dg/Behavior.h"

@@ -438,7 +438,6 @@
     <None Include="assets\shaders\includes\vertex_main.glsl">
       <Filter>Shaders\OpenGL\Includes</Filter>
     </None>
-    <None Include="packages.config" />
     <None Include="include\dg\RasterizerStateAttributes.def">
       <Filter>Header Files</Filter>
     </None>

@@ -2,10 +2,6 @@
 //  Texture.cpp
 //
 
-#if defined(_DIRECTX)
-#include <DDSTextureLoader.h>
-#endif
-
 #include <cassert>
 #include <iostream>
 #include <string>

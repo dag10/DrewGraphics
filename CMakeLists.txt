@@ -21,3 +21,4 @@ endif ()
 
 add_subdirectory(Engine)
 add_subdirectory(Experiments)
+add_subdirectory(CaVR)

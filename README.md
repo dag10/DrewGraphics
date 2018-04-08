@@ -10,14 +10,20 @@ I added in DirectX 11 as an optional graphics API.
 
 ## Organization
 
-There are two main projects in their respective subdirectories: **Engine** and **Experiments**.
+There are three main projects in their respective subdirectories.
 
-**Engine** is the core engine, compiled to a library. **Experiments** is a set of scenes (think *Unity* scenes)
-which are essentially mini-projects. Scenes are chosen during runtime by passing in the scene name as the
-launch argument, or typing it into standard input.
+**Engine** is the core engine, compiled to a library.
 
-Some scenes have a VR variant (designated by the -vr suffix). These scenes rely on an OpenVR-supported headset
-being connected.
+**Experiments** is a set of scenes (think *Unity* scenes) which are essentially mini-projects.
+Scenes are chosen during runtime by passing in the scene name as the launch argument, or typing
+it into standard input.
+
+Some scenes have a VR variant (designated by the -vr suffix). These scenes rely on an
+OpenVR-supported headset being connected.
+
+**CaVR** is a simple proof-of-concept VR game I'm developing with the engine. In it, a small
+spaceship attached to one of the VR controllers has to navigate an infinite and ever-shrinking
+cave while collecting fuel cells and avoiding collision with the walls.
 
 ## Getting started
 

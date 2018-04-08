@@ -14,17 +14,13 @@
 #include <GLFW/glfw3.h>
 #endif
 
-// TODO: Delete unused includes.
 #if defined(_WIN32)
 #include <Windows.h>
 #endif
 
-// TODO: Delete unused includes.
 #if defined(_DIRECTX)
 #include <Windows.Foundation.h>
 #include <wrl\wrappers\corewrappers.h>
-#include <wrl\client.h>
-#include <stdio.h>
 #pragma comment(lib, "runtimeobject.lib")
 #endif
 

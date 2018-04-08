@@ -30,9 +30,6 @@
     <ClCompile Include="src\scenes\CanvasTestScene.cpp">
       <Filter>Source Files\scenes</Filter>
     </ClCompile>
-    <ClCompile Include="src\scenes\DeepCloningScene.cpp">
-      <Filter>Source Files\scenes</Filter>
-    </ClCompile>
     <ClCompile Include="src\scenes\MeshesScene.cpp">
       <Filter>Source Files\scenes</Filter>
     </ClCompile>
@@ -60,15 +57,15 @@
     <ClCompile Include="src\scenes\VRScene.cpp">
       <Filter>Source Files\scenes</Filter>
     </ClCompile>
+    <ClCompile Include="src\scenes\WidgetScene.cpp">
+      <Filter>Source Files\scenes</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\dg\scenes\BoundsScene.h">
       <Filter>Header Files\scenes</Filter>
     </ClInclude>
     <ClInclude Include="include\dg\scenes\CanvasTestScene.h">
-      <Filter>Header Files\scenes</Filter>
-    </ClInclude>
-    <ClInclude Include="include\dg\scenes\DeepCloningScene.h">
       <Filter>Header Files\scenes</Filter>
     </ClInclude>
     <ClInclude Include="include\dg\scenes\MeshesScene.h">
@@ -96,6 +93,9 @@
       <Filter>Header Files\scenes</Filter>
     </ClInclude>
     <ClInclude Include="include\dg\scenes\VRScene.h">
+      <Filter>Header Files\scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="include\dg\scenes\WidgetScene.h">
       <Filter>Header Files\scenes</Filter>
     </ClInclude>
   </ItemGroup>

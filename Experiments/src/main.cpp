@@ -9,10 +9,8 @@
 #include "dg/Engine.h"
 #include "dg/Exceptions.h"
 #include "dg/Window.h"
-
 #include "dg/scenes/BoundsScene.h"
 #include "dg/scenes/CanvasTestScene.h"
-#include "dg/scenes/DeepCloningScene.h"
 #include "dg/scenes/MeshesScene.h"
 #include "dg/scenes/PortalScene.h"
 #include "dg/scenes/QuadScene.h"
@@ -22,6 +20,7 @@
 #include "dg/scenes/TexturesScene.h"
 #include "dg/scenes/TransparencyScene.h"
 #include "dg/scenes/VRScene.h"
+#include "dg/scenes/WidgetScene.h"
 
 using namespace dg;
 
@@ -33,8 +32,8 @@ std::unique_ptr<Scene> PromptForScene(
   constructors["portal"]       = dg::PortalScene::Make;
   constructors["shadows"]      = dg::ShadowScene::Make;
   constructors["simple"]       = dg::SimpleScene::Make;
-  constructors["cloning"]      = dg::DeepCloningScene::Make;
-  constructors["cloning-vr"]   = dg::DeepCloningScene::MakeVR;
+  constructors["widget"]       = dg::WidgetScene::Make;
+  constructors["widget-vr"]    = dg::WidgetScene::MakeVR;
   constructors["textures"]     = dg::TexturesScene::Make;
   constructors["meshes"]       = dg::MeshesScene::Make;
   constructors["meshes-vr"]    = dg::MeshesScene::MakeVR;

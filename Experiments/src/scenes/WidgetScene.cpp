@@ -1,8 +1,8 @@
 //
-//  scenes/DeepCloningScene.cpp
+//  scenes/WidgetScene.cpp
 //
 
-#include "dg/scenes/DeepCloningScene.h"
+#include "dg/scenes/WidgetScene.h"
 
 #include <forward_list>
 #include <glm/glm.hpp>
@@ -20,23 +20,23 @@
 #include "dg/behaviors/KeyboardLightController.h"
 #include "dg/materials/StandardMaterial.h"
 
-using namespace dg::DeepCloning;
+using namespace dg::Widget;
 
 #pragma region Scene
 
-std::unique_ptr<dg::DeepCloningScene> dg::DeepCloningScene::Make() {
-  return std::unique_ptr<dg::DeepCloningScene>(new dg::DeepCloningScene(false));
+std::unique_ptr<dg::WidgetScene> dg::WidgetScene::Make() {
+  return std::unique_ptr<dg::WidgetScene>(new dg::WidgetScene(false));
 }
 
-std::unique_ptr<dg::DeepCloningScene> dg::DeepCloningScene::MakeVR() {
-  return std::unique_ptr<dg::DeepCloningScene>(new dg::DeepCloningScene(true));
+std::unique_ptr<dg::WidgetScene> dg::WidgetScene::MakeVR() {
+  return std::unique_ptr<dg::WidgetScene>(new dg::WidgetScene(true));
 }
 
-dg::DeepCloningScene::DeepCloningScene(bool enableVR) : Scene() {
+dg::WidgetScene::WidgetScene(bool enableVR) : Scene() {
   this->enableVR = enableVR;
 }
 
-void dg::DeepCloningScene::Initialize() {
+void dg::WidgetScene::Initialize() {
   Scene::Initialize();
 
   // Lock window cursor to center.
@@ -137,7 +137,7 @@ void dg::DeepCloningScene::Initialize() {
   }
 }
 
-std::shared_ptr<dg::SceneObject> dg::DeepCloningScene::BuildWidget(
+std::shared_ptr<dg::SceneObject> dg::WidgetScene::BuildWidget(
     std::shared_ptr<Window> window, Key key, glm::vec3 color, bool momentary) {
   auto widget = std::make_shared<SceneObject>();
 
@@ -198,7 +198,7 @@ std::shared_ptr<dg::SceneObject> dg::DeepCloningScene::BuildWidget(
 #pragma endregion
 #pragma region WidgetBehavior
 
-dg::DeepCloning::WidgetBehavior::WidgetBehavior(
+dg::Widget::WidgetBehavior::WidgetBehavior(
     std::weak_ptr<Window> window,
     std::weak_ptr<Model> button, std::weak_ptr<Light> light)
   : Behavior(), window(window), button(button), light(light) {

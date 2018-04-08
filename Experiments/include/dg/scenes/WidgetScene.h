@@ -1,5 +1,5 @@
 //
-//  scenes/DeepCloningScene.h
+//  scenes/WidgetScene.h
 //
 
 #pragma once
@@ -15,27 +15,27 @@ namespace dg {
   class Model;
   class Window;
 
-  class DeepCloningScene : public Scene {
+  class WidgetScene : public Scene {
 
     public:
 
-      static std::unique_ptr<DeepCloningScene> Make();
-      static std::unique_ptr<DeepCloningScene> MakeVR();
+      static std::unique_ptr<WidgetScene> Make();
+      static std::unique_ptr<WidgetScene> MakeVR();
 
 
       virtual void Initialize();
 
     private:
 
-      DeepCloningScene(bool enableVR);
+      WidgetScene(bool enableVR);
 
       static std::shared_ptr<SceneObject> BuildWidget(
           std::shared_ptr<Window> window, Key key, glm::vec3 color,
           bool momentary = false);
 
-  }; // class DeepCloningScene
+  }; // class WidgetScene
 
-  namespace DeepCloning {
+  namespace Widget {
 
     class WidgetBehavior : public Behavior {
 
@@ -64,6 +64,6 @@ namespace dg {
 
     }; // class WidgetBehavior
 
-  } // namespace DeepCloning
+  } // namespace Widget
 
 } // namespace dg

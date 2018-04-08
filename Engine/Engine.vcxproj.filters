@@ -363,5 +363,6 @@
     <None Include="assets\shaders\includes\shared_head.glsl">
       <Filter>Shaders\OpenGL\Includes</Filter>
     </None>
+    <None Include="packages.config" />
   </ItemGroup>
 </Project>

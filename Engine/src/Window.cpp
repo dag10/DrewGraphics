@@ -336,9 +336,33 @@ void dg::OpenGLWindow::SetClientSize(glm::vec2 size) {
 glm::vec2 dg::OpenGLWindow::GetContentScale() const {
   float x, y;
   if (glfwWindow == nullptr) {
+#if GLFW_VERSION_MAJOR == 3 && GLFW_VERSION_MINOR >= 3
     glfwGetMonitorContentScale(glfwGetPrimaryMonitor(), &x, &y);
+#else
+    GLFWmonitor *monitor = glfwGetPrimaryMonitor();
+    const GLFWvidmode *mode = glfwGetVideoMode(monitor);
+    int widthMM, heightMM;
+    glfwGetMonitorPhysicalSize(monitor, &widthMM, &heightMM);
+    const double dpiWidth = mode->width / (widthMM / 25.4);
+    const double dpiHeight = mode->height / (heightMM / 25.4);
+    const double defaultDPI = 96;
+    x = (float)(dpiWidth / defaultDPI);
+    y = (float)(dpiHeight / defaultDPI);
+#endif
   } else {
+#if GLFW_VERSION_MAJOR == 3 && GLFW_VERSION_MINOR >= 3
     glfwGetWindowContentScale(glfwWindow, &x, &y);
+#else
+    glm::vec2 framebufferSize;
+    int fbWidth;
+    int fbHeight;
+    int windowWidth;
+    int windowHeight;
+    glfwGetFramebufferSize(glfwWindow, &fbWidth, &fbHeight);
+    glfwGetWindowSize(glfwWindow, &windowWidth, &windowHeight);
+    x = (float)(fbWidth / windowWidth);
+    y = (float)(fbHeight / windowHeight);
+#endif
   }
   return glm::vec2(x, y);
 }

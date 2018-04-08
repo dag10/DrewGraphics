@@ -2,19 +2,6 @@
 //  main.cpp
 //
 
-// TODO: Delete unused includes.
-#if defined(_WIN32)
-#include <Windows.h>
-#endif
-
-// TODO: Delete unused includes.
-#if defined(_DIRECTX)
-#include <Windows.Foundation.h>
-#include <wrl\wrappers\corewrappers.h>
-#include <wrl\client.h>
-#include <stdio.h>
-#endif
-
 #include <functional>
 #include <iostream>
 #include <map>
@@ -132,8 +119,6 @@ static void RunEngine(std::string sceneName) {
 #if defined(_OPENGL)
 
 int main(int argc, const char* argv[]) {
-  std::cout << "TODO: Port all Experimental scenes to Experiments project."
-            << std::endl << std::endl;
   RunEngine((argc > 1) ? std::string(argv[1]) : "");
   return 0;
 }

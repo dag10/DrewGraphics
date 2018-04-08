@@ -124,8 +124,8 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug_GL|Win32'">
-    <IncludePath>$(SolutionDir)external\glfw\include;$(SolutionDir)external\glm;$(ProjectDir)include;$(SolutionDir)external\openvr\headers;$(SolutionDir)Engine\include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)external\glfw\build\src\Debug;$(LibraryPath);$(SolutionDir)external\openvr\lib\win32;$(SolutionDir)Engine\bin\$(Configuration)\$(Platform)</LibraryPath>
+    <IncludePath>$(SolutionDir)external\glm;$(ProjectDir)include;$(SolutionDir)external\openvr\headers;$(SolutionDir)Engine\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(LibraryPath);$(SolutionDir)external\openvr\lib\win32;$(SolutionDir)Engine\bin\$(Configuration)\$(Platform)</LibraryPath>
     <ReferencePath>$(SolutionDir)external\openvr\bin\win32;$(ReferencePath)</ReferencePath>
     <ExecutablePath>$(ExecutablePath)</ExecutablePath>
     <OutDir>$(ProjectDir)bin\$(Configuration)\$(Platform)\</OutDir>
@@ -140,8 +140,8 @@
     <IntDir>$(ProjectDir)obj\$(Configuration)\$(Platform)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release_GL|Win32'">
-    <IncludePath>$(SolutionDir)external\glfw\include;$(SolutionDir)external\glm;$(ProjectDir)include;$(SolutionDir)external\openvr\headers;$(SolutionDir)Engine\include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)external\glfw\build\src\Release;$(LibraryPath);$(SolutionDir)external\openvr\lib\win32;$(SolutionDir)Engine\bin\$(Configuration)\$(Platform)</LibraryPath>
+    <IncludePath>$(SolutionDir)external\glm;$(ProjectDir)include;$(SolutionDir)external\openvr\headers;$(SolutionDir)Engine\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(LibraryPath);$(SolutionDir)external\openvr\lib\win32;$(SolutionDir)Engine\bin\$(Configuration)\$(Platform)</LibraryPath>
     <ReferencePath>$(SolutionDir)external\openvr\bin\win32;$(ReferencePath)</ReferencePath>
     <ExecutablePath>$(ExecutablePath)</ExecutablePath>
     <OutDir>$(ProjectDir)bin\$(Configuration)\$(Platform)\</OutDir>
@@ -156,8 +156,8 @@
     <IntDir>$(ProjectDir)obj\$(Configuration)\$(Platform)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug_GL|x64'">
-    <IncludePath>$(SolutionDir)external\glfw\include;$(SolutionDir)external\glm;$(ProjectDir)include;$(SolutionDir)external\openvr\headers;$(SolutionDir)Engine\include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)external\glfw\build\src\Debug;$(LibraryPath);$(SolutionDir)external\openvr\lib\win64;$(SolutionDir)Engine\bin\$(Configuration)\$(Platform)</LibraryPath>
+    <IncludePath>$(SolutionDir)external\glm;$(ProjectDir)include;$(SolutionDir)external\openvr\headers;$(SolutionDir)Engine\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(LibraryPath);$(SolutionDir)external\openvr\lib\win64;$(SolutionDir)Engine\bin\$(Configuration)\$(Platform)</LibraryPath>
     <ReferencePath>$(SolutionDir)external\openvr\bin\win64;$(ReferencePath)</ReferencePath>
     <OutDir>$(ProjectDir)bin\$(Configuration)\$(Platform)\</OutDir>
     <IntDir>$(ProjectDir)obj\$(Configuration)\$(Platform)\</IntDir>
@@ -170,8 +170,8 @@
     <IntDir>$(ProjectDir)obj\$(Configuration)\$(Platform)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release_GL|x64'">
-    <IncludePath>$(SolutionDir)external\glfw\include;$(SolutionDir)external\glm;$(ProjectDir)include;$(SolutionDir)external\openvr\headers;$(SolutionDir)Engine\include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)external\glfw\build\src\Release;$(LibraryPath);$(SolutionDir)external\openvr\lib\win64;$(SolutionDir)Engine\bin\$(Configuration)\$(Platform)</LibraryPath>
+    <IncludePath>$(SolutionDir)external\glm;$(ProjectDir)include;$(SolutionDir)external\openvr\headers;$(SolutionDir)Engine\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(LibraryPath);$(SolutionDir)external\openvr\lib\win64;$(SolutionDir)Engine\bin\$(Configuration)\$(Platform)</LibraryPath>
     <ReferencePath>$(SolutionDir)external\openvr\bin\win64;$(ReferencePath)</ReferencePath>
     <OutDir>$(ProjectDir)bin\$(Configuration)\$(Platform)\</OutDir>
     <IntDir>$(ProjectDir)obj\$(Configuration)\$(Platform)\</IntDir>
@@ -194,7 +194,7 @@
     </ClCompile>
     <Link />
     <Link>
-      <AdditionalDependencies>Engine.lib;opengl32.lib;glfw3.lib;openvr_api.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Engine.lib;opengl32.lib;openvr_api.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
@@ -234,7 +234,7 @@ xcopy /d /y /e "$(ProjectDir)assets" "$(OutDir)assets"</Command>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>Engine.lib;opengl32.lib;glfw3.lib;openvr_api.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Engine.lib;opengl32.lib;openvr_api.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
@@ -276,7 +276,7 @@ xcopy /d /y /e "$(ProjectDir)assets" "$(OutDir)assets"</Command>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>Engine.lib;opengl32.lib;glfw3.lib;openvr_api.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Engine.lib;opengl32.lib;openvr_api.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
@@ -320,7 +320,7 @@ xcopy /d /y /e "$(ProjectDir)assets" "$(OutDir)assets"</Command>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>Engine.lib;opengl32.lib;glfw3.lib;openvr_api.lib;openvr_api.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Engine.lib;opengl32.lib;openvr_api.lib;openvr_api.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
@@ -380,8 +380,18 @@ xcopy /d /y /e "$(ProjectDir)assets" "$(OutDir)assets"</Command>
     <ClInclude Include="include\dg\scenes\TransparencyScene.h" />
     <ClInclude Include="include\dg\scenes\VRScene.h" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
     <Import Project="packages\directxtk_desktop_2015.2017.12.13.1\build\native\directxtk_desktop_2015.targets" Condition="Exists('packages\directxtk_desktop_2015.2017.12.13.1\build\native\directxtk_desktop_2015.targets')" />
+    <Import Project="..\packages\glfw.3.2.1.5\build\native\glfw.targets" Condition="Exists('..\packages\glfw.3.2.1.5\build\native\glfw.targets')" />
   </ImportGroup>
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\packages\glfw.3.2.1.5\build\native\glfw.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\glfw.3.2.1.5\build\native\glfw.targets'))" />
+  </Target>
 </Project>

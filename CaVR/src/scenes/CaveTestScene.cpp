@@ -79,8 +79,9 @@ void cavr::CaveTestScene::Initialize() {
   // development and make it controllable with keyboard and mouse.
   if (!enableVR) {
     window->LockCursor();
-    mainCamera->transform = dg::Transform::T(glm::vec3(2.f, 1.83f, -1.2f));
-    mainCamera->LookAtPoint(glm::vec3(0, 0, 0));
+    mainCamera->transform =
+        dg::Transform::T(glm::vec3(-0.905f, 1.951f, -1.63f));
+    mainCamera->LookAtDirection(glm::vec3(0.259f, -0.729f, 0.633f));
     dg::Behavior::Attach(
         mainCamera, std::make_shared<dg::KeyboardCameraController>(window));
   }

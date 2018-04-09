@@ -42,6 +42,36 @@ dg::Vertex::Vertex(
 }
 
 #pragma endregion
+#pragma region Triangle
+
+dg::Mesh::Triangle::Triangle(Vertex v1, Vertex v2, Vertex v3, Winding winding)
+    : vertices{v1, v2, v3}, winding(winding) {
+  if (v1.attributes != v2.attributes || v1.attributes != v3.attributes) {
+    throw std::runtime_error(
+        "Attempted to create a triangle out of vertices with mismatched "
+        "attributes.");
+  }
+}
+
+void dg::Mesh::Triangle::CalculateFaceNormal() {
+  glm::vec3 d01 = vertices[1].data.position - vertices[0].data.position;
+  glm::vec3 d02 = vertices[2].data.position - vertices[0].data.position;
+  glm::vec3 normal = glm::normalize(glm::cross(d02, d01));
+
+  if (winding == Mesh::Winding::CW) {
+    normal *= -1;
+  }
+
+  Vertex::AttrFlag newAttrs = vertices[0].attributes | Vertex::AttrFlag::NORMAL;
+  vertices[0].attributes = newAttrs;
+  vertices[1].attributes = newAttrs;
+  vertices[2].attributes = newAttrs;
+  vertices[0].data.normal = normal;
+  vertices[1].data.normal = normal;
+  vertices[2].data.normal = normal;
+}
+
+#pragma endregion
 #pragma region Base Class
 
 dg::Mesh *dg::Mesh::lastDrawnMesh = nullptr;
@@ -76,19 +106,16 @@ void dg::Mesh::AddQuad(
   AddTriangle(v1, v3, v4, winding);
 }
 
-void dg::Mesh::AddTriangle(const Triangle &triangle) {
-  AddTriangle(triangle.vertices[0], triangle.vertices[1], triangle.vertices[2],
-              triangle.winding);
+void dg::Mesh::AddTriangle(Vertex v1, Vertex v2, Vertex v3, Winding winding) {
+  AddTriangle(Triangle(v1, v2, v3, winding));
 }
 
-void dg::Mesh::AddTriangle(Vertex v1, Vertex v2, Vertex v3, Winding winding) {
+void dg::Mesh::AddTriangle(const Triangle &triangle) {
   using Flag = Vertex::AttrFlag;
 
-  if (v1.attributes != v2.attributes || v1.attributes != v3.attributes) {
-    throw std::runtime_error(
-        "Attempted to add a triangle to a mesh when it has mismatched "
-        "attributes.");
-  }
+  Vertex v1 = triangle.vertices[0];
+  Vertex v2 = triangle.vertices[1];
+  Vertex v3 = triangle.vertices[2];
 
   // TODO: Don't change winding here, but actually switch the rasterizer
   //       state to accept CCW winding.
@@ -98,7 +125,7 @@ void dg::Mesh::AddTriangle(Vertex v1, Vertex v2, Vertex v3, Winding winding) {
   Winding desiredWinding = Winding::CCW;
 #endif
 
-  if (winding != desiredWinding) {
+  if (triangle.winding != desiredWinding) {
     std::swap(v1, v2);
   }
 

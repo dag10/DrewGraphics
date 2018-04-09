@@ -33,7 +33,7 @@ dg::StandardMaterial dg::StandardMaterial::WithWireframeColor(glm::vec3 color) {
   material.SetDiffuse(color);
   material.SetLit(false);
   material.rasterizerOverride = RasterizerState::Wireframe();
-  material.queue = RenderQueue::Transparent;
+  material.queue = RenderQueue::Wireframe;
   return material;
 }
 

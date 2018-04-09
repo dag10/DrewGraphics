@@ -99,11 +99,16 @@ namespace dg {
 
       enum class Winding { CW, CCW };
 
-      struct Triangle {
-        Vertex vertices[3];
-        Winding winding;
-        Triangle(Vertex v1, Vertex v2, Vertex v3, Winding winding)
-            : vertices{v1, v2, v3}, winding(winding) {}
+      class Triangle {
+
+        public:
+
+          Vertex vertices[3];
+          Winding winding;
+
+          Triangle(Vertex v1, Vertex v2, Vertex v3, Winding winding);
+
+          void CalculateFaceNormal();
       };
 
       static std::shared_ptr<Mesh> Cube;

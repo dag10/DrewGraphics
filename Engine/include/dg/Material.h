@@ -17,6 +17,7 @@ namespace dg {
     Background  = 1000,
     Geometry    = 2000,
     Transparent = 3000,
+    Wireframe   = Transparent + 100,
     Overlay     = 4000,
   };
 

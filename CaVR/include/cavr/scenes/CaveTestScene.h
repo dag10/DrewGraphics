@@ -61,14 +61,13 @@ namespace cavr {
 
           void CreateMesh();
 
-          inline std::shared_ptr<Knot> GetStartKnot() const { return start; }
-          inline std::shared_ptr<Knot> GetEndKnot() const { return end; }
+          inline std::shared_ptr<Knot> GetStartKnot() const { return knots[0]; }
+          inline std::shared_ptr<Knot> GetEndKnot() const { return knots[1]; }
           inline std::shared_ptr<dg::Mesh> GetMesh() const { return mesh; }
 
         public:
 
-          std::shared_ptr<Knot> start;
-          std::shared_ptr<Knot> end;
+          std::shared_ptr<Knot> knots[2];
           std::shared_ptr<dg::Mesh> mesh = nullptr;
 
       };
@@ -98,6 +97,7 @@ const Tunnel::Knot &knot) const;
       std::shared_ptr<dg::Light> skyLight;
 
       std::shared_ptr<dg::StandardMaterial> segmentMaterial;
+      std::shared_ptr<dg::StandardMaterial> segmentWireframeMaterial;
       std::shared_ptr<dg::StandardMaterial> knotVertexMaterial;
       std::shared_ptr<dg::StandardMaterial> knotMaterial;
 

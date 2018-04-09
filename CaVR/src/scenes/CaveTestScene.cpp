@@ -25,7 +25,7 @@ std::unique_ptr<cavr::CaveTestScene> cavr::CaveTestScene::Make() {
 }
 
 cavr::CaveTestScene::CaveTestScene() : dg::Scene() {
-  enableVR = true;
+  //enableVR = true;
 }
 
 void cavr::CaveTestScene::Initialize() {
@@ -96,15 +96,18 @@ void cavr::CaveTestScene::Initialize() {
   knotVertexMaterial = std::make_shared<dg::StandardMaterial>(
       dg::StandardMaterial::WithTransparentColor(
           glm::vec4(0.4f, 0.4f, 0.9f, 0.9f)));
-  knotVertexMaterial->rasterizerOverride = dg::RasterizerState::AdditiveBlending();
+  knotVertexMaterial->rasterizerOverride =
+      dg::RasterizerState::AdditiveBlending();
 
   // Create segment material for visualization.
   segmentMaterial = std::make_shared<dg::StandardMaterial>(
       dg::StandardMaterial::WithTransparentColor(
-          glm::vec4(0.1f, 0.5f, 0.1f, 0.3f)));
+          glm::vec4(0.1f, 0.6f, 0.1f, 0.4f)));
   segmentMaterial->rasterizerOverride = dg::RasterizerState::AdditiveBlending();
-  segmentMaterial->rasterizerOverride.SetCullMode(
-      dg::RasterizerState::CullMode::OFF);
+
+  // Create segment wireframe material for visualization.
+  segmentWireframeMaterial = std::make_shared<dg::StandardMaterial>(
+      dg::StandardMaterial::WithWireframeColor(glm::vec3(0.1f, 0.5f, 0.1f)));
 
   CreateCave();
 }
@@ -152,11 +155,15 @@ void cavr::CaveTestScene::CreateCave() {
   }
 
   // Visualize vertex positions for second segment.
-  cave->AddChild(CreateKnotVertexModel(*tunnel.segments[1].start), false);
-  cave->AddChild(CreateKnotVertexModel(*tunnel.segments[1].end), false);
+  cave->AddChild(CreateKnotVertexModel(*tunnel.segments[1].knots[0]), false);
+  cave->AddChild(CreateKnotVertexModel(*tunnel.segments[1].knots[1]), false);
 
   // Visualize second segment.
-  tunnel.segments[1].CreateMesh();
+  for (auto &segment : tunnel.segments) {
+    segment.CreateMesh();
+    cave->AddChild(std::make_shared<dg::Model>(
+        segment.GetMesh(), segmentWireframeMaterial, dg::Transform()));
+  }
 }
 
 std::shared_ptr<dg::SceneObject> cavr::CaveTestScene::CreateKnotVertexModel(
@@ -166,7 +173,7 @@ std::shared_ptr<dg::SceneObject> cavr::CaveTestScene::CreateKnotVertexModel(
     container->AddChild(
         std::make_shared<dg::Model>(
             dg::Mesh::Sphere, knotVertexMaterial,
-            dg::Transform::TS(knot.GetVertexPosition(i), glm::vec3(0.01f))),
+            dg::Transform::TS(knot.GetVertexPosition(i), glm::vec3(0.002f))),
         false);
   }
   return container;
@@ -180,7 +187,7 @@ std::shared_ptr<dg::Model> cavr::CaveTestScene::CreateKnotModel(
           knot.GetPosition(),
           glm::quat(knot.GetXF()) *
               glm::quat(glm::radians(glm::vec3(90, 0, 0))),
-          glm::vec3(knot.GetRadius() * 2.f, 0.02f, knot.GetRadius() * 2.f)));
+          glm::vec3(knot.GetRadius() * 2.f, 0.012f, knot.GetRadius() * 2.f)));
 }
 
 cavr::Tunnel::Knot::Knot(glm::vec3 position, glm::vec3 forward, float radius)
@@ -202,12 +209,28 @@ glm::vec3 cavr::Tunnel::Knot::PositionForVertex(int index) const {
 
 cavr::Tunnel::Segment::Segment(std::shared_ptr<Knot> start,
                                std::shared_ptr<Knot> end)
-    : start(start), end(end) {}
+    : knots{start, end} {}
 
 void cavr::Tunnel::Segment::CreateMesh() {
+  const int numTriangles = VerticesPerRing * 2;
+  std::vector<dg::Mesh::Triangle> triangles;
+
   for (int i = 0; i < VerticesPerRing; i++) {
-    // TODO
+    int nextIdx = (i + 1) % VerticesPerRing;
+    dg::Vertex v1(knots[0]->GetVertexPosition(i));
+    dg::Vertex v2(knots[1]->GetVertexPosition(i));
+    dg::Vertex v3(knots[1]->GetVertexPosition(nextIdx));
+    dg::Vertex v4(knots[0]->GetVertexPosition(nextIdx));
+
+    triangles.push_back(dg::Mesh::Triangle(v1, v2, v3, dg::Mesh::Winding::CCW));
+    triangles.push_back(dg::Mesh::Triangle(v1, v3, v4, dg::Mesh::Winding::CCW));
   }
+
+  mesh = dg::Mesh::Create();
+  for (auto &triangle : triangles) {
+    mesh->AddTriangle(triangle);
+  }
+  mesh->FinishBuilding();
 }
 
 void cavr::CaveTestScene::Update() {

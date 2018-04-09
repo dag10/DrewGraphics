@@ -102,6 +102,8 @@ namespace dg {
       struct Triangle {
         Vertex vertices[3];
         Winding winding;
+        Triangle(Vertex v1, Vertex v2, Vertex v3, Winding winding)
+            : vertices{v1, v2, v3}, winding(winding) {}
       };
 
       static std::shared_ptr<Mesh> Cube;
@@ -123,6 +125,7 @@ namespace dg {
       void AddQuad(
           Vertex v1, Vertex v2, Vertex v3, Vertex v4, Winding winding);
       void AddTriangle(Vertex v1, Vertex v2, Vertex v3, Winding winding);
+      void AddTriangle(const Triangle& triangle);
       virtual void FinishBuilding() = 0;
 
       const Vertex GetVertex(int i) const;

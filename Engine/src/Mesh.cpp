@@ -76,6 +76,11 @@ void dg::Mesh::AddQuad(
   AddTriangle(v1, v3, v4, winding);
 }
 
+void dg::Mesh::AddTriangle(const Triangle &triangle) {
+  AddTriangle(triangle.vertices[0], triangle.vertices[1], triangle.vertices[2],
+              triangle.winding);
+}
+
 void dg::Mesh::AddTriangle(Vertex v1, Vertex v2, Vertex v3, Winding winding) {
   using Flag = Vertex::AttrFlag;
 

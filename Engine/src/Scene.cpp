@@ -112,6 +112,7 @@ void dg::Scene::RenderFrame() {
   }
 
   // TODO: If VR, just render a quad of the left eye instead.
+  Graphics::Instance->SetRenderTarget(*window);
   ClearBuffer();
   mainCamera->aspectRatio = window->GetAspectRatio();
   DrawScene(*mainCamera);

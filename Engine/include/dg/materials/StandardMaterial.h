@@ -18,6 +18,7 @@ namespace dg {
       static StandardMaterial WithColor(glm::vec4 color);
       static StandardMaterial WithTransparentColor(glm::vec4 color);
       static StandardMaterial WithTexture(std::shared_ptr<Texture> texture);
+      static StandardMaterial WithWireframeColor(glm::vec3 color);
 
       StandardMaterial();
 

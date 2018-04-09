@@ -28,6 +28,15 @@ dg::StandardMaterial dg::StandardMaterial::WithTransparentColor(
   return material;
 }
 
+dg::StandardMaterial dg::StandardMaterial::WithWireframeColor(glm::vec3 color) {
+  StandardMaterial material;
+  material.SetDiffuse(color);
+  material.SetLit(false);
+  material.rasterizerOverride = RasterizerState::Wireframe();
+  material.queue = RenderQueue::Transparent;
+  return material;
+}
+
 dg::StandardMaterial dg::StandardMaterial::WithTexture(
     std::shared_ptr<Texture> texture) {
   StandardMaterial material;

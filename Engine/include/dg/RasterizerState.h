@@ -21,6 +21,7 @@ namespace dg {
       static RasterizerState Default();
       static RasterizerState AdditiveBlending();
       static RasterizerState AlphaBlending();
+      static RasterizerState Wireframe();
 
       enum class CullMode {
         OFF,
@@ -58,6 +59,11 @@ namespace dg {
         DST_ALPHA,
         ONE_MINUS_DST_ALPHA,
         // Holding off on declaring the others until I see the utility.
+      };
+
+      enum class FillMode {
+        LINE,
+        FILL,
       };
 
       RasterizerState() = default;
@@ -163,6 +169,7 @@ namespace std {
   std::string to_string(dg::RasterizerState::DepthFunc depthFunc);
   std::string to_string(dg::RasterizerState::BlendEquation blendEquation);
   std::string to_string(dg::RasterizerState::BlendFunc blendFunc);
+  std::string to_string(dg::RasterizerState::FillMode fillMode);
 
   std::string to_string(const dg::RasterizerState &state);
 

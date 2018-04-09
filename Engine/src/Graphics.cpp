@@ -192,6 +192,8 @@ void dg::OpenGLGraphics::ApplyRasterizerState(const RasterizerState &state) {
   } else {
     glDisable(GL_BLEND);
   }
+
+  glPolygonMode(GL_FRONT_AND_BACK, ToGLEnum(state.GetFillMode()));
 }
 
 GLenum dg::OpenGLGraphics::ToGLEnum(RasterizerState::CullMode cullMode) {
@@ -266,6 +268,16 @@ GLenum dg::OpenGLGraphics::ToGLEnum(
       return GL_DST_ALPHA;
     case RasterizerState::BlendFunc::ONE_MINUS_DST_ALPHA:
       return GL_ONE_MINUS_DST_ALPHA;
+  }
+  return GL_NONE;
+}
+
+GLenum dg::OpenGLGraphics::ToGLEnum(RasterizerState::FillMode fillMode) {
+  switch (fillMode) {
+    case RasterizerState::FillMode::LINE:
+      return GL_LINE;
+    case RasterizerState::FillMode::FILL:
+      return GL_FILL;
   }
   return GL_NONE;
 }
@@ -474,6 +486,7 @@ dg::DirectXGraphics::CreateRasterizerStateResources(
 
   CD3D11_RASTERIZER_DESC rasterizerDesc(D3D11_DEFAULT);
   rasterizerDesc.CullMode = CullModeToDXEnum(state.GetCullMode());
+  rasterizerDesc.FillMode = FillModeToDXEnum(state.GetFillMode());
   rasterizerDesc.FrontCounterClockwise = state.GetFlipRenderY();
   HRESULT hr =
       device->CreateRasterizerState(&rasterizerDesc, &resources->rsState);
@@ -616,6 +629,18 @@ D3D11_BLEND dg::DirectXGraphics::BlendFuncToDXEnum(
   }
   throw EngineError("Can't get D3D11_BLEND for unknown BlendFunc: " +
                     std::to_string((int)blendFunction));
+}
+
+D3D11_FILL_MODE dg::DirectXGraphics::FillModeToDXEnum(
+    RasterizerState::FillMode fillMode) {
+  switch (fillMode) {
+    case RasterizerState::FillMode::LINE:
+      return D3D11_FILL_MODE::D3D11_FILL_WIREFRAME;
+    case RasterizerState::FillMode::FILL:
+      return D3D11_FILL_MODE::D3D11_FILL_SOLID;
+  }
+  throw EngineError("Can't get D3D11_FILL_MODE for unknown FillMode: " +
+                    std::to_string((int)fillMode));
 }
 
 dg::DirectXGraphics::RasterizerStateResources::~RasterizerStateResources() {

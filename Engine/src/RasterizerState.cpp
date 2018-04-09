@@ -8,17 +8,18 @@
 
 dg::RasterizerState dg::RasterizerState::Default() {
   RasterizerState state;
-  state.SetCullMode(RasterizerState::CullMode::BACK);
+  state.SetCullMode(CullMode::BACK);
   state.SetWriteDepth(true);
-  state.SetDepthFunc(RasterizerState::DepthFunc::LESS);
+  state.SetDepthFunc(DepthFunc::LESS);
   state.SetBlendEnabled(false);
-  state.SetRGBBlendEquation(RasterizerState::BlendEquation::ADD);
-  state.SetAlphaBlendEquation(RasterizerState::BlendEquation::ADD);
-  state.SetSrcRGBBlendFunc(RasterizerState::BlendFunc::ONE);
-  state.SetDstRGBBlendFunc(RasterizerState::BlendFunc::ZERO);
-  state.SetSrcAlphaBlendFunc(RasterizerState::BlendFunc::ONE);
-  state.SetDstAlphaBlendFunc(RasterizerState::BlendFunc::ZERO);
+  state.SetRGBBlendEquation(BlendEquation::ADD);
+  state.SetAlphaBlendEquation(BlendEquation::ADD);
+  state.SetSrcRGBBlendFunc(BlendFunc::ONE);
+  state.SetDstRGBBlendFunc(BlendFunc::ZERO);
+  state.SetSrcAlphaBlendFunc(BlendFunc::ONE);
+  state.SetDstAlphaBlendFunc(BlendFunc::ZERO);
   state.SetFlipRenderY(false);
+  state.SetFillMode(FillMode::FILL);
   return state;
 }
 
@@ -26,12 +27,12 @@ dg::RasterizerState dg::RasterizerState::AdditiveBlending() {
   RasterizerState state;
   state.SetWriteDepth(false);
   state.SetBlendEnabled(true);
-  state.SetRGBBlendEquation(RasterizerState::BlendEquation::ADD);
-  state.SetAlphaBlendEquation(RasterizerState::BlendEquation::ADD);
-  state.SetSrcRGBBlendFunc(RasterizerState::BlendFunc::SRC_ALPHA);
-  state.SetDstRGBBlendFunc(RasterizerState::BlendFunc::ONE);
-  state.SetSrcAlphaBlendFunc(RasterizerState::BlendFunc::ZERO);
-  state.SetDstAlphaBlendFunc(RasterizerState::BlendFunc::ONE);
+  state.SetRGBBlendEquation(BlendEquation::ADD);
+  state.SetAlphaBlendEquation(BlendEquation::ADD);
+  state.SetSrcRGBBlendFunc(BlendFunc::SRC_ALPHA);
+  state.SetDstRGBBlendFunc(BlendFunc::ONE);
+  state.SetSrcAlphaBlendFunc(BlendFunc::ZERO);
+  state.SetDstAlphaBlendFunc(BlendFunc::ONE);
   return state;
 }
 
@@ -39,12 +40,20 @@ dg::RasterizerState dg::RasterizerState::AlphaBlending() {
   RasterizerState state;
   state.SetWriteDepth(false);
   state.SetBlendEnabled(true);
-  state.SetRGBBlendEquation(RasterizerState::BlendEquation::ADD);
-  state.SetAlphaBlendEquation(RasterizerState::BlendEquation::ADD);
-  state.SetSrcRGBBlendFunc(RasterizerState::BlendFunc::SRC_ALPHA);
-  state.SetDstRGBBlendFunc(RasterizerState::BlendFunc::ONE_MINUS_SRC_ALPHA);
-  state.SetSrcAlphaBlendFunc(RasterizerState::BlendFunc::ONE);
-  state.SetDstAlphaBlendFunc(RasterizerState::BlendFunc::ONE);
+  state.SetRGBBlendEquation(BlendEquation::ADD);
+  state.SetAlphaBlendEquation(BlendEquation::ADD);
+  state.SetSrcRGBBlendFunc(BlendFunc::SRC_ALPHA);
+  state.SetDstRGBBlendFunc(BlendFunc::ONE_MINUS_SRC_ALPHA);
+  state.SetSrcAlphaBlendFunc(BlendFunc::ONE);
+  state.SetDstAlphaBlendFunc(BlendFunc::ONE);
+  return state;
+}
+
+dg::RasterizerState dg::RasterizerState::Wireframe() {
+  RasterizerState state;
+  state.SetWriteDepth(false);
+  state.SetCullMode(CullMode::OFF);
+  state.SetFillMode(FillMode::LINE);
   return state;
 }
 
@@ -226,6 +235,22 @@ std::string std::to_string(dg::RasterizerState::BlendFunc blendFunc) {
              std::to_string(
                  static_cast<std::underlying_type_t<
                      dg::RasterizerState::BlendFunc>>(blendFunc)) +
+             ")";
+  }
+}
+
+std::string std::to_string(dg::RasterizerState::FillMode fillMode) {
+  switch (fillMode) {
+    case dg::RasterizerState::FillMode::LINE:
+      return "LINE";
+    case dg::RasterizerState::FillMode::FILL:
+      return "FILL";
+    default:
+      return "INVALID(" +
+             std::to_string(
+                 static_cast<
+                     std::underlying_type_t<dg::RasterizerState::FillMode>>(
+                     fillMode)) +
              ")";
   }
 }

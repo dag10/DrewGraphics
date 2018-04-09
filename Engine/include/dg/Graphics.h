@@ -103,6 +103,7 @@ namespace dg {
       static GLenum ToGLEnum(RasterizerState::DepthFunc depthFunc);
       static GLenum ToGLEnum(RasterizerState::BlendEquation blendEquation);
       static GLenum ToGLEnum(RasterizerState::BlendFunc blendFunction);
+      static GLenum ToGLEnum(RasterizerState::FillMode fillMode);
 
   }; // class OpenGLGraphics
 #endif
@@ -172,6 +173,8 @@ namespace dg {
           RasterizerState::BlendEquation blendEquation);
       static D3D11_BLEND BlendFuncToDXEnum(
           RasterizerState::BlendFunc blendFunction);
+      static D3D11_FILL_MODE FillModeToDXEnum(
+          RasterizerState::FillMode fillMode);
 
   }; // class DirectXGraphics
 #endif

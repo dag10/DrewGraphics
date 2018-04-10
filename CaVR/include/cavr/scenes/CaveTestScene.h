@@ -12,7 +12,8 @@
 namespace dg {
   class SceneObject;
   class Model;
-  class Light;
+  class DirectionalLight;
+  class PointLight;
   class StandardMaterial;
 } // namespace dg
 
@@ -31,7 +32,8 @@ namespace cavr {
           // All units are in cave-local space.
 
           Knot() = default;
-          Knot(glm::vec3 position, glm::vec3 forward, float radius);
+          Knot(glm::vec3 position, glm::vec3 forward, float radius,
+               float curveSpeed);
 
           inline const glm::vec3 &GetPosition() const { return position; }
           inline const glm::vec3 &GetRight() const { return xf[0]; }
@@ -53,6 +55,7 @@ namespace cavr {
           glm::vec3 position = glm::vec3(0);
           glm::mat3x3 xf = glm::mat3x3(1);
           float radius = 0;
+          float curveSpeed = 1;
           std::vector<glm::vec3> vertices;
 
       };
@@ -103,19 +106,26 @@ namespace cavr {
 
       CaveTestScene();
 
+      static std::vector<std::shared_ptr<Tunnel::Knot>> CreateFunnelKnots();
+      static std::vector<std::shared_ptr<Tunnel::Knot>> CreateArcKnots();
+
       void CreateCave();
       std::shared_ptr<dg::SceneObject> CreateKnotVertexModels(
           const Tunnel::Knot &knot) const;
-      std::shared_ptr<dg::Model> CreateKnotModel(
+      std::shared_ptr<dg::SceneObject> CreateKnotModels(
           const Tunnel::Knot &knot) const;
 
       std::shared_ptr<dg::PointLight> controllerLight;
+      std::shared_ptr<dg::DirectionalLight> skyLight;
+      std::shared_ptr<dg::Model> floor;
+      std::shared_ptr<dg::SceneObject> knots;
 
       std::shared_ptr<dg::StandardMaterial> segmentMaterial;
       std::shared_ptr<dg::StandardMaterial> segmentTransparentMaterial;
       std::shared_ptr<dg::StandardMaterial> segmentWireframeMaterial;
       std::shared_ptr<dg::StandardMaterial> knotVertexMaterial;
       std::shared_ptr<dg::StandardMaterial> knotMaterial;
+      std::shared_ptr<dg::StandardMaterial> knotForwardMaterial;
 
   }; // class CaveTestScene
 

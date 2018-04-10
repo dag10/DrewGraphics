@@ -23,16 +23,23 @@ dg::StandardMaterial dg::StandardMaterial::WithTransparentColor(
     glm::vec4 color) {
   StandardMaterial material;
   material.SetDiffuse(color);
-  material.rasterizerOverride = RasterizerState::AlphaBlending();
+  material.rasterizerOverride += RasterizerState::AlphaBlending();
   material.queue = RenderQueue::Transparent;
   return material;
 }
 
 dg::StandardMaterial dg::StandardMaterial::WithWireframeColor(glm::vec3 color) {
-  StandardMaterial material;
-  material.SetDiffuse(color);
+  StandardMaterial material = WithColor(color);
   material.SetLit(false);
-  material.rasterizerOverride = RasterizerState::Wireframe();
+  material.rasterizerOverride += RasterizerState::Wireframe();
+  material.queue = RenderQueue::Wireframe;
+  return material;
+}
+
+dg::StandardMaterial dg::StandardMaterial::WithWireframeColor(glm::vec4 color) {
+  StandardMaterial material = WithTransparentColor(color);
+  material.SetLit(false);
+  material.rasterizerOverride += RasterizerState::Wireframe();
   material.queue = RenderQueue::Wireframe;
   return material;
 }

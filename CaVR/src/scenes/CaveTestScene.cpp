@@ -97,10 +97,9 @@ void cavr::CaveTestScene::Initialize() {
   auto lightSphereColor = std::make_shared<dg::StandardMaterial>(
       dg::StandardMaterial::WithColor(controllerLight->GetDiffuse()));
   lightSphereColor->SetLit(false);
-  controllerLight->AddChild(
-      std::make_shared<dg::Model>(dg::Mesh::Sphere, lightSphereColor,
-                                  dg::Transform::S(glm::vec3(0.025f))),
-      false);
+  auto lightSphere = std::make_shared<dg::Model>(
+      dg::Mesh::Sphere, lightSphereColor, dg::Transform::S(glm::vec3(0.025f)));
+  controllerLight->AddChild(lightSphere, false);
 
   // If VR could not enable, position the camera in a useful place for
   // development and make it controllable with keyboard and mouse.
@@ -113,8 +112,12 @@ void cavr::CaveTestScene::Initialize() {
         mainCamera, std::make_shared<dg::KeyboardCameraController>(window));
 
     // Attach controller light to camera.
-    controllerLight->transform =
-        dg::Transform::T((dg::FORWARD * 0.2f) + (dg::UP * -0.08f));
+    lightSphere->material = std::make_shared<dg::StandardMaterial>(
+        dg::StandardMaterial::WithTransparentColor(
+            glm::vec4(1.f, 1.f, 1.f, 0.1f)));
+    std::static_pointer_cast<dg::StandardMaterial>(lightSphere->material)
+        ->SetLit(false);
+    controllerLight->transform = dg::Transform::T((dg::FORWARD * 0.2f));
     mainCamera->AddChild(controllerLight, false);
   }
 

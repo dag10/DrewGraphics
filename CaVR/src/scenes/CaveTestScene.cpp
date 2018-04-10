@@ -38,12 +38,18 @@ void cavr::CaveTestScene::Initialize() {
       dg::Texture::FromPath("assets/textures/stars_with_sun_skybox.png"));
 
   // Create sky light.
-  skyLight = std::make_shared<dg::DirectionalLight>(
-      glm::vec3(1.0f, 0.93f, 0.86f), 0.186f, 1.253f, 0.647f);
+  auto skyLight = std::make_shared<dg::DirectionalLight>(
+      glm::vec3(1.0f, 0.93f, 0.86f), 0.f, 1.1f, 0.647f);
   skyLight->LookAtDirection(glm::vec3(0.183381f, -0.767736f, 0.613965f));
   dg::Behavior::Attach(skyLight,
                        std::make_shared<dg::KeyboardLightController>(window));
   AddChild(skyLight);
+
+  // Create moon light to shade shadow from sun.
+  auto moonLight = std::make_shared<dg::DirectionalLight>(
+      glm::vec3(1.0f, 0.93f, 0.86f), 0.f, 0.35f, 0.f);
+  moonLight->LookAtDirection(-skyLight->transform.Forward());
+  AddChild(moonLight);
 
   // Create floor material.
   auto floorMaterial = std::make_shared<dg::StandardMaterial>(
@@ -75,6 +81,24 @@ void cavr::CaveTestScene::Initialize() {
   dg::Behavior::Attach(rightController, std::make_shared<dg::VRRenderModel>());
   vrContainer->AddChild(rightController);
 
+  // Attach point light to left controller.
+  controllerLight = std::make_shared<dg::PointLight>(
+      glm::vec3(1.0f, 0.93f, 0.86f), 0.f, 5.0f, 3.f);
+  controllerLight->transform = dg::Transform::T(dg::FORWARD * 0.035f);
+  controllerLight->LookAtDirection(-skyLight->transform.Forward());
+  controllerLight->SetLinear(1.5f);
+  controllerLight->SetQuadratic(3.0f);
+  leftController->AddChild(controllerLight, false);
+
+  // Attach sphere to left controller to represent point light.
+  auto lightSphereColor = std::make_shared<dg::StandardMaterial>(
+      dg::StandardMaterial::WithColor(controllerLight->GetDiffuse()));
+  lightSphereColor->SetLit(false);
+  controllerLight->AddChild(
+      std::make_shared<dg::Model>(dg::Mesh::Sphere, lightSphereColor,
+                                  dg::Transform::S(glm::vec3(0.025f))),
+      false);
+
   // If VR could not enable, position the camera in a useful place for
   // development and make it controllable with keyboard and mouse.
   if (!enableVR) {
@@ -84,6 +108,11 @@ void cavr::CaveTestScene::Initialize() {
     mainCamera->LookAtDirection(glm::vec3(0.259f, -0.729f, 0.633f));
     dg::Behavior::Attach(
         mainCamera, std::make_shared<dg::KeyboardCameraController>(window));
+
+    // Attach controller light to camera.
+    controllerLight->transform =
+        dg::Transform::T((dg::FORWARD * 0.2f) + (dg::UP * -0.08f));
+    mainCamera->AddChild(controllerLight, false);
   }
 
   // Create knot material for visualization.
@@ -100,12 +129,20 @@ void cavr::CaveTestScene::Initialize() {
       dg::RasterizerState::AdditiveBlending();
 
   // Create segment material for visualization.
+  glm::vec3 caveColor = glm::vec3(112, 103, 87) / 255.f * 0.4f;
   segmentMaterial = std::make_shared<dg::StandardMaterial>(
-      dg::StandardMaterial::WithColor(glm::vec3(0.3f, 0.4f, 0.3f)));
+      dg::StandardMaterial::WithColor(caveColor));
+
+  // Create transparent wireframe material for visualization.
+  segmentTransparentMaterial = std::make_shared<dg::StandardMaterial>(
+      dg::StandardMaterial::WithTransparentColor(glm::vec4(caveColor, 0.3f)));
+  segmentTransparentMaterial->rasterizerOverride.SetCullMode(
+      dg::RasterizerState::CullMode::FRONT);
 
   // Create segment wireframe material for visualization.
   segmentWireframeMaterial = std::make_shared<dg::StandardMaterial>(
-      dg::StandardMaterial::WithWireframeColor(glm::vec3(0.1f, 0.5f, 0.1f)));
+      dg::StandardMaterial::WithWireframeColor(
+          glm::vec4(0.1f, 0.5f, 0.1f, 0.1f)));
   segmentWireframeMaterial->rasterizerOverride.SetCullMode(
       dg::RasterizerState::CullMode::FRONT);
 
@@ -120,10 +157,10 @@ void cavr::CaveTestScene::CreateCave() {
   // This tunnel's characteristics.
   const glm::vec3 segmentStart(-1.f, 1.2f, -0.3f);
   const glm::vec3 segmentEnd(1.f, 0.5f, 0.3f);
-  const int numKnots = 5;
+  const int numKnots = 35;
   const glm::vec3 segmentInterval =
       (segmentEnd - segmentStart) / (float)numKnots;
-  const float minRadius = 0.15f;
+  const float minRadius = 0.1f;
   const float maxRadius = 0.25f;
 
   // Create the tunnel's knots.
@@ -143,10 +180,16 @@ void cavr::CaveTestScene::CreateCave() {
     knots.push_back(std::make_shared<Tunnel::Knot>(pos, forward, radius));
   }
 
-  // Visualize each knot as a cylinder.
+  // Visualize each original knot as a cylinder.
   //for (auto &knot : knots) {
   //  cave->AddChild(CreateKnotModel(*knot), false);
   //}
+
+  // Interpolate knots and finalize their vertices.
+  knots = Tunnel::Knot::InterpolateKnots(knots);
+  for (auto &knot : knots) {
+    knot->CreateVertices();
+  }
 
   // Create segments for each adjacent pair of knots.
   Tunnel tunnel;
@@ -159,12 +202,14 @@ void cavr::CaveTestScene::CreateCave() {
   //cave->AddChild(CreateKnotVertexModel(*tunnel.segments[1].knots[1]), false);
 
   // Visualize second segment.
+  int parity = 0;
   for (auto &segment : tunnel.segments) {
-    segment.CreateMesh();
+    segment.CreateMesh(parity);
+    parity = 1 - parity;
     cave->AddChild(std::make_shared<dg::Model>(
         segment.GetMesh(), segmentMaterial, dg::Transform()));
     cave->AddChild(std::make_shared<dg::Model>(
-        segment.GetMesh(), segmentWireframeMaterial, dg::Transform()));
+        segment.GetMesh(), segmentTransparentMaterial, dg::Transform()));
   }
 }
 
@@ -197,37 +242,50 @@ cavr::Tunnel::Knot::Knot(glm::vec3 position, glm::vec3 forward, float radius)
   glm::vec3 right = glm::normalize(glm::cross(forward, dg::UP));
   glm::vec3 up = glm::normalize(glm::cross(right, forward));
   xf = glm::mat3x3(right, up, -forward);
+}
+
+void cavr::Tunnel::Knot::CreateVertices() {
   for (int i = 0; i < Tunnel::VerticesPerRing; i++) {
-    vertices[i] = PositionForVertex(i);
+    vertices[i] = position + glm::quat(xf) *
+                                 glm::quat(glm::radians(glm::vec3(
+                                     0, 0, i * 360 / VerticesPerRing))) *
+                                 glm::vec3(radius, 0, 0);
+
+    // Randomize the position a little bit to make it bumpy.
+    float r = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
+    glm::vec3 dir = glm::normalize(vertices[i] - position);
+    vertices[i] += (dir * r * 0.02f);
   }
 }
 
-glm::vec3 cavr::Tunnel::Knot::PositionForVertex(int index) const {
-  return position + glm::quat(xf) *
-                        glm::quat(glm::radians(
-                            glm::vec3(0, 0, index * 360 / VerticesPerRing))) *
-                        glm::vec3(radius, 0, 0);
+std::vector<std::shared_ptr<cavr::Tunnel::Knot>>
+cavr::Tunnel::Knot::InterpolateKnots(
+    const std::vector<std::shared_ptr<Knot>> &knots) {
+  return knots; // TODO
 }
 
 cavr::Tunnel::Segment::Segment(std::shared_ptr<Knot> start,
                                std::shared_ptr<Knot> end)
     : knots{start, end} {}
 
-void cavr::Tunnel::Segment::CreateMesh() {
+void cavr::Tunnel::Segment::CreateMesh(int parity) {
   const int numTriangles = VerticesPerRing * 2;
   std::vector<dg::Mesh::Triangle> triangles;
 
-  const int subdivisions = 3;
-
   for (int i = 0; i < VerticesPerRing; i++) {
     int nextIdx = (i + 1) % VerticesPerRing;
-    dg::Vertex v1(knots[0]->GetVertexPosition(i));
-    dg::Vertex v2(knots[1]->GetVertexPosition(i));
-    dg::Vertex v3(knots[1]->GetVertexPosition(nextIdx));
-    dg::Vertex v4(knots[0]->GetVertexPosition(nextIdx));
+    int a = parity;
+    int b = 1 - a;
+    dg::Vertex v1(knots[a]->GetVertexPosition(i));
+    dg::Vertex v2(knots[b]->GetVertexPosition(i));
+    dg::Vertex v3(knots[b]->GetVertexPosition(nextIdx));
+    dg::Vertex v4(knots[a]->GetVertexPosition(nextIdx));
 
-    triangles.push_back(dg::Mesh::Triangle(v1, v2, v3, dg::Mesh::Winding::CCW));
-    triangles.push_back(dg::Mesh::Triangle(v1, v3, v4, dg::Mesh::Winding::CCW));
+    auto winding =
+        (parity == 1) ? dg::Mesh::Winding::CW : dg::Mesh::Winding::CCW;
+
+    triangles.push_back(dg::Mesh::Triangle(v1, v2, v3, winding));
+    triangles.push_back(dg::Mesh::Triangle(v1, v3, v4, winding));
   }
 
   mesh = dg::Mesh::Create();
@@ -240,4 +298,8 @@ void cavr::Tunnel::Segment::CreateMesh() {
 
 void cavr::CaveTestScene::Update() {
   Scene::Update();
+
+  if (window->IsKeyJustPressed(dg::Key::SPACE)) {
+    controllerLight->enabled = !controllerLight->enabled;
+  }
 }

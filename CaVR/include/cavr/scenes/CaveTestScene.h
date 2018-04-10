@@ -22,7 +22,7 @@ namespace cavr {
 
     public:
 
-      static const int VerticesPerRing = 12;
+      static const int VerticesPerRing = 24;
 
       class Knot {
 
@@ -43,6 +43,11 @@ namespace cavr {
             return vertices[index];
           }
 
+          void CreateVertices();
+
+          static std::vector<std::shared_ptr<Knot>> InterpolateKnots(
+              const std::vector<std::shared_ptr<Knot>> &knots);
+
          private:
 
           glm::vec3 PositionForVertex(int index) const;
@@ -59,7 +64,7 @@ namespace cavr {
 
           Segment(std::shared_ptr<Knot> start, std::shared_ptr<Knot> end);
 
-          void CreateMesh();
+          void CreateMesh(int parity);
 
           inline std::shared_ptr<Knot> GetStartKnot() const { return knots[0]; }
           inline std::shared_ptr<Knot> GetEndKnot() const { return knots[1]; }
@@ -94,9 +99,10 @@ const Tunnel::Knot &knot) const;
       std::shared_ptr<dg::Model> CreateKnotModel(
           const Tunnel::Knot &knot) const;
 
-      std::shared_ptr<dg::Light> skyLight;
+      std::shared_ptr<dg::PointLight> controllerLight;
 
       std::shared_ptr<dg::StandardMaterial> segmentMaterial;
+      std::shared_ptr<dg::StandardMaterial> segmentTransparentMaterial;
       std::shared_ptr<dg::StandardMaterial> segmentWireframeMaterial;
       std::shared_ptr<dg::StandardMaterial> knotVertexMaterial;
       std::shared_ptr<dg::StandardMaterial> knotMaterial;

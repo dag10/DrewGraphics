@@ -97,6 +97,15 @@ namespace dg {
 #include "dg/RasterizerStateAttributes.def"
       };
 
+      friend inline RasterizerState operator+(const RasterizerState &lhs,
+                                              const RasterizerState &rhs) {
+        return RasterizerState::Flatten(lhs, rhs);
+      };
+      friend inline RasterizerState operator+=(RasterizerState &lhs,
+                                               const RasterizerState &rhs) {
+        return lhs = lhs + rhs;
+      }
+
     private:
 
       using T = std::underlying_type_t<AttrFlag>;

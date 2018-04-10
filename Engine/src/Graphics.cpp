@@ -37,7 +37,7 @@ void dg::Graphics::PushRasterizerState(const RasterizerState &state) {
         std::unique_ptr<RasterizerState>(new RasterizerState(state)));
   } else {
     states.push_front(std::unique_ptr<RasterizerState>(
-        new RasterizerState(RasterizerState::Flatten(*states.front(), state))));
+        new RasterizerState(*states.front() + state)));
   }
 }
 

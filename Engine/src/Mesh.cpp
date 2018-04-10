@@ -168,7 +168,7 @@ void dg::Mesh::AddTriangle(const Triangle &triangle) {
 
   if (attributes == Flag::NONE) {
     attributes = v1.attributes;
-  } if (v1.attributes != attributes) {
+  } else if (v1.attributes != attributes) {
     throw std::runtime_error(
         "Attempted to add a triangle to a mesh with noncompatible attributes.");
   }

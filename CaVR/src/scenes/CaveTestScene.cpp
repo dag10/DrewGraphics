@@ -8,7 +8,6 @@
 #include <memory>
 #include "cavr/CavrEngine.h"
 #include "dg/Lights.h"
-#include "dg/Mesh.h"
 #include "dg/Model.h"
 #include "dg/Skybox.h"
 #include "dg/Texture.h"
@@ -25,7 +24,7 @@ std::unique_ptr<cavr::CaveTestScene> cavr::CaveTestScene::Make() {
 }
 
 cavr::CaveTestScene::CaveTestScene() : dg::Scene() {
-  enableVR = true;
+  //enableVR = true;
 }
 
 void cavr::CaveTestScene::Initialize() {
@@ -194,26 +193,18 @@ void cavr::CaveTestScene::CreateCave() {
   // Create segments for each adjacent pair of knots.
   Tunnel tunnel;
   for (int i = 0; i < numKnots - 1; i++) {
-    tunnel.segments.push_back(Tunnel::Segment(knots[i], knots[i + 1]));
+    tunnel.AddSegment(Tunnel::Segment(knots[i], knots[i + 1]));
   }
 
-  // Visualize vertex positions for second segment.
-  //cave->AddChild(CreateKnotVertexModel(*tunnel.segments[1].knots[0]), false);
-  //cave->AddChild(CreateKnotVertexModel(*tunnel.segments[1].knots[1]), false);
-
-  // Visualize second segment.
-  int parity = 0;
-  for (auto &segment : tunnel.segments) {
-    segment.CreateMesh(parity);
-    parity = 1 - parity;
-    cave->AddChild(std::make_shared<dg::Model>(
-        segment.GetMesh(), segmentMaterial, dg::Transform()));
-    cave->AddChild(std::make_shared<dg::Model>(
-        segment.GetMesh(), segmentTransparentMaterial, dg::Transform()));
-  }
+  // Create mesh for tunnel.
+  tunnel.CreateMesh();
+  cave->AddChild(std::make_shared<dg::Model>(tunnel.GetMesh(), segmentMaterial,
+                                             dg::Transform()));
+  cave->AddChild(std::make_shared<dg::Model>(
+      tunnel.GetMesh(), segmentTransparentMaterial, dg::Transform()));
 }
 
-std::shared_ptr<dg::SceneObject> cavr::CaveTestScene::CreateKnotVertexModel(
+std::shared_ptr<dg::SceneObject> cavr::CaveTestScene::CreateKnotVertexModels(
     const Tunnel::Knot &knot) const {
   auto container = std::make_shared<SceneObject>();
   for (int i = 0; i < Tunnel::VerticesPerRing; i++) {
@@ -245,6 +236,8 @@ cavr::Tunnel::Knot::Knot(glm::vec3 position, glm::vec3 forward, float radius)
 }
 
 void cavr::Tunnel::Knot::CreateVertices() {
+  assert(vertices.empty());
+  vertices = std::vector<glm::vec3>(VerticesPerRing);
   for (int i = 0; i < Tunnel::VerticesPerRing; i++) {
     vertices[i] = position + glm::quat(xf) *
                                  glm::quat(glm::radians(glm::vec3(
@@ -268,9 +261,9 @@ cavr::Tunnel::Segment::Segment(std::shared_ptr<Knot> start,
                                std::shared_ptr<Knot> end)
     : knots{start, end} {}
 
-void cavr::Tunnel::Segment::CreateMesh(int parity) {
+void cavr::Tunnel::Segment::CreateMesh(
+    std::vector<dg::Mesh::Triangle> &triangles, int parity) {
   const int numTriangles = VerticesPerRing * 2;
-  std::vector<dg::Mesh::Triangle> triangles;
 
   for (int i = 0; i < VerticesPerRing; i++) {
     int nextIdx = (i + 1) % VerticesPerRing;
@@ -287,7 +280,20 @@ void cavr::Tunnel::Segment::CreateMesh(int parity) {
     triangles.push_back(dg::Mesh::Triangle(v1, v2, v3, winding));
     triangles.push_back(dg::Mesh::Triangle(v1, v3, v4, winding));
   }
+}
 
+void cavr::Tunnel::AddSegment(const Segment &segment) {
+  assert(mesh == nullptr);
+  segments.push_back(segment);
+}
+
+void cavr::Tunnel::CreateMesh() {
+  std::vector<dg::Mesh::Triangle> triangles;
+  int parity = 0;
+  for (auto &segment : segments) {
+    segment.CreateMesh(triangles, parity);
+    parity = 1 - parity;
+  }
   mesh = dg::Mesh::Create();
   for (auto &triangle : triangles) {
     triangle.CalculateFaceNormal();

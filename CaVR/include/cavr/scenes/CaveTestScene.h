@@ -6,12 +6,12 @@
 
 #include <memory>
 #include <vector>
+#include "dg/Mesh.h"
 #include "dg/Scene.h"
 
 namespace dg {
   class SceneObject;
   class Model;
-  class Mesh;
   class Light;
   class StandardMaterial;
 } // namespace dg
@@ -48,14 +48,13 @@ namespace cavr {
           static std::vector<std::shared_ptr<Knot>> InterpolateKnots(
               const std::vector<std::shared_ptr<Knot>> &knots);
 
-         private:
-
-          glm::vec3 PositionForVertex(int index) const;
+        private:
 
           glm::vec3 position = glm::vec3(0);
           glm::mat3x3 xf = glm::mat3x3(1);
           float radius = 0;
-          glm::vec3 vertices[VerticesPerRing];
+          std::vector<glm::vec3> vertices;
+
       };
 
       class Segment {
@@ -64,20 +63,31 @@ namespace cavr {
 
           Segment(std::shared_ptr<Knot> start, std::shared_ptr<Knot> end);
 
-          void CreateMesh(int parity);
+          void CreateMesh(std::vector<dg::Mesh::Triangle> &triangles,
+                          int parity);
 
           inline std::shared_ptr<Knot> GetStartKnot() const { return knots[0]; }
           inline std::shared_ptr<Knot> GetEndKnot() const { return knots[1]; }
-          inline std::shared_ptr<dg::Mesh> GetMesh() const { return mesh; }
 
         public:
 
           std::shared_ptr<Knot> knots[2];
-          std::shared_ptr<dg::Mesh> mesh = nullptr;
 
       };
 
+      inline std::shared_ptr<dg::Mesh> GetMesh() const {
+        assert(mesh != nullptr);
+        return mesh;
+      }
+
+      void AddSegment(const Segment &segment);
+      void CreateMesh();
+
+    private:
+
       std::vector<Segment> segments;
+      std::shared_ptr<dg::Mesh> mesh = nullptr;
+
   };
 
   class CaveTestScene : public dg::Scene {
@@ -94,8 +104,8 @@ namespace cavr {
       CaveTestScene();
 
       void CreateCave();
-      std::shared_ptr<dg::SceneObject> CreateKnotVertexModel(
-const Tunnel::Knot &knot) const;
+      std::shared_ptr<dg::SceneObject> CreateKnotVertexModels(
+          const Tunnel::Knot &knot) const;
       std::shared_ptr<dg::Model> CreateKnotModel(
           const Tunnel::Knot &knot) const;
 

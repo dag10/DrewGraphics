@@ -87,6 +87,7 @@ namespace cavr {
 
       CaveSegment() = default;
       CaveSegment(const KnotSet &knots);
+      CaveSegment(const KnotSet &knots, const CaveSegment &previousSegment);
 
     private:
 

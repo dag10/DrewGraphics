@@ -131,8 +131,10 @@ cavr::CaveSegment::KnotSet cavr::CaveSegment::KnotSet::WithInterpolatedKnots()
 cavr::CaveSegment::KnotSet cavr::CaveSegment::KnotSet::WithBakedTransform()
     const {
   KnotSet transformedKnots = KnotSet::FullCopy(*this);
-  for (auto &knot : transformedKnots.knots) {
-    knot->TransformBy(transformedKnots.transform);
+  if (transformedKnots.transform != dg::Transform()) {
+    for (auto &knot : transformedKnots.knots) {
+      knot->TransformBy(transformedKnots.transform);
+    }
   }
   transformedKnots.transform = dg::Transform();
   return transformedKnots;
@@ -140,12 +142,17 @@ cavr::CaveSegment::KnotSet cavr::CaveSegment::KnotSet::WithBakedTransform()
 
 cavr::CaveSegment::KnotSet cavr::CaveSegment::KnotSet::TransformedBy(
     dg::Transform xf) const {
-  KnotSet transformedKnots = KnotSet::FullCopy(*this);
-  for (auto &knot : transformedKnots.knots) {
-    knot->TransformBy(xf);
-  }
+  KnotSet transformedKnots = KnotSet::RefCopy(*this);
   transformedKnots.transform = xf * this->transform;
   return transformedKnots;
+}
+
+cavr::CaveSegment::CaveSegment(const KnotSet &knots,
+                               const CaveSegment &previousSegment) {
+  const Knot &lastKnot = *previousSegment.GetOriginalKnotSet().knots.back();
+  const Knot &nextNewKnot = *knots.knots.front();
+  dg::Transform xfDelta = lastKnot.GetXF() * nextNewKnot.GetXF().Inverse();
+  *this = CaveSegment(knots.TransformedBy(xfDelta));
 }
 
 cavr::CaveSegment::CaveSegment(const KnotSet &knots) {

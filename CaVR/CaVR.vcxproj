@@ -355,6 +355,7 @@ xcopy /d /y /e "$(ProjectDir)assets" "$(OutDir)assets"</Command>
     <ClCompile Include="src\CavrEngine.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\scenes\CaveTestScene.cpp" />
+    <ClCompile Include="src\Cave.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -362,6 +363,7 @@ xcopy /d /y /e "$(ProjectDir)assets" "$(OutDir)assets"</Command>
   <ItemGroup>
     <ClInclude Include="include\cavr\CavrEngine.h" />
     <ClInclude Include="include\cavr\scenes\CaveTestScene.h" />
+    <ClInclude Include="include\cavr\Cave.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

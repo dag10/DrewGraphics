@@ -4,12 +4,16 @@
 
 #include "cavr/Cave.h"
 
+cavr::CaveSegment::Knot::Knot(dg::Transform xf, float curveSpeed)
+    : xf(xf), curveSpeed(curveSpeed) {}
+
 cavr::CaveSegment::Knot::Knot(glm::vec3 position, glm::vec3 forward,
                               float radius, float curveSpeed)
-    : position(position), radius(radius), curveSpeed(curveSpeed) {
+    : curveSpeed(curveSpeed) {
   glm::vec3 right = glm::normalize(glm::cross(forward, dg::UP));
   glm::vec3 up = glm::normalize(glm::cross(right, forward));
-  xf = glm::mat3x3(right, up, -forward);
+  xf = dg::Transform::TRS(position, glm::quat(glm::mat3x3(right, up, -forward)),
+                          glm::vec3(radius));
 }
 
 cavr::CaveSegment::KnotSet::KnotSet(const KnotSet &other) {
@@ -89,7 +93,7 @@ cavr::CaveSegment::KnotSet cavr::CaveSegment::KnotSet::InterpolatedKnots()
 }
 
 cavr::CaveSegment::CaveSegment(const KnotSet &knots) : originalKnotSet(knots) {
-  knotSet = knots.InterpolatedKnots();
+  auto knotSet = knots.InterpolatedKnots();
 
   // Determine vertex positions for a ring of vertices around the knot.
   for (auto &knot : knotSet.knots) {
@@ -97,26 +101,6 @@ cavr::CaveSegment::CaveSegment(const KnotSet &knots) : originalKnotSet(knots) {
   }
 
   // Create mesh for cave segment.
-  CreateMesh();
-}
-
-void cavr::CaveSegment::Knot::CreateVertices() {
-  assert(vertices.empty());
-  vertices = std::vector<glm::vec3>(VerticesPerRing);
-  for (int i = 0; i < CaveSegment::VerticesPerRing; i++) {
-    vertices[i] = position + glm::quat(xf) *
-                                 glm::quat(glm::radians(glm::vec3(
-                                     0, 0, i * 360 / VerticesPerRing))) *
-                                 glm::vec3(radius, 0, 0);
-
-    // Randomize the position a little bit to make it bumpy.
-    float r = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
-    glm::vec3 dir = glm::normalize(vertices[i] - position);
-    vertices[i] += (dir * r * radius * 0.1f);
-  }
-}
-
-void cavr::CaveSegment::CreateMesh() {
   std::vector<dg::Mesh::Triangle> triangles;
 
   int parity = 0;
@@ -131,6 +115,22 @@ void cavr::CaveSegment::CreateMesh() {
     mesh->AddTriangle(triangle);
   }
   mesh->FinishBuilding();
+}
+
+void cavr::CaveSegment::Knot::CreateVertices() {
+  assert(vertices.empty());
+  vertices = std::vector<glm::vec3>(VerticesPerRing);
+  for (int i = 0; i < CaveSegment::VerticesPerRing; i++) {
+    vertices[i] = GetPosition() + GetXF().rotation *
+                                      glm::quat(glm::radians(glm::vec3(
+                                          0, 0, i * 360 / VerticesPerRing))) *
+                                      glm::vec3(GetRadius(), 0, 0);
+
+    // Randomize the position a little bit to make it bumpy.
+    float r = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
+    glm::vec3 dir = glm::normalize(vertices[i] - GetPosition());
+    vertices[i] += (dir * r * GetRadius() * 0.1f);
+  }
 }
 
 void cavr::CaveSegment::CreateRingMesh(std::vector<dg::Mesh::Triangle> &triangles,

@@ -23,15 +23,16 @@ namespace cavr {
         public:
 
           Knot() = default;
+          Knot(dg::Transform xf, float curveSpeed);
           Knot(glm::vec3 position, glm::vec3 forward, float radius,
                float curveSpeed);
 
-          inline const glm::vec3 &GetPosition() const { return position; }
-          inline const glm::vec3 &GetRight() const { return xf[0]; }
-          inline const glm::vec3 &GetUp() const { return xf[1]; }
-          inline glm::vec3 GetForward() const { return -xf[2]; }
-          inline const glm::mat3x3 &GetXF() const { return xf; }
-          inline float GetRadius() const { return radius; }
+          inline const glm::vec3 &GetPosition() const { return xf.translation; }
+          inline const glm::vec3 &GetRight() const { return xf.Right(); }
+          inline const glm::vec3 &GetUp() const { return xf.Up(); }
+          inline glm::vec3 GetForward() const { return xf.Forward(); }
+          inline const dg::Transform &GetXF() const { return xf; }
+          inline float GetRadius() const { return xf.scale.x; }
           inline float GetCurveSpeed() const { return curveSpeed; }
           inline const glm::vec3 &GetVertexPosition(int index) const {
             assert(!vertices.empty());
@@ -42,9 +43,7 @@ namespace cavr {
 
         private:
 
-          glm::vec3 position = glm::vec3(0);
-          glm::mat3x3 xf = glm::mat3x3(1);
-          float radius = 0;
+          dg::Transform xf;
           float curveSpeed = 1;
           std::vector<glm::vec3> vertices;
 
@@ -68,10 +67,6 @@ namespace cavr {
         return originalKnotSet;
       }
 
-      inline const KnotSet GetKnotSet() const {
-        return knotSet;
-      }
-
       inline std::shared_ptr<dg::Mesh> GetMesh() const {
         assert(mesh != nullptr);
         return mesh;
@@ -88,7 +83,6 @@ namespace cavr {
                              const Knot &secondKnot);
 
       KnotSet originalKnotSet;
-      KnotSet knotSet;
       std::shared_ptr<dg::Mesh> mesh = nullptr;
 
   }; // class CaveSegment

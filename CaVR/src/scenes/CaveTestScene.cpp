@@ -24,7 +24,7 @@ std::unique_ptr<cavr::CaveTestScene> cavr::CaveTestScene::Make() {
 }
 
 cavr::CaveTestScene::CaveTestScene() : dg::Scene() {
-  enableVR = true;
+  //enableVR = true;
 }
 
 void cavr::CaveTestScene::Initialize() {
@@ -194,7 +194,7 @@ cavr::CaveSegment::KnotSet cavr::CaveTestScene::CreateStraightKnots() {
   set.knots.push_back(std::shared_ptr<CaveSegment::Knot>(
       new CaveSegment::Knot(start, -dg::RIGHT, radius, 1.f)));
   set.knots.push_back(std::shared_ptr<CaveSegment::Knot>(
-      new CaveSegment::Knot(end, -dg::RIGHT, radius, 1.f)));
+      new CaveSegment::Knot(end, -dg::RIGHT, radius * 0.1f, 1.f)));
 
   return set;
 }
@@ -202,7 +202,7 @@ cavr::CaveSegment::KnotSet cavr::CaveTestScene::CreateStraightKnots() {
 void cavr::CaveTestScene::AddCaveSegment(const CaveSegment &segment) {
   // Visualize each original knots as models.
   for (auto &knot : segment.GetOriginalKnotSet().knots) {
-    knots->AddChild(CreateKnotModels(*knot), false);
+    knots->AddChild(CreateKnotVisualization(*knot), false);
   }
 
   // Create mesh for tunnel.
@@ -217,7 +217,8 @@ void cavr::CaveTestScene::AddCaveSegment(const CaveSegment &segment) {
       false);
 }
 
-std::shared_ptr<dg::SceneObject> cavr::CaveTestScene::CreateKnotVertexModels(
+std::shared_ptr<dg::SceneObject>
+cavr::CaveTestScene::CreateKnotVertexVisualization(
     const CaveSegment::Knot &knot) const {
   auto container = std::make_shared<SceneObject>();
   for (int i = 0; i < CaveSegment::VerticesPerRing; i++) {
@@ -230,32 +231,41 @@ std::shared_ptr<dg::SceneObject> cavr::CaveTestScene::CreateKnotVertexModels(
   return container;
 }
 
-std::shared_ptr<dg::SceneObject> cavr::CaveTestScene::CreateKnotModels(
+std::shared_ptr<dg::SceneObject> cavr::CaveTestScene::CreateKnotVisualization(
     const CaveSegment::Knot &knot) const {
   auto container = std::make_shared<SceneObject>();
+
+  // Disk
   container->AddChild(
       std::make_shared<dg::Model>(
           dg::Mesh::Cylinder, knotDiskMaterial,
-          dg::Transform::TRS(knot.GetPosition(),
-                             glm::quat(knot.GetXF()) *
-                                 glm::quat(glm::radians(glm::vec3(-90, 0, 0))),
-                             glm::vec3(knot.GetRadius() * 2.f, 0.012f,
-                                       knot.GetRadius() * 2.f))),
+          knot.GetXF() *
+              dg::Transform::RS(glm::quat(glm::radians(glm::vec3(-90, 0, 0))),
+                                glm::vec3(2.f, 0.1f, 2.f))),
       false);
+
+  // Arrow stem
+  float stemWidth = 0.07f;
+  float stemHeight = knot.GetCurveSpeed() * 0.75f;
   auto stem = std::make_shared<dg::Model>(
       dg::Mesh::Cylinder, knotArrowMaterial,
-      dg::Transform::TRS(knot.GetPosition(),
-                         glm::quat(knot.GetXF()) *
-                             glm::quat(glm::radians(glm::vec3(-90, 1, 0))),
-                         glm::vec3(0.005f, 0.05f, 0.005f)) *
-          dg::Transform::T(glm::vec3(0.f, 0.5f, 0.f)));
-  stem->AddChild(
-      std::make_shared<dg::Model>(
-          dg::Mesh::LoadOBJ("assets/models/cone.obj"), knotArrowMaterial,
-          dg::Transform::TS(glm::vec3(0.f, 0.5f, 0.f),
-                            glm::vec3(2.5f, 0.2f, 2.5f))),
-      false);
+      knot.GetXF() *
+          dg::Transform::TRS(dg::FORWARD * stemHeight * 0.5f,
+                             glm::quat(glm::radians(glm::vec3(-90, 0, 0))),
+                             glm::vec3(stemWidth, stemHeight, stemWidth)));
   container->AddChild(stem, false);
+
+  // Arrow cone
+  float arrowWidth = 2.5f * stemWidth;
+  float arrowHeight = 1.0f * arrowWidth;
+  auto cone = std::make_shared<dg::Model>(
+      dg::Mesh::LoadOBJ("assets/models/cone.obj"), knotArrowMaterial,
+      knot.GetXF() *
+          dg::Transform::TRS(dg::FORWARD * (arrowHeight * 0.5f + stemHeight),
+                             glm::quat(glm::radians(glm::vec3(-90, 0, 0))),
+                             glm::vec3(arrowWidth, arrowHeight, arrowWidth)));
+  container->AddChild(cone, false);
+
   return container;
 }
 

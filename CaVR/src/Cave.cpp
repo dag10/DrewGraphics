@@ -4,8 +4,19 @@
 
 #include "cavr/Cave.h"
 
+cavr::CaveSegment::Knot::Knot(const Knot &other) {
+  xf = other.xf;
+  curveSpeed = other.curveSpeed;
+  vertices = std::vector<glm::vec3>(other.vertices);
+}
+
 cavr::CaveSegment::Knot::Knot(dg::Transform xf, float curveSpeed)
     : xf(xf), curveSpeed(curveSpeed) {}
+
+cavr::CaveSegment::Knot::Knot(glm::vec3 position, glm::quat rotation,
+                              float radius, float curveSpeed) {
+  xf = dg::Transform::TRS(position, rotation, glm::vec3(radius));
+}
 
 cavr::CaveSegment::Knot::Knot(glm::vec3 position, glm::vec3 forward,
                               float radius, float curveSpeed)
@@ -16,12 +27,27 @@ cavr::CaveSegment::Knot::Knot(glm::vec3 position, glm::vec3 forward,
                           glm::vec3(radius));
 }
 
-cavr::CaveSegment::KnotSet::KnotSet(const KnotSet &other) {
-  this->knots = std::vector<std::shared_ptr<Knot>>(other.knots);
-  this->transform = other.transform;
+cavr::CaveSegment::KnotSet cavr::CaveSegment::KnotSet::RefCopy(
+    const KnotSet &other) {
+  KnotSet knotSet;
+  knotSet.knots = std::vector<std::shared_ptr<Knot>>(other.knots);
+  knotSet.transform = other.transform;
+  return knotSet;
 }
 
-cavr::CaveSegment::KnotSet cavr::CaveSegment::KnotSet::InterpolatedKnots()
+cavr::CaveSegment::KnotSet cavr::CaveSegment::KnotSet::FullCopy(
+    const KnotSet &other) {
+  KnotSet knotSet;
+  size_t numKnots = other.knots.size();
+  knotSet.knots = std::vector<std::shared_ptr<Knot>>(numKnots);
+  for (int i = 0; i < numKnots; i++) {
+    knotSet.knots[i] = std::shared_ptr<Knot>(new Knot(*other.knots[i]));
+  }
+  knotSet.transform = other.transform;
+  return knotSet;
+}
+
+cavr::CaveSegment::KnotSet cavr::CaveSegment::KnotSet::WithInterpolatedKnots()
     const {
   if (knots.size() <= 1) {
     return KnotSet(*this);
@@ -45,19 +71,18 @@ cavr::CaveSegment::KnotSet cavr::CaveSegment::KnotSet::InterpolatedKnots()
     // Use Cubic Hermite Curves to interpolate the positions.
     // http://www.cubic.org/docs/hermite.htm
     std::vector<glm::vec3> positions(subdivisions-1);
+    const float s1 = first->GetCurveSpeed() * first->GetRadius();
+    const float s2 = second->GetCurveSpeed() * second->GetRadius();
+    const glm::vec3 p1 = first->GetPosition();
+    const glm::vec3 p2 = second->GetPosition();
+    const glm::vec3 t1 = first->GetForward() * s1;
+    const glm::vec3 t2 = second->GetForward() * s2;
     for (int t = 1; t <= subdivisions - 1; t++) {
       const float s = (float)t / (float)subdivisions;
       const float h1 = (2 * s * s * s) - (3 * s * s) + 1;
       const float h2 = (-2 * s * s * s) + (3 * s * s);
       const float h3 = (s * s * s) - (2 * s * s) + s;
       const float h4 = (s * s * s) - (s * s);
-      const float s1 = first->GetCurveSpeed() * sqrt(first->GetRadius()) * 10.f;
-      const float s2 =
-          second->GetCurveSpeed() * sqrt(second->GetRadius()) * 10.f;
-      const glm::vec3 p1 = first->GetPosition();
-      const glm::vec3 p2 = second->GetPosition();
-      const glm::vec3 t1 = first->GetForward() * s1;
-      const glm::vec3 t2 = second->GetForward() * s2;
       positions[t - 1] = (h1 * p1) + (h2 * p2) + (h3 * t1) + (h4 * t2);
     }
 
@@ -79,8 +104,19 @@ cavr::CaveSegment::KnotSet cavr::CaveSegment::KnotSet::InterpolatedKnots()
           first->GetCurveSpeed() +
           ((second->GetCurveSpeed() - first->GetCurveSpeed()) * ss);
 
-      newKnots.push_back(
-          std::make_shared<Knot>(pos, forward, radius, curveSpeed));
+      // We already knot the forward vector (tangent) based on the adjacent
+      // knot positions, but what about this up and right vectors? We can't
+      // just use the world's up since our knot might actually be pointing up!
+      // Instead, we'll slerp this knot's right and up vectors based on the
+      // right and up vectors of knots we're interpolating between.
+      glm::vec3 right =
+          glm::slerp(first->GetXF().rotation, second->GetXF().rotation, ss) *
+          dg::RIGHT;
+      glm::vec3 up = glm::normalize(glm::cross(right, forward));
+
+      newKnots.push_back(std::make_shared<Knot>(
+          pos, glm::quat(glm::mat3x3(right, up, -forward)), radius,
+          curveSpeed));
     }
   }
 
@@ -92,8 +128,29 @@ cavr::CaveSegment::KnotSet cavr::CaveSegment::KnotSet::InterpolatedKnots()
   return newKnotSet;
 }
 
-cavr::CaveSegment::CaveSegment(const KnotSet &knots) : originalKnotSet(knots) {
-  auto knotSet = knots.InterpolatedKnots();
+cavr::CaveSegment::KnotSet cavr::CaveSegment::KnotSet::WithBakedTransform()
+    const {
+  KnotSet transformedKnots = KnotSet::FullCopy(*this);
+  for (auto &knot : transformedKnots.knots) {
+    knot->TransformBy(transformedKnots.transform);
+  }
+  transformedKnots.transform = dg::Transform();
+  return transformedKnots;
+}
+
+cavr::CaveSegment::KnotSet cavr::CaveSegment::KnotSet::TransformedBy(
+    dg::Transform xf) const {
+  KnotSet transformedKnots = KnotSet::FullCopy(*this);
+  for (auto &knot : transformedKnots.knots) {
+    knot->TransformBy(xf);
+  }
+  transformedKnots.transform = xf * this->transform;
+  return transformedKnots;
+}
+
+cavr::CaveSegment::CaveSegment(const KnotSet &knots) {
+  originalKnotSet = knots.WithBakedTransform();
+  auto knotSet = originalKnotSet.WithInterpolatedKnots();
 
   // Determine vertex positions for a ring of vertices around the knot.
   for (auto &knot : knotSet.knots) {
@@ -121,10 +178,11 @@ void cavr::CaveSegment::Knot::CreateVertices() {
   assert(vertices.empty());
   vertices = std::vector<glm::vec3>(VerticesPerRing);
   for (int i = 0; i < CaveSegment::VerticesPerRing; i++) {
-    vertices[i] = GetPosition() + GetXF().rotation *
-                                      glm::quat(glm::radians(glm::vec3(
-                                          0, 0, i * 360 / VerticesPerRing))) *
-                                      glm::vec3(GetRadius(), 0, 0);
+    vertices[i] = (GetXF() *
+                   dg::Transform::R(glm::quat(glm::radians(
+                       glm::vec3(0, 0, i * 360 / VerticesPerRing)))) *
+                   dg::Transform::T(dg::RIGHT))
+                      .translation;
 
     // Randomize the position a little bit to make it bumpy.
     float r = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
@@ -133,9 +191,13 @@ void cavr::CaveSegment::Knot::CreateVertices() {
   }
 }
 
-void cavr::CaveSegment::CreateRingMesh(std::vector<dg::Mesh::Triangle> &triangles,
-                                   int parity, const Knot &firstKnot,
-                                   const Knot &secondKnot) {
+void cavr::CaveSegment::Knot::TransformBy(dg::Transform xf) {
+  this->xf = xf * this->xf;
+}
+
+void cavr::CaveSegment::CreateRingMesh(
+    std::vector<dg::Mesh::Triangle> &triangles, int parity,
+    const Knot &firstKnot, const Knot &secondKnot) {
   const int numTriangles = VerticesPerRing * 2;
 
   const Knot *knots[] = {

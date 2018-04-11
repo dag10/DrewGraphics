@@ -36,6 +36,7 @@ namespace cavr {
 
       static CaveSegment::KnotSet CreateArcKnots();
       static CaveSegment::KnotSet CreateStraightKnots();
+      static CaveSegment::KnotSet CreateVerticalKnots();
 
       void AddCaveSegment(const CaveSegment &segment);
       std::shared_ptr<dg::SceneObject> CreateKnotVertexVisualization(

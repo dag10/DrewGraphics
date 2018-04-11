@@ -23,7 +23,10 @@ namespace cavr {
         public:
 
           Knot() = default;
+          Knot(const Knot &);
           Knot(dg::Transform xf, float curveSpeed);
+          Knot(glm::vec3 position, glm::quat rotation, float radius,
+               float curveSpeed);
           Knot(glm::vec3 position, glm::vec3 forward, float radius,
                float curveSpeed);
 
@@ -41,6 +44,8 @@ namespace cavr {
 
           void CreateVertices();
 
+          void TransformBy(dg::Transform xf);
+
         private:
 
           dg::Transform xf;
@@ -53,10 +58,18 @@ namespace cavr {
 
         public:
 
-          KnotSet() = default;
-          KnotSet(const KnotSet&);
+          // Create a copy whos knot pointers point to the original knots.
+          static KnotSet RefCopy(const KnotSet &);
 
-          KnotSet InterpolatedKnots() const;
+          // Create a copy whos knot pointers point to copies of the
+          // original knots.
+          static KnotSet FullCopy(const KnotSet &);
+
+          KnotSet() = default;
+
+          KnotSet WithInterpolatedKnots() const;
+          KnotSet WithBakedTransform() const;
+          KnotSet TransformedBy(dg::Transform xf) const;
 
           std::vector<std::shared_ptr<Knot>> knots;
           dg::Transform transform;

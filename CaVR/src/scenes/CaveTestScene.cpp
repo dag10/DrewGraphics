@@ -24,7 +24,7 @@ std::unique_ptr<cavr::CaveTestScene> cavr::CaveTestScene::Make() {
 }
 
 cavr::CaveTestScene::CaveTestScene() : dg::Scene() {
-  //enableVR = true;
+  enableVR = true;
 }
 
 void cavr::CaveTestScene::Initialize() {
@@ -165,6 +165,7 @@ void cavr::CaveTestScene::Initialize() {
   // Create cave segments.
   AddCaveSegment(CaveSegment(CreateArcKnots()));
   AddCaveSegment(CaveSegment(CreateStraightKnots()));
+  AddCaveSegment(CaveSegment(CreateVerticalKnots()));
 }
 
 cavr::CaveSegment::KnotSet cavr::CaveTestScene::CreateArcKnots() {
@@ -176,11 +177,11 @@ cavr::CaveSegment::KnotSet cavr::CaveTestScene::CreateArcKnots() {
   const float radius = 0.13f;
   const float slope = -1.5;
   set.knots.push_back(std::shared_ptr<CaveSegment::Knot>(new CaveSegment::Knot(
-      start, glm::normalize(glm::vec3(-0.1f, 0.4f, -0.5f)), radius, .3f)));
+      start, glm::normalize(glm::vec3(-0.1f, 0.4f, -0.5f)), radius, 12.f)));
   set.knots.push_back(std::shared_ptr<CaveSegment::Knot>(new CaveSegment::Knot(
-      middle, glm::normalize(glm::vec3(-1, 0, 0)), radius * 0.7f, 1.f)));
+      middle, glm::normalize(glm::vec3(-1, 0, 0)), radius * 0.7f, 40.f)));
   set.knots.push_back(std::shared_ptr<CaveSegment::Knot>(new CaveSegment::Knot(
-      end, glm::normalize(glm::vec3(-1.f, 0.f, 0.3f)), radius * 0.4f, 1.f)));
+      end, glm::normalize(glm::vec3(-1.f, 0.f, 0.3f)), radius * 0.4f, 40.f)));
 
   return set;
 }
@@ -192,9 +193,28 @@ cavr::CaveSegment::KnotSet cavr::CaveTestScene::CreateStraightKnots() {
   const glm::vec3 end(-1.f, 0.75f, 0.f);
   const float radius = 0.1f;
   set.knots.push_back(std::shared_ptr<CaveSegment::Knot>(
-      new CaveSegment::Knot(start, -dg::RIGHT, radius, 1.f)));
+      new CaveSegment::Knot(start, -dg::RIGHT, radius, 40.f)));
   set.knots.push_back(std::shared_ptr<CaveSegment::Knot>(
-      new CaveSegment::Knot(end, -dg::RIGHT, radius * 0.1f, 1.f)));
+      new CaveSegment::Knot(end, -dg::RIGHT, radius * 0.1f, 40.f)));
+
+  return set;
+}
+
+cavr::CaveSegment::KnotSet cavr::CaveTestScene::CreateVerticalKnots() {
+  CaveSegment::KnotSet set;
+
+  const glm::vec3 start(-0.5f, 0.f, -0.8f);
+  const glm::vec3 end(-0.5f, 3.f, -0.8f);
+  const float radius = 0.1f;
+  const float speed = 24.f;
+  set.knots.push_back(std::shared_ptr<CaveSegment::Knot>(new CaveSegment::Knot(
+      dg::Transform::TRS(start, glm::quat(glm::radians(glm::vec3(90, 180, 0))),
+                         glm::vec3(radius)),
+      speed)));
+  set.knots.push_back(std::shared_ptr<CaveSegment::Knot>(new CaveSegment::Knot(
+      dg::Transform::TRS(end, glm::quat(glm::radians(glm::vec3(90, 0, 0))),
+                         glm::vec3(radius)),
+      speed)));
 
   return set;
 }
@@ -246,7 +266,7 @@ std::shared_ptr<dg::SceneObject> cavr::CaveTestScene::CreateKnotVisualization(
 
   // Arrow stem
   float stemWidth = 0.07f;
-  float stemHeight = knot.GetCurveSpeed() * 0.75f;
+  float stemHeight = knot.GetCurveSpeed() * 0.1f;
   auto stem = std::make_shared<dg::Model>(
       dg::Mesh::Cylinder, knotArrowMaterial,
       knot.GetXF() *

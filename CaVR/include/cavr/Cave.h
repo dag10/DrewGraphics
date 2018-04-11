@@ -64,6 +64,14 @@ namespace cavr {
 
       }; // class KnotSet
 
+      inline const KnotSet GetOriginalKnotSet() const {
+        return originalKnotSet;
+      }
+
+      inline const KnotSet GetKnotSet() const {
+        return knotSet;
+      }
+
       inline std::shared_ptr<dg::Mesh> GetMesh() const {
         assert(mesh != nullptr);
         return mesh;
@@ -79,6 +87,7 @@ namespace cavr {
                              int parity, const Knot &firstKnot,
                              const Knot &secondKnot);
 
+      KnotSet originalKnotSet;
       KnotSet knotSet;
       std::shared_ptr<dg::Mesh> mesh = nullptr;
 

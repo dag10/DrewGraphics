@@ -162,7 +162,9 @@ void cavr::CaveTestScene::Initialize() {
   knots = std::make_shared<dg::SceneObject>();
   caveContainer->AddChild(knots, false);
 
-  CreateCave();
+  // Create cave segments.
+  AddCaveSegment(CaveSegment(CreateArcKnots()));
+  AddCaveSegment(CaveSegment(CreateStraightKnots()));
 }
 
 cavr::CaveSegment::KnotSet cavr::CaveTestScene::CreateArcKnots() {
@@ -183,24 +185,36 @@ cavr::CaveSegment::KnotSet cavr::CaveTestScene::CreateArcKnots() {
   return set;
 }
 
-void cavr::CaveTestScene::CreateCave() {
-  CaveSegment::KnotSet set = CreateArcKnots();
+cavr::CaveSegment::KnotSet cavr::CaveTestScene::CreateStraightKnots() {
+  CaveSegment::KnotSet set;
 
+  const glm::vec3 start(1.f, 0.75f, 0.f);
+  const glm::vec3 end(-1.f, 0.75f, 0.f);
+  const float radius = 0.1f;
+  set.knots.push_back(std::shared_ptr<CaveSegment::Knot>(
+      new CaveSegment::Knot(start, -dg::RIGHT, radius, 1.f)));
+  set.knots.push_back(std::shared_ptr<CaveSegment::Knot>(
+      new CaveSegment::Knot(end, -dg::RIGHT, radius, 1.f)));
+
+  return set;
+}
+
+void cavr::CaveTestScene::AddCaveSegment(const CaveSegment &segment) {
   // Visualize each original knots as models.
-  for (auto &knot : set.knots) {
+  for (auto &knot : segment.GetOriginalKnotSet().knots) {
     knots->AddChild(CreateKnotModels(*knot), false);
   }
 
   // Create mesh for tunnel.
-  CaveSegment tunnel(set);
   caveContainer->AddChild(std::make_shared<dg::Model>(
-                              tunnel.GetMesh(), caveMaterial, dg::Transform()),
+                              segment.GetMesh(), caveMaterial, dg::Transform()),
                           false);
   auto outerMaterial =
       enableVR ? caveTransparentMaterial : caveWireframeMaterial;
-  caveContainer->AddChild(std::make_shared<dg::Model>(
-                              tunnel.GetMesh(), outerMaterial, dg::Transform()),
-                          false);
+  caveContainer->AddChild(
+      std::make_shared<dg::Model>(segment.GetMesh(), outerMaterial,
+                                  dg::Transform()),
+      false);
 }
 
 std::shared_ptr<dg::SceneObject> cavr::CaveTestScene::CreateKnotVertexModels(

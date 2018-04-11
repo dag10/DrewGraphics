@@ -88,7 +88,7 @@ cavr::CaveSegment::KnotSet cavr::CaveSegment::KnotSet::InterpolatedKnots()
   return newKnotSet;
 }
 
-cavr::CaveSegment::CaveSegment(const KnotSet &knots) {
+cavr::CaveSegment::CaveSegment(const KnotSet &knots) : originalKnotSet(knots) {
   knotSet = knots.InterpolatedKnots();
 
   // Determine vertex positions for a ring of vertices around the knot.

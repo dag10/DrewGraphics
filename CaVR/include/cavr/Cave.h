@@ -87,9 +87,10 @@ namespace cavr {
 
       CaveSegment() = default;
       CaveSegment(const KnotSet &knots);
-      CaveSegment(const KnotSet &knots, const CaveSegment &previousSegment);
+      CaveSegment(const KnotSet &knots, const CaveSegment &previousSegment,
+                  bool backwards = false);
 
-    private:
+     private:
 
       void CreateMesh();
       static void CreateRingMesh(std::vector<dg::Mesh::Triangle> &triangles,

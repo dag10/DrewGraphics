@@ -172,9 +172,15 @@ void cavr::CaveTestScene::Initialize() {
   CaveSegment::KnotSet arcKnots = CreateArcKnots();
   CaveSegment currentArcSegment(arcKnots.TransformedBy(
       dg::Transform::TS(glm::vec3(0.5, 0, -1), glm::vec3(0.8f))));
+  CaveSegment originalSegment = currentArcSegment;
   AddCaveSegment(currentArcSegment);
   for (int i = 1; i < 15; i++) {
     currentArcSegment = CaveSegment(arcKnots, currentArcSegment);
+    AddCaveSegment(currentArcSegment);
+  }
+  currentArcSegment = originalSegment;
+  for (int i = 1; i < 15; i++) {
+    currentArcSegment = CaveSegment(arcKnots, currentArcSegment, true);
     AddCaveSegment(currentArcSegment);
   }
 }

@@ -148,11 +148,17 @@ cavr::CaveSegment::KnotSet cavr::CaveSegment::KnotSet::TransformedBy(
 }
 
 cavr::CaveSegment::CaveSegment(const KnotSet &knots,
-                               const CaveSegment &previousSegment) {
-  const Knot &lastKnot = *previousSegment.GetOriginalKnotSet().knots.back();
-  const Knot &nextNewKnot = *knots.knots.front();
-  dg::Transform xfDelta = lastKnot.GetXF() * nextNewKnot.GetXF().Inverse();
-  *this = CaveSegment(knots.TransformedBy(xfDelta));
+                               const CaveSegment &previousSegment,
+                               bool backwards) {
+  std::shared_ptr<Knot> lastKnot =
+      backwards ? previousSegment.GetOriginalKnotSet().knots.front()
+                : previousSegment.GetOriginalKnotSet().knots.back();
+  std::shared_ptr<Knot> nextNewKnot =
+      backwards ? knots.knots.back() : knots.knots.front();
+  dg::Transform xfDelta = lastKnot->GetXF() * nextNewKnot->GetXF().Inverse();
+  KnotSet newKnots = knots.TransformedBy(xfDelta).WithBakedTransform();
+  newKnots.knots[backwards ? newKnots.knots.size() - 1 : 0] = lastKnot;
+  *this = CaveSegment(newKnots);
 }
 
 cavr::CaveSegment::CaveSegment(const KnotSet &knots) {
@@ -182,7 +188,10 @@ cavr::CaveSegment::CaveSegment(const KnotSet &knots) {
 }
 
 void cavr::CaveSegment::Knot::CreateVertices() {
-  assert(vertices.empty());
+  if (!vertices.empty()) {
+    return;
+  }
+
   vertices = std::vector<glm::vec3>(VerticesPerRing);
   for (int i = 0; i < CaveSegment::VerticesPerRing; i++) {
     vertices[i] = (GetXF() *

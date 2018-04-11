@@ -64,24 +64,6 @@ namespace cavr {
 
       }; // class KnotSet
 
-      class Ring {
-
-        public:
-
-          Ring(std::shared_ptr<Knot> start, std::shared_ptr<Knot> end);
-
-          void CreateMesh(std::vector<dg::Mesh::Triangle> &triangles,
-                          int parity);
-
-          inline std::shared_ptr<Knot> GetStartKnot() const { return knots[0]; }
-          inline std::shared_ptr<Knot> GetEndKnot() const { return knots[1]; }
-
-        public:
-
-          std::shared_ptr<Knot> knots[2];
-
-      }; // class Ring
-
       inline std::shared_ptr<dg::Mesh> GetMesh() const {
         assert(mesh != nullptr);
         return mesh;
@@ -93,8 +75,11 @@ namespace cavr {
     private:
 
       void CreateMesh();
+      static void CreateRingMesh(std::vector<dg::Mesh::Triangle> &triangles,
+                             int parity, const Knot &firstKnot,
+                             const Knot &secondKnot);
 
-      std::vector<Ring> rings;
+      KnotSet knotSet;
       std::shared_ptr<dg::Mesh> mesh = nullptr;
 
   }; // class CaveSegment

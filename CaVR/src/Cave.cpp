@@ -89,18 +89,11 @@ cavr::CaveSegment::KnotSet cavr::CaveSegment::KnotSet::InterpolatedKnots()
 }
 
 cavr::CaveSegment::CaveSegment(const KnotSet &knots) {
-  KnotSet interpolatedKnots = knots.InterpolatedKnots();
+  knotSet = knots.InterpolatedKnots();
 
   // Determine vertex positions for a ring of vertices around the knot.
-  for (auto &knot : interpolatedKnots.knots) {
+  for (auto &knot : knotSet.knots) {
     knot->CreateVertices();
-  }
-
-  // Create rings for each adjacent pair of knots.
-  const size_t numKnots = interpolatedKnots.knots.size();
-  for (size_t i = 0; i < numKnots - 1; i++) {
-    rings.push_back(CaveSegment::Ring(interpolatedKnots.knots[i],
-                                 interpolatedKnots.knots[i + 1]));
   }
 
   // Create mesh for cave segment.
@@ -123,13 +116,32 @@ void cavr::CaveSegment::Knot::CreateVertices() {
   }
 }
 
-cavr::CaveSegment::Ring::Ring(std::shared_ptr<Knot> start,
-                               std::shared_ptr<Knot> end)
-    : knots{start, end} {}
+void cavr::CaveSegment::CreateMesh() {
+  std::vector<dg::Mesh::Triangle> triangles;
 
-void cavr::CaveSegment::Ring::CreateMesh(
-    std::vector<dg::Mesh::Triangle> &triangles, int parity) {
+  int parity = 0;
+  size_t numKnots = knotSet.knots.size();
+  for (size_t i = 0; i < numKnots - 1; i++) {
+    CreateRingMesh(triangles, parity, *knotSet.knots[i], *knotSet.knots[i + 1]);
+    parity = 1 - parity;
+  }
+  mesh = dg::Mesh::Create();
+  for (auto &triangle : triangles) {
+    triangle.CalculateFaceNormal();
+    mesh->AddTriangle(triangle);
+  }
+  mesh->FinishBuilding();
+}
+
+void cavr::CaveSegment::CreateRingMesh(std::vector<dg::Mesh::Triangle> &triangles,
+                                   int parity, const Knot &firstKnot,
+                                   const Knot &secondKnot) {
   const int numTriangles = VerticesPerRing * 2;
+
+  const Knot *knots[] = {
+    &firstKnot,
+    &secondKnot,
+  };
 
   for (int i = 0; i < VerticesPerRing; i++) {
     int nextIdx = (i + 1) % VerticesPerRing;
@@ -148,19 +160,4 @@ void cavr::CaveSegment::Ring::CreateMesh(
 
     parity = 1 - parity;
   }
-}
-
-void cavr::CaveSegment::CreateMesh() {
-  std::vector<dg::Mesh::Triangle> triangles;
-  int parity = 0;
-  for (auto &ring : rings) {
-    ring.CreateMesh(triangles, parity);
-    parity = 1 - parity;
-  }
-  mesh = dg::Mesh::Create();
-  for (auto &triangle : triangles) {
-    triangle.CalculateFaceNormal();
-    mesh->AddTriangle(triangle);
-  }
-  mesh->FinishBuilding();
 }

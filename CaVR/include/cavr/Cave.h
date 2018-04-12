@@ -37,19 +37,24 @@ namespace cavr {
           inline const dg::Transform &GetXF() const { return xf; }
           inline float GetRadius() const { return xf.scale.x; }
           inline float GetCurveSpeed() const { return curveSpeed; }
+          inline int GetRotations() const { return rotations; }
           inline const glm::vec3 &GetVertexPosition(int index) const {
             assert(!vertices.empty());
             return vertices[index];
           }
 
+          glm::quat GetUnrotatedRotation() const;
+
           void CreateVertices();
 
           void TransformBy(dg::Transform xf);
+          void RotateBy(float approxRadians);
 
         private:
 
           dg::Transform xf;
           float curveSpeed = 1;
+          int rotations = 0;
           std::vector<glm::vec3> vertices;
 
       }; // class Knot
@@ -71,6 +76,7 @@ namespace cavr {
           KnotSet WithBakedTransform() const;
           KnotSet TransformedBy(dg::Transform xf) const;
 
+          std::vector<std::shared_ptr<Knot>> noninterpolatedKnots;
           std::vector<std::shared_ptr<Knot>> knots;
           dg::Transform transform;
 

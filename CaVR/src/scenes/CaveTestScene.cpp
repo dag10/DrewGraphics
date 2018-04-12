@@ -24,7 +24,7 @@ std::unique_ptr<cavr::CaveTestScene> cavr::CaveTestScene::Make() {
 }
 
 cavr::CaveTestScene::CaveTestScene() : dg::Scene() {
-  enableVR = true;
+  //enableVR = true;
 }
 
 void cavr::CaveTestScene::Initialize() {
@@ -162,27 +162,21 @@ void cavr::CaveTestScene::Initialize() {
   knots = std::make_shared<dg::SceneObject>();
   caveContainer->AddChild(knots, false);
 
-  // Create cave segments.
-  dg::Transform xf = dg::Transform::T(glm::vec3(0, 0, -2));
-  AddCaveSegment(CaveSegment(CreateStraightKnots().TransformedBy(xf)));
-  AddCaveSegment(CaveSegment(CreateVerticalKnots().TransformedBy(xf)));
-  AddCaveSegment(CaveSegment(CreateVerticalKnots().TransformedBy(xf)));
-
   // Join multiple ArcSegments together.
-  CaveSegment::KnotSet arcKnots = CreateArcKnots();
+  CaveSegment::KnotSet arcKnots = CreateArcKnots().WithInterpolatedKnots();
   CaveSegment currentArcSegment(arcKnots.TransformedBy(
       dg::Transform::TS(glm::vec3(0.5, 0, -1), glm::vec3(0.8f))));
   CaveSegment originalSegment = currentArcSegment;
   AddCaveSegment(currentArcSegment);
-  for (int i = 1; i < 15; i++) {
+  srand(1);
+  for (int i = 1; i < 20; i++) {
+    float r = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
+    arcKnots.knots.front()->RotateBy(glm::radians(r * 360.f));
+    //arcKnots.knots.front()->RotateBy(glm::radians(180.f));
     currentArcSegment = CaveSegment(arcKnots, currentArcSegment);
     AddCaveSegment(currentArcSegment);
   }
   currentArcSegment = originalSegment;
-  for (int i = 1; i < 15; i++) {
-    currentArcSegment = CaveSegment(arcKnots, currentArcSegment, true);
-    AddCaveSegment(currentArcSegment);
-  }
 }
 
 cavr::CaveSegment::KnotSet cavr::CaveTestScene::CreateArcKnots() {
@@ -191,13 +185,13 @@ cavr::CaveSegment::KnotSet cavr::CaveTestScene::CreateArcKnots() {
   const glm::vec3 start(1.f, 0.8f, 0.4f);
   const glm::vec3 middle(-0.1f, 1.3f, -0.2f);
   const glm::vec3 end(-1.f, 0.75f, 0.4f);
-  const float radius = 0.13f;
+  const float radius = 0.15f;
   set.knots.push_back(std::shared_ptr<CaveSegment::Knot>(new CaveSegment::Knot(
       start, glm::normalize(glm::vec3(-0.1f, 0.4f, -0.5f)), radius, 15.f)));
   set.knots.push_back(std::shared_ptr<CaveSegment::Knot>(new CaveSegment::Knot(
-      middle, glm::normalize(glm::vec3(-1, 0, 0)), radius * 0.9f, 25.f)));
+      middle, glm::normalize(glm::vec3(-1, 0, 0)), radius * 0.9f, 15.f)));
   set.knots.push_back(std::shared_ptr<CaveSegment::Knot>(new CaveSegment::Knot(
-      end, glm::normalize(glm::vec3(-1.f, 0.f, 0.3f)), radius * 0.6f, 20.f)));
+      end, glm::normalize(glm::vec3(-1.f, 0.f, 0.3f)), radius, 15.f)));
 
   return set;
 }
@@ -237,7 +231,11 @@ cavr::CaveSegment::KnotSet cavr::CaveTestScene::CreateVerticalKnots() {
 
 void cavr::CaveTestScene::AddCaveSegment(const CaveSegment &segment) {
   // Visualize each original knots as models.
-  for (auto &knot : segment.GetOriginalKnotSet().knots) {
+  auto interpolated =
+      !segment.GetOriginalKnotSet().noninterpolatedKnots.empty();
+  for (auto &knot : interpolated
+                        ? segment.GetOriginalKnotSet().noninterpolatedKnots
+                        : segment.GetOriginalKnotSet().knots) {
     knots->AddChild(CreateKnotVisualization(*knot), false);
   }
 
@@ -272,12 +270,13 @@ std::shared_ptr<dg::SceneObject> cavr::CaveTestScene::CreateKnotVisualization(
   auto container = std::make_shared<SceneObject>();
 
   // Disk
+  float diskWidth = 0.1f;
   container->AddChild(
       std::make_shared<dg::Model>(
           dg::Mesh::Cylinder, knotDiskMaterial,
           knot.GetXF() *
               dg::Transform::RS(glm::quat(glm::radians(glm::vec3(-90, 0, 0))),
-                                glm::vec3(2.f, 0.1f, 2.f))),
+                                glm::vec3(2.f, diskWidth, 2.f))),
       false);
 
   // Arrow stem
@@ -301,6 +300,15 @@ std::shared_ptr<dg::SceneObject> cavr::CaveTestScene::CreateKnotVisualization(
                              glm::quat(glm::radians(glm::vec3(-90, 0, 0))),
                              glm::vec3(arrowWidth, arrowHeight, arrowWidth)));
   container->AddChild(cone, false);
+
+  // "Right" cone
+  auto up = std::make_shared<dg::Model>(
+      dg::Mesh::LoadOBJ("assets/models/cone.obj"), knotArrowMaterial,
+      knot.GetXF() *
+          dg::Transform::TRS(dg::RIGHT * 1.0f,
+                             glm::quat(glm::radians(glm::vec3(0, 0, -90))),
+                             glm::vec3(diskWidth * 2.f)));
+  container->AddChild(up, false);
 
   return container;
 }

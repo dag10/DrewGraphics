@@ -7,6 +7,7 @@
 cavr::CaveSegment::Knot::Knot(const Knot &other) {
   xf = other.xf;
   curveSpeed = other.curveSpeed;
+  rotations = other.rotations;
   vertices = std::vector<glm::vec3>(other.vertices);
 }
 
@@ -16,6 +17,7 @@ cavr::CaveSegment::Knot::Knot(dg::Transform xf, float curveSpeed)
 cavr::CaveSegment::Knot::Knot(glm::vec3 position, glm::quat rotation,
                               float radius, float curveSpeed) {
   xf = dg::Transform::TRS(position, rotation, glm::vec3(radius));
+  this->curveSpeed = curveSpeed;
 }
 
 cavr::CaveSegment::Knot::Knot(glm::vec3 position, glm::vec3 forward,
@@ -25,12 +27,15 @@ cavr::CaveSegment::Knot::Knot(glm::vec3 position, glm::vec3 forward,
   glm::vec3 up = glm::normalize(glm::cross(right, forward));
   xf = dg::Transform::TRS(position, glm::quat(glm::mat3x3(right, up, -forward)),
                           glm::vec3(radius));
+  this->curveSpeed = curveSpeed;
 }
 
 cavr::CaveSegment::KnotSet cavr::CaveSegment::KnotSet::RefCopy(
     const KnotSet &other) {
   KnotSet knotSet;
   knotSet.knots = std::vector<std::shared_ptr<Knot>>(other.knots);
+  knotSet.noninterpolatedKnots =
+      std::vector<std::shared_ptr<Knot>>(other.noninterpolatedKnots);
   knotSet.transform = other.transform;
   return knotSet;
 }
@@ -43,6 +48,13 @@ cavr::CaveSegment::KnotSet cavr::CaveSegment::KnotSet::FullCopy(
   for (int i = 0; i < numKnots; i++) {
     knotSet.knots[i] = std::shared_ptr<Knot>(new Knot(*other.knots[i]));
   }
+  size_t numNoninterpolatedKnots = other.noninterpolatedKnots.size();
+  knotSet.noninterpolatedKnots =
+      std::vector<std::shared_ptr<Knot>>(numNoninterpolatedKnots);
+  for (int i = 0; i < numNoninterpolatedKnots; i++) {
+    knotSet.noninterpolatedKnots[i] =
+        std::shared_ptr<Knot>(new Knot(*other.noninterpolatedKnots[i]));
+  }
   knotSet.transform = other.transform;
   return knotSet;
 }
@@ -54,7 +66,7 @@ cavr::CaveSegment::KnotSet cavr::CaveSegment::KnotSet::WithInterpolatedKnots()
   }
 
   // TODO: Calculate based on length.
-  const int subdivisions = 80;
+  const int subdivisions = 50;
 
   std::vector<std::shared_ptr<Knot>> newKnots;
   const size_t numKnots = knots.size();
@@ -94,7 +106,7 @@ cavr::CaveSegment::KnotSet cavr::CaveSegment::KnotSet::WithInterpolatedKnots()
           (t == (subdivisions - 1) ? second->GetPosition() : positions[t]);
       glm::vec3 t1 = glm::normalize(next - pos);
       glm::vec3 t2 = glm::normalize(pos - prev);
-      glm::vec3 forward = (t1 + t2) * 0.5f;
+      glm::vec3 forward = glm::normalize((t1 + t2) * 0.5f);
 
       // Smoothstep the radius and curveSpeed based on next and previous knots.
       float ss = glm::smoothstep(0.f, 1.f, (float)(t) / (float)subdivisions);
@@ -104,14 +116,14 @@ cavr::CaveSegment::KnotSet cavr::CaveSegment::KnotSet::WithInterpolatedKnots()
           first->GetCurveSpeed() +
           ((second->GetCurveSpeed() - first->GetCurveSpeed()) * ss);
 
-      // We already knot the forward vector (tangent) based on the adjacent
+      // We already know the forward vector (tangent) based on the adjacent
       // knot positions, but what about this up and right vectors? We can't
       // just use the world's up since our knot might actually be pointing up!
       // Instead, we'll slerp this knot's right and up vectors based on the
       // right and up vectors of knots we're interpolating between.
-      glm::vec3 right =
-          glm::slerp(first->GetXF().rotation, second->GetXF().rotation, ss) *
-          dg::RIGHT;
+      glm::vec3 right = glm::slerp(first->GetUnrotatedRotation(),
+                                   second->GetUnrotatedRotation(), ss) *
+                        dg::RIGHT;
       glm::vec3 up = glm::normalize(glm::cross(right, forward));
 
       newKnots.push_back(std::make_shared<Knot>(
@@ -123,6 +135,7 @@ cavr::CaveSegment::KnotSet cavr::CaveSegment::KnotSet::WithInterpolatedKnots()
   newKnots.push_back(knots.back());
 
   KnotSet newKnotSet;
+  newKnotSet.noninterpolatedKnots = knots;
   newKnotSet.knots = newKnots;
   newKnotSet.transform = transform;
   return newKnotSet;
@@ -133,6 +146,9 @@ cavr::CaveSegment::KnotSet cavr::CaveSegment::KnotSet::WithBakedTransform()
   KnotSet transformedKnots = KnotSet::FullCopy(*this);
   if (transformedKnots.transform != dg::Transform()) {
     for (auto &knot : transformedKnots.knots) {
+      knot->TransformBy(transformedKnots.transform);
+    }
+    for (auto &knot : transformedKnots.noninterpolatedKnots) {
       knot->TransformBy(transformedKnots.transform);
     }
   }
@@ -163,7 +179,8 @@ cavr::CaveSegment::CaveSegment(const KnotSet &knots,
 
 cavr::CaveSegment::CaveSegment(const KnotSet &knots) {
   originalKnotSet = knots.WithBakedTransform();
-  auto knotSet = originalKnotSet.WithInterpolatedKnots();
+  //auto knotSet = originalKnotSet.WithInterpolatedKnots();
+  auto knotSet = originalKnotSet;
 
   // Determine vertex positions for a ring of vertices around the knot.
   for (auto &knot : knotSet.knots) {
@@ -187,6 +204,11 @@ cavr::CaveSegment::CaveSegment(const KnotSet &knots) {
   mesh->FinishBuilding();
 }
 
+glm::quat cavr::CaveSegment::Knot::GetUnrotatedRotation() const {
+  float radians = (float)rotations * glm::radians(360.f) / VerticesPerRing;
+  return (xf * dg::Transform::R(glm::quat(glm::vec3(0, 0, -radians)))).rotation;
+}
+
 void cavr::CaveSegment::Knot::CreateVertices() {
   if (!vertices.empty()) {
     return;
@@ -201,14 +223,22 @@ void cavr::CaveSegment::Knot::CreateVertices() {
                       .translation;
 
     // Randomize the position a little bit to make it bumpy.
-    float r = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
-    glm::vec3 dir = glm::normalize(vertices[i] - GetPosition());
-    vertices[i] += (dir * r * GetRadius() * 0.1f);
+    //float r = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
+    //glm::vec3 dir = glm::normalize(vertices[i] - GetPosition());
+    //vertices[i] += (dir * r * GetRadius() * 0.1f);
   }
 }
 
 void cavr::CaveSegment::Knot::TransformBy(dg::Transform xf) {
   this->xf = xf * this->xf;
+}
+
+void cavr::CaveSegment::Knot::RotateBy(float approxRadians) {
+  int newRotations = (int)glm::degrees(approxRadians) * VerticesPerRing / 360;
+  rotations += newRotations;
+  float actualRadians =
+      (float)newRotations * glm::radians(360.f) / VerticesPerRing;
+  xf = xf * dg::Transform::R(glm::quat(glm::vec3(0, 0, actualRadians)));
 }
 
 void cavr::CaveSegment::CreateRingMesh(
@@ -225,10 +255,17 @@ void cavr::CaveSegment::CreateRingMesh(
     int nextIdx = (i + 1) % VerticesPerRing;
     int a = parity;
     int b = 1 - a;
-    dg::Vertex v1(knots[a]->GetVertexPosition(i));
-    dg::Vertex v2(knots[b]->GetVertexPosition(i));
-    dg::Vertex v3(knots[b]->GetVertexPosition(nextIdx));
-    dg::Vertex v4(knots[a]->GetVertexPosition(nextIdx));
+
+    int aIdx = i;
+    int bIdx = nextIdx;
+
+    // Correct for any rotations the next ring has has.
+    bIdx = (bIdx - knots[b]->GetRotations()) % VerticesPerRing;
+
+    dg::Vertex v1(knots[a]->GetVertexPosition(aIdx));
+    dg::Vertex v2(knots[b]->GetVertexPosition(aIdx));
+    dg::Vertex v3(knots[b]->GetVertexPosition(bIdx));
+    dg::Vertex v4(knots[a]->GetVertexPosition(bIdx));
 
     auto winding =
         (parity == 1) ? dg::Mesh::Winding::CW : dg::Mesh::Winding::CCW;

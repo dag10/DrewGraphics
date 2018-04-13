@@ -12,11 +12,14 @@
 #include "dg/vr/VRTrackedObject.h"
 
 void dg::VRRenderModel::Start() {
+  Behavior::Start();
   trackedObject = GetSceneObject()->GetBehavior<VRTrackedObject>();
 }
 
 void dg::VRRenderModel::Update() {
-  auto trackedObject = GetSceneObject()->GetBehavior<VRTrackedObject>();
+  Behavior::Update();
+
+  auto trackedObject = this->trackedObject.lock();
   if (!trackedObject) {
     return;
   }

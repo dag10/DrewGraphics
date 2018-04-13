@@ -21,6 +21,7 @@
 #include "dg/Window.h"
 #include "dg/behaviors/KeyboardLightController.h"
 #include "dg/materials/StandardMaterial.h"
+#include "dg/vr/VRControllerState.h"
 #include "dg/vr/VRManager.h"
 #include "dg/vr/VRRenderModel.h"
 #include "dg/vr/VRTrackedObject.h"
@@ -92,6 +93,7 @@ void dg::VRScene::Initialize() {
   spotLight->LookAtDirection(-UP);
   spotLight->SetCutoff(glm::radians(35.f));
   spotLight->SetFeather(glm::radians(3.f));
+  spotLight->SetCastShadows(true);
   indoorCeilingLight = std::make_shared<PointLight>(
       ceilingLightColor, 0.927f, 0.903f, 1.063f);
   outdoorCeilingLight = std::make_shared<PointLight>(
@@ -223,20 +225,24 @@ void dg::VRScene::Initialize() {
       Transform::S(glm::vec3(0.2f, 0.1f, 0.1f))), false);
 
   // Add objects to follow OpenVR tracked devices.
-  auto leftController = std::make_shared<SceneObject>();
+  leftController = std::make_shared<SceneObject>();
   vrContainer->AddChild(leftController);
   Behavior::Attach(leftController, std::make_shared<VRTrackedObject>(
     vr::ETrackedControllerRole::TrackedControllerRole_LeftHand));
+  Behavior::Attach(leftController, std::make_shared<VRControllerState>());
   Behavior::Attach(leftController, std::make_shared<VRRenderModel>());
-  auto rightController = std::make_shared<SceneObject>();
+  rightController = std::make_shared<SceneObject>();
   Behavior::Attach(rightController, std::make_shared<VRTrackedObject>(
     vr::ETrackedControllerRole::TrackedControllerRole_RightHand));
+  Behavior::Attach(rightController, std::make_shared<VRControllerState>());
   Behavior::Attach(rightController, std::make_shared<VRRenderModel>());
   vrContainer->AddChild(rightController);
 
   // Create a flashlight attached to the right controller.
   flashlight = std::make_shared<SpotLight>(
       ceilingLightColor, 0.314f, 2.16f, 2.11f);
+  originalFlashlightDiffuse = flashlight->GetDiffuse();
+  originalFlashlightSpecular = flashlight->GetSpecular();
   flashlight->LookAtDirection(FORWARD);
   flashlight->SetCutoff(glm::radians(35.f));
   flashlight->SetCastShadows(true);
@@ -254,6 +260,31 @@ void dg::VRScene::Initialize() {
 
 void dg::VRScene::Update() {
   Scene::Update();
+
+  // Get VR controller states.
+  auto leftState = leftController->GetBehavior<VRControllerState>();
+  auto rightState = rightController->GetBehavior<VRControllerState>();
+
+  // Vary flashlight brightness based on trigger squeeze amount.
+  const float minLighting = 0.3f;
+  const float lighting =
+      minLighting + ((1.f - minLighting) *
+                     rightState->GetAxis(VRControllerState::Axis::TRIGGER).x);
+  flashlight->SetDiffuse(originalFlashlightDiffuse * lighting);
+  flashlight->SetSpecular(originalFlashlightSpecular * lighting);
+
+  // Tapping on the left or right side of the trackpad cycles through
+  // lighting configurations.
+  if (rightState->IsButtonJustPressed(VRControllerState::Button::TOUCHPAD)) {
+    int configStep =
+        rightState->GetAxis(VRControllerState::Axis::TOUCHPAD).x < 0 ? -1 : 1;
+    lightingType =
+        (LightingType)((lightingType + configStep) % NumLightingModes);
+    if (lightingType < 0) {
+      lightingType = (LightingType)(lightingType + NumLightingModes);
+    }
+    UpdateLightingConfiguration();
+  }
 
   // If F was tapped, switch to the flashlight configuration.
   if (window->IsKeyJustPressed(Key::F)) {
@@ -279,8 +310,9 @@ void dg::VRScene::Update() {
     UpdateLightingConfiguration();
   }
 
-  // Toggle animating light with keyboard tap of L.
-  if (window->IsKeyJustPressed(Key::L)) {
+  // Toggle animating light with keyboard tap of L or click of the MENU button.
+  if (window->IsKeyJustPressed(Key::L) ||
+      rightState->IsButtonJustPressed(VRControllerState::Button::MENU)) {
     animatingLight = !animatingLight;
   }
 

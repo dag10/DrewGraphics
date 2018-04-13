@@ -171,6 +171,9 @@
     <ClCompile Include="src\opengl\glad.c">
       <Filter>Source Files\opengl</Filter>
     </ClCompile>
+    <ClCompile Include="src\vr\VRControllerState.cpp">
+      <Filter>Source Files\vr</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\dg\Behavior.h">
@@ -289,6 +292,9 @@
     </ClInclude>
     <ClInclude Include="include\dg\opengl\glad\glad.h">
       <Filter>Header Files\opengl\glad</Filter>
+    </ClInclude>
+    <ClInclude Include="include\dg\vr\VRControllerState.h">
+      <Filter>Header Files\vr</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

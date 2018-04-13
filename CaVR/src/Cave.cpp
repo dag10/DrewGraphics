@@ -45,13 +45,13 @@ cavr::CaveSegment::KnotSet cavr::CaveSegment::KnotSet::FullCopy(
   KnotSet knotSet;
   size_t numKnots = other.knots.size();
   knotSet.knots = std::vector<std::shared_ptr<Knot>>(numKnots);
-  for (int i = 0; i < numKnots; i++) {
+  for (unsigned int i = 0; i < numKnots; i++) {
     knotSet.knots[i] = std::shared_ptr<Knot>(new Knot(*other.knots[i]));
   }
   size_t numNoninterpolatedKnots = other.noninterpolatedKnots.size();
   knotSet.noninterpolatedKnots =
       std::vector<std::shared_ptr<Knot>>(numNoninterpolatedKnots);
-  for (int i = 0; i < numNoninterpolatedKnots; i++) {
+  for (unsigned int i = 0; i < numNoninterpolatedKnots; i++) {
     knotSet.noninterpolatedKnots[i] =
         std::shared_ptr<Knot>(new Knot(*other.noninterpolatedKnots[i]));
   }

@@ -18,6 +18,7 @@
 #include "dg/Window.h"
 #include "dg/materials/ScreenQuadMaterial.h"
 #include "dg/vr/VRManager.h"
+#include "dg/vr/VRRenderModel.h"
 #include "dg/vr/VRTrackedObject.h"
 
 dg::Scene::Scene() : SceneObject() {}

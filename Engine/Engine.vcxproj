@@ -382,6 +382,7 @@ xcopy /d /e /y "$(ProjectDir)assets" "$(OutDir)\assets"</Command>
     <ClCompile Include="src\Texture.cpp" />
     <ClCompile Include="src\Transform.cpp" />
     <ClCompile Include="src\Utils.cpp" />
+    <ClCompile Include="src\vr\VRControllerState.cpp" />
     <ClCompile Include="src\vr\VRManager.cpp" />
     <ClCompile Include="src\vr\VRRenderModel.cpp" />
     <ClCompile Include="src\vr\VRTrackedObject.cpp" />
@@ -423,6 +424,7 @@ xcopy /d /e /y "$(ProjectDir)assets" "$(OutDir)\assets"</Command>
     <ClInclude Include="include\dg\Texture.h" />
     <ClInclude Include="include\dg\Transform.h" />
     <ClInclude Include="include\dg\Utils.h" />
+    <ClInclude Include="include\dg\vr\VRControllerState.h" />
     <ClInclude Include="include\dg\vr\VRManager.h" />
     <ClInclude Include="include\dg\vr\VRRenderModel.h" />
     <ClInclude Include="include\dg\vr\VRTrackedObject.h" />

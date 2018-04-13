@@ -32,6 +32,8 @@ namespace dg {
         PointLighting,
         SpotLighting,
         FlashlightLighting,
+
+        NumLightingModes,
       };
 
       void UpdateLightingConfiguration();
@@ -45,6 +47,10 @@ namespace dg {
       std::shared_ptr<Light> outdoorCeilingLight;
       std::shared_ptr<SpotLight> spotLight;
       std::shared_ptr<SpotLight> flashlight;
+      std::shared_ptr<SceneObject> leftController;
+      std::shared_ptr<SceneObject> rightController;
+      glm::vec3 originalFlashlightDiffuse;
+      glm::vec3 originalFlashlightSpecular;
 
   }; // class VRScene
 

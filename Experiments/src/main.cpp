@@ -89,13 +89,6 @@ static void RunEngine(std::string sceneName) {
     engine.Initialize();
     engine.StartScene(scene);
 
-    // Minimize the console window on Windows.
-#ifdef _MSC_VER
-#ifndef DEFAULT_SCENE
-    ShowWindow(GetConsoleWindow(), SW_MINIMIZE);
-#endif
-#endif
-
     while (!engine.ShouldQuit()) {
       engine.Update();
     }

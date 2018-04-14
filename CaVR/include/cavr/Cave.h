@@ -31,8 +31,8 @@ namespace cavr {
                float curveSpeed);
 
           inline const glm::vec3 &GetPosition() const { return xf.translation; }
-          inline const glm::vec3 &GetRight() const { return xf.Right(); }
-          inline const glm::vec3 &GetUp() const { return xf.Up(); }
+          inline glm::vec3 GetRight() const { return xf.Right(); }
+          inline glm::vec3 GetUp() const { return xf.Up(); }
           inline glm::vec3 GetForward() const { return xf.Forward(); }
           inline const dg::Transform &GetXF() const { return xf; }
           inline float GetRadius() const { return xf.scale.x; }

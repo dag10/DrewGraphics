@@ -42,9 +42,9 @@ void dg::Time::Reset() {
 void dg::Time::Update() {
 
 #if defined(_OPENGL)
-  Delta = glfwGetTime();
-  Elapsed += Delta;
-  glfwSetTime(0);
+  double oldElapsed = Elapsed;
+  Elapsed = glfwGetTime();
+  Delta = Elapsed - oldElapsed;
 #elif defined(_DIRECTX)
   QueryPerformanceCounter((LARGE_INTEGER*)&currentTime);
   Delta = max(((double)(currentTime - previousTime) * perfCounterSeconds), 0.0);

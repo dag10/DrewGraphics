@@ -167,8 +167,8 @@ cavr::CaveSegment::CaveSegment(const KnotSet &knots,
                                const CaveSegment &previousSegment,
                                bool backwards) {
   std::shared_ptr<Knot> lastKnot =
-      backwards ? previousSegment.GetOriginalKnotSet().knots.front()
-                : previousSegment.GetOriginalKnotSet().knots.back();
+      backwards ? previousSegment.GetKnotSet().knots.front()
+                : previousSegment.GetKnotSet().knots.back();
   std::shared_ptr<Knot> nextNewKnot =
       backwards ? knots.knots.back() : knots.knots.front();
   dg::Transform xfDelta = lastKnot->GetXF() * nextNewKnot->GetXF().Inverse();
@@ -177,14 +177,17 @@ cavr::CaveSegment::CaveSegment(const KnotSet &knots,
   *this = CaveSegment(newKnots);
 }
 
+bool cavr::CaveSegment::KnotSet::IsInterpolated() const {
+  return !noninterpolatedKnots.empty();
+}
+
 cavr::CaveSegment::CaveSegment(const KnotSet &knots) {
   originalKnotSet = knots.WithBakedTransform();
-  //auto knotSet = originalKnotSet.WithInterpolatedKnots();
   auto knotSet = originalKnotSet;
 
   // Determine vertex positions for a ring of vertices around the knot.
   for (auto &knot : knotSet.knots) {
-    knot->CreateVertices();
+    knot->CreateVertices(true);
   }
 
   // Create mesh for cave segment.
@@ -209,7 +212,7 @@ glm::quat cavr::CaveSegment::Knot::GetUnrotatedRotation() const {
   return (xf * dg::Transform::R(glm::quat(glm::vec3(0, 0, -radians)))).rotation;
 }
 
-void cavr::CaveSegment::Knot::CreateVertices() {
+void cavr::CaveSegment::Knot::CreateVertices(bool rough) {
   if (!vertices.empty()) {
     return;
   }
@@ -223,9 +226,11 @@ void cavr::CaveSegment::Knot::CreateVertices() {
                       .translation;
 
     // Randomize the position a little bit to make it bumpy.
-    //float r = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
-    //glm::vec3 dir = glm::normalize(vertices[i] - GetPosition());
-    //vertices[i] += (dir * r * GetRadius() * 0.1f);
+    if (rough) {
+      float r = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
+      glm::vec3 dir = glm::normalize(vertices[i] - GetPosition());
+      vertices[i] += (dir * r * GetRadius() * 0.1f);
+    }
   }
 }
 

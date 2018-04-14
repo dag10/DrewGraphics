@@ -45,7 +45,7 @@ namespace cavr {
 
           glm::quat GetUnrotatedRotation() const;
 
-          void CreateVertices();
+          void CreateVertices(bool rough);
 
           void TransformBy(dg::Transform xf);
           void RotateBy(float approxRadians);
@@ -76,13 +76,15 @@ namespace cavr {
           KnotSet WithBakedTransform() const;
           KnotSet TransformedBy(dg::Transform xf) const;
 
+		  bool IsInterpolated() const;
+
           std::vector<std::shared_ptr<Knot>> noninterpolatedKnots;
           std::vector<std::shared_ptr<Knot>> knots;
           dg::Transform transform;
 
       }; // class KnotSet
 
-      inline const KnotSet GetOriginalKnotSet() const {
+      inline const KnotSet GetKnotSet() const {
         return originalKnotSet;
       }
 

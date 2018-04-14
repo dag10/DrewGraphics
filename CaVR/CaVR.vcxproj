@@ -352,18 +352,22 @@ xcopy /d /y /e "$(ProjectDir)assets" "$(OutDir)assets"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\behaviors\CaveBehavior.cpp" />
     <ClCompile Include="src\CavrEngine.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\scenes\CaveTestScene.cpp" />
     <ClCompile Include="src\Cave.cpp" />
+    <ClCompile Include="src\scenes\GameScene.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\cavr\behaviors\CaveBehavior.h" />
     <ClInclude Include="include\cavr\CavrEngine.h" />
     <ClInclude Include="include\cavr\scenes\CaveTestScene.h" />
     <ClInclude Include="include\cavr\Cave.h" />
+    <ClInclude Include="include\cavr\scenes\GameScene.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

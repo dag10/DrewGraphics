@@ -243,10 +243,10 @@ cavr::CaveSegment::KnotSet cavr::CaveTestScene::CreateVerticalKnots() {
 void cavr::CaveTestScene::AddCaveSegment(const CaveSegment &segment) {
   // Visualize each original knots as models.
   auto interpolated =
-      !segment.GetOriginalKnotSet().noninterpolatedKnots.empty();
+      !segment.GetKnotSet().noninterpolatedKnots.empty();
   for (auto &knot : interpolated
-                        ? segment.GetOriginalKnotSet().noninterpolatedKnots
-                        : segment.GetOriginalKnotSet().knots) {
+                        ? segment.GetKnotSet().noninterpolatedKnots
+                        : segment.GetKnotSet().knots) {
     knots->AddChild(CreateKnotVisualization(*knot), false);
   }
 

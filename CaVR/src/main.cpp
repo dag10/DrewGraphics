@@ -6,11 +6,12 @@
 #include <memory>
 #include "cavr/CavrEngine.h"
 #include "cavr/scenes/CaveTestScene.h"
+#include "cavr/scenes/GameScene.h"
 #include "dg/Exceptions.h"
 #include "dg/Window.h"
 
 static void RunEngine() {
-  std::shared_ptr<dg::Scene> scene = cavr::CaveTestScene::Make();
+  std::shared_ptr<dg::Scene> scene = cavr::GameScene::Make();
   std::shared_ptr<dg::Window> window = nullptr;
 
   try {

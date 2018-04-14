@@ -19,6 +19,12 @@
     <Filter Include="Source Files\scenes">
       <UniqueIdentifier>{93d81eae-19bb-4f65-8b3c-cbc39ff2b608}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\behaviors">
+      <UniqueIdentifier>{813b2501-23b6-45cf-aeac-d1ff1728a055}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\behaviors">
+      <UniqueIdentifier>{ccec03d4-17df-4e83-b72f-570cce434683}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\scenes\CaveTestScene.cpp">
@@ -33,6 +39,12 @@
     <ClCompile Include="src\Cave.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\scenes\GameScene.cpp">
+      <Filter>Source Files\scenes</Filter>
+    </ClCompile>
+    <ClCompile Include="src\behaviors\CaveBehavior.cpp">
+      <Filter>Source Files\behaviors</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -46,6 +58,12 @@
     </ClInclude>
     <ClInclude Include="include\cavr\Cave.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\cavr\scenes\GameScene.h">
+      <Filter>Header Files\scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="include\cavr\behaviors\CaveBehavior.h">
+      <Filter>Header Files\behaviors</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

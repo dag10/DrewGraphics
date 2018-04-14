@@ -15,6 +15,7 @@
 #include "dg/behaviors/KeyboardCameraController.h"
 #include "dg/behaviors/KeyboardLightController.h"
 #include "dg/materials/StandardMaterial.h"
+#include "dg/vr/VRControllerState.h"
 #include "dg/vr/VRManager.h"
 #include "dg/vr/VRRenderModel.h"
 #include "dg/vr/VRTrackedObject.h"
@@ -24,7 +25,7 @@ std::unique_ptr<cavr::CaveTestScene> cavr::CaveTestScene::Make() {
 }
 
 cavr::CaveTestScene::CaveTestScene() : dg::Scene() {
-  //enableVR = true;
+  enableVR = true;
 }
 
 void cavr::CaveTestScene::Initialize() {
@@ -69,29 +70,33 @@ void cavr::CaveTestScene::Initialize() {
   AddChild(floor);
 
   // Add objects to follow OpenVR tracked devices.
-  auto leftController = std::make_shared<SceneObject>();
+  leftController = std::make_shared<SceneObject>();
   vrContainer->AddChild(leftController);
   dg::Behavior::Attach(
       leftController,
       std::make_shared<dg::VRTrackedObject>(
           vr::ETrackedControllerRole::TrackedControllerRole_LeftHand));
   dg::Behavior::Attach(leftController, std::make_shared<dg::VRRenderModel>());
-  auto rightController = std::make_shared<SceneObject>();
+  dg::Behavior::Attach(leftController,
+                       std::make_shared<dg::VRControllerState>());
+  rightController = std::make_shared<SceneObject>();
   dg::Behavior::Attach(
       rightController,
       std::make_shared<dg::VRTrackedObject>(
           vr::ETrackedControllerRole::TrackedControllerRole_RightHand));
   dg::Behavior::Attach(rightController, std::make_shared<dg::VRRenderModel>());
+  dg::Behavior::Attach(rightController,
+                       std::make_shared<dg::VRControllerState>());
   vrContainer->AddChild(rightController);
 
-  // Attach point light to left controller.
+  // Attach point light to right controller.
   controllerLight = std::make_shared<dg::PointLight>(
       glm::vec3(1.0f, 0.93f, 0.86f), 0.f, 4.0f, 3.f);
   controllerLight->transform = dg::Transform::T(dg::FORWARD * 0.035f);
   controllerLight->LookAtDirection(-skyLight->transform.Forward());
   controllerLight->SetLinear(1.5f);
   controllerLight->SetQuadratic(3.0f);
-  leftController->AddChild(controllerLight, false);
+  rightController->AddChild(controllerLight, false);
 
   // Attach sphere to left controller to represent point light.
   auto lightSphereColor = std::make_shared<dg::StandardMaterial>(
@@ -161,6 +166,12 @@ void cavr::CaveTestScene::Initialize() {
   AddChild(caveContainer);
   knots = std::make_shared<dg::SceneObject>();
   caveContainer->AddChild(knots, false);
+  caveWireframeModels = std::make_shared<dg::SceneObject>();
+  caveContainer->AddChild(caveWireframeModels, false);
+  caveTransparentModels = std::make_shared<dg::SceneObject>();
+  caveContainer->AddChild(caveTransparentModels, false);
+  caveTransparentModels->enabled = enableVR;
+  caveWireframeModels->enabled = !caveTransparentModels->enabled;
 
   // Join multiple ArcSegments together.
   CaveSegment::KnotSet arcKnots = CreateArcKnots().WithInterpolatedKnots();
@@ -171,7 +182,7 @@ void cavr::CaveTestScene::Initialize() {
   srand(1);
   for (int i = 1; i < 20; i++) {
     float r = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
-    arcKnots.knots.front()->RotateBy(glm::radians(r * 360.f));
+    //arcKnots.knots.front()->RotateBy(glm::radians(r * 360.f));
     //arcKnots.knots.front()->RotateBy(glm::radians(180.f));
     currentArcSegment = CaveSegment(arcKnots, currentArcSegment);
     AddCaveSegment(currentArcSegment);
@@ -243,10 +254,12 @@ void cavr::CaveTestScene::AddCaveSegment(const CaveSegment &segment) {
   caveContainer->AddChild(std::make_shared<dg::Model>(
                               segment.GetMesh(), caveMaterial, dg::Transform()),
                           false);
-  auto outerMaterial =
-      enableVR ? caveTransparentMaterial : caveWireframeMaterial;
-  caveContainer->AddChild(
-      std::make_shared<dg::Model>(segment.GetMesh(), outerMaterial,
+  caveWireframeModels->AddChild(
+      std::make_shared<dg::Model>(segment.GetMesh(), caveWireframeMaterial,
+                                  dg::Transform()),
+      false);
+  caveTransparentModels->AddChild(
+      std::make_shared<dg::Model>(segment.GetMesh(), caveTransparentMaterial,
                                   dg::Transform()),
       false);
 }
@@ -316,24 +329,40 @@ std::shared_ptr<dg::SceneObject> cavr::CaveTestScene::CreateKnotVisualization(
 void cavr::CaveTestScene::Update() {
   Scene::Update();
 
-  // Toggle controller light with SPACE key.
-  if (window->IsKeyJustPressed(dg::Key::SPACE)) {
+  // Get VR controller states.
+  auto leftState = leftController->GetBehavior<dg::VRControllerState>();
+  auto rightState = rightController->GetBehavior<dg::VRControllerState>();
+
+  // Toggle outer material type with left MENU button.
+  if (leftState->IsButtonJustPressed(dg::VRControllerState::Button::MENU)) {
+	  caveWireframeModels->enabled = !caveWireframeModels->enabled;
+	  caveTransparentModels->enabled = !caveTransparentModels->enabled;
+  }
+
+  // Toggle controller light with SPACE key or right TOUCHPAD button.
+  if (window->IsKeyJustPressed(dg::Key::SPACE) ||
+      rightState->IsButtonJustPressed(
+          dg::VRControllerState::Button::TOUCHPAD)) {
     controllerLight->enabled = !controllerLight->enabled;
   }
 
-  // Toggle skybox and ground with B key.
-  if (window->IsKeyJustPressed(dg::Key::B)) {
+  // Toggle skybox and ground with B key or GRIP buttons.
+  if (window->IsKeyJustPressed(dg::Key::B) ||
+      leftState->IsButtonJustPressed(dg::VRControllerState::Button::GRIP) ||
+      rightState->IsButtonJustPressed(dg::VRControllerState::Button::GRIP)) {
     skybox->enabled = !skybox->enabled;
     floor->enabled = !floor->enabled;
   }
 
-  // Toggle sky light with L key.
-  if (window->IsKeyJustPressed(dg::Key::L)) {
+  // Toggle sky light with L key or left TOUCHPAD button.
+  if (window->IsKeyJustPressed(dg::Key::L) ||
+      leftState->IsButtonJustPressed(dg::VRControllerState::Button::TOUCHPAD)) {
     skyLight->enabled = !skyLight->enabled;
   }
 
-  // Toggle knot visibility with K key.
-  if (window->IsKeyJustPressed(dg::Key::K)) {
+  // Toggle knot visibility with K key or right MENU button.
+  if (window->IsKeyJustPressed(dg::Key::K) ||
+      rightState->IsButtonJustPressed(dg::VRControllerState::Button::MENU)) {
     knots->enabled = !knots->enabled;
   }
 }

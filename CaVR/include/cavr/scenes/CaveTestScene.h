@@ -44,11 +44,16 @@ namespace cavr {
       std::shared_ptr<dg::SceneObject> CreateKnotVisualization(
           const CaveSegment::Knot &knot) const;
 
+      std::shared_ptr<SceneObject> leftController;
+      std::shared_ptr<SceneObject> rightController;
+
       std::shared_ptr<dg::PointLight> controllerLight;
       std::shared_ptr<dg::DirectionalLight> skyLight;
       std::shared_ptr<dg::Model> floor;
       std::shared_ptr<dg::SceneObject> caveContainer;
       std::shared_ptr<dg::SceneObject> knots;
+      std::shared_ptr<dg::SceneObject> caveWireframeModels;
+      std::shared_ptr<dg::SceneObject> caveTransparentModels;
 
       std::shared_ptr<dg::StandardMaterial> caveMaterial;
       std::shared_ptr<dg::StandardMaterial> caveTransparentMaterial;

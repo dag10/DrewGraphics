@@ -35,6 +35,10 @@ namespace cavr {
       void SetShowWireframe(bool showWireframe);
       bool GetShowWireframe() const;
 
+      inline std::weak_ptr<dg::SceneObject> GetInteriorModels() const {
+        return caveInteriorModels;
+      }
+
       void AddNextCaveSegment();
 
     private:
@@ -54,6 +58,7 @@ namespace cavr {
       std::vector<CaveSegment::KnotSet> knotSets;
 
       std::shared_ptr<dg::SceneObject> knots;
+      std::shared_ptr<dg::SceneObject> caveInteriorModels;
       std::shared_ptr<dg::SceneObject> caveWireframeModels;
       std::shared_ptr<dg::SceneObject> caveTransparentModels;
 

@@ -53,6 +53,8 @@ void cavr::CaveBehavior::Start() {
   // Create cave containers.
   knots = std::make_shared<dg::SceneObject>();
   obj->AddChild(knots, false);
+  caveInteriorModels = std::make_shared<dg::SceneObject>();
+  obj->AddChild(caveInteriorModels, false);
   caveWireframeModels = std::make_shared<dg::SceneObject>();
   obj->AddChild(caveWireframeModels, false);
   caveTransparentModels = std::make_shared<dg::SceneObject>();
@@ -169,8 +171,6 @@ cavr::CaveSegment::KnotSet cavr::CaveBehavior::CreateStraightKnots() {
 }
 
 void cavr::CaveBehavior::AddCaveSegment(const CaveSegment &segment) {
-  auto obj = GetSceneObject();
-
   // Visualize each original knots as models.
   for (auto &knot : segment.GetKnotSet().IsInterpolated()
                         ? segment.GetKnotSet().noninterpolatedKnots
@@ -179,9 +179,10 @@ void cavr::CaveBehavior::AddCaveSegment(const CaveSegment &segment) {
   }
 
   // Create mesh for tunnel.
-  obj->AddChild(std::make_shared<dg::Model>(segment.GetMesh(), caveMaterial,
-                                            dg::Transform()),
-                false);
+  caveInteriorModels->AddChild(
+      std::make_shared<dg::Model>(segment.GetMesh(), caveMaterial,
+                                  dg::Transform()),
+      false);
   caveWireframeModels->AddChild(
       std::make_shared<dg::Model>(segment.GetMesh(), caveWireframeMaterial,
                                   dg::Transform()),

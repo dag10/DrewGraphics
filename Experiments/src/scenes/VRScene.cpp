@@ -31,7 +31,7 @@ std::unique_ptr<dg::VRScene> dg::VRScene::Make() {
 }
 
 dg::VRScene::VRScene() : Scene() {
-  enableVR = true;
+  //enableVR = true;
 }
 
 void dg::VRScene::Initialize() {

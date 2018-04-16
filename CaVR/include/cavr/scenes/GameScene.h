@@ -7,6 +7,7 @@
 #include <cassert>
 #include <memory>
 #include <vector>
+#include "dg/FrameBuffer.h"
 #include "dg/Mesh.h"
 #include "dg/Scene.h"
 
@@ -15,6 +16,7 @@ namespace dg {
   class Model;
   class DirectionalLight;
   class PointLight;
+  class Camera;
   class StandardMaterial;
 } // namespace dg
 
@@ -28,6 +30,7 @@ namespace cavr {
 
       virtual void Initialize();
       virtual void Update();
+      virtual void RenderFrame();
 
     private:
 
@@ -36,6 +39,9 @@ namespace cavr {
       std::shared_ptr<SceneObject> leftController;
       std::shared_ptr<SceneObject> rightController;
 
+      std::shared_ptr<SceneObject> shipAttachment;
+      std::shared_ptr<dg::FrameBuffer> intersectionFramebuffer;
+      std::shared_ptr<dg::Camera> intersectionCamera;
       std::shared_ptr<dg::PointLight> controllerLight;
       std::shared_ptr<dg::DirectionalLight> skyLight;
       std::shared_ptr<dg::Model> floor;

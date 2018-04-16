@@ -8,6 +8,7 @@
 #include <memory>
 #include "cavr/CavrEngine.h"
 #include "cavr/behaviors/CaveBehavior.h"
+#include "dg/Camera.h"
 #include "dg/Engine.h"
 #include "dg/InputCodes.h"
 #include "dg/Lights.h"
@@ -29,7 +30,7 @@ std::unique_ptr<cavr::GameScene> cavr::GameScene::Make() {
 }
 
 cavr::GameScene::GameScene() : dg::Scene() {
-  //enableVR = true;
+  enableVR = true;
 }
 
 void cavr::GameScene::Initialize() {
@@ -93,14 +94,18 @@ void cavr::GameScene::Initialize() {
                        std::make_shared<dg::VRControllerState>());
   vrContainer->AddChild(rightController);
 
+  // Create attachment point point for eventual spaceship.
+  shipAttachment =
+      std::make_shared<SceneObject>(dg::Transform::T(dg::FORWARD * 0.035f));
+  rightController->AddChild(shipAttachment);
+
   // Attach point light to right controller.
   controllerLight = std::make_shared<dg::PointLight>(
       glm::vec3(1.0f, 0.93f, 0.86f), 0.f, 4.0f, 3.f);
-  controllerLight->transform = dg::Transform::T(dg::FORWARD * 0.035f);
   controllerLight->LookAtDirection(-skyLight->transform.Forward());
   controllerLight->SetLinear(1.5f);
   controllerLight->SetQuadratic(3.0f);
-  rightController->AddChild(controllerLight, false);
+  shipAttachment->AddChild(controllerLight, false);
 
   // Attach sphere to left controller to represent point light.
   auto lightSphereColor = std::make_shared<dg::StandardMaterial>(
@@ -109,6 +114,24 @@ void cavr::GameScene::Initialize() {
   auto lightSphere = std::make_shared<dg::Model>(
       dg::Mesh::Sphere, lightSphereColor, dg::Transform::S(glm::vec3(0.025f)));
   controllerLight->AddChild(lightSphere, false);
+
+  // Create intersectionFramebuffer for rendering cave intersection test.
+  const int fbRes = 128;
+  intersectionFramebuffer =
+      dg::FrameBuffer::Create(fbRes, fbRes, false, false, true);
+  intersectionCamera = std::make_shared<dg::Camera>();
+  intersectionCamera->farClip = 0.025f;
+  intersectionCamera->nearClip = intersectionCamera->farClip * 0.001f;
+  shipAttachment->AddChild(intersectionCamera, false);
+
+  // Attach quad to sphere temporarily to visualize intersection rendering.
+  auto renderQuadMat = std::make_shared<dg::StandardMaterial>(
+    dg::StandardMaterial::WithTexture(intersectionFramebuffer->GetColorTexture()));
+  renderQuadMat->SetLit(false);
+  auto renderQuad = std::make_shared<dg::Model>(
+      dg::Mesh::Quad, renderQuadMat,
+      dg::Transform::TS(glm::vec3(-0.11f, 0, 0), glm::vec3(0.08f)));
+  shipAttachment->AddChild(renderQuad, false);
 
   // If VR could not enable, position the camera in a useful place for
   // development and make it controllable with keyboard and mouse.
@@ -126,8 +149,10 @@ void cavr::GameScene::Initialize() {
             glm::vec4(1.f, 1.f, 1.f, 0.1f)));
     std::static_pointer_cast<dg::StandardMaterial>(lightSphere->material)
         ->SetLit(false);
-    controllerLight->transform = dg::Transform::T((dg::FORWARD * 0.1f));
-    mainCamera->AddChild(controllerLight, false);
+    shipAttachment->transform = dg::Transform::T(glm::vec3(0, 0, -0.1f));
+    renderQuad->transform =
+        dg::Transform::TS(glm::vec3(-0.05f, 0, 0), glm::vec3(0.04f));
+    mainCamera->AddChild(shipAttachment, false);
   }
 
   // Create cave.
@@ -195,7 +220,7 @@ void cavr::GameScene::Update() {
   if (rightTrigger > minRightTrigger) {
     float thrustAmount =
         (rightTrigger - minRightTrigger) / (1.f - minRightTrigger);
-    glm::vec3 thrustDir = controllerLight->SceneSpace().Forward();
+    glm::vec3 thrustDir = shipAttachment->SceneSpace().Forward();
     caveBehavior->AddVelocity(thrustDir * -thrustAmount * 0.02f);
   }
 
@@ -211,4 +236,12 @@ void cavr::GameScene::Update() {
     }
     caveBehavior->SetVelocity(velo);
   }
+}
+
+void cavr::GameScene::RenderFrame() {
+  // Render scene for intersectionFramebuffer.
+  RenderFrameBuffer(*intersectionFramebuffer, *intersectionCamera);
+
+  // Render scene for output.
+  dg::Scene::RenderFrame();
 }

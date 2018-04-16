@@ -12,7 +12,6 @@
 #include "dg/scenes/BoundsScene.h"
 #include "dg/scenes/CanvasTestScene.h"
 #include "dg/scenes/MeshesScene.h"
-#include "dg/scenes/PortalScene.h"
 #include "dg/scenes/QuadScene.h"
 #include "dg/scenes/RobotScene.h"
 #include "dg/scenes/ShadowScene.h"
@@ -29,7 +28,6 @@ std::unique_ptr<Scene> PromptForScene(
   std::map<
     std::string,
     std::function<std::unique_ptr<dg::Scene>()>> constructors;
-  constructors["portal"]       = dg::PortalScene::Make;
   constructors["shadows"]      = dg::ShadowScene::Make;
   constructors["simple"]       = dg::SimpleScene::Make;
   constructors["widget"]       = dg::WidgetScene::Make;

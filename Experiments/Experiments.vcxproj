@@ -357,7 +357,6 @@ xcopy /d /y /e "$(ProjectDir)assets" "$(OutDir)assets"</Command>
     <ClCompile Include="src\scenes\CanvasTestScene.cpp" />
     <ClCompile Include="src\scenes\WidgetScene.cpp" />
     <ClCompile Include="src\scenes\MeshesScene.cpp" />
-    <ClCompile Include="src\scenes\PortalScene.cpp" />
     <ClCompile Include="src\scenes\QuadScene.cpp" />
     <ClCompile Include="src\scenes\RobotScene.cpp" />
     <ClCompile Include="src\scenes\ShadowScene.cpp" />
@@ -371,7 +370,6 @@ xcopy /d /y /e "$(ProjectDir)assets" "$(OutDir)assets"</Command>
     <ClInclude Include="include\dg\scenes\CanvasTestScene.h" />
     <ClInclude Include="include\dg\scenes\WidgetScene.h" />
     <ClInclude Include="include\dg\scenes\MeshesScene.h" />
-    <ClInclude Include="include\dg\scenes\PortalScene.h" />
     <ClInclude Include="include\dg\scenes\QuadScene.h" />
     <ClInclude Include="include\dg\scenes\RobotScene.h" />
     <ClInclude Include="include\dg\scenes\ShadowScene.h" />

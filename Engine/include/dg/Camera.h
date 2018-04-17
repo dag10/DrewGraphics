@@ -14,10 +14,19 @@ namespace dg {
   class Camera : public SceneObject {
 
     public:
+
+      enum class Projection {
+        Perspective,
+        Orthographic,
+      };
+
+      Projection projection = Projection::Perspective;
       float aspectRatio = 1;
       float fov = glm::radians(60.f); // radians
       float nearClip = 0.1f;
       float farClip = 100.f;
+      float orthoWidth = 0.1f;
+      float orthoHeight = 0.1f;
 
       Camera();
 

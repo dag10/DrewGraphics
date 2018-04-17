@@ -25,6 +25,18 @@
     <Filter Include="Source Files\behaviors">
       <UniqueIdentifier>{ccec03d4-17df-4e83-b72f-570cce434683}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Shaders">
+      <UniqueIdentifier>{59a46f59-71c1-462b-91ea-2cc64dc08f26}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\SphereIntersection">
+      <UniqueIdentifier>{079000b6-a1e1-4157-bddb-1adc8c66a21d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\materials">
+      <UniqueIdentifier>{e2287b98-8148-497c-ae52-3a3223f2ee37}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\materials">
+      <UniqueIdentifier>{8b110758-d7c3-4161-89c4-f5aedeccb1a5}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\scenes\CaveTestScene.cpp">
@@ -44,6 +56,9 @@
     </ClCompile>
     <ClCompile Include="src\behaviors\CaveBehavior.cpp">
       <Filter>Source Files\behaviors</Filter>
+    </ClCompile>
+    <ClCompile Include="src\materials\SphereIntersectionMaterial.cpp">
+      <Filter>Source Files\materials</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -65,5 +80,19 @@
     <ClInclude Include="include\cavr\behaviors\CaveBehavior.h">
       <Filter>Header Files\behaviors</Filter>
     </ClInclude>
+    <ClInclude Include="include\cavr\materials\SphereIntersectionMaterial.h">
+      <Filter>Header Files\materials</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="assets\shaders\SphereIntersection\SphereIntersectionPixelShader.hlsl">
+      <Filter>Shaders\SphereIntersection</Filter>
+    </FxCompile>
+    <FxCompile Include="assets\shaders\SphereIntersection\SphereIntersectionVertexShader.hlsl">
+      <Filter>Shaders\SphereIntersection</Filter>
+    </FxCompile>
+    <FxCompile Include="assets\shaders\SphereIntersection\SphereIntersectionShared.hlsl">
+      <Filter>Shaders\SphereIntersection</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>

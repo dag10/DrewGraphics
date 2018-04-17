@@ -8,6 +8,7 @@
 #include <memory>
 #include "cavr/CavrEngine.h"
 #include "cavr/behaviors/CaveBehavior.h"
+#include "cavr/materials/SphereIntersectionMaterial.h"
 #include "dg/Camera.h"
 #include "dg/Engine.h"
 #include "dg/InputCodes.h"
@@ -30,7 +31,7 @@ std::unique_ptr<cavr::GameScene> cavr::GameScene::Make() {
 }
 
 cavr::GameScene::GameScene() : dg::Scene() {
-  //vr.requested = true;
+  vr.requested = true;
 }
 
 void cavr::GameScene::Initialize() {
@@ -130,8 +131,8 @@ void cavr::GameScene::Initialize() {
   shipIntersectionSubrender.camera->orthoWidth = xfBoundingSphere.scale.x;
   shipIntersectionSubrender.camera->orthoHeight = xfBoundingSphere.scale.y;
   shipIntersectionSubrender.layerMask = GameScene::LayerMask::CaveGeometry();
-  shipIntersectionSubrender.material = std::make_shared<dg::StandardMaterial>(
-      dg::StandardMaterial::WithColor(glm::vec3(1)));
+  shipIntersectionSubrender.material =
+      std::make_shared<cavr::SphereIntersectionMaterial>();
   shipIntersectionSubrender.material->rasterizerOverride.SetCullMode(
       dg::RasterizerState::CullMode::OFF);
   std::static_pointer_cast<dg::StandardMaterial>(

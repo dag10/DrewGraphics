@@ -126,6 +126,13 @@ void cavr::GameScene::Initialize() {
   shipIntersectionSubrender.camera->nearClip =
       shipIntersectionSubrender.camera->farClip * 0.001f;
   shipIntersectionSubrender.layerMask = GameScene::LayerMask::CaveGeometry();
+  shipIntersectionSubrender.material = std::make_shared<dg::StandardMaterial>(
+      dg::StandardMaterial::WithColor(glm::vec3(1)));
+  shipIntersectionSubrender.material->rasterizerOverride.SetCullMode(
+      dg::RasterizerState::CullMode::OFF);
+  std::static_pointer_cast<dg::StandardMaterial>(
+      shipIntersectionSubrender.material)
+      ->SetLit(false);
   shipAttachment->AddChild(shipIntersectionSubrender.camera, false);
 
   // Attach quad to sphere temporarily to visualize intersection rendering.

@@ -226,6 +226,7 @@ namespace dg {
         RasterizerState rasterizerState;
         std::shared_ptr<FrameBuffer> framebuffer = nullptr;
         std::shared_ptr<Camera> camera = nullptr;
+        std::shared_ptr<Material> material = nullptr;
         vr::EVREye eye;
         LayerMask layerMask = LayerMask::ALL();
         bool renderSkybox = true;
@@ -336,10 +337,6 @@ namespace dg {
       void SetupSubrender(Subrender &subrender);
       void TeardownSubrender();
       void TeardownRender();
-      void PrepareModelForDraw(
-          const Model &model, glm::vec3 cameraPosition, glm::mat4x4 view,
-          glm::mat4x4 projection,
-          const Light::ShaderData (&lights)[Light::MAX_LIGHTS]) const;
       void DrawScene();
       void ProcessSceneHierarchy();
       void RenderLightShadowMap();

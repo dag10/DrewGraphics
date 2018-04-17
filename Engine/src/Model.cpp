@@ -20,7 +20,12 @@ dg::Model::Model(Model& other) : SceneObject(other) {
   this->layer = other.layer;
 }
 
-void dg::Model::Draw(glm::mat4x4 view, glm::mat4x4 projection) const {
+void dg::Model::Draw(glm::mat4x4 view, glm::mat4x4 projection,
+                     std::shared_ptr<Material> material) const {
+  if (material == nullptr) {
+    material = this->material;
+  }
+
   glm::mat4x4 xfMat = CachedSceneSpace().ToMat4();
 
   if (material->rasterizerOverride.HasDeclaredAttributes()) {

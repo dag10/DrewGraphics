@@ -109,22 +109,26 @@ void cavr::GameScene::Initialize() {
 
   // Attach sphere to left controller to represent point light.
   auto lightSphereColor = std::make_shared<dg::StandardMaterial>(
-      dg::StandardMaterial::WithColor(controllerLight->GetDiffuse()));
-  lightSphereColor->SetLit(false);
+      dg::StandardMaterial::WithTransparentColor(
+          glm::vec4(1.f, 1.f, 1.f, 0.1f)));
   auto lightSphere = std::make_shared<dg::Model>(
       dg::Mesh::Sphere, lightSphereColor, dg::Transform::S(glm::vec3(0.025f)));
   controllerLight->AddChild(lightSphere, false);
 
   // Create intersectionFramebuffer for rendering cave intersection test.
+  dg::Transform xfBoundingSphere = lightSphere->SceneSpace();
   const int fbRes = 128;
   shipIntersectionSubrender.type = Subrender::Type::MonoscopicFramebuffer;
   shipIntersectionSubrender.renderSkybox = false;
   shipIntersectionSubrender.framebuffer =
       dg::FrameBuffer::Create(fbRes, fbRes, false, false, true);
   shipIntersectionSubrender.camera = std::make_shared<dg::Camera>();
-  shipIntersectionSubrender.camera->farClip = 0.025f;
-  shipIntersectionSubrender.camera->nearClip =
-      shipIntersectionSubrender.camera->farClip * 0.001f;
+  shipIntersectionSubrender.camera->projection =
+      dg::Camera::Projection::Orthographic;
+  shipIntersectionSubrender.camera->farClip = xfBoundingSphere.scale.z * 0.5f;
+  shipIntersectionSubrender.camera->nearClip = xfBoundingSphere.scale.z * -0.5f;
+  shipIntersectionSubrender.camera->orthoWidth = xfBoundingSphere.scale.x;
+  shipIntersectionSubrender.camera->orthoHeight = xfBoundingSphere.scale.y;
   shipIntersectionSubrender.layerMask = GameScene::LayerMask::CaveGeometry();
   shipIntersectionSubrender.material = std::make_shared<dg::StandardMaterial>(
       dg::StandardMaterial::WithColor(glm::vec3(1)));
@@ -156,9 +160,6 @@ void cavr::GameScene::Initialize() {
         cameras.main, std::make_shared<dg::KeyboardCameraController>(window));
 
     // Attach controller light to camera.
-    lightSphere->material = std::make_shared<dg::StandardMaterial>(
-        dg::StandardMaterial::WithTransparentColor(
-            glm::vec4(1.f, 1.f, 1.f, 0.1f)));
     std::static_pointer_cast<dg::StandardMaterial>(lightSphere->material)
         ->SetLit(false);
     shipAttachment->transform = dg::Transform::T(glm::vec3(0, 0, -0.1f));

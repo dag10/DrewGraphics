@@ -17,6 +17,7 @@ dg::Model::Model(
 dg::Model::Model(Model& other) : SceneObject(other) {
   this->mesh = other.mesh;
   this->material = other.material;
+  this->layer = other.layer;
 }
 
 void dg::Model::Draw(glm::mat4x4 view, glm::mat4x4 projection) const {

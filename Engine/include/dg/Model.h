@@ -6,9 +6,10 @@
 #include <memory>
 #include <glm/mat4x4.hpp>
 
-#include "dg/SceneObject.h"
 #include "dg/Material.h"
 #include "dg/Mesh.h"
+#include "dg/Scene.h"
+#include "dg/SceneObject.h"
 
 namespace dg {
 
@@ -26,6 +27,7 @@ namespace dg {
 
       std::shared_ptr<Mesh> mesh = nullptr;
       std::shared_ptr<Material> material = nullptr;
+      Scene::LayerMask layer = Scene::LayerMask::Default();
 
       void Draw(glm::mat4x4 view, glm::mat4x4 projection) const;
 

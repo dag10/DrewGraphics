@@ -393,8 +393,17 @@ void dg::Scene::DrawScene() {
   glm::vec4 cameraPos_h = glm::inverse(view) * glm::vec4(0, 0, 0, 1);
   glm::vec3 cameraPos = glm::vec3(cameraPos_h) / cameraPos_h.w;
   for (auto &currentModel : currentRender.models) {
-    PrepareModelForDraw(
-        *currentModel.model, cameraPos, view, projection, lightArray);
+    if (!(currentModel.model->layer & currentRender.subrender->layerMask)) {
+      continue;
+    }
+    currentModel.model->material->SendCameraPosition(cameraPos);
+    currentModel.model->material->SendLights(lightArray);
+    if (currentRender.shadowCastingLight != nullptr) {
+      auto texture = currentRender.shadowCastingLight->GetShadowMap();
+      if (texture != nullptr) {
+        currentModel.model->material->SendShadowMap(texture);
+      }
+    }
     (*currentModel.model).Draw(view, projection);
   }
 }
@@ -404,14 +413,6 @@ void dg::Scene::PrepareModelForDraw(
     glm::mat4x4 projection,
     const Light::ShaderData (&lights)[Light::MAX_LIGHTS]) const {
 
-  model.material->SendCameraPosition(cameraPosition);
-  model.material->SendLights(lights);
-  if (currentRender.shadowCastingLight != nullptr) {
-    auto texture = currentRender.shadowCastingLight->GetShadowMap();
-    if (texture != nullptr) {
-      model.material->SendShadowMap(texture);
-    }
-  }
 }
 
 bool dg::Scene::AutomaticWindowTitle() const {

@@ -104,11 +104,6 @@ void dg::TexturesScene::Initialize() {
     StandardMaterial::WithTexture(framebuffer->GetDepthTexture());
   framebufferDepthMaterial.SetLit(false);
 
-  // Create solid color material for showing on framebuffer quads in
-  // scened rendered to framebuffer.
-  StandardMaterial dummyFramebufferMaterial = StandardMaterial::WithColor(
-    glm::vec3(0.1, 0.15, 0.4));
-
   // Container for quads that show framebuffer.
   auto renderQuads = std::make_shared<SceneObject>();
   renderQuads->transform = Transform::TRS(
@@ -121,18 +116,20 @@ void dg::TexturesScene::Initialize() {
   float quadSize = 1.2f;
   float quadSep = 0.1f;
   float quadAspect = 1.5f;
-  renderQuads->AddChild(std::make_shared<Model>(
-    dg::Mesh::Quad,
-    std::make_shared<StandardMaterial>(framebufferColorMaterial),
-    Transform::TS(
-      glm::vec3(-quadSize * 0.5f - quadSep * 0.5f, 0, 0),
-      quadSize * glm::vec3(1, 1 / quadAspect, 1))), false);
-  renderQuads->AddChild(std::make_shared<Model>(
-    dg::Mesh::Quad,
-    std::make_shared<StandardMaterial>(framebufferDepthMaterial),
-    Transform::TS(
-      glm::vec3(quadSize * 0.5f + quadSep * 0.5f, 0, 0),
-      quadSize * glm::vec3(1, 1 / quadAspect, 1))), false);
+  auto colorQuad = std::make_shared<Model>(
+      dg::Mesh::Quad,
+      std::make_shared<StandardMaterial>(framebufferColorMaterial),
+      Transform::TS(glm::vec3(-quadSize * 0.5f - quadSep * 0.5f, 0, 0),
+                    quadSize * glm::vec3(1, 1 / quadAspect, 1)));
+  auto depthQuad = std::make_shared<Model>(
+      dg::Mesh::Quad,
+      std::make_shared<StandardMaterial>(framebufferDepthMaterial),
+      Transform::TS(glm::vec3(quadSize * 0.5f + quadSep * 0.5f, 0, 0),
+                    quadSize * glm::vec3(1, 1 / quadAspect, 1)));
+  colorQuad->layer = LayerMask::UsesFramebuffer();
+  depthQuad->layer = LayerMask::UsesFramebuffer();
+  renderQuads->AddChild(colorQuad, false);
+  renderQuads->AddChild(depthQuad, false);
 
   // Create custom texture using a Canvas.
   Canvas canvas(128, 128);
@@ -169,6 +166,7 @@ void dg::TexturesScene::Initialize() {
   quadSubrender.type = Subrender::Type::MonoscopicFramebuffer;
   quadSubrender.camera = virtualCamera;
   quadSubrender.framebuffer = framebuffer;
+  quadSubrender.layerMask = LayerMask::ALL() - LayerMask::UsesFramebuffer();
 
   // Configure camera.
   cameras.main->transform.translation = glm::vec3(-1.25f, 2, 1.1f);

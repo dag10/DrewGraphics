@@ -109,6 +109,60 @@ namespace dg {
 
     public:
 
+      // Each model can have a "layer", which is one of 64 bits. A subrender
+      // can be configured to draw models of certain layers.
+      class LayerMask {
+        public:
+          // Mask denoting no layers will be drawn.
+          static inline LayerMask NONE() { return LayerMask(0); }
+
+          // Mask denoting all layers will be drawn.
+          static inline LayerMask ALL() {
+            return LayerMask(0xFFFFFFFFFFFFFFFF);
+          }
+
+          // Default layer for models.
+          static inline LayerMask Default() { return LayerMask::Ord(1); }
+
+          // Operators.
+          friend inline LayerMask operator|(LayerMask lhs, LayerMask rhs) {
+            return LayerMask(lhs.value | rhs.value);
+          };
+          friend inline LayerMask operator|=(LayerMask &lhs, LayerMask rhs) {
+            return lhs = lhs | rhs;
+          }
+          friend inline LayerMask operator&(LayerMask lhs, LayerMask rhs) {
+            return LayerMask(lhs.value & rhs.value);
+          };
+          friend inline bool operator==(LayerMask lhs, LayerMask rhs) {
+            return lhs.value = rhs.value;
+          };
+          friend inline bool operator!(LayerMask flag) {
+            return flag.value == 0;
+          }
+          friend inline LayerMask operator~(LayerMask flag) {
+            return LayerMask(~flag.value);
+          }
+          friend inline LayerMask operator-(LayerMask lhs, LayerMask rhs) {
+            return lhs & ~rhs;
+          };
+          friend inline LayerMask operator-=(LayerMask &lhs, LayerMask rhs) {
+            return lhs = lhs - rhs;
+          }
+          LayerMask(const LayerMask &other) : value(other.value) {}
+
+        protected:
+          static const uint64_t HighestIndex = 1;
+          static inline LayerMask Ord(uint64_t idx) {
+            assert(idx < 63);
+            return LayerMask((uint64_t)1 << idx);
+          }
+          LayerMask(uint64_t value) : value(value) {}
+
+        private:
+          uint64_t value;
+      };
+
       // Scenes may be created without any intent to run them. Do not perform
       // logic in the constructor.
       Scene();
@@ -173,6 +227,7 @@ namespace dg {
         std::shared_ptr<FrameBuffer> framebuffer = nullptr;
         std::shared_ptr<Camera> camera = nullptr;
         vr::EVREye eye;
+        LayerMask layerMask = LayerMask::ALL();
         bool renderSkybox = true;
       }; // struct Subrender
 

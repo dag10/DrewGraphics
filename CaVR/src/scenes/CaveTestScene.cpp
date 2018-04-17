@@ -25,14 +25,14 @@ std::unique_ptr<cavr::CaveTestScene> cavr::CaveTestScene::Make() {
 }
 
 cavr::CaveTestScene::CaveTestScene() : dg::Scene() {
-  enableVR = true;
+  vr.requested = true;
 }
 
 void cavr::CaveTestScene::Initialize() {
   dg::Scene::Initialize();
 
   // Make near clip plane shorter.
-  mainCamera->nearClip = 0.01f;
+  cameras.main->nearClip = 0.01f;
 
   // Create skybox.
   // Image generated from
@@ -71,7 +71,7 @@ void cavr::CaveTestScene::Initialize() {
 
   // Add objects to follow OpenVR tracked devices.
   leftController = std::make_shared<SceneObject>();
-  vrContainer->AddChild(leftController);
+  vr.container->AddChild(leftController);
   dg::Behavior::Attach(
       leftController,
       std::make_shared<dg::VRTrackedObject>(
@@ -87,7 +87,7 @@ void cavr::CaveTestScene::Initialize() {
   dg::Behavior::Attach(rightController, std::make_shared<dg::VRRenderModel>());
   dg::Behavior::Attach(rightController,
                        std::make_shared<dg::VRControllerState>());
-  vrContainer->AddChild(rightController);
+  vr.container->AddChild(rightController);
 
   // Attach point light to right controller.
   controllerLight = std::make_shared<dg::PointLight>(
@@ -108,13 +108,13 @@ void cavr::CaveTestScene::Initialize() {
 
   // If VR could not enable, position the camera in a useful place for
   // development and make it controllable with keyboard and mouse.
-  if (!enableVR) {
+  if (!vr.enabled) {
     window->LockCursor();
-    mainCamera->transform =
+    cameras.main->transform =
         dg::Transform::T(glm::vec3(-0.905f, 1.951f, -1.63f));
-    mainCamera->LookAtDirection(glm::vec3(0.259f, -0.729f, 0.633f));
+    cameras.main->LookAtDirection(glm::vec3(0.259f, -0.729f, 0.633f));
     dg::Behavior::Attach(
-        mainCamera, std::make_shared<dg::KeyboardCameraController>(window));
+        cameras.main, std::make_shared<dg::KeyboardCameraController>(window));
 
     // Attach controller light to camera.
     lightSphere->material = std::make_shared<dg::StandardMaterial>(
@@ -123,7 +123,7 @@ void cavr::CaveTestScene::Initialize() {
     std::static_pointer_cast<dg::StandardMaterial>(lightSphere->material)
         ->SetLit(false);
     controllerLight->transform = dg::Transform::T((dg::FORWARD * 0.2f));
-    mainCamera->AddChild(controllerLight, false);
+    cameras.main->AddChild(controllerLight, false);
   }
 
   // Create knot material for visualization.
@@ -170,7 +170,7 @@ void cavr::CaveTestScene::Initialize() {
   caveContainer->AddChild(caveWireframeModels, false);
   caveTransparentModels = std::make_shared<dg::SceneObject>();
   caveContainer->AddChild(caveTransparentModels, false);
-  caveTransparentModels->enabled = enableVR;
+  caveTransparentModels->enabled = vr.enabled;
   caveWireframeModels->enabled = !caveTransparentModels->enabled;
 
   // Join multiple ArcSegments together.

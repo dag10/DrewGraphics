@@ -15,8 +15,9 @@ dg::CanvasScene::~CanvasScene() {}
 
 void dg::CanvasScene::Initialize() {
   Scene::Initialize();
-  defaultRasterizerState.SetWriteDepth(false);
-  defaultRasterizerState.SetDepthFunc(RasterizerState::DepthFunc::ALWAYS);
+  subrenders.main.rasterizerState.SetWriteDepth(false);
+  subrenders.main.rasterizerState.SetDepthFunc(
+      RasterizerState::DepthFunc::ALWAYS);
 
   canvas = std::make_shared<Canvas>(
     (unsigned int)window->GetWidth(),
@@ -26,11 +27,11 @@ void dg::CanvasScene::Initialize() {
 }
 
 void dg::CanvasScene::RenderFrame() {
-  Graphics::Instance->PushRasterizerState(defaultRasterizerState);
+  Graphics::Instance->PushRasterizerState(subrenders.main.rasterizerState);
   ClearBuffer();
   quadMaterial->SetTexture(canvas->GetTexture());
   quadMaterial->Use();
   Mesh::Quad->Draw();
-  Graphics::Instance->PushRasterizerState(defaultRasterizerState);
+  Graphics::Instance->PopRasterizerState();
 }
 

@@ -89,11 +89,11 @@ void dg::ShadowScene::Initialize() {
                     glm::vec3(floorSize, floorSize, 1))));
 
   // Configure camera.
-  mainCamera->transform = Transform::T({1.054, 1.467, 2.048});
-  mainCamera->LookAtDirection({-0.3126, -0.4692, -0.8259});
+  cameras.main->transform = Transform::T({1.054, 1.467, 2.048});
+  cameras.main->LookAtDirection({-0.3126, -0.4692, -0.8259});
 
   // Allow camera to be controller by the keyboard and mouse.
-  Behavior::Attach(mainCamera,
+  Behavior::Attach(cameras.main,
                    std::make_shared<KeyboardCameraController>(window));
 
   // Material for drawing depth map over scene.
@@ -102,7 +102,8 @@ void dg::ShadowScene::Initialize() {
 
   // Create custom shadow framebuffer with color map (for special screen
   // quad output).
-  shadowFrameBuffer = FrameBuffer::Create(2048, 2048, true, false, true);
+  subrenders.light.framebuffer =
+      FrameBuffer::Create(2048, 2048, true, false, true);
 }
 
 void dg::ShadowScene::Update() {
@@ -114,19 +115,9 @@ void dg::ShadowScene::Update() {
       spotlight->transform;
 }
 
-void dg::ShadowScene::RenderFrame() {
-  ProcessSceneHierarchy();
-  RenderLightShadowMap();
-  Graphics::Instance->PushRasterizerState(defaultRasterizerState);
-
-  ClearBuffer();
-
-  // Render scene for real.
-  mainCamera->aspectRatio = window->GetAspectRatio();
-  DrawScene(*mainCamera);
-
+void dg::ShadowScene::RenderOverlays() {
   // Draw depth map over scene.
-  quadMaterial->SetTexture(shadowFrameBuffer->GetDepthTexture());
+  quadMaterial->SetTexture(subrenders.light.framebuffer->GetDepthTexture());
   glm::vec2 scale = glm::vec2(1) / glm::vec2(window->GetAspectRatio(), 1);
   quadMaterial->SetScale(scale);
   quadMaterial->SetRedChannelOnly(true);
@@ -135,12 +126,10 @@ void dg::ShadowScene::RenderFrame() {
   Mesh::Quad->Draw();
 
   // Draw light color rendering over scene.
-  quadMaterial->SetTexture(shadowFrameBuffer->GetColorTexture());
+  quadMaterial->SetTexture(subrenders.light.framebuffer->GetColorTexture());
   quadMaterial->SetRedChannelOnly(false);
   quadMaterial->SetScale(scale);
   quadMaterial->SetOffset(glm::vec2(1 - scale.x * 0.5, -1 + scale.y * 0.5));
   quadMaterial->Use();
   Mesh::Quad->Draw();
-
-  Graphics::Instance->PopRasterizerState();
 }

@@ -29,7 +29,7 @@ std::unique_ptr<dg::BoundsScene> dg::BoundsScene::MakeVR() {
 }
 
 dg::BoundsScene::BoundsScene(bool enableVR) : Scene() {
-  this->enableVR = enableVR;
+  vr.requested = enableVR;
 }
 
 void dg::BoundsScene::Initialize() {
@@ -40,7 +40,7 @@ void dg::BoundsScene::Initialize() {
     << std::endl
     << "NOTE: Bounds are not yet implemented." << std::endl
     << std::endl;
-  if (!enableVR) {
+  if (!vr.enabled) {
     std::cout
       << "Camera controls:" << std::endl
       << "  Mouse: Look around" << std::endl
@@ -58,7 +58,7 @@ void dg::BoundsScene::Initialize() {
   }
 
   // Lock window cursor to center.
-  if (!enableVR) {
+  if (!vr.enabled) {
     window->LockCursor();
   }
 
@@ -182,15 +182,14 @@ void dg::BoundsScene::Initialize() {
           glm::quat(glm::radians(glm::vec3(-90, 0, 0))),
           glm::vec3(floorSize, floorSize, 1))));
 
-  if (!enableVR) {
+  if (!vr.enabled) {
     // Configure camera.
-    mainCamera->transform.translation = glm::vec3(0, 2, 3);
-    mainCamera->LookAtPoint(glm::vec3(0));
+    cameras.main->transform.translation = glm::vec3(0, 2, 3);
+    cameras.main->LookAtPoint(glm::vec3(0));
 
     // Allow camera to be controller by the keyboard and mouse.
-    Behavior::Attach(
-        mainCamera,
-        std::make_shared<KeyboardCameraController>(window));
+    Behavior::Attach(cameras.main,
+                     std::make_shared<KeyboardCameraController>(window));
   }
 }
 

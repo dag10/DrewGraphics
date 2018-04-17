@@ -33,7 +33,7 @@ std::unique_ptr<dg::WidgetScene> dg::WidgetScene::MakeVR() {
 }
 
 dg::WidgetScene::WidgetScene(bool enableVR) : Scene() {
-  this->enableVR = enableVR;
+  vr.requested = enableVR;
 }
 
 void dg::WidgetScene::Initialize() {
@@ -71,12 +71,12 @@ void dg::WidgetScene::Initialize() {
           glm::vec3(floorSize, floorSize, 1))));
 
   // Configure camera.
-  mainCamera->transform.translation = glm::vec3(-2.85f, 3.56f, 4.16f);
-  mainCamera->LookAtDirection({ 0.30847f, -0.6647f, -0.6805f });
+  cameras.main->transform.translation = glm::vec3(-2.85f, 3.56f, 4.16f);
+  cameras.main->LookAtDirection({ 0.30847f, -0.6647f, -0.6805f });
 
   // Allow camera to be controller by the keyboard and mouse.
   Behavior::Attach(
-      mainCamera,
+      cameras.main,
       std::make_shared<KeyboardCameraController>(window));
 
   // Create widgets

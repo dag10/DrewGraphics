@@ -30,18 +30,18 @@ namespace cavr {
 
       virtual void Initialize();
       virtual void Update();
-      virtual void RenderFrame();
 
     private:
 
       GameScene();
 
+      virtual void RenderFramebuffers();
+
+      Subrender shipIntersectionSubrender;
       std::shared_ptr<SceneObject> leftController;
       std::shared_ptr<SceneObject> rightController;
 
       std::shared_ptr<SceneObject> shipAttachment;
-      std::shared_ptr<dg::FrameBuffer> intersectionFramebuffer;
-      std::shared_ptr<dg::Camera> intersectionCamera;
       std::shared_ptr<dg::PointLight> controllerLight;
       std::shared_ptr<dg::DirectionalLight> skyLight;
       std::shared_ptr<dg::Model> floor;

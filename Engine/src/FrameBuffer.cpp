@@ -65,6 +65,10 @@ unsigned int dg::BaseFrameBuffer::GetHeight() const {
   return height;
 }
 
+float dg::BaseFrameBuffer::GetAspectRatio() const {
+  return (float)width / (float)height;
+}
+
 std::shared_ptr<dg::Texture> dg::BaseFrameBuffer::GetColorTexture() const {
   return colorTexture;
 }

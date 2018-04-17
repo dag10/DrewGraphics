@@ -68,6 +68,7 @@ namespace dg {
 
     unsigned int GetWidth() const;
     unsigned int GetHeight() const;
+	float GetAspectRatio() const;
 
     std::shared_ptr<Texture> GetColorTexture() const;
     std::shared_ptr<Texture> GetDepthTexture() const;

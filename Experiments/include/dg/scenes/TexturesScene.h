@@ -5,7 +5,6 @@
 #pragma once
 
 #include <memory>
-#include "dg/FrameBuffer.h"
 #include "dg/Scene.h"
 
 namespace dg {
@@ -23,13 +22,12 @@ namespace dg {
 
       virtual void Initialize();
       virtual void Update();
-      virtual void RenderFrame();
 
     private:
 
-      std::shared_ptr<FrameBuffer> framebuffer;
-      std::shared_ptr<SceneObject> renderQuads;
-      std::shared_ptr<SceneObject> dummyRenderQuads;
+      virtual void RenderFramebuffers();
+
+	  Subrender quadSubrender;
       std::shared_ptr<Camera> virtualCamera;
 
       bool flyingMainCamera = true;

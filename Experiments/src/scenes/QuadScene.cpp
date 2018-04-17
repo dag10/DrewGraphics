@@ -58,8 +58,8 @@ void dg::QuadScene::Initialize() {
   AddChild(directionalLight);
 
   // Configure camera.
-  mainCamera->transform.translation = glm::vec3(0, 0, 2);
-  mainCamera->LookAt(*quad);
+  cameras.main->transform.translation = glm::vec3(0, 0, 2);
+  cameras.main->LookAt(*quad);
 }
 
 void dg::QuadScene::Update() {

@@ -27,7 +27,7 @@ std::unique_ptr<dg::RobotScene> dg::RobotScene::MakeVR() {
 }
 
 dg::RobotScene::RobotScene(bool enableVR) : Scene() {
-  this->enableVR = enableVR;
+  vr.requested = enableVR;
 }
 
 void dg::RobotScene::Initialize() {
@@ -56,18 +56,18 @@ void dg::RobotScene::Initialize() {
             << std::endl;
 
   // Lock window cursor to center.
-  if (!enableVR) {
+  if (!vr.enabled) {
     window->LockCursor();
   }
 
   // Adjust VR scale.
-  if (enableVR) {
-    vrContainer->transform.scale *= 2.f;
+  if (vr.enabled) {
+    vr.container->transform.scale *= 2.f;
   }
 
   // Add objects to follow OpenVR tracked devices.
   auto leftController = std::make_shared<SceneObject>();
-  vrContainer->AddChild(leftController);
+  vr.container->AddChild(leftController);
   Behavior::Attach(leftController, std::make_shared<VRTrackedObject>(
     vr::ETrackedControllerRole::TrackedControllerRole_LeftHand));
   Behavior::Attach(leftController, std::make_shared<VRRenderModel>());
@@ -75,7 +75,7 @@ void dg::RobotScene::Initialize() {
   Behavior::Attach(rightController, std::make_shared<VRTrackedObject>(
     vr::ETrackedControllerRole::TrackedControllerRole_RightHand));
   Behavior::Attach(rightController, std::make_shared<VRRenderModel>());
-  vrContainer->AddChild(rightController);
+  vr.container->AddChild(rightController);
 
   // Create sky light.
   auto skylight = std::make_shared<DirectionalLight>(
@@ -412,14 +412,13 @@ void dg::RobotScene::Initialize() {
   )), false);
 
   // Initial camera position.
-  mainCamera->transform = Transform::T({ 2.f, 2.36f, 3.64f });
-  mainCamera->LookAtDirection({ -0.524f, -0.324f, -0.788f });
+  cameras.main->transform = Transform::T({ 2.f, 2.36f, 3.64f });
+  cameras.main->LookAtDirection({ -0.524f, -0.324f, -0.788f });
 
   // Allow camera to be controller by the keyboard and mouse.
-  if (!enableVR) {
-    Behavior::Attach(
-        mainCamera,
-        std::make_shared<KeyboardCameraController>(window, 7.f));
+  if (!vr.enabled) {
+    Behavior::Attach(cameras.main,
+                     std::make_shared<KeyboardCameraController>(window, 7.f));
   }
 
   // Create a flashlight attached to the camera.
@@ -431,11 +430,11 @@ void dg::RobotScene::Initialize() {
   flashlight->SetCastShadows(true);
   Behavior::Attach(
     flashlight, std::make_shared<KeyboardLightController>(window));
-  if (enableVR) {
+  if (vr.enabled) {
     rightController->AddChild(flashlight, false);
   } else {
     flashlight->transform = Transform::T(glm::vec3(0.1f, -0.1f, 0));
-    mainCamera->AddChild(flashlight, false);
+    cameras.main->AddChild(flashlight, false);
   }
 }
 
@@ -450,7 +449,7 @@ void dg::RobotScene::Update() {
   // If Space is tapped, tag whether flashlight is pinned to camera transform.
   if (window->IsKeyJustPressed(Key::SPACE)) {
     if (flashlight->Parent() == this) {
-      mainCamera->AddChild(flashlight, true);
+      cameras.main->AddChild(flashlight, true);
     } else {
       AddChild(flashlight, true);
     }

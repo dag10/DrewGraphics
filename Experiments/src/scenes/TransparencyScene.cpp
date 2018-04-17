@@ -28,7 +28,7 @@ std::unique_ptr<dg::TransparencyScene> dg::TransparencyScene::MakeVR() {
 }
 
 dg::TransparencyScene::TransparencyScene(bool enableVR) : Scene() {
-  this->enableVR = enableVR;
+  vr.requested = enableVR;
 }
 
 void dg::TransparencyScene::Initialize() {
@@ -37,7 +37,7 @@ void dg::TransparencyScene::Initialize() {
   std::cout
     << "This scene is a demo of transparent material rendering." << std::endl
     << std::endl;
-  if (!enableVR) {
+  if (!vr.enabled) {
     std::cout
       << "Camera controls:" << std::endl
       << "  Mouse: Look around" << std::endl
@@ -55,7 +55,7 @@ void dg::TransparencyScene::Initialize() {
   }
 
   // Lock window cursor to center.
-  if (!enableVR) {
+  if (!vr.enabled) {
     window->LockCursor();
   }
 
@@ -201,15 +201,14 @@ void dg::TransparencyScene::Initialize() {
           glm::quat(glm::radians(glm::vec3(-90, 0, 0))),
           glm::vec3(floorSize, floorSize, 1))));
 
-  if (!enableVR) {
+  if (!vr.enabled) {
     // Configure camera.
-    mainCamera->transform.translation = glm::vec3(0, 2, 3);
-    mainCamera->LookAtPoint(glm::vec3(0));
+    cameras.main->transform.translation = glm::vec3(0, 2, 3);
+    cameras.main->LookAtPoint(glm::vec3(0));
 
     // Allow camera to be controller by the keyboard and mouse.
-    Behavior::Attach(
-        mainCamera,
-        std::make_shared<KeyboardCameraController>(window));
+    Behavior::Attach(cameras.main,
+                     std::make_shared<KeyboardCameraController>(window));
   }
 }
 

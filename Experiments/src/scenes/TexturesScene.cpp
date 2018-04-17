@@ -92,7 +92,7 @@ void dg::TexturesScene::Initialize() {
           glm::vec3(floorSize, floorSize, 1))));
 
   // Create frame buffer.
-  framebuffer = FrameBuffer::Create(1024, 1024, true, true);
+  auto framebuffer = FrameBuffer::Create(1024, 1024, true, true);
 
   // Create material for displaying the framebuffer color buffer.
   StandardMaterial framebufferColorMaterial =
@@ -109,17 +109,13 @@ void dg::TexturesScene::Initialize() {
   StandardMaterial dummyFramebufferMaterial = StandardMaterial::WithColor(
     glm::vec3(0.1, 0.15, 0.4));
 
-  // Container for quads that show framebuffer, so they can be disabled
-  // when rendering the virtual scene.
-  renderQuads = std::make_shared<SceneObject>();
+  // Container for quads that show framebuffer.
+  auto renderQuads = std::make_shared<SceneObject>();
   renderQuads->transform = Transform::TRS(
     glm::vec3(0, 1.25f, -0.4),
     glm::quat(glm::radians(glm::vec3(-20, 0, 0))),
     glm::vec3(0.5f));
   AddChild(renderQuads);
-  dummyRenderQuads = std::make_shared<SceneObject>();
-  dummyRenderQuads->transform = renderQuads->transform;
-  AddChild(dummyRenderQuads);
 
   // Create quad to show framebuffer color and depth buffers.
   float quadSize = 1.2f;
@@ -134,18 +130,6 @@ void dg::TexturesScene::Initialize() {
   renderQuads->AddChild(std::make_shared<Model>(
     dg::Mesh::Quad,
     std::make_shared<StandardMaterial>(framebufferDepthMaterial),
-    Transform::TS(
-      glm::vec3(quadSize * 0.5f + quadSep * 0.5f, 0, 0),
-      quadSize * glm::vec3(1, 1 / quadAspect, 1))), false);
-  dummyRenderQuads->AddChild(std::make_shared<Model>(
-    dg::Mesh::Quad,
-    std::make_shared<StandardMaterial>(dummyFramebufferMaterial),
-    Transform::TS(
-      glm::vec3(-quadSize * 0.5f - quadSep * 0.5f, 0, 0),
-      quadSize * glm::vec3(1, 1 / quadAspect, 1))), false);
-  dummyRenderQuads->AddChild(std::make_shared<Model>(
-    dg::Mesh::Quad,
-    std::make_shared<StandardMaterial>(dummyFramebufferMaterial),
     Transform::TS(
       glm::vec3(quadSize * 0.5f + quadSep * 0.5f, 0, 0),
       quadSize * glm::vec3(1, 1 / quadAspect, 1))), false);
@@ -181,21 +165,24 @@ void dg::TexturesScene::Initialize() {
   virtualCamera->aspectRatio = quadAspect;
   AddChild(virtualCamera);
 
+  // Configure subrender for virtual camera.
+  quadSubrender.type = Subrender::Type::MonoscopicFramebuffer;
+  quadSubrender.camera = virtualCamera;
+  quadSubrender.framebuffer = framebuffer;
+
   // Configure camera.
-  mainCamera->transform.translation = glm::vec3(-1.25f, 2, 1.1f);
-  mainCamera->LookAtPoint(
-      (cube->transform.translation +
-       ceilingLight->transform.translation) / 2.f);
+  cameras.main->transform.translation = glm::vec3(-1.25f, 2, 1.1f);
+  cameras.main->LookAtPoint(
+      (cube->transform.translation + ceilingLight->transform.translation) /
+      2.f);
 
   // Allow camera to be controller by the keyboard and mouse.
-  Behavior::Attach(
-      mainCamera,
-      std::make_shared<KeyboardCameraController>(window));
+  Behavior::Attach(cameras.main,
+                   std::make_shared<KeyboardCameraController>(window));
 
   // Allow the virtual camera to also be controller.
-  Behavior::Attach(
-      virtualCamera,
-      std::make_shared<KeyboardCameraController>(window));
+  Behavior::Attach(virtualCamera,
+                   std::make_shared<KeyboardCameraController>(window));
   virtualCamera->GetBehavior<KeyboardCameraController>()->enabled = false;
 }
 
@@ -204,7 +191,7 @@ void dg::TexturesScene::Update() {
 
   if (window->IsKeyJustPressed(Key::SPACE)) {
     flyingMainCamera = !flyingMainCamera;
-    mainCamera->GetBehavior<KeyboardCameraController>()->enabled =
+    cameras.main->GetBehavior<KeyboardCameraController>()->enabled =
       flyingMainCamera;
     virtualCamera->GetBehavior<KeyboardCameraController>()->enabled =
       !flyingMainCamera;
@@ -216,14 +203,6 @@ void dg::TexturesScene::Update() {
   }
 }
 
-void dg::TexturesScene::RenderFrame() {
-  // Render scene for framebuffer.
-  renderQuads->enabled = false;
-  dummyRenderQuads->enabled = true;
-  RenderFrameBuffer(*framebuffer, *virtualCamera);
-  dummyRenderQuads->enabled = false;
-  renderQuads->enabled = true;
-
-  // Render scene for output.
-  Scene::RenderFrame();
+void dg::TexturesScene::RenderFramebuffers() {
+  PerformSubrender(quadSubrender);
 }

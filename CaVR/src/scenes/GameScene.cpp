@@ -30,14 +30,14 @@ std::unique_ptr<cavr::GameScene> cavr::GameScene::Make() {
 }
 
 cavr::GameScene::GameScene() : dg::Scene() {
-  enableVR = true;
+  vr.requested = true;
 }
 
 void cavr::GameScene::Initialize() {
   dg::Scene::Initialize();
 
   // Make near clip plane shorter.
-  mainCamera->nearClip = 0.01f;
+  cameras.main->nearClip = 0.01f;
 
   // Create skybox.
   // Image generated from
@@ -76,7 +76,7 @@ void cavr::GameScene::Initialize() {
 
   // Add objects to follow OpenVR tracked devices.
   leftController = std::make_shared<SceneObject>();
-  vrContainer->AddChild(leftController);
+  vr.container->AddChild(leftController);
   dg::Behavior::Attach(
       leftController,
       std::make_shared<dg::VRTrackedObject>(
@@ -92,7 +92,7 @@ void cavr::GameScene::Initialize() {
   dg::Behavior::Attach(rightController, std::make_shared<dg::VRRenderModel>());
   dg::Behavior::Attach(rightController,
                        std::make_shared<dg::VRControllerState>());
-  vrContainer->AddChild(rightController);
+  vr.container->AddChild(rightController);
 
   // Create attachment point point for eventual spaceship.
   shipAttachment =
@@ -117,16 +117,20 @@ void cavr::GameScene::Initialize() {
 
   // Create intersectionFramebuffer for rendering cave intersection test.
   const int fbRes = 128;
-  intersectionFramebuffer =
+  shipIntersectionSubrender.type = Subrender::Type::MonoscopicFramebuffer;
+  shipIntersectionSubrender.renderSkybox = false;
+  shipIntersectionSubrender.framebuffer =
       dg::FrameBuffer::Create(fbRes, fbRes, false, false, true);
-  intersectionCamera = std::make_shared<dg::Camera>();
-  intersectionCamera->farClip = 0.025f;
-  intersectionCamera->nearClip = intersectionCamera->farClip * 0.001f;
-  shipAttachment->AddChild(intersectionCamera, false);
+  shipIntersectionSubrender.camera = std::make_shared<dg::Camera>();
+  shipIntersectionSubrender.camera->farClip = 0.025f;
+  shipIntersectionSubrender.camera->nearClip =
+      shipIntersectionSubrender.camera->farClip * 0.001f;
+  shipAttachment->AddChild(shipIntersectionSubrender.camera, false);
 
   // Attach quad to sphere temporarily to visualize intersection rendering.
-  auto renderQuadMat = std::make_shared<dg::StandardMaterial>(
-    dg::StandardMaterial::WithTexture(intersectionFramebuffer->GetColorTexture()));
+  auto renderQuadMat =
+      std::make_shared<dg::StandardMaterial>(dg::StandardMaterial::WithTexture(
+          shipIntersectionSubrender.framebuffer->GetColorTexture()));
   renderQuadMat->SetLit(false);
   auto renderQuad = std::make_shared<dg::Model>(
       dg::Mesh::Quad, renderQuadMat,
@@ -135,13 +139,13 @@ void cavr::GameScene::Initialize() {
 
   // If VR could not enable, position the camera in a useful place for
   // development and make it controllable with keyboard and mouse.
-  if (!enableVR) {
+  if (!vr.enabled) {
     window->LockCursor();
-    mainCamera->transform =
+    cameras.main->transform =
         dg::Transform::T(glm::vec3(-0.905f, 1.951f, -1.63f));
-    mainCamera->LookAtDirection(glm::vec3(0.259f, -0.729f, 0.633f));
+    cameras.main->LookAtDirection(glm::vec3(0.259f, -0.729f, 0.633f));
     dg::Behavior::Attach(
-        mainCamera, std::make_shared<dg::KeyboardCameraController>(window));
+        cameras.main, std::make_shared<dg::KeyboardCameraController>(window));
 
     // Attach controller light to camera.
     lightSphere->material = std::make_shared<dg::StandardMaterial>(
@@ -152,15 +156,15 @@ void cavr::GameScene::Initialize() {
     shipAttachment->transform = dg::Transform::T(glm::vec3(0, 0, -0.1f));
     renderQuad->transform =
         dg::Transform::TS(glm::vec3(-0.05f, 0, 0), glm::vec3(0.04f));
-    mainCamera->AddChild(shipAttachment, false);
+    cameras.main->AddChild(shipAttachment, false);
   }
 
   // Create cave.
   cave = std::make_shared<dg::SceneObject>();
   auto caveBehavior =
       dg::Behavior::Attach(cave, std::make_shared<CaveBehavior>());
-  caveBehavior->SetShowKnots(!enableVR);
-  caveBehavior->SetShowWireframe(!enableVR);
+  caveBehavior->SetShowKnots(!vr.enabled);
+  caveBehavior->SetShowWireframe(!vr.enabled);
   AddChild(cave);
 }
 
@@ -169,6 +173,14 @@ void cavr::GameScene::Update() {
   auto leftState = leftController->GetBehavior<dg::VRControllerState>();
   auto rightState = rightController->GetBehavior<dg::VRControllerState>();
   auto caveBehavior = cave->GetBehavior<CaveBehavior>();
+
+  // Swap left and right controllers with TILDE key.
+  if (window->IsKeyJustPressed(dg::Key::GRAVE_ACCENT)) {
+    auto leftTrackedObj = leftController->GetBehavior<dg::VRTrackedObject>();
+    auto rightTrackedObj = rightController->GetBehavior<dg::VRTrackedObject>();
+    std::swap(leftTrackedObj->role, rightTrackedObj->role);
+    std::swap(leftTrackedObj->deviceIndex, rightTrackedObj->deviceIndex);
+  }
 
   // Toggle outer material type with M key or left MENU button.
   if (window->IsKeyJustPressed(dg::Key::M) ||
@@ -238,10 +250,7 @@ void cavr::GameScene::Update() {
   }
 }
 
-void cavr::GameScene::RenderFrame() {
+void cavr::GameScene::RenderFramebuffers() {
   // Render scene for intersectionFramebuffer.
-  RenderFrameBuffer(*intersectionFramebuffer, *intersectionCamera);
-
-  // Render scene for output.
-  dg::Scene::RenderFrame();
+  PerformSubrender(shipIntersectionSubrender);
 }

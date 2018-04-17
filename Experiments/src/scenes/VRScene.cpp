@@ -31,7 +31,7 @@ std::unique_ptr<dg::VRScene> dg::VRScene::Make() {
 }
 
 dg::VRScene::VRScene() : Scene() {
-  //enableVR = true;
+  vr.requested = true;
 }
 
 void dg::VRScene::Initialize() {
@@ -218,7 +218,7 @@ void dg::VRScene::Initialize() {
   AddChild(ceiling);
 
   // Create box that represents the camera's position.
-  mainCamera->AddChild(std::make_shared<Model>(
+  cameras.main->AddChild(std::make_shared<Model>(
       dg::Mesh::Cube,
       std::make_shared<Material>(
         StandardMaterial::WithColor(glm::vec3(0.8f, 1.0f, 0.8f))),
@@ -226,7 +226,7 @@ void dg::VRScene::Initialize() {
 
   // Add objects to follow OpenVR tracked devices.
   leftController = std::make_shared<SceneObject>();
-  vrContainer->AddChild(leftController);
+  vr.container->AddChild(leftController);
   Behavior::Attach(leftController, std::make_shared<VRTrackedObject>(
     vr::ETrackedControllerRole::TrackedControllerRole_LeftHand));
   Behavior::Attach(leftController, std::make_shared<VRControllerState>());
@@ -236,7 +236,7 @@ void dg::VRScene::Initialize() {
     vr::ETrackedControllerRole::TrackedControllerRole_RightHand));
   Behavior::Attach(rightController, std::make_shared<VRControllerState>());
   Behavior::Attach(rightController, std::make_shared<VRRenderModel>());
-  vrContainer->AddChild(rightController);
+  vr.container->AddChild(rightController);
 
   // Create a flashlight attached to the right controller.
   flashlight = std::make_shared<SpotLight>(

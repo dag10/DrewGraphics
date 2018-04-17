@@ -25,7 +25,7 @@ namespace dg {
 
     private:
 
-      virtual void RenderFrame();
+      virtual void RenderOverlays();
 
       std::shared_ptr<Model> cube = nullptr;
       std::shared_ptr<SpotLight> spotlight = nullptr;

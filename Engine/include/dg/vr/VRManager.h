@@ -41,7 +41,7 @@ namespace dg {
       // To be called by the scene once the render is finished.
       void RenderFinished();
 
-      // These methods should only be called from
+      // These methods should only be called from VRTrackedObject.
       void RegisterTrackedObject(VRTrackedObject *object);
       void DeregisterTrackedObject(VRTrackedObject *object);
 

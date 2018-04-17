@@ -104,16 +104,14 @@ void dg::SimpleScene::Initialize() {
           glm::vec3(floorSize, floorSize, 1))));
 
   // Configure camera.
-  mainCamera->transform.translation = glm::vec3(-1.25f, 2, 1.1f);
-  mainCamera->LookAtPoint(
+  cameras.main->transform.translation = glm::vec3(-1.25f, 2, 1.1f);
+  cameras.main->LookAtPoint(
       (cube->transform.translation +
        ceilingLight->transform.translation) / 2.f);
 
   // Allow camera to be controller by the keyboard and mouse.
-  Behavior::Attach(
-      mainCamera,
-      std::make_shared<KeyboardCameraController>(window));
-
+  Behavior::Attach(cameras.main,
+                   std::make_shared<KeyboardCameraController>(window));
 
   //mainCamera->transform = Transform();
 }

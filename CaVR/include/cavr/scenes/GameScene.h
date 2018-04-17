@@ -31,6 +31,19 @@ namespace cavr {
       virtual void Initialize();
       virtual void Update();
 
+      class LayerMask : public dg::Scene::LayerMask {
+        public:
+          // Layer used for inner cave wall geometry to detect cave
+          // intersections using the GPU.
+          static inline LayerMask CaveGeometry() { return Ord(1); }
+        protected:
+          LayerMask(Scene::LayerMask mask) : Scene::LayerMask(mask) {}
+        private:
+          static inline LayerMask Ord(uint64_t idx) {
+            return LayerMask(Scene::LayerMask::Ord(HighestIndex + idx));
+          }
+      };
+
     private:
 
       GameScene();

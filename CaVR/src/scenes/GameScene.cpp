@@ -30,7 +30,7 @@ std::unique_ptr<cavr::GameScene> cavr::GameScene::Make() {
 }
 
 cavr::GameScene::GameScene() : dg::Scene() {
-  vr.requested = true;
+  //vr.requested = true;
 }
 
 void cavr::GameScene::Initialize() {
@@ -125,6 +125,7 @@ void cavr::GameScene::Initialize() {
   shipIntersectionSubrender.camera->farClip = 0.025f;
   shipIntersectionSubrender.camera->nearClip =
       shipIntersectionSubrender.camera->farClip * 0.001f;
+  shipIntersectionSubrender.layerMask = GameScene::LayerMask::CaveGeometry();
   shipAttachment->AddChild(shipIntersectionSubrender.camera, false);
 
   // Attach quad to sphere temporarily to visualize intersection rendering.

@@ -3,6 +3,7 @@
 //
 
 #include "cavr/behaviors/CaveBehavior.h"
+#include "cavr/scenes/GameScene.h"
 #include "dg/EngineTime.h"
 #include "dg/Model.h"
 #include "dg/SceneObject.h"
@@ -179,10 +180,10 @@ void cavr::CaveBehavior::AddCaveSegment(const CaveSegment &segment) {
   }
 
   // Create mesh for tunnel.
-  caveInteriorModels->AddChild(
-      std::make_shared<dg::Model>(segment.GetMesh(), caveMaterial,
-                                  dg::Transform()),
-      false);
+  auto interior = std::make_shared<dg::Model>(segment.GetMesh(), caveMaterial,
+                                              dg::Transform());
+  interior->layer = GameScene::LayerMask::CaveGeometry();
+  caveInteriorModels->AddChild(interior, false);
   caveWireframeModels->AddChild(
       std::make_shared<dg::Model>(segment.GetMesh(), caveWireframeMaterial,
                                   dg::Transform()),

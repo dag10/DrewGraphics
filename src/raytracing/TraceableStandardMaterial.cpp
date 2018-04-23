@@ -109,6 +109,10 @@ glm::vec3 dg::TraceableStandardMaterial::CalculateLight(
 }
 
 glm::vec3 dg::TraceableStandardMaterial::Shade(const RayResult& rayres) const {
+  if (rayres.leavingSurface) {
+    return glm::vec3(0);
+  }
+
   glm::vec3 diffuseColor =
       GetRequiredProperty("_Material.diffuse")->value._vec3;
   glm::vec3 specularColor =

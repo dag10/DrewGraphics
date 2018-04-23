@@ -11,7 +11,7 @@
 
 namespace dg {
 
-  enum class ReflectionBlendMode {
+  enum class RayBlendMode {
     Additive,
     Weighted,
   };
@@ -70,7 +70,7 @@ namespace dg {
 
       // I have to put some raytracing-specific properties here.
       void SetReflection(float reflection);
-      void SetReflectionBlending(ReflectionBlendMode mode);
+      void SetRayBlending(RayBlendMode mode);
       void SetTransmission(float transmission);
       void SetMaxDepth(int maxDepth);
 
@@ -85,8 +85,9 @@ namespace dg {
 
       float reflection = 0;
       float transmission = 0;
+      float refractiveIndex = 2.417; // glass
       int maxDepth = 5;
-      ReflectionBlendMode reflectionBlendMode = ReflectionBlendMode::Weighted;
+      RayBlendMode rayBlendMode = RayBlendMode::Weighted;
 
     private:
 

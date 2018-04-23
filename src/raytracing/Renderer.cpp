@@ -14,7 +14,7 @@
 
 dg::Renderer::Renderer(unsigned int width, unsigned int height, Scene *scene)
   : scene(scene) {
-  const float resScale = 2;
+  const float resScale = 2.f;
   width *= resScale;
   height *= resScale;
   canvas = std::make_shared<Canvas>(width, height);
@@ -49,7 +49,7 @@ void dg::Renderer::Render() {
   glm::vec3 planeCenter(planeCenter_h.x, planeCenter_h.y, planeCenter_h.z);
 
   glm::vec4 planeRightPos_h = glm::column(plane_SS, 1);
-  planeRightPos_h /= planeRightPos_h.w; // Normalize homogenous coords
+  planeRightPos_h /= planeRightPos_h.w; // Normalize homogenous coord
   glm::vec3 planeRightPos(planeRightPos_h.x, planeRightPos_h.y, planeRightPos_h.z);
   glm::vec3 planeRight = planeRightPos - planeCenter;
 
@@ -86,6 +86,9 @@ void dg::Renderer::Render() {
         if (res.hit && res.model->material->reflection > 0) {
           ray = res.GetReflectedRay();
           maxDepth = std::min(maxDepth, res.model->material->maxDepth);
+        } else if (res.hit && res.model->material->transmission > 0) {
+          ray = res.GetRefractedRay();
+          maxDepth = std::min(maxDepth, res.model->material->maxDepth);
         } else {
           break;
         }
@@ -97,13 +100,16 @@ void dg::Renderer::Render() {
       bool isInitial = true;
       while (!results.empty()) {
         auto &res = results.front();
-        float weight = isInitial ? 1 : (1.f - res.model->material->reflection);
-        switch (res.model->material->reflectionBlendMode) {
-          case ReflectionBlendMode::Additive:
+        float blendWeight = res.model->material->reflection > 0
+                                ? res.model->material->reflection
+                                : res.model->material->transmission;
+        float weight = isInitial ? 1 : (1.f - blendWeight);
+        switch (res.model->material->rayBlendMode) {
+          case RayBlendMode::Additive:
             color *= (1.f - weight);
             color += ShadeRayResult(res);
             break;
-          case ReflectionBlendMode::Weighted:
+          case RayBlendMode::Weighted:
             color *= (1.f - weight);
             color += weight * ShadeRayResult(res);
             break;
@@ -184,13 +190,26 @@ dg::RayResult dg::Renderer::TraceRay(Ray ray) {
         continue;
       }
       Ray lightRay = shortest.RayToLight(light.second);
-      RayResult shortestLightRayRes = RayResult::Miss(ray);
-      for (auto model = objects.begin(); model != objects.end(); model++) {
-        if (*model == shortest.model) continue;
-        shortestLightRayRes =
-            RayResult::Closest(shortestLightRayRes, (*model)->RayTest(lightRay));
+      RayResult res = RayResult::Miss(ray);
+      int maxDepth = 10;
+      while (maxDepth > 0) {
+        maxDepth--;
+        for (auto model = objects.begin(); model != objects.end(); model++) {
+          if (*model == shortest.model) continue;
+          res = RayResult::Closest(res, (*model)->RayTest(lightRay));
+        }
+        if (res.hit && res.model->material->reflection > 0) {
+          lightRay = res.GetReflectedRay();
+          maxDepth = std::min(maxDepth, res.model->material->maxDepth);
+        } else if (res.hit && res.model->material->transmission > 0) {
+          lightRay = res.GetRefractedRay();
+          maxDepth = std::min(maxDepth, res.model->material->maxDepth);
+        } else {
+          break;
+        }
+        res = RayResult::Miss(lightRay);
       }
-      if (!shortestLightRayRes.hit) {
+      if (!res.hit) {
         if (lightRay.IntersectLight(light.second).hit) {
           shortest.lightDirectIllumination[light.first] = true;
         }

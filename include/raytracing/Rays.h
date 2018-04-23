@@ -23,6 +23,7 @@ namespace dg {
 
       glm::vec3 origin;
       glm::vec3 direction;
+      float refractiveIndex = 1; // air
       float scaleFromParent = 1;
 
       Ray() = default;
@@ -47,6 +48,7 @@ namespace dg {
 
       const TraceableModel *model = nullptr;
       bool hit = false;
+      bool leavingSurface = false;
       std::unordered_map<int, bool> lightDirectIllumination;
       Ray ray;
       float distance = 0;
@@ -61,7 +63,8 @@ namespace dg {
       static const RayResult& Closest(const RayResult& a, const RayResult& b);
 
       glm::vec3 GetIntersectionPoint() const;
-      Ray GetReflectedRay() const;
+      Ray GetReflectedRay(bool flipNormal = false) const;
+      Ray GetRefractedRay() const;
 
       // Expects RayResult to be in Scene Space.
       Ray RayToLight(const Light::ShaderData& lightData) const;

@@ -9,8 +9,9 @@ dg::Material::Material(Material& other) {
   this->properties = other.properties;
   this->highestTexUnitHint = other.highestTexUnitHint;
   this->reflection = other.reflection;
-  this->reflectionBlendMode = other.reflectionBlendMode;
+  this->rayBlendMode = other.rayBlendMode;
   this->transmission = other.transmission;
+  this->refractiveIndex = other.refractiveIndex;
   this->maxDepth = other.maxDepth;
 }
 
@@ -34,8 +35,9 @@ void dg::swap(Material& first, Material& second) {
   swap(first.properties, second.properties);
   swap(first.highestTexUnitHint, second.highestTexUnitHint);
   swap(first.reflection, second.reflection);
-  swap(first.reflectionBlendMode, second.reflectionBlendMode);
+  swap(first.rayBlendMode, second.rayBlendMode);
   swap(first.transmission, second.transmission);
+  swap(first.refractiveIndex, second.refractiveIndex);
   swap(first.maxDepth, second.maxDepth);
 }
 
@@ -179,8 +181,8 @@ void dg::Material::SetReflection(float reflection) {
   this->reflection = reflection;
 }
 
-void dg::Material::SetReflectionBlending(ReflectionBlendMode mode) {
-  this->reflectionBlendMode = mode;
+void dg::Material::SetRayBlending(RayBlendMode mode) {
+  this->rayBlendMode = mode;
 }
 
 void dg::Material::SetTransmission(float transmission) {

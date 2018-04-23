@@ -32,6 +32,7 @@ void dg::RaytraceScene::Initialize() {
   auto directionalLight = std::make_shared<DirectionalLight>(
       glm::vec3(1.0f, 0.93f, 0.86f), 0, 0.8, 0.968f);
   directionalLight->LookAtDirection(glm::normalize(glm::vec3(-0.6, -1, -0.3)));
+  //directionalLight->LookAtDirection(glm::normalize(glm::vec3(0.4, -1, -1.1)));
   AddChild(directionalLight);
 
   Behavior::Attach(directionalLight,
@@ -60,24 +61,27 @@ void dg::RaytraceScene::Initialize() {
   sphereMaterial.SetShininess(64);
 
   // Create front sphere.
-  sphereMaterial.SetDiffuse(glm::vec3(0.7, 0.3, 0.3));
-  sphereMaterial.SetReflection(0.03f);
+  sphereMaterial.SetDiffuse(glm::vec3(0.025));
+  sphereMaterial.SetSpecular(glm::vec3(1));
+  sphereMaterial.SetTransmission(1);
+  sphereMaterial.SetReflection(0);
+  sphereMaterial.refractiveIndex = 1.52f;
+  //sphereMaterial.refractiveIndex = 1.09f;
+  sphereMaterial.SetRayBlending(RayBlendMode::Additive);
   AddChild(std::make_shared<TraceableModel>(
       dg::Mesh::Sphere,
       std::make_shared<TraceableStandardMaterial>(sphereMaterial),
+      //Transform::TS(glm::vec3(-3, 2, 6), glm::vec3(2.5))));
       Transform::TS(glm::vec3(-3, 2, 0), glm::vec3(2.5))));
 
   // Create back sphere.
-  //sphereMaterial.SetDiffuse(glm::vec3(0.3, 0.7, 0.3));
   sphereMaterial.SetDiffuse(glm::vec3(0.1));
   sphereMaterial.SetSpecular(glm::vec3(1));
+  sphereMaterial.SetTransmission(0);
   sphereMaterial.SetReflection(1);
-  sphereMaterial.SetReflectionBlending(ReflectionBlendMode::Additive);
-  //sphereMaterial.SetDiffuse(glm::vec3(1.5));
-  //sphereMaterial.SetReflection(0.9);
+  sphereMaterial.SetRayBlending(RayBlendMode::Additive);
   AddChild(std::make_shared<TraceableModel>(
       dg::Mesh::Sphere,
-      //std::make_shared<TraceableCheckerboardMaterial>(floorMaterial),
       std::make_shared<TraceableStandardMaterial>(sphereMaterial),
       Transform::TS(glm::vec3(-1, 1.5, -2), glm::vec3(2.5))));
 

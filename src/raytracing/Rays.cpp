@@ -6,7 +6,9 @@
 #include <MathUtils.h>
 #include <Mesh.h>
 #include <raytracing/Rays.h>
+#include <raytracing/TraceableModel.h>
 #include <glm/gtc/matrix_access.hpp>
+#include <glm/gtx/vector_angle.hpp>
 #include <limits>
 
 dg::Ray dg::Ray::TransformedBy(glm::mat4 xf) const {
@@ -39,6 +41,7 @@ dg::Ray dg::Ray::TransformedBy(glm::mat4 xf) const {
       direction_pos_MS_h.z);
 
   Ray ret = *this;
+  ret.refractiveIndex = refractiveIndex;
   ret.scaleFromParent = glm::length(direction_MS);
   ret.origin = origin_MS;
   ret.direction = glm::normalize(direction_MS);
@@ -153,6 +156,11 @@ dg::RayResult dg::Ray::IntersectSphere(float radius) const {
   res.interpolatedVertex.texCoord =
       glm::vec2((glm::degrees(normalEuler.y) + 180.f) / 360.f,
                 (glm::degrees(normalEuler.x) / 180.f) + 0.5f);
+
+  if (originLen < radius) {
+    res.leavingSurface = true;
+  }
+
   return res;
 }
 
@@ -201,6 +209,8 @@ dg::RayResult dg::RayResult::TransformedBy(glm::mat4 xf,
   ret.interpolatedVertex = interpolatedVertex;
   ret.model = model;
   ret.hit = hit;
+  ret.leavingSurface = leavingSurface;
+  ret.lightDirectIllumination = lightDirectIllumination;
   ret.ray = newRay;
   ret.normal =
       glm::normalize(glm::mat3x3(glm::transpose(glm::inverse(xf))) * normal);
@@ -212,15 +222,48 @@ glm::vec3 dg::RayResult::GetIntersectionPoint() const {
   return ray.origin + (ray.direction * distance);
 }
 
-dg::Ray dg::RayResult::GetReflectedRay() const {
+dg::Ray dg::RayResult::GetReflectedRay(bool flipNormal) const {
   Ray ret;
   ret.origin = GetIntersectionPoint();
   ret.direction = glm::reflect(ray.direction, normal);
+
+  if (flipNormal) {
+    ret.direction *= -1.f;
+  }
 
   // Move ray slightly out of originating point to prevent intersection with
   // self.
   ret.origin += ret.direction * 0.0001f;
 
+  return ret;
+}
+
+dg::Ray dg::RayResult::GetRefractedRay() const {
+  glm::vec3 I = glm::normalize(ray.direction);
+  glm::vec3 N = glm::normalize(normal);
+  float nRay = ray.refractiveIndex;
+  float nMat = leavingSurface ? 1.f : model->material->refractiveIndex;
+  float cosi = std::min(std::max(glm::dot(I, N), -1.f), 1.f);
+  float etai = nRay;
+  float etat = nMat;
+  glm::vec3 n = N;
+  if (cosi < 0) {
+    cosi = -cosi;
+  } else {
+    std::swap(etai, etat);
+    n = -N;
+  }
+  float eta = etai / etat;
+  float k = 1.f - eta * eta * (1.f - cosi * cosi);
+  if (k < 0) {
+    return GetReflectedRay();
+  }
+
+  Ray ret;
+  ret.origin = GetIntersectionPoint();
+  ret.direction = eta * I + (eta * cosi - sqrtf(k)) * n;
+  ret.refractiveIndex = nMat;
+  ret.origin += ret.direction * 0.0001f;
   return ret;
 }
 

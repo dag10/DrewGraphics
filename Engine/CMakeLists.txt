@@ -3,7 +3,6 @@ project(Engine)
 
 find_library(OPENVR_FRAMEWORK OpenVR HINTS ../external/openvr/bin/osx64)
 
-find_package(glfw3 REQUIRED)
 find_package(OpenGL REQUIRED)
 
 set(${PROJECT_NAME}_DEFINITIONS
@@ -20,6 +19,8 @@ add_library(${PROJECT_NAME} SHARED ${SOURCES})
 target_include_directories(${PROJECT_NAME} PUBLIC
   include
   ../external/openvr/headers
+  ../external/glm
+  ../external/glfw/include
   ../external)
 
 if (APPLE)

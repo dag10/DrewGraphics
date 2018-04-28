@@ -19,6 +19,7 @@ if (WIN32)
   set(CMAKE_SHARED_LIBRARY_PREFIX "")
 endif ()
 
+add_subdirectory(external/glfw)
 add_subdirectory(Engine)
 add_subdirectory(Experiments)
 add_subdirectory(CaVR)

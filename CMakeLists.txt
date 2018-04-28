@@ -4,20 +4,23 @@ project(DREW_GRAPHICS_PROJECT)
 
 find_library(OPENVR_FRAMEWORK OpenVR HINTS external/openvr/bin/osx64)
 
-find_package(glfw3 REQUIRED)
 find_package(OpenGL REQUIRED)
-
-add_definitions(-DDEFAULT_SCENE="raytrace")
-add_definitions(-DGLM_FORCE_NO_CTOR_INIT)
-add_definitions(-DGLFW_INCLUDE_NONE)
 
 file(GLOB_RECURSE SOURCES "src/*.cpp" "src/*.c")
 
 add_executable(DrewGraphics ${SOURCES})
 
+add_subdirectory(external/glfw)
+
+add_definitions(-DDEFAULT_SCENE="raytrace")
+add_definitions(-DGLM_FORCE_NO_CTOR_INIT)
+add_definitions(-DGLFW_INCLUDE_NONE)
+
 target_include_directories(DrewGraphics PUBLIC
   include
   external/openvr/headers
+  external/glm
+  external/glfw/include
   external)
 
 if (APPLE)

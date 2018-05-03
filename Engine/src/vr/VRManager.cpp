@@ -50,8 +50,13 @@ void dg::VRManager::CreateFramebuffers() {
     uint32_t vrWidth, vrHeight;
     vrSystem->GetRecommendedRenderTargetSize(&vrWidth, &vrHeight);
 
-    leftFramebuffer = FrameBuffer::Create(vrWidth, vrHeight, false, true);
-    rightFramebuffer = FrameBuffer::Create(vrWidth, vrHeight, false, true);
+    FrameBuffer::Options options;
+    options.width = vrWidth;
+    options.height = vrHeight;
+    options.depthReadable = false;
+    options.hasStencil = true;
+    leftFramebuffer = FrameBuffer::Create(options);
+    rightFramebuffer = FrameBuffer::Create(options);
 }
 
 dg::VRManager::~VRManager() {

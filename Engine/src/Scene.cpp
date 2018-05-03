@@ -326,8 +326,13 @@ void dg::Scene::RenderLightShadowMap() {
   }
 
   if (subrenders.light.framebuffer == nullptr) {
-    subrenders.light.framebuffer =
-        FrameBuffer::Create(2048, 2048, true, false, false);
+    FrameBuffer::Options options;
+    options.width = 2048;
+    options.height = 2048;
+    options.depthReadable = true;
+    options.hasColor = false;
+    options.hasStencil = false;
+    subrenders.light.framebuffer = FrameBuffer::Create(options);
   }
 
   auto *spotlight = static_cast<SpotLight *>(currentRender.shadowCastingLight);

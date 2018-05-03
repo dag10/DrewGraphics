@@ -15,6 +15,10 @@
 
 namespace dg {
 
+#pragma region FrameBuffer Options
+
+#pragma endregion
+
   class OpenGLFrameBuffer;
   class DirectXFrameBuffer;
 #if defined(_OPENGL)
@@ -58,27 +62,34 @@ namespace dg {
 
    public:
 
-    static std::shared_ptr<FrameBuffer> Create(
-        unsigned int width, unsigned int height, bool depthReadable = false,
-        bool allowStencil = false, bool createColorTexture = true);
+    struct Options {
+      unsigned int width;
+      unsigned int height;
+      bool depthReadable = true;
+      bool hasColor = true;
+      bool hasStencil = true;
+      bool mipmap = false;
+    };
+
+    static std::shared_ptr<FrameBuffer> Create(Options options);
 
     BaseFrameBuffer(BaseFrameBuffer& other) = delete;
     virtual ~BaseFrameBuffer() {}
     BaseFrameBuffer& operator=(BaseFrameBuffer& other) = delete;
 
+    const Options &GetOptions() const;
     unsigned int GetWidth() const;
     unsigned int GetHeight() const;
-	float GetAspectRatio() const;
+    float GetAspectRatio() const;
 
     std::shared_ptr<Texture> GetColorTexture() const;
     std::shared_ptr<Texture> GetDepthTexture() const;
 
    protected:
 
-    BaseFrameBuffer() {}
+    BaseFrameBuffer(Options options);
 
-    unsigned int width = 0;
-    unsigned int height = 0;
+    const Options options;
 
     std::shared_ptr<Texture> colorTexture = nullptr;
     std::shared_ptr<Texture> depthTexture = nullptr;
@@ -98,16 +109,14 @@ namespace dg {
 
    private:
 
-    OpenGLFrameBuffer(unsigned int width, unsigned int height,
-                      bool depthReadable, bool allowStencil,
-                      bool createColorTexture);
+    OpenGLFrameBuffer(Options options);
 
 
     void AttachColorTexture(std::shared_ptr<Texture> texture);
     void AttachDepthTexture(std::shared_ptr<Texture> texture,
-                            bool allowStencil);
+                            bool hasStencil);
     void AttachDepthRenderBuffer(std::shared_ptr<RenderBuffer> buffer,
-                                 bool allowStencil);
+                                 bool hasStencil);
 
     GLuint bufferHandle = 0;
     std::shared_ptr<RenderBuffer> depthRenderBuffer = nullptr;
@@ -123,9 +132,7 @@ namespace dg {
 
     virtual ~DirectXFrameBuffer();
 
-    DirectXFrameBuffer(unsigned int width, unsigned int height,
-                       bool depthReadable, bool allowStencil,
-                       bool createColorTexture);
+    DirectXFrameBuffer(Options options);
 
     ID3D11RenderTargetView *GetRenderTargetView();
     ID3D11DepthStencilView *GetDepthStencilView();

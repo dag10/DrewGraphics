@@ -50,23 +50,26 @@ unsigned int dg::RenderBuffer::GetHeight() const {
 
 #pragma region BaseFrameBuffer
 
-std::shared_ptr<dg::FrameBuffer> dg::BaseFrameBuffer::Create(
-    unsigned int width, unsigned int height, bool depthReadable,
-    bool allowStencil, bool createColorTexture) {
-  return std::shared_ptr<FrameBuffer>(new FrameBuffer(
-      width, height, depthReadable, allowStencil, createColorTexture));
+std::shared_ptr<dg::FrameBuffer> dg::BaseFrameBuffer::Create(Options options) {
+  return std::shared_ptr<FrameBuffer>(new FrameBuffer(options));
+}
+
+dg::BaseFrameBuffer::BaseFrameBuffer(Options options) : options(options) {}
+
+const dg::FrameBuffer::Options &dg::BaseFrameBuffer::GetOptions() const {
+  return options;
 }
 
 unsigned int dg::BaseFrameBuffer::GetWidth() const {
-  return width;
+  return options.width;
 }
 
 unsigned int dg::BaseFrameBuffer::GetHeight() const {
-  return height;
+  return options.height;
 }
 
 float dg::BaseFrameBuffer::GetAspectRatio() const {
-  return (float)width / (float)height;
+  return (float)GetWidth() / (float)GetHeight();
 }
 
 std::shared_ptr<dg::Texture> dg::BaseFrameBuffer::GetColorTexture() const {
@@ -82,38 +85,38 @@ std::shared_ptr<dg::Texture> dg::BaseFrameBuffer::GetDepthTexture() const {
 #if defined(_OPENGL)
 #pragma region OpenGL FrameBuffer
 
-dg::OpenGLFrameBuffer::OpenGLFrameBuffer(unsigned int width,
-                                         unsigned int height,
-                                         bool depthReadable, bool allowStencil,
-                                         bool createColorTexture) {
-  this->width = width;
-  this->height = height;
-
+dg::OpenGLFrameBuffer::OpenGLFrameBuffer(Options options)
+    : BaseFrameBuffer(options) {
   glGenFramebuffers(1, &bufferHandle);
 
-  if (createColorTexture) {
+  if (options.hasColor) {
     TextureOptions texOpts;
-    texOpts.width = width;
-    texOpts.height = height;
+    texOpts.width = options.width;
+    texOpts.height = options.height;
     texOpts.wrap = TextureWrap::CLAMP_EDGE;
     AttachColorTexture(Texture::Generate(texOpts));
   }
 
-  if (depthReadable) {
-    if (allowStencil) {
-      AttachDepthTexture(Texture::DepthTexture(width, height, true, true),
-                         true);
+  if (options.depthReadable) {
+    if (options.hasStencil) {
+      AttachDepthTexture(
+          Texture::DepthTexture(options.width, options.height, true, true),
+          true);
     } else {
-      AttachDepthTexture(Texture::DepthTexture(width, height, false, true),
-                         false);
+      AttachDepthTexture(
+          Texture::DepthTexture(options.width, options.height, false, true),
+          false);
     }
   } else {
-    if (allowStencil) {
+    if (options.hasStencil) {
       AttachDepthRenderBuffer(
-          RenderBuffer::Create(width, height, GL_DEPTH_STENCIL), true);
+          RenderBuffer::Create(options.width, options.height, GL_DEPTH_STENCIL),
+          true);
     } else {
       AttachDepthRenderBuffer(
-          RenderBuffer::Create(width, height, GL_DEPTH_COMPONENT), false);
+          RenderBuffer::Create(options.width, options.height,
+                               GL_DEPTH_COMPONENT),
+          false);
     }
   }
 
@@ -140,10 +143,10 @@ void dg::OpenGLFrameBuffer::AttachColorTexture(std::shared_ptr<Texture> texture)
 }
 
 void dg::OpenGLFrameBuffer::AttachDepthTexture(
-  std::shared_ptr<Texture> texture, bool allowStencil) {
+  std::shared_ptr<Texture> texture, bool hasStencil) {
   depthTexture = texture;
   glBindFramebuffer(GL_FRAMEBUFFER, bufferHandle);
-  GLenum format = allowStencil \
+  GLenum format = hasStencil \
     ? GL_DEPTH_STENCIL_ATTACHMENT
     : GL_DEPTH_ATTACHMENT;
   glFramebufferTexture2D(
@@ -154,10 +157,10 @@ void dg::OpenGLFrameBuffer::AttachDepthTexture(
 }
 
 void dg::OpenGLFrameBuffer::AttachDepthRenderBuffer(
-  std::shared_ptr<RenderBuffer> buffer, bool allowStencil) {
+  std::shared_ptr<RenderBuffer> buffer, bool hasStencil) {
   depthRenderBuffer = buffer;
   glBindFramebuffer(GL_FRAMEBUFFER, bufferHandle);
-  GLenum format = allowStencil \
+  GLenum format = hasStencil \
     ? GL_DEPTH_STENCIL_ATTACHMENT
     : GL_DEPTH_ATTACHMENT;
   glFramebufferRenderbuffer(
@@ -175,21 +178,16 @@ GLuint dg::OpenGLFrameBuffer::GetHandle() const {
 #elif defined(_DIRECTX)
 #pragma region DirectX FrameBuffer
 
-dg::DirectXFrameBuffer::DirectXFrameBuffer(unsigned int width,
-                                           unsigned int height,
-                                           bool depthReadable,
-                                           bool allowStencil,
-                                           bool createColorTexture) {
-  this->width = width;
-  this->height = height;
-
+dg::DirectXFrameBuffer::DirectXFrameBuffer(Options options)
+    : BaseFrameBuffer(options) {
   depthTexture =
-      Texture::DepthTexture(width, height, allowStencil, depthReadable);
+      Texture::DepthTexture(options.width, options.height, options.hasStencil,
+                            options.depthReadable);
 
-  if (createColorTexture) {
+  if (options.hasColor) {
     TextureOptions texOpts;
-    texOpts.width = width;
-    texOpts.height = height;
+    texOpts.width = options.width;
+    texOpts.height = options.height;
     texOpts.wrap = TextureWrap::CLAMP_EDGE;
     colorTexture = Texture::Generate(texOpts);
 

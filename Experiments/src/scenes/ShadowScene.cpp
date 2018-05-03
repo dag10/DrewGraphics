@@ -102,8 +102,12 @@ void dg::ShadowScene::Initialize() {
 
   // Create custom shadow framebuffer with color map (for special screen
   // quad output).
-  subrenders.light.framebuffer =
-      FrameBuffer::Create(2048, 2048, true, false, true);
+  FrameBuffer::Options options;
+  options.width = 2048;
+  options.height = 2048;
+  options.depthReadable = true;
+  options.hasStencil = false;
+  subrenders.light.framebuffer = FrameBuffer::Create(options);
 }
 
 void dg::ShadowScene::Update() {

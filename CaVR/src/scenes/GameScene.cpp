@@ -121,8 +121,12 @@ void cavr::GameScene::Initialize() {
   const int fbRes = 128;
   shipIntersectionSubrender.type = Subrender::Type::MonoscopicFramebuffer;
   shipIntersectionSubrender.renderSkybox = false;
-  shipIntersectionSubrender.framebuffer =
-      dg::FrameBuffer::Create(fbRes, fbRes, false, false, true);
+  dg::FrameBuffer::Options options;
+  options.width = fbRes;
+  options.height = fbRes;
+  options.depthReadable = false;
+  options.hasStencil = false;
+  shipIntersectionSubrender.framebuffer = dg::FrameBuffer::Create(options);
   shipIntersectionSubrender.camera = std::make_shared<dg::Camera>();
   shipIntersectionSubrender.camera->projection =
       dg::Camera::Projection::Orthographic;

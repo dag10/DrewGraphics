@@ -355,23 +355,62 @@ xcopy /d /y /e "$(ProjectDir)assets" "$(OutDir)assets"</Command>
     <ClCompile Include="src\behaviors\CaveBehavior.cpp" />
     <ClCompile Include="src\CavrEngine.cpp" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\materials\IntersectionDownscaleMaterial.cpp" />
     <ClCompile Include="src\materials\SphereIntersectionMaterial.cpp" />
     <ClCompile Include="src\scenes\CaveTestScene.cpp" />
     <ClCompile Include="src\Cave.cpp" />
     <ClCompile Include="src\scenes\GameScene.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="assets\shaders\IntersectionDownscale\IntersectionDownscaleShared.hlsli" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\cavr\behaviors\CaveBehavior.h" />
     <ClInclude Include="include\cavr\CavrEngine.h" />
+    <ClInclude Include="include\cavr\materials\IntersectionDownscaleMaterial.h" />
     <ClInclude Include="include\cavr\materials\SphereIntersectionMaterial.h" />
     <ClInclude Include="include\cavr\scenes\CaveTestScene.h" />
     <ClInclude Include="include\cavr\Cave.h" />
     <ClInclude Include="include\cavr\scenes\GameScene.h" />
   </ItemGroup>
   <ItemGroup>
+    <FxCompile Include="assets\shaders\IntersectionDownscale\IntersectionDownscalePixelShader.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release_DX|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release_GL|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release_DX|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release_GL|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug_GL|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug_DX|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug_DX|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug_GL|x64'">Pixel</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release_DX|Win32'">5.0</ShaderModel>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug_DX|Win32'">5.0</ShaderModel>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release_GL|Win32'">5.0</ShaderModel>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug_GL|Win32'">5.0</ShaderModel>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release_DX|x64'">5.0</ShaderModel>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug_DX|x64'">5.0</ShaderModel>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release_GL|x64'">5.0</ShaderModel>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug_GL|x64'">5.0</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="assets\shaders\IntersectionDownscale\IntersectionDownscaleVertexShader.hlsl">
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release_DX|Win32'">5.0</ShaderModel>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug_DX|Win32'">5.0</ShaderModel>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release_GL|Win32'">5.0</ShaderModel>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug_GL|Win32'">5.0</ShaderModel>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release_DX|x64'">5.0</ShaderModel>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug_DX|x64'">5.0</ShaderModel>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release_GL|x64'">5.0</ShaderModel>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug_GL|x64'">5.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release_DX|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug_DX|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release_GL|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug_GL|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release_DX|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug_DX|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release_GL|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug_GL|x64'">Vertex</ShaderType>
+    </FxCompile>
     <FxCompile Include="assets\shaders\SphereIntersection\SphereIntersectionPixelShader.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release_DX|Win32'">Pixel</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release_DX|Win32'">5.0</ShaderModel>
@@ -390,7 +429,7 @@ xcopy /d /y /e "$(ProjectDir)assets" "$(OutDir)assets"</Command>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug_GL|x64'">Pixel</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug_GL|x64'">5.0</ShaderModel>
     </FxCompile>
-    <FxCompile Include="assets\shaders\SphereIntersection\SphereIntersectionShared.hlsl">
+    <FxCompile Include="assets\shaders\SphereIntersection\SphereIntersectionShared.hlsli">
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release_DX|Win32'">5.0</ShaderModel>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug_DX|Win32'">5.0</ShaderModel>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release_GL|Win32'">5.0</ShaderModel>

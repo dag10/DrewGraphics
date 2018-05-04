@@ -49,12 +49,19 @@ namespace cavr {
       GameScene();
 
       virtual void RenderFramebuffers();
+      virtual void DrawCustomSubrender(const Subrender &subrender);
+      virtual void PostProcess();
+      virtual void ResourceReadback();
 
       Subrender shipIntersectionSubrender;
-      std::shared_ptr<SceneObject> leftController;
-      std::shared_ptr<SceneObject> rightController;
+      Subrender shipIntersectionDownscaleSubrender;
+      std::shared_ptr<dg::Texture> intersectionReadStagingTexture;
+      std::shared_ptr<dg::Model> intersectionDownscaleModel;
+      std::shared_ptr<dg::SceneObject> leftController;
+      std::shared_ptr<dg::SceneObject> rightController;
 
-      std::shared_ptr<SceneObject> shipAttachment;
+      std::shared_ptr<dg::SceneObject> shipAttachment;
+      std::shared_ptr<dg::Model> lightSphere;
       std::shared_ptr<dg::PointLight> controllerLight;
       std::shared_ptr<dg::DirectionalLight> skyLight;
       std::shared_ptr<dg::Model> floor;

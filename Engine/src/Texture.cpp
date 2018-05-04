@@ -108,10 +108,12 @@ void dg::OpenGLTexture::UpdateData(const void *pixels, bool genMipMap) {
       options.GetOpenGLType(),
       pixels);
   if (options.mipmap && genMipMap) {
-    glGenerateMipmap(GL_TEXTURE_2D);
+    GenerateMips();
   }
   glBindTexture(GL_TEXTURE_2D, 0);
 }
+
+void dg::OpenGLTexture::GenerateMips() { glGenerateMipmap(GL_TEXTURE_2D); }
 
 void dg::OpenGLTexture::GenerateImage(void *pixels) {
   assert(textureHandle == 0);
@@ -175,8 +177,12 @@ void dg::DirectXTexture::UpdateData(const void *pixels, bool genMipMap) {
   Graphics::Instance->context->UpdateSubresource(texture, 0, NULL, pixels,
                                                  (unsigned int)rowPitch, 0);
   if (options.mipmap && genMipMap) {
-    Graphics::Instance->context->GenerateMips(srv);
+    GenerateMips();
   }
+}
+
+void dg::DirectXTexture::GenerateMips() {
+  Graphics::Instance->context->GenerateMips(srv);
 }
 
 ID3D11ShaderResourceView *dg::DirectXTexture::GetShaderResourceView() const {
@@ -194,6 +200,11 @@ ID3D11Texture2D *dg::DirectXTexture::GetTexture() const {
 void dg::DirectXTexture::GenerateImage(void *pixels) {
   assert(texture == nullptr);
 
+  if (options.cpuReadable && options.shaderReadable) {
+    throw EngineError(
+        "Cannot create a texture that is CPU readable and shader readable.");
+  }
+
   auto internalFormat = options.GetDirectXInternalFormat();
 
   D3D11_TEXTURE2D_DESC desc = {};
@@ -203,8 +214,13 @@ void dg::DirectXTexture::GenerateImage(void *pixels) {
   desc.ArraySize = 1;
   desc.Format = internalFormat;
   desc.SampleDesc.Count = 1;
-  desc.Usage = D3D11_USAGE_DEFAULT;
-  desc.BindFlags = options.GetDirectXBind();
+  if (options.cpuReadable) {
+    desc.Usage = D3D11_USAGE_STAGING;
+    desc.CPUAccessFlags |= D3D11_CPU_ACCESS_READ;
+  } else {
+    desc.Usage = D3D11_USAGE_DEFAULT;
+    desc.BindFlags = options.GetDirectXBind();
+  }
   if (options.shaderReadable) {
     desc.BindFlags |= D3D11_BIND_SHADER_RESOURCE;
   }

@@ -49,6 +49,7 @@ namespace dg {
     TexturePixelType type = TexturePixelType::BYTE;
     bool mipmap = false;
     bool shaderReadable = true;
+    bool cpuReadable = false;
     unsigned int width;
     unsigned int height;
 
@@ -97,6 +98,7 @@ namespace dg {
       BaseTexture& operator=(BaseTexture& other) = delete;
 
       virtual void UpdateData(const void *pixels, bool genMipMap = true) = 0;
+      virtual void GenerateMips() = 0;
 
       const TextureOptions GetOptions() const;
       unsigned int GetWidth() const;
@@ -122,6 +124,7 @@ namespace dg {
       virtual ~OpenGLTexture();
 
       virtual void UpdateData(const void *pixels, bool genMipMap = true);
+      virtual void GenerateMips();
 
       GLuint GetHandle() const;
 
@@ -145,6 +148,7 @@ namespace dg {
       virtual ~DirectXTexture();
 
       virtual void UpdateData(const void *pixels, bool genMipMap = true);
+      virtual void GenerateMips();
 
       ID3D11ShaderResourceView *GetShaderResourceView() const;
       ID3D11SamplerState *GetSamplerState() const;

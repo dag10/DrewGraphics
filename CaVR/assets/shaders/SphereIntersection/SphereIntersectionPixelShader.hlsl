@@ -1,4 +1,4 @@
-#include "SphereIntersectionShared.hlsl"
+#include "SphereIntersectionShared.hlsli"
 
 // Clips fragments to be within a the unit sphere of an orthographic projection.
 float4 main(VertexToPixel input) : SV_TARGET{

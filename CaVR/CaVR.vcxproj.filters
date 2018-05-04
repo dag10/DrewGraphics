@@ -37,6 +37,9 @@
     <Filter Include="Source Files\materials">
       <UniqueIdentifier>{8b110758-d7c3-4161-89c4-f5aedeccb1a5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Shaders\IntersectionDownscale">
+      <UniqueIdentifier>{30ecb946-2749-4ac4-806b-1a4f9603324e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\scenes\CaveTestScene.cpp">
@@ -60,9 +63,15 @@
     <ClCompile Include="src\materials\SphereIntersectionMaterial.cpp">
       <Filter>Source Files\materials</Filter>
     </ClCompile>
+    <ClCompile Include="src\materials\IntersectionDownscaleMaterial.cpp">
+      <Filter>Source Files\materials</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <None Include="assets\shaders\IntersectionDownscale\IntersectionDownscaleShared.hlsli">
+      <Filter>Shaders\IntersectionDownscale</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\cavr\scenes\CaveTestScene.h">
@@ -83,6 +92,9 @@
     <ClInclude Include="include\cavr\materials\SphereIntersectionMaterial.h">
       <Filter>Header Files\materials</Filter>
     </ClInclude>
+    <ClInclude Include="include\cavr\materials\IntersectionDownscaleMaterial.h">
+      <Filter>Header Files\materials</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="assets\shaders\SphereIntersection\SphereIntersectionPixelShader.hlsl">
@@ -91,8 +103,14 @@
     <FxCompile Include="assets\shaders\SphereIntersection\SphereIntersectionVertexShader.hlsl">
       <Filter>Shaders\SphereIntersection</Filter>
     </FxCompile>
-    <FxCompile Include="assets\shaders\SphereIntersection\SphereIntersectionShared.hlsl">
+    <FxCompile Include="assets\shaders\SphereIntersection\SphereIntersectionShared.hlsli">
       <Filter>Shaders\SphereIntersection</Filter>
+    </FxCompile>
+    <FxCompile Include="assets\shaders\IntersectionDownscale\IntersectionDownscaleVertexShader.hlsl">
+      <Filter>Shaders\IntersectionDownscale</Filter>
+    </FxCompile>
+    <FxCompile Include="assets\shaders\IntersectionDownscale\IntersectionDownscalePixelShader.hlsl">
+      <Filter>Shaders\IntersectionDownscale</Filter>
     </FxCompile>
   </ItemGroup>
 </Project>

@@ -17,18 +17,18 @@ std::shared_ptr<dg::FrameBuffer> dg::BaseFrameBuffer::Create(Options options) {
 
 dg::BaseFrameBuffer::BaseFrameBuffer(Options options) : options(options) {
   // Create depth (and possibly stencil) texture.
-  TextureOptions texOpts;
-  texOpts.width = options.width;
-  texOpts.height = options.height;
-  texOpts.format = options.hasStencil ? TexturePixelFormat::DEPTH_STENCIL
+  TextureOptions depthTexOpts;
+  depthTexOpts.width = options.width;
+  depthTexOpts.height = options.height;
+  depthTexOpts.format = options.hasStencil ? TexturePixelFormat::DEPTH_STENCIL
                                       : TexturePixelFormat::DEPTH;
-  texOpts.type =
+  depthTexOpts.type =
       options.hasStencil ? TexturePixelType::INT : TexturePixelType::FLOAT;
-  texOpts.wrap = TextureWrap::CLAMP_EDGE;
-  texOpts.mipmap = false;
-  texOpts.shaderReadable = options.depthReadable;
-  texOpts.mipmap = options.mipmap;
-  depthTexture = Texture::Generate(texOpts);
+  depthTexOpts.wrap = TextureWrap::CLAMP_EDGE;
+  depthTexOpts.mipmap = false;
+  depthTexOpts.shaderReadable = options.depthReadable;
+  depthTexOpts.interpolation = options.interpolation;
+  depthTexture = Texture::Generate(depthTexOpts);
 
   // Create main texture.
   if (options.hasColor) {

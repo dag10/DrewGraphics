@@ -115,6 +115,7 @@ float4 main(VertexToPixel input) : SV_TARGET {
   float2 texCoord = input.texCoord.xy * uvScale;
 
   float4 diffuseColor =
+      //useDiffuseMap ? diffuseTexture.SampleLevel(diffuseTextureSampler, texCoord, 3.402823466e+38f)
       useDiffuseMap ? diffuseTexture.Sample(diffuseTextureSampler, texCoord)
                     : diffuse;
 

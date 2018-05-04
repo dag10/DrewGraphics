@@ -154,10 +154,14 @@ void dg::Scene::SetupSubrender(Subrender &subrender) {
   // Set up render target.
   if (subrender.framebuffer == nullptr) {
     Graphics::Instance->SetRenderTarget(*window);
-    subrender.camera->aspectRatio = window->GetAspectRatio();
+    if (subrender.camera != nullptr) {
+      subrender.camera->aspectRatio = window->GetAspectRatio();
+    }
   } else {
     Graphics::Instance->SetRenderTarget(*subrender.framebuffer);
-    subrender.camera->aspectRatio = subrender.framebuffer->GetAspectRatio();
+    if (subrender.camera != nullptr) {
+      subrender.camera->aspectRatio = subrender.framebuffer->GetAspectRatio();
+    }
   }
 
   // Always use the main subrender's rasterizer state as the base rasterizer
@@ -215,9 +219,10 @@ void dg::Scene::RenderFrame() {
   }
   subrenders.main.camera = cameras.main;
   PerformSubrender(subrenders.main);
-  RenderOverlays();
+  PostProcess();
   TeardownRender();
   PostRender();
+  ResourceReadback();
 }
 
 void dg::Scene::PerformSubrender(Subrender &subrender) {
@@ -228,7 +233,11 @@ void dg::Scene::PerformSubrender(Subrender &subrender) {
 
   SetupSubrender(subrender);
   PreSubrender(subrender);
-  DrawScene();
+  if (subrender.drawScene) {
+    DrawScene();
+  } else {
+    DrawCustomSubrender(subrender);
+  }
   PostSubrender(subrender);
   TeardownSubrender();
 }

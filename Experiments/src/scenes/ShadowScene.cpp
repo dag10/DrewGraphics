@@ -119,7 +119,7 @@ void dg::ShadowScene::Update() {
       spotlight->transform;
 }
 
-void dg::ShadowScene::RenderOverlays() {
+void dg::ShadowScene::PostProcess() {
   // Draw depth map over scene.
   quadMaterial->SetTexture(subrenders.light.framebuffer->GetDepthTexture());
   glm::vec2 scale = glm::vec2(1) / glm::vec2(window->GetAspectRatio(), 1);

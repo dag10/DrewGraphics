@@ -1,5 +1,5 @@
 #include "../../../../Engine/assets/shaders/includes/VertexShaderInput.hlsl"
-#include "SphereIntersectionShared.hlsl"
+#include "SphereIntersectionShared.hlsli"
 
 cbuffer Camera : register(b0) {
   matrix _Matrix_M;

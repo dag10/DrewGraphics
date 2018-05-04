@@ -49,6 +49,9 @@ namespace dg {
   // frame. Within RenderFrame(), this is the high-level flow, represented
   // as pseudo code.
   //
+  // ResourceReadback() is an optional hooked called after every the entire
+  // render is finished. Any reads from GPU resources should be performed here.
+  //
   // ------------ Pseudocode ----------------- | ----------- Notes ------------
   //                                           | (No notes == shouldn't extend)
   // RenderFrame() {                           |
@@ -99,10 +102,11 @@ namespace dg {
   //   PostSubrender()                         | Virtual, empty by default.
   //   TeardownSubrender()                     |
   //                                           |
-  //   RenderOverlays()                        | Virtual, empty by default.
+  //   PostProcess()                           | Virtual, empty by default.
   //                                           |
   //   TeardownRender()                        |
   //   PostRender()                            | Virtual, empty by default.
+  //   ResourceReadback()                      | Virtual, empty by default.
   // }
   //
   class Scene : public SceneObject {
@@ -230,6 +234,7 @@ namespace dg {
         vr::EVREye eye;
         LayerMask layerMask = LayerMask::ALL();
         bool renderSkybox = true;
+        bool drawScene = true;
       }; // struct Subrender
 
       // Hook called before any rendering work begins. This is a child scene's
@@ -239,6 +244,9 @@ namespace dg {
       // Hook called after the buffer is cleared and just before the scene is
       // drawn for a subrender.
       virtual void PreSubrender(const Subrender &subrender) {};
+
+      // Hook called instead of DrawScene() if subrender.drawScene is false.
+      virtual void DrawCustomSubrender(const Subrender &subrender) {};
 
       // Hook called just after the scene is drawn for a subrender.
       // This is the last hook called before stereoscopic renders are submitted
@@ -257,7 +265,11 @@ namespace dg {
       // Called after the main scene has been rendered to the window, but before
       // this frame's render is unable to create any more subrenders. Render
       // post-processing effects and screen-space overlays here.
-      virtual void RenderOverlays() {};
+      virtual void PostProcess() {};
+
+      // Hooked called after every the entire render is finished. Any reads from
+      // GPU resources should be performed here.
+      virtual void ResourceReadback() {};
 
       // Clears the backbuffer, called once per subrender.
       // Override this to change background color.

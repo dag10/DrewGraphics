@@ -88,10 +88,6 @@ namespace dg {
 
       static std::shared_ptr<Texture> FromPath(const std::string& path);
       static std::shared_ptr<Texture> Generate(TextureOptions options);
-      static std::shared_ptr<Texture> DepthTexture(unsigned int width,
-                                                   unsigned int height,
-                                                   bool allowStencil,
-                                                   bool shaderReabable);
 
       BaseTexture() = delete;
 

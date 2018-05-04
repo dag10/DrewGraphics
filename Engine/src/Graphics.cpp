@@ -344,12 +344,20 @@ void dg::DirectXGraphics::InitializeGraphics() {
   device->CreateRenderTargetView(backBufferTexture, 0, &windowRenderTargetView);
   backBufferTexture->Release();
 
-  auto depthTexture = Texture::DepthTexture(
-      (unsigned int)contentSize.x, (unsigned int)contentSize.y, true, false);
+  TextureOptions depthTexOpts;
+  depthTexOpts.width = (unsigned int)contentSize.x;
+  depthTexOpts.height = (unsigned int)contentSize.y;
+  depthTexOpts.format = TexturePixelFormat::DEPTH_STENCIL;
+  depthTexOpts.type = TexturePixelType::INT;
+  depthTexOpts.wrap = TextureWrap::CLAMP_EDGE;
+  depthTexOpts.mipmap = false;
+  depthTexOpts.shaderReadable = false;
+  auto depthTexture = Texture::Generate(depthTexOpts);
+
   D3D11_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc = {};
   depthStencilViewDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
   depthStencilViewDesc.Format =
-      depthTexture->GetOptions().GetDirectXDepthStencilFormat();
+      depthTexOpts.GetDirectXDepthStencilFormat();
   device->CreateDepthStencilView(depthTexture->GetTexture(),
                                  &depthStencilViewDesc,
                                  &windowDepthStencilView);
@@ -396,12 +404,19 @@ void dg::DirectXGraphics::OnWindowResize(const Window& window) {
   device->CreateRenderTargetView(backBufferTexture, 0, &windowRenderTargetView);
   backBufferTexture->Release();
 
-  auto depthTexture = Texture::DepthTexture(
-      (unsigned int)contentSize.x, (unsigned int)contentSize.y, true, false);
+  TextureOptions depthTexOpts;
+  depthTexOpts.width = (unsigned int)contentSize.x;
+  depthTexOpts.height = (unsigned int)contentSize.y;
+  depthTexOpts.format = TexturePixelFormat::DEPTH_STENCIL;
+  depthTexOpts.type = TexturePixelType::INT;
+  depthTexOpts.wrap = TextureWrap::CLAMP_EDGE;
+  depthTexOpts.mipmap = false;
+  depthTexOpts.shaderReadable = false;
+  auto depthTexture = Texture::Generate(depthTexOpts);
+
   D3D11_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc = {};
   depthStencilViewDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
-  depthStencilViewDesc.Format =
-      depthTexture->GetOptions().GetDirectXDepthStencilFormat();
+  depthStencilViewDesc.Format = depthTexOpts.GetDirectXDepthStencilFormat();
   device->CreateDepthStencilView(depthTexture->GetTexture(),
                                  &depthStencilViewDesc,
                                  &windowDepthStencilView);

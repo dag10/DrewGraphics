@@ -27,36 +27,6 @@ namespace dg {
   using FrameBuffer = DirectXFrameBuffer;
 #endif
 
-#if defined(_OPENGL)
-  // Copy is disabled to prevent resource leaks.
-  class RenderBuffer {
-
-   public:
-
-    static std::shared_ptr<RenderBuffer> Create(unsigned int width,
-                                                unsigned int height,
-                                                GLenum format);
-
-    RenderBuffer(RenderBuffer& other) = delete;
-    ~RenderBuffer();
-    RenderBuffer& operator=(RenderBuffer& other) = delete;
-
-    GLuint GetHandle() const;
-
-    unsigned int GetWidth() const;
-    unsigned int GetHeight() const;
-
-   private:
-
-    RenderBuffer(unsigned int width, unsigned int height, GLenum format);
-
-    GLuint bufferHandle = 0;
-    unsigned int width;
-    unsigned int height;
-
-  };  // class RenderBuffer
-#endif
-
   // Copy is disabled to prevent resource leaks.
   class BaseFrameBuffer {
 
@@ -69,6 +39,7 @@ namespace dg {
       bool hasColor = true;
       bool hasStencil = true;
       bool mipmap = false;
+      TextureInterpolation interpolation = TextureInterpolation::LINEAR;
     };
 
     static std::shared_ptr<FrameBuffer> Create(Options options);
@@ -111,15 +82,7 @@ namespace dg {
 
     OpenGLFrameBuffer(Options options);
 
-
-    void AttachColorTexture(std::shared_ptr<Texture> texture);
-    void AttachDepthTexture(std::shared_ptr<Texture> texture,
-                            bool hasStencil);
-    void AttachDepthRenderBuffer(std::shared_ptr<RenderBuffer> buffer,
-                                 bool hasStencil);
-
     GLuint bufferHandle = 0;
-    std::shared_ptr<RenderBuffer> depthRenderBuffer = nullptr;
 
   }; // class OpenGLFrameBuffer
 

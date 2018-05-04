@@ -46,22 +46,6 @@ std::shared_ptr<dg::Texture> dg::BaseTexture::Generate(TextureOptions options) {
   return texture;
 }
 
-std::shared_ptr<dg::Texture> dg::BaseTexture::DepthTexture(
-    unsigned int width, unsigned int height, bool allowStencil,
-    bool shaderReadable) {
-  TextureOptions texOpts;
-  texOpts.width = width;
-  texOpts.height = height;
-  texOpts.format = allowStencil ? TexturePixelFormat::DEPTH_STENCIL
-                                : TexturePixelFormat::DEPTH;
-  texOpts.type = allowStencil ? TexturePixelType::INT : TexturePixelType::FLOAT;
-  texOpts.wrap = TextureWrap::CLAMP_EDGE;
-  texOpts.mipmap = false;
-  texOpts.shaderReadable = shaderReadable;
-
-  return Generate(texOpts);
-}
-
 dg::BaseTexture::BaseTexture(TextureOptions options) : options(options) {
   if (options.format == TexturePixelFormat::DEPTH ||
       options.format == TexturePixelFormat::DEPTH_STENCIL) {

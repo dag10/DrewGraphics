@@ -46,12 +46,27 @@ namespace cavr {
 
     private:
 
+      enum class DevModeState {
+        Disabled,
+
+        // Both controller's menu buttons are pressed, waiting on both of
+        // them to be released.
+        AwaitingRelease,
+
+        // Developer-only buttons on controllers are enabled, such as toggling
+        // the cave wireframe, etc.
+        Enabled,
+      };
+
       GameScene();
 
       virtual void RenderFramebuffers();
       virtual void DrawCustomSubrender(const Subrender &subrender);
       virtual void PostProcess();
       virtual void ResourceReadback();
+
+      DevModeState devModeState = DevModeState::Disabled;
+      std::shared_ptr<dg::Model> renderQuad;
 
       Subrender shipIntersectionSubrender;
       Subrender shipIntersectionDownscaleSubrender;

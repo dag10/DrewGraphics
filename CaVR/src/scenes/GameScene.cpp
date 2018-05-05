@@ -114,6 +114,7 @@ void cavr::GameScene::Initialize() {
   auto lightSphereColor = std::make_shared<dg::StandardMaterial>(
       dg::StandardMaterial::WithTransparentColor(
           glm::vec4(1.f, 1.f, 1.f, 0.1f)));
+  lightSphereColor->SetLit(false);
   lightSphere = std::make_shared<dg::Model>(
       dg::Mesh::Sphere, lightSphereColor, dg::Transform::S(glm::vec3(0.025f)));
   controllerLight->AddChild(lightSphere, false);
@@ -186,7 +187,7 @@ void cavr::GameScene::Initialize() {
       std::make_shared<dg::StandardMaterial>(dg::StandardMaterial::WithTexture(
           shipIntersectionSubrender.framebuffer->GetColorTexture()));
   renderQuadMat->SetLit(false);
-  auto renderQuad = std::make_shared<dg::Model>(
+  renderQuad = std::make_shared<dg::Model>(
       dg::Mesh::Quad, renderQuadMat,
       dg::Transform::TS(glm::vec3(-0.11f, 0, 0), glm::vec3(0.08f)));
   shipAttachment->AddChild(renderQuad, false);
@@ -199,8 +200,8 @@ void cavr::GameScene::Initialize() {
   downscaleQuadMat->SetLit(false);
   auto downscaleQuad = std::make_shared<dg::Model>(
       dg::Mesh::Quad, downscaleQuadMat,
-      dg::Transform::TS(glm::vec3(0.11f, 0, 0), glm::vec3(0.08f)));
-  shipAttachment->AddChild(downscaleQuad, false);
+      dg::Transform::TS(glm::vec3(-1.f, 0.25f, 0), glm::vec3(0.5f)));
+  renderQuad->AddChild(downscaleQuad, false);
 
   // If VR could not enable, position the camera in a useful place for
   // development and make it controllable with keyboard and mouse.
@@ -218,8 +219,14 @@ void cavr::GameScene::Initialize() {
     shipAttachment->transform = dg::Transform::T(glm::vec3(0, 0, -0.1f));
     renderQuad->transform =
         dg::Transform::TS(glm::vec3(-0.05f, 0, 0), glm::vec3(0.04f));
+    renderQuad->material->rasterizerOverride.SetDepthFunc(
+        dg::RasterizerState::DepthFunc::ALWAYS);
+    renderQuad->material->queue = dg::RenderQueue::Overlay;
     downscaleQuad->transform =
-        dg::Transform::TS(glm::vec3(0.05f, 0, 0), glm::vec3(0.04f));
+        dg::Transform::TS(glm::vec3(-0.25f, -1.f, 0), glm::vec3(0.5f));
+    downscaleQuad->material->rasterizerOverride.SetDepthFunc(
+        dg::RasterizerState::DepthFunc::ALWAYS);
+    downscaleQuad->material->queue = dg::RenderQueue::Overlay;
     cameras.main->AddChild(shipAttachment, false);
   }
 
@@ -227,8 +234,6 @@ void cavr::GameScene::Initialize() {
   cave = std::make_shared<dg::SceneObject>();
   auto caveBehavior =
       dg::Behavior::Attach(cave, std::make_shared<CaveBehavior>());
-  caveBehavior->SetShowKnots(!vr.enabled);
-  caveBehavior->SetShowWireframe(!vr.enabled);
   AddChild(cave);
 }
 
@@ -246,42 +251,48 @@ void cavr::GameScene::Update() {
     std::swap(leftTrackedObj->deviceIndex, rightTrackedObj->deviceIndex);
   }
 
-  // Toggle outer material type with M key or left MENU button.
-  if (window->IsKeyJustPressed(dg::Key::M) ||
-      leftState->IsButtonJustPressed(dg::VRControllerState::Button::MENU)) {
-    caveBehavior->SetShowWireframe(!caveBehavior->GetShowWireframe());
-  }
+  // Handle controller inputs.
+  switch (devModeState) {
+    case DevModeState::Disabled: {
+      if (leftState->IsButtonPressed(dg::VRControllerState::Button::MENU) &&
+          rightState->IsButtonPressed(dg::VRControllerState::Button::MENU)) {
+        devModeState = DevModeState::AwaitingRelease;
+      }
+      if (window->IsKeyJustPressed(dg::Key::TAB)) {
+        devModeState = DevModeState::Enabled;
+      }
+      break;
+    }
+    case DevModeState::AwaitingRelease: {
+      if (!leftState->IsButtonPressed(dg::VRControllerState::Button::MENU) &&
+          !rightState->IsButtonPressed(dg::VRControllerState::Button::MENU)) {
+        devModeState = DevModeState::Enabled;
+      }
+      break;
+    }
+    case DevModeState::Enabled: {
+      // Exit dev mode with TAB key or left MENU button.
+      if (window->IsKeyJustPressed(dg::Key::TAB) ||
+          leftState->IsButtonJustPressed(dg::VRControllerState::Button::MENU)) {
+        devModeState = DevModeState::Disabled;
+      }
 
-  // Toggle controller light with SPACE key or right TOUCHPAD button.
-  if (window->IsKeyJustPressed(dg::Key::SPACE) ||
-      rightState->IsButtonJustPressed(
-          dg::VRControllerState::Button::TOUCHPAD)) {
-    controllerLight->enabled = !controllerLight->enabled;
-  }
+      // Toggle wireframe and knot visibility with K key or right MENU button.
+      if (window->IsKeyJustPressed(dg::Key::M) ||
+          rightState->IsButtonJustPressed(
+              dg::VRControllerState::Button::MENU)) {
+        caveBehavior->SetShowKnots(!caveBehavior->GetShowKnots());
+        caveBehavior->SetShowWireframe(!caveBehavior->GetShowWireframe());
+      }
 
-  // Toggle skybox and ground with B key or left GRIP buttons.
-  if (window->IsKeyJustPressed(dg::Key::B) ||
-      leftState->IsButtonJustPressed(dg::VRControllerState::Button::GRIP)) {
-    skybox->enabled = !skybox->enabled;
-    floor->enabled = !floor->enabled;
-  }
-
-  // Toggle sky light with L key or left TOUCHPAD button.
-  if (window->IsKeyJustPressed(dg::Key::L) ||
-      leftState->IsButtonJustPressed(dg::VRControllerState::Button::TOUCHPAD)) {
-    skyLight->enabled = !skyLight->enabled;
-  }
-
-  // Toggle knot visibility with K key or right MENU button.
-  if (window->IsKeyJustPressed(dg::Key::K) ||
-      rightState->IsButtonJustPressed(dg::VRControllerState::Button::MENU)) {
-    caveBehavior->SetShowKnots(!caveBehavior->GetShowKnots());
-  }
-
-  // Add new cave segment with ENTER key or clicking left TRIGGER.
-  if (window->IsKeyJustPressed(dg::Key::ENTER) ||
-      leftState->IsButtonJustPressed(dg::VRControllerState::Button::TRIGGER)) {
-    caveBehavior->AddNextCaveSegment();
+      // Add new cave segment with ENTER key or clicking left TRIGGER.
+      if (window->IsKeyJustPressed(dg::Key::ENTER) ||
+          leftState->IsButtonJustPressed(
+              dg::VRControllerState::Button::TRIGGER)) {
+        caveBehavior->AddNextCaveSegment();
+      }
+      break;
+    }
   }
 
   // If left mouse or X key or right trigger is held down, add to cave velocity.
@@ -312,6 +323,12 @@ void cavr::GameScene::Update() {
     }
     caveBehavior->SetVelocity(velo);
   }
+
+  bool devEnabled = (devModeState == DevModeState::Enabled);
+  skybox->enabled = devEnabled;
+  floor->enabled = devEnabled;
+  skyLight->enabled = devEnabled;
+  renderQuad->enabled = devEnabled;
 }
 
 void cavr::GameScene::RenderFramebuffers() {

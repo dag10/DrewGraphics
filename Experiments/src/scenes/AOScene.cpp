@@ -36,12 +36,28 @@ void dg::AOScene::Initialize() {
   skybox =
       Skybox::Create(Texture::FromPath("assets/textures/skybox_daylight.png"));
 
-  // Create sky light.
-  auto skyLight = std::make_shared<DirectionalLight>(
-      glm::vec3(1.0f, 0.93f, 0.86f), 0.44, 1.17, 0.07f);
-  skyLight->LookAtDirection(glm::normalize(glm::vec3(-0.3f, -1, -0.2f)));
-  Behavior::Attach(skyLight, std::make_shared<KeyboardLightController>(window));
-  AddChild(skyLight);
+  // Create primary sky light.
+  auto primarySkyLight = std::make_shared<DirectionalLight>(
+      glm::vec3(1.0f, 0.93f, 0.86f), 0.4, 0.82, 0.07);
+  primarySkyLight->LookAtDirection(glm::normalize(glm::vec3(-0.3f, -1, -0.2f)));
+  //Behavior::Attach(primarySkyLight,
+                   //std::make_shared<KeyboardLightController>(window));
+  AddChild(primarySkyLight);
+
+  // Create secondary sky light.
+  auto secondarySkyLight = std::make_shared<DirectionalLight>(
+      primarySkyLight->GetDiffuse(), 0, 0.21, 0);
+  secondarySkyLight->LookAtDirection(-primarySkyLight->transform.Forward());
+  //Behavior::Attach(secondarySkyLight,
+                   //std::make_shared<KeyboardLightController>(window));
+  AddChild(secondarySkyLight);
+
+  // Create camera point light.
+  auto cameraLight =
+      std::make_shared<PointLight>(primarySkyLight->GetDiffuse(), 0, 0.17, 0);
+  cameras.main->AddChild(cameraLight, false);
+  Behavior::Attach(cameraLight,
+                   std::make_shared<KeyboardLightController>(window));
 
   // Create model material.
   StandardMaterial cubeMaterial = StandardMaterial::WithColor(glm::vec3(0.5));
@@ -50,8 +66,8 @@ void dg::AOScene::Initialize() {
   // Load model.
   AddChild(std::make_shared<Model>(
       Mesh::LoadOBJ("assets/models/crytek-sponza/sponza.obj"),
-      //std::make_shared<StandardMaterial>(cubeMaterial),
-      std::make_shared<UVMaterial>(),
+      std::make_shared<StandardMaterial>(cubeMaterial),
+      //std::make_shared<UVMaterial>(),
       Transform::S(glm::vec3(0.0025))));
 
   // Create floor material.

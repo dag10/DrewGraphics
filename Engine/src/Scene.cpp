@@ -46,7 +46,6 @@ void dg::Scene::Initialize() {
   // Create the subrender configuration as the basis for all monoscopic
   // framebuffer subrenders. This does not apply to stereoscopic framebuffers
   // or shadowmap framebuffers.
-  subrenders.framebuffer.rasterizerState;
   subrenders.framebuffer.type = Subrender::Type::MonoscopicFramebuffer;
 #if defined(_DIRECTX)
   subrenders.framebuffer.rasterizerState.SetFlipRenderY(true, true);

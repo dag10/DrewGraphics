@@ -267,7 +267,7 @@ namespace dg {
       // post-processing effects and screen-space overlays here.
       virtual void PostProcess() {};
 
-      // Hooked called after every the entire render is finished. Any reads from
+      // Hook called after every the entire render is finished. Any reads from
       // GPU resources should be performed here.
       virtual void ResourceReadback() {};
 

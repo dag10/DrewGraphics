@@ -106,6 +106,7 @@ void cavr::ShipBehavior::GenerateIntersectionMips() {
 }
 
 void cavr::ShipBehavior::ReadIntersectionResults() {
+#if defined(_DIRECTX)
   ID3D11Texture2D *downscaledTexture =
       intersectionDownscaleSubrender.framebuffer->GetColorTexture()
           ->GetTexture();
@@ -128,4 +129,5 @@ void cavr::ShipBehavior::ReadIntersectionResults() {
   BYTE *textureBytes = (BYTE *)shadingTextureData.pData;
   intersectsCave = textureBytes[0] != 0;
   dg::Graphics::Instance->context->Unmap(stagingTexture, 0);
+#endif
 }

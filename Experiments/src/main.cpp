@@ -9,6 +9,7 @@
 #include "dg/Engine.h"
 #include "dg/Exceptions.h"
 #include "dg/Window.h"
+#include "dg/scenes/AOScene.h"
 #include "dg/scenes/BoundsScene.h"
 #include "dg/scenes/CanvasTestScene.h"
 #include "dg/scenes/MeshesScene.h"
@@ -28,6 +29,7 @@ std::unique_ptr<Scene> PromptForScene(
   std::map<
     std::string,
     std::function<std::unique_ptr<dg::Scene>()>> constructors;
+  constructors["ao"]           = dg::AOScene::Make;
   constructors["shadows"]      = dg::ShadowScene::Make;
   constructors["simple"]       = dg::SimpleScene::Make;
   constructors["widget"]       = dg::WidgetScene::Make;

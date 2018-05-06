@@ -8,6 +8,7 @@
 #include <memory>
 #include "cavr/CavrEngine.h"
 #include "cavr/behaviors/CaveBehavior.h"
+#include "cavr/behaviors/ShipBehavior.h"
 #include "cavr/materials/IntersectionDownscaleMaterial.h"
 #include "cavr/materials/SphereIntersectionMaterial.h"
 #include "dg/Camera.h"
@@ -102,90 +103,15 @@ void cavr::GameScene::Initialize() {
       std::make_shared<SceneObject>(dg::Transform::T(dg::FORWARD * 0.035f));
   rightController->AddChild(shipAttachment);
 
-  // Attach point light to right controller.
-  controllerLight = std::make_shared<dg::PointLight>(
-      glm::vec3(1.0f, 0.93f, 0.86f), 0.f, 4.0f, 3.f);
-  controllerLight->LookAtDirection(-skyLight->transform.Forward());
-  controllerLight->SetLinear(1.5f);
-  controllerLight->SetQuadratic(3.0f);
-  shipAttachment->AddChild(controllerLight, false);
-
-  // Attach sphere to left controller to represent point light.
-  auto lightSphereColor = std::make_shared<dg::StandardMaterial>(
-      dg::StandardMaterial::WithTransparentColor(
-          glm::vec4(1.f, 1.f, 1.f, 0.1f)));
-  lightSphereColor->SetLit(false);
-  lightSphere = std::make_shared<dg::Model>(
-      dg::Mesh::Sphere, lightSphereColor, dg::Transform::S(glm::vec3(0.025f)));
-  controllerLight->AddChild(lightSphere, false);
-
-  // Create subrender for drawing any cave geometry inside of the ship hull onto
-  // a texture for intersection testing.
-  dg::Transform xfBoundingSphere = lightSphere->SceneSpace();
-  shipIntersectionSubrender.type = Subrender::Type::MonoscopicFramebuffer;
-  shipIntersectionSubrender.renderSkybox = false;
-  shipIntersectionSubrender.camera = std::make_shared<dg::Camera>();
-  shipIntersectionSubrender.camera->projection =
-      dg::Camera::Projection::Orthographic;
-  shipIntersectionSubrender.camera->farClip = xfBoundingSphere.scale.z * 0.5f;
-  shipIntersectionSubrender.camera->nearClip = xfBoundingSphere.scale.z * -0.5f;
-  shipIntersectionSubrender.camera->orthoWidth = xfBoundingSphere.scale.x;
-  shipIntersectionSubrender.camera->orthoHeight = xfBoundingSphere.scale.y;
-  shipIntersectionSubrender.layerMask = GameScene::LayerMask::CaveGeometry();
-  shipIntersectionSubrender.material =
-      std::make_shared<cavr::SphereIntersectionMaterial>();
-  shipIntersectionSubrender.material->rasterizerOverride.SetCullMode(
-      dg::RasterizerState::CullMode::OFF);
-  std::static_pointer_cast<dg::StandardMaterial>(
-      shipIntersectionSubrender.material)
-      ->SetLit(false);
-  shipAttachment->AddChild(shipIntersectionSubrender.camera, false);
-
-  // Create intersection framebuffer for rendering cave intersection test.
-  dg::FrameBuffer::Options options;
-  options.width = options.height = 64;
-  options.depthReadable = false;
-  options.hasStencil = false;
-  options.mipmap = true;
-  options.interpolation = dg::TextureInterpolation::NEAREST;
-  shipIntersectionSubrender.framebuffer = dg::FrameBuffer::Create(options);
-
-  // Create custom subrender for downscaling the intersection texture.
-  shipIntersectionDownscaleSubrender.type =
-      Subrender::Type::MonoscopicFramebuffer;
-  shipIntersectionDownscaleSubrender.drawScene = false;
-
-  // Create intersection downscale framebuffer for processing the cave
-  // intersection texture.
-  dg::FrameBuffer::Options downscaleFrameBufferOpts;
-  downscaleFrameBufferOpts.width = 1;
-  downscaleFrameBufferOpts.height = 1;
-  downscaleFrameBufferOpts.depthReadable = false;
-  downscaleFrameBufferOpts.hasStencil = false;
-  shipIntersectionDownscaleSubrender.framebuffer =
-      dg::FrameBuffer::Create(downscaleFrameBufferOpts);
-
-  // Create texture for transferring 1px downscaled intersection texture from
-  // GPU to CPU.
-  dg::TextureOptions stagingTexOpts =
-      shipIntersectionDownscaleSubrender.framebuffer->GetColorTexture()
-          ->GetOptions();
-  stagingTexOpts.cpuReadable = true;
-  stagingTexOpts.shaderReadable = false;
-  intersectionReadStagingTexture = dg::Texture::Generate(stagingTexOpts);
-
-  // Set up shader for downscaling intersection texture into a 1x1 pixel
-  // average.
-  intersectionDownscaleModel = std::make_shared<dg::Model>(
-      dg::Mesh::Quad,
-      std::make_shared<IntersectionDownscaleMaterial>(
-          shipIntersectionSubrender.framebuffer->GetColorTexture()),
-      dg::Transform());
+  // Create ship, attached to attachment point.
+  auto shipObj = CreateShip();
+  ship = shipObj->GetBehavior<ShipBehavior>();
+  shipAttachment->AddChild(shipObj, false);
 
   // Attach quad to sphere temporarily to visualize intersection rendering.
   auto renderQuadMat =
       std::make_shared<dg::StandardMaterial>(dg::StandardMaterial::WithTexture(
-          shipIntersectionSubrender.framebuffer->GetColorTexture()));
+          ship->GetIntersectionSubrender().framebuffer->GetColorTexture()));
   renderQuadMat->SetLit(false);
   renderQuad = std::make_shared<dg::Model>(
       dg::Mesh::Quad, renderQuadMat,
@@ -196,12 +122,19 @@ void cavr::GameScene::Initialize() {
   // downscaling.
   auto downscaleQuadMat =
       std::make_shared<dg::StandardMaterial>(dg::StandardMaterial::WithTexture(
-          shipIntersectionDownscaleSubrender.framebuffer->GetColorTexture()));
+          ship->GetIntersectionDownscaleSubrender()
+              .framebuffer->GetColorTexture()));
   downscaleQuadMat->SetLit(false);
   auto downscaleQuad = std::make_shared<dg::Model>(
       dg::Mesh::Quad, downscaleQuadMat,
       dg::Transform::TS(glm::vec3(-1.f, 0.25f, 0), glm::vec3(0.5f)));
   renderQuad->AddChild(downscaleQuad, false);
+
+  // Create cave.
+  cave = std::make_shared<dg::SceneObject>();
+  auto caveBehavior =
+      dg::Behavior::Attach(cave, std::make_shared<CaveBehavior>());
+  AddChild(cave);
 
   // If VR could not enable, position the camera in a useful place for
   // development and make it controllable with keyboard and mouse.
@@ -214,8 +147,6 @@ void cavr::GameScene::Initialize() {
         cameras.main, std::make_shared<dg::KeyboardCameraController>(window));
 
     // Attach controller light to camera.
-    std::static_pointer_cast<dg::StandardMaterial>(lightSphere->material)
-        ->SetLit(false);
     shipAttachment->transform = dg::Transform::T(glm::vec3(0, 0, -0.1f));
     renderQuad->transform =
         dg::Transform::TS(glm::vec3(-0.05f, 0, 0), glm::vec3(0.04f));
@@ -229,12 +160,6 @@ void cavr::GameScene::Initialize() {
     downscaleQuad->material->queue = dg::RenderQueue::Overlay;
     cameras.main->AddChild(shipAttachment, false);
   }
-
-  // Create cave.
-  cave = std::make_shared<dg::SceneObject>();
-  auto caveBehavior =
-      dg::Behavior::Attach(cave, std::make_shared<CaveBehavior>());
-  AddChild(cave);
 }
 
 void cavr::GameScene::Update() {
@@ -254,16 +179,21 @@ void cavr::GameScene::Update() {
   // Handle controller inputs.
   switch (devModeState) {
     case DevModeState::Disabled: {
+      // Enter dev mode by pressing both controllers' MENU buttons
+      // simultaniously.
       if (leftState->IsButtonPressed(dg::VRControllerState::Button::MENU) &&
           rightState->IsButtonPressed(dg::VRControllerState::Button::MENU)) {
         devModeState = DevModeState::AwaitingRelease;
       }
+
+      // Alternatively, enter dev mode by hitting TAB key.
       if (window->IsKeyJustPressed(dg::Key::TAB)) {
         devModeState = DevModeState::Enabled;
       }
       break;
     }
     case DevModeState::AwaitingRelease: {
+      // Wait until both MENU buttons are released before entering dev mode.
       if (!leftState->IsButtonPressed(dg::VRControllerState::Button::MENU) &&
           !rightState->IsButtonPressed(dg::VRControllerState::Button::MENU)) {
         devModeState = DevModeState::Enabled;
@@ -333,49 +263,48 @@ void cavr::GameScene::Update() {
 
 void cavr::GameScene::RenderFramebuffers() {
   // Render scene for intersectionFramebuffer.
-  PerformSubrender(shipIntersectionSubrender);
+  PerformSubrender(ship->GetIntersectionSubrender());
 }
 
 void cavr::GameScene::PostProcess() {
   // Generate mip levels for intersection texture.
-  shipIntersectionSubrender.framebuffer->GetColorTexture()->GenerateMips();
+  ship->GenerateIntersectionMips();
 
   // Sample the lowest mip level from the previous frame's intersection test.
-  PerformSubrender(shipIntersectionDownscaleSubrender);
+  PerformSubrender(ship->GetIntersectionDownscaleSubrender());
 }
 
 void cavr::GameScene::DrawCustomSubrender(const Subrender &subrender) {
-  if (&subrender == &shipIntersectionDownscaleSubrender) {
-    intersectionDownscaleModel->Draw(glm::mat4x4(1), glm::mat4x4(1));
+  if (&subrender == &ship->GetIntersectionDownscaleSubrender()) {
+    ship->DrawIntersectionDownscale();
   }
 }
 
 void cavr::GameScene::ResourceReadback() {
-  ID3D11Texture2D *downscaledTexture =
-      shipIntersectionDownscaleSubrender.framebuffer->GetColorTexture()
-          ->GetTexture();
-  ID3D11Texture2D *stagingTexture =
-      intersectionReadStagingTexture->GetTexture();
+  ship->ReadIntersectionResults();
+}
 
-  // Copy intersection pixel from downscaled texture to staging texture.
-  dg::Graphics::Instance->context->CopyResource(stagingTexture,
-                                                downscaledTexture);
+std::shared_ptr<dg::SceneObject> cavr::GameScene::CreateShip() {
+  auto ship = std::make_shared<SceneObject>();
 
-  // Access the data on the GPU in the staging texture to read back its one
-  // pixel.
-  D3D11_MAPPED_SUBRESOURCE shadingTextureData;
-  HRESULT hr = dg::Graphics::Instance->context->Map(
-      stagingTexture, 0, D3D11_MAP_READ, NULL, &shadingTextureData);
-  if (FAILED(hr)) {
-    throw std::runtime_error("Failed to map intersection texture.");
-  }
+  // Create point light at center of ship.
+  auto controllerLight = std::make_shared<dg::PointLight>(
+      glm::vec3(1.0f, 0.93f, 0.86f), 0.f, 4.0f, 3.f);
+  controllerLight->SetLinear(1.5f);
+  controllerLight->SetQuadratic(3.0f);
+  ship->AddChild(controllerLight, false);
 
-  BYTE *textureBytes = (BYTE *)shadingTextureData.pData;
-  bool intersectsCaveWall = textureBytes[0] != 0;
-  dg::Graphics::Instance->context->Unmap(stagingTexture, 0);
+  // Attach sphere to left controller to represent ship hull.
+  auto hullSphereColor = std::make_shared<dg::StandardMaterial>(
+      dg::StandardMaterial::WithTransparentColor(
+          glm::vec4(1.f, 1.f, 1.f, 0.1f)));
+  hullSphereColor->SetLit(false);
+  auto hullSphere = std::make_shared<dg::Model>(
+      dg::Mesh::Sphere, hullSphereColor, dg::Transform::S(glm::vec3(0.025f)));
+  ship->AddChild(hullSphere, false);
 
-  // Change sphere color based on intersection.
-  std::static_pointer_cast<dg::StandardMaterial>(lightSphere->material)
-      ->SetDiffuse(intersectsCaveWall ? glm::vec4(1, 0, 0, 0.4)
-                                      : glm::vec4(1, 1, 1, 0.1));
+  auto shipBehavior = dg::Behavior::Attach(
+      ship, std::shared_ptr<ShipBehavior>(new ShipBehavior(hullSphere)));
+
+  return ship;
 }

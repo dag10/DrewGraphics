@@ -66,6 +66,9 @@
     <ClCompile Include="src\materials\IntersectionDownscaleMaterial.cpp">
       <Filter>Source Files\materials</Filter>
     </ClCompile>
+    <ClCompile Include="src\behaviors\ShipBehavior.cpp">
+      <Filter>Source Files\behaviors</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -94,6 +97,9 @@
     </ClInclude>
     <ClInclude Include="include\cavr\materials\IntersectionDownscaleMaterial.h">
       <Filter>Header Files\materials</Filter>
+    </ClInclude>
+    <ClInclude Include="include\cavr\behaviors\ShipBehavior.h">
+      <Filter>Header Files\behaviors</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -22,6 +22,8 @@ namespace dg {
 
 namespace cavr {
 
+  class ShipBehavior;
+
   class GameScene : public dg::Scene {
 
     public:
@@ -46,6 +48,8 @@ namespace cavr {
 
     private:
 
+      static std::shared_ptr<dg::SceneObject> CreateShip();
+
       enum class DevModeState {
         Disabled,
 
@@ -68,16 +72,11 @@ namespace cavr {
       DevModeState devModeState = DevModeState::Disabled;
       std::shared_ptr<dg::Model> renderQuad;
 
-      Subrender shipIntersectionSubrender;
-      Subrender shipIntersectionDownscaleSubrender;
-      std::shared_ptr<dg::Texture> intersectionReadStagingTexture;
-      std::shared_ptr<dg::Model> intersectionDownscaleModel;
       std::shared_ptr<dg::SceneObject> leftController;
       std::shared_ptr<dg::SceneObject> rightController;
 
       std::shared_ptr<dg::SceneObject> shipAttachment;
-      std::shared_ptr<dg::Model> lightSphere;
-      std::shared_ptr<dg::PointLight> controllerLight;
+      std::shared_ptr<ShipBehavior> ship;
       std::shared_ptr<dg::DirectionalLight> skyLight;
       std::shared_ptr<dg::Model> floor;
       std::shared_ptr<dg::SceneObject> cave;

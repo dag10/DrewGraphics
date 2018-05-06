@@ -167,6 +167,39 @@ namespace dg {
           uint64_t value;
       };
 
+      // Configuration for a subrender. A subrender is a process within a
+      // single frame's render that will walk the scene hierarchy and draw the
+      // scene once to some render target.
+      struct Subrender {
+
+        enum class Type {
+          // Unknown state, for catching out-of-order mistakes.
+          None,
+
+          // Rendering to window.
+          MonoscopicWindow,
+
+          // Rendering to single framebuffer.
+          MonoscopicFramebuffer,
+
+          // Rendering to left or right eye of VR HMD.
+          Stereoscopic,
+
+          // Rendering depths for a light map.
+          Shadowmap,
+        };
+
+        Type type = Type::None;
+        RasterizerState rasterizerState;
+        std::shared_ptr<FrameBuffer> framebuffer = nullptr;
+        std::shared_ptr<Camera> camera = nullptr;
+        std::shared_ptr<Material> material = nullptr;
+        vr::EVREye eye;
+        LayerMask layerMask = LayerMask::ALL();
+        bool renderSkybox = true;
+        bool drawScene = true;
+      }; // struct Subrender
+
       // Scenes may be created without any intent to run them. Do not perform
       // logic in the constructor.
       Scene();
@@ -203,39 +236,6 @@ namespace dg {
         float distanceToCamera = 0;
         SortedModel(Model &model) { this->model = &model; }
       };
-
-      // Configuration for a subrender. A subrender is a process within a
-      // single frame's render that will walk the scene hierarchy and draw the
-      // scene once to some render target.
-      struct Subrender {
-
-        enum class Type {
-          // Unknown state, for catching out-of-order mistakes.
-          None,
-
-          // Rendering to window.
-          MonoscopicWindow,
-
-          // Rendering to single framebuffer.
-          MonoscopicFramebuffer,
-
-          // Rendering to left or right eye of VR HMD.
-          Stereoscopic,
-
-          // Rendering depths for a light map.
-          Shadowmap,
-        };
-
-        Type type = Type::None;
-        RasterizerState rasterizerState;
-        std::shared_ptr<FrameBuffer> framebuffer = nullptr;
-        std::shared_ptr<Camera> camera = nullptr;
-        std::shared_ptr<Material> material = nullptr;
-        vr::EVREye eye;
-        LayerMask layerMask = LayerMask::ALL();
-        bool renderSkybox = true;
-        bool drawScene = true;
-      }; // struct Subrender
 
       // Hook called before any rendering work begins. This is a child scene's
       // last change to modify the scene hierarchy before it's walked.

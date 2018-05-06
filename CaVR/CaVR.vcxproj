@@ -353,6 +353,7 @@ xcopy /d /y /e "$(ProjectDir)assets" "$(OutDir)assets"</Command>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\behaviors\CaveBehavior.cpp" />
+    <ClCompile Include="src\behaviors\ShipBehavior.cpp" />
     <ClCompile Include="src\CavrEngine.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\materials\IntersectionDownscaleMaterial.cpp" />
@@ -367,6 +368,7 @@ xcopy /d /y /e "$(ProjectDir)assets" "$(OutDir)assets"</Command>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\cavr\behaviors\CaveBehavior.h" />
+    <ClInclude Include="include\cavr\behaviors\ShipBehavior.h" />
     <ClInclude Include="include\cavr\CavrEngine.h" />
     <ClInclude Include="include\cavr\materials\IntersectionDownscaleMaterial.h" />
     <ClInclude Include="include\cavr\materials\SphereIntersectionMaterial.h" />

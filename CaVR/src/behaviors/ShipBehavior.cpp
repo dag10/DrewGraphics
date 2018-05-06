@@ -49,8 +49,13 @@ void cavr::ShipBehavior::Initialize() {
   options.width = options.height = 64;
   options.depthReadable = false;
   options.hasStencil = false;
-  options.mipmap = true;
-  options.interpolation = dg::TextureInterpolation::NEAREST;
+  dg::TextureOptions colorTexOpts;
+  colorTexOpts.width = options.width;
+  colorTexOpts.height = options.height;
+  colorTexOpts.wrap = dg::TextureWrap::CLAMP_EDGE;
+  colorTexOpts.mipmap = true;
+  colorTexOpts.interpolation = dg::TextureInterpolation::NEAREST;
+  options.textureOptions.push_back(colorTexOpts);
   intersectionSubrender.framebuffer = dg::FrameBuffer::Create(options);
 
   // Create custom subrender for downscaling the intersection texture.

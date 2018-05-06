@@ -5,6 +5,7 @@
 
 #include <memory>
 #include <string>
+#include <vector>
 #include "dg/Texture.h"
 
 #if defined(_OPENGL)
@@ -38,8 +39,7 @@ namespace dg {
       bool depthReadable = true;
       bool hasColor = true;
       bool hasStencil = true;
-      bool mipmap = false;
-      TextureInterpolation interpolation = TextureInterpolation::LINEAR;
+      std::vector<TextureOptions> textureOptions;
     };
 
     static std::shared_ptr<FrameBuffer> Create(Options options);
@@ -53,7 +53,8 @@ namespace dg {
     unsigned int GetHeight() const;
     float GetAspectRatio() const;
 
-    std::shared_ptr<Texture> GetColorTexture() const;
+    unsigned int ColorTextureCount() const;
+    std::shared_ptr<Texture> GetColorTexture(int i = 0) const;
     std::shared_ptr<Texture> GetDepthTexture() const;
 
    protected:
@@ -62,7 +63,7 @@ namespace dg {
 
     const Options options;
 
-    std::shared_ptr<Texture> colorTexture = nullptr;
+    std::vector<std::shared_ptr<Texture>> colorTextures;
     std::shared_ptr<Texture> depthTexture = nullptr;
 
   }; // class BaseFrameBuffer

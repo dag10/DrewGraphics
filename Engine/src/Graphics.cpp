@@ -110,12 +110,20 @@ void dg::OpenGLGraphics::InitializeResources() {
 void dg::OpenGLGraphics::SetRenderTarget(FrameBuffer &frameBuffer) {
   glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer.GetHandle());
   SetViewport(0, 0, frameBuffer.GetWidth(), frameBuffer.GetHeight());
+  unsigned int attachments[10];
+  for (int i = 0; i < sizeof(attachments) / sizeof(attachments[0]); i++) {
+    attachments[i] = GL_COLOR_ATTACHMENT0 + i;
+  }
+  glDrawBuffers(frameBuffer.ColorTextureCount(), attachments);
 }
 
 void dg::OpenGLGraphics::SetRenderTarget(Window& window) {
   glBindFramebuffer(GL_FRAMEBUFFER, 0);
   glm::vec2 size = window.GetFramebufferSize();
   SetViewport(0, 0, (int)size.x, (int)size.y);
+
+  unsigned int attachment = GL_COLOR_ATTACHMENT0;
+  glDrawBuffers(1, &attachment);
 }
 
 void dg::OpenGLGraphics::SetViewport(int x, int y, int width, int height) {

@@ -3,6 +3,6 @@
 in vec4 v_ScenePos;
 in vec3 v_Normal;
 
-out vec4 FragColor;
+layout (location = 0) out vec4 FragColor;
 
 #line 1 2

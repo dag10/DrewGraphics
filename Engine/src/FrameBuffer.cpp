@@ -25,20 +25,28 @@ dg::BaseFrameBuffer::BaseFrameBuffer(Options options) : options(options) {
   depthTexOpts.type =
       options.hasStencil ? TexturePixelType::INT : TexturePixelType::FLOAT;
   depthTexOpts.wrap = TextureWrap::CLAMP_EDGE;
-  depthTexOpts.mipmap = false;
   depthTexOpts.shaderReadable = options.depthReadable;
-  depthTexOpts.interpolation = options.interpolation;
   depthTexture = Texture::Generate(depthTexOpts);
 
-  // Create main texture.
-  if (options.hasColor) {
+  // If the options want us to have a color texture but didn't provide at least
+  // one color texture definition, create a standard one.
+  if (options.hasColor && options.textureOptions.empty()) {
     TextureOptions texOpts;
     texOpts.width = options.width;
     texOpts.height = options.height;
     texOpts.wrap = TextureWrap::CLAMP_EDGE;
-    texOpts.mipmap = options.mipmap;
-    texOpts.interpolation = options.interpolation;
-    colorTexture = Texture::Generate(texOpts);
+    options.textureOptions.push_back(texOpts);
+  }
+  options.hasColor = !options.textureOptions.empty();
+
+  // Create color texture(s).
+  for (const auto &texOpts : options.textureOptions) {
+    if (texOpts.width != options.width || texOpts.height != options.height) {
+      throw EngineError(
+          "Attempted to create a framebuffer color texture with dimensions "
+          "that do not match those of the framebuffer.");
+    }
+    colorTextures.push_back(Texture::Generate(texOpts));
   }
 }
 
@@ -58,8 +66,12 @@ float dg::BaseFrameBuffer::GetAspectRatio() const {
   return (float)GetWidth() / (float)GetHeight();
 }
 
-std::shared_ptr<dg::Texture> dg::BaseFrameBuffer::GetColorTexture() const {
-  return colorTexture;
+unsigned int dg::BaseFrameBuffer::ColorTextureCount() const {
+  return colorTextures.size();
+}
+
+std::shared_ptr<dg::Texture> dg::BaseFrameBuffer::GetColorTexture(int i) const {
+  return colorTextures[i];
 }
 
 std::shared_ptr<dg::Texture> dg::BaseFrameBuffer::GetDepthTexture() const {
@@ -74,25 +86,24 @@ std::shared_ptr<dg::Texture> dg::BaseFrameBuffer::GetDepthTexture() const {
 dg::OpenGLFrameBuffer::OpenGLFrameBuffer(Options options)
     : BaseFrameBuffer(options) {
   glGenFramebuffers(1, &bufferHandle);
+  glBindFramebuffer(GL_FRAMEBUFFER, bufferHandle);
 
-  if (options.hasColor) {
-    glBindFramebuffer(GL_FRAMEBUFFER, bufferHandle);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
-                           colorTexture->GetHandle(), 0);
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+  for (int i = 0; i < colorTextures.size(); i++) {
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i,
+                           GL_TEXTURE_2D, colorTextures[i]->GetHandle(), 0);
   }
 
-  glBindFramebuffer(GL_FRAMEBUFFER, bufferHandle);
   GLenum format =
       options.hasStencil ? GL_DEPTH_STENCIL_ATTACHMENT : GL_DEPTH_ATTACHMENT;
   glFramebufferTexture2D(GL_FRAMEBUFFER, format, GL_TEXTURE_2D,
                          depthTexture->GetHandle(), 0);
-  glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
   GLuint status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
   if (status != GL_FRAMEBUFFER_COMPLETE) {
     throw FrameBufferException(status);
   }
+
+  glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 dg::OpenGLFrameBuffer::~OpenGLFrameBuffer() {
@@ -112,9 +123,14 @@ GLuint dg::OpenGLFrameBuffer::GetHandle() const {
 
 dg::DirectXFrameBuffer::DirectXFrameBuffer(Options options)
     : BaseFrameBuffer(options) {
+  if (options.textureOptions.size() > 1) {
+    throw EngineError(
+        "TODO: Multiple color textures not yet implemented for DirectX build.");
+  }
+
   if (options.hasColor) {
     Graphics::Instance->device->CreateRenderTargetView(
-        colorTexture->GetTexture(), 0, &renderTargetView);
+        GetColorTexture()->GetTexture(), 0, &renderTargetView);
   }
 
   D3D11_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc = {};

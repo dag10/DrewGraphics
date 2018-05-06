@@ -3,6 +3,7 @@
 //
 
 #include "dg/materials/ScreenQuadMaterial.h"
+#include "dg/RasterizerState.h"
 
 std::shared_ptr<dg::Shader> dg::ScreenQuadMaterial::screenQuadShader = nullptr;
 
@@ -18,6 +19,9 @@ dg::ScreenQuadMaterial::ScreenQuadMaterial() : Material() {
   }
 
   shader = ScreenQuadMaterial::screenQuadShader;
+
+  queue = RenderQueue::Overlay;
+  rasterizerOverride.SetDepthFunc(RasterizerState::DepthFunc::ALWAYS);
 }
 
 dg::ScreenQuadMaterial::ScreenQuadMaterial(

@@ -114,6 +114,7 @@ namespace dg {
       static std::shared_ptr<Mesh> Cube;
       static std::shared_ptr<Mesh> MappedCube;
       static std::shared_ptr<Mesh> Quad;
+      static std::shared_ptr<Mesh> ScreenQuad;
       static std::shared_ptr<Mesh> Cylinder;
       static std::shared_ptr<Mesh> Sphere;
 
@@ -161,6 +162,7 @@ namespace dg {
       static std::shared_ptr<Mesh> CreateCube();
       static std::shared_ptr<Mesh> CreateMappedCube();
       static std::shared_ptr<Mesh> CreateQuad();
+      static std::shared_ptr<Mesh> CreateScreenQuad();
       static std::shared_ptr<Mesh> CreateCylinder(
           int radialDivisions, int heightDivisions);
       static std::shared_ptr<Mesh> CreateSphere(int subdivisions);

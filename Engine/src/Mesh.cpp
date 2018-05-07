@@ -80,6 +80,7 @@ std::unordered_map<std::string, std::weak_ptr<dg::Mesh>> dg::Mesh::fileMap;
 std::shared_ptr<dg::Mesh> dg::Mesh::Cube = nullptr;
 std::shared_ptr<dg::Mesh> dg::Mesh::MappedCube = nullptr;
 std::shared_ptr<dg::Mesh> dg::Mesh::Quad = nullptr;
+std::shared_ptr<dg::Mesh> dg::Mesh::ScreenQuad = nullptr;
 std::shared_ptr<dg::Mesh> dg::Mesh::Cylinder = nullptr;
 std::shared_ptr<dg::Mesh> dg::Mesh::Sphere = nullptr;
 
@@ -92,6 +93,9 @@ void dg::Mesh::CreatePrimitives() {
 
   assert(Mesh::Quad == nullptr);
   dg::Mesh::Quad = CreateQuad();
+
+  assert(Mesh::ScreenQuad == nullptr);
+  dg::Mesh::ScreenQuad = CreateScreenQuad();
 
   assert(Mesh::Cylinder == nullptr);
   dg::Mesh::Cylinder = CreateCylinder(64, 1);
@@ -396,6 +400,25 @@ std::shared_ptr<dg::Mesh> dg::Mesh::CreateQuad() {
   std::shared_ptr<Mesh> mesh = Create();
 
   float S = 0.5f; // half size
+
+  mesh->AddQuad(
+    // position       normal          texCoord  tangent
+    { { -S, -S, +0 }, { +0, +0, +1 }, { 0, 0 }, { 1, 0, 0 } },
+    { { -S, +S, +0 }, { +0, +0, +1 }, { 0, 1 }, { 1, 0, 0 } },
+    { { +S, +S, +0 }, { +0, +0, +1 }, { 1, 1 }, { 1, 0, 0 } },
+    { { +S, -S, +0 }, { +0, +0, +1 }, { 1, 0 }, { 1, 0, 0 } },
+    Winding::CCW
+  );
+
+  mesh->FinishBuilding();
+
+  return mesh;
+}
+
+std::shared_ptr<dg::Mesh> dg::Mesh::CreateScreenQuad() {
+  std::shared_ptr<Mesh> mesh = Create();
+
+  float S = 1; // screen size
 
   mesh->AddQuad(
     // position       normal          texCoord  tangent

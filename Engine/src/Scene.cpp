@@ -414,29 +414,27 @@ void dg::Scene::DrawScene() {
     }
   }
 
-  // Render models.
+  // Gather non-persistent data we'll send to each model's shader once per draw.
   glm::vec4 cameraPos_h = glm::inverse(view) * glm::vec4(0, 0, 0, 1);
   glm::vec3 cameraPos = glm::vec3(cameraPos_h) / cameraPos_h.w;
-  for (auto &currentModel : currentRender.models) {
-    std::shared_ptr<Material> material = currentRender.subrender->material;
-    if (material == nullptr) {
-      material = currentModel.model->material;
+  Model::DrawContext context;
+  context.view = view;
+  context.projection = projection;
+  context.cameraPos = &cameraPos;
+  if (currentRender.subrender->sendLights) {
+    context.lights = &lightArray;
+    if (currentRender.shadowCastingLight != nullptr) {
+      auto texture = currentRender.shadowCastingLight->GetShadowMap();
+      if (texture != nullptr) {
+        context.shadowMap = texture;
+      }
     }
+  }
+
+  // Render models.
+  for (auto &currentModel : currentRender.models) {
     if (!(currentModel.model->layer & currentRender.subrender->layerMask)) {
       continue;
-    }
-    Model::DrawContext context;
-    context.view = view;
-    context.projection = projection;
-    context.cameraPos = &cameraPos;
-    if (currentRender.subrender->sendLights) {
-      context.lights = &lightArray;
-      if (currentRender.shadowCastingLight != nullptr) {
-        auto texture = currentRender.shadowCastingLight->GetShadowMap();
-        if (texture != nullptr) {
-          context.shadowMap = texture;
-        }
-      }
     }
     (*currentModel.model).Draw(context, currentRender.subrender->material);
   }

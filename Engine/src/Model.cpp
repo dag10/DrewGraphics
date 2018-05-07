@@ -58,6 +58,7 @@ void dg::Model::Draw(const DrawContext &context,
 
   material->SendMatrixNormal(glm::transpose(glm::inverse(xfMat)));
   material->SendMatrixM(xfMat);
+  material->SendMatrixV(context.view);
   material->SendMatrixMVP(context.projection * context.view * xfMat);
 
 #if defined(_DIRECTX)

@@ -124,6 +124,10 @@ void dg::Material::SendMatrixM(glm::mat4x4 m) {
   shader->SetMat4("_Matrix_M", m);
 }
 
+void dg::Material::SendMatrixV(glm::mat4x4 v) {
+  shader->SetMat4("_Matrix_V", v);
+}
+
 void dg::Material::SendMatrixNormal(glm::mat4x4 normal) {
   shader->SetMat4("_Matrix_Normal", normal);
 }

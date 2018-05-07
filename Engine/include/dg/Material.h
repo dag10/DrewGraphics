@@ -110,6 +110,7 @@ namespace dg {
       void SendCameraPosition(glm::vec3 position);
       void SendMatrixMVP(glm::mat4x4 mvp);
       void SendMatrixM(glm::mat4x4 m);
+      void SendMatrixV(glm::mat4x4 v);
       void SendMatrixNormal(glm::mat4x4 normal);
       void SendLights(const Light::ShaderData(&lights)[Light::MAX_LIGHTS]);
       void SendShadowMap(std::shared_ptr<Texture> shadowMap);

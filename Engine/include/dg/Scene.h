@@ -65,7 +65,7 @@ namespace dg {
   //                                           | struct.
   //                                           |
   //   if (shadow-producing light exists) {    |
-  //     SetupSubrender(Type::Shadowmap)       | Sets framebuffer, also calls
+  //     SetupSubrender(Type::Depthmap)       | Sets framebuffer, also calls
   //                                           | ClearBuffer().
   //     PreSubrender()                        | Virtual, empty by default.
   //     DrawScene()                           |
@@ -172,7 +172,7 @@ namespace dg {
       // scene once to some render target.
       struct Subrender {
 
-        enum class Type {
+        enum class OutputType {
           // Unknown state, for catching out-of-order mistakes.
           None,
 
@@ -186,20 +186,55 @@ namespace dg {
           Stereoscopic,
 
           // Rendering depths for a light map.
-          Shadowmap,
+          Depthmap,
         };
 
-        Type type = Type::None;
+        enum class DrawType {
+          // Call DrawCustomSubrender() during the draw phase.
+          Custom,
+
+          // Draw the entire scene using DrawScene().
+          Scene,
+
+          // Draw a screen-space quad with the given material.
+          Quad,
+        };
+
+        // Where this subrender is being output to.
+        OutputType outputType = OutputType::None;
+
+        // What to draw.
+        DrawType drawType = DrawType::Scene;
+
+        // Base rasterizer state to apply for this subrender.
         RasterizerState rasterizerState;
+
+        // Target FrameBuffer (if applicable for outputType), or nullptr
+        // for window output.
         std::shared_ptr<FrameBuffer> framebuffer = nullptr;
+
+        // Camera to use, if DrawType is Scene.
         std::shared_ptr<Camera> camera = nullptr;
+
+        // Material to use for quad if DrawType is Quad, or optional material
+        // override for all models if DrawType is Scene.
         std::shared_ptr<Material> material = nullptr;
+
+        // Which eye we're rendering for, if DrawType is Stereoscopic.
         vr::EVREye eye;
+
+        // Which model layers to draw if DrawType is Scene.
         LayerMask layerMask = LayerMask::ALL();
+
+        // Whether to send the scene's light data to the shader.
         bool sendLights = true;
+
+        // Whether to clear the target buffer before draw phase.
         bool clearBuffer = true;
+
+        // Whether to draw the skybox before the draw phase.
         bool renderSkybox = true;
-        bool drawScene = true;
+
       }; // struct Subrender
 
       // Scenes may be created without any intent to run them. Do not perform

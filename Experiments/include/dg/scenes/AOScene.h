@@ -13,6 +13,7 @@ namespace dg {
   class Model;
   class PointLight;
   class SpotLight;
+  class Canvas;
 
   class AOScene : public Scene {
 
@@ -42,10 +43,16 @@ namespace dg {
         None,
         GBuffer,
         Lighting,
+        SSAO,
       };
 
-      void InitializeSubrenders();
+      void InitializeDeferred();
+      void InitializeSSAO();
       void CreateGBuffer();
+      void CreateSSAOBuffers();
+
+      void LinkGeometryToSSAO();
+      void LinkGeometryToLight();
 
       virtual void RenderFramebuffers();
       virtual void PreRender();
@@ -53,6 +60,10 @@ namespace dg {
       OverlayState overlayState = OverlayState::GBuffer;
 
       Subrender geometrySubrender;
+      Subrender ssaoSubrender;
+
+      std::vector<glm::vec3> ssaoKernel;
+      std::shared_ptr<Canvas> ssaoNoise;
 
       std::vector<std::shared_ptr<Model>> overlayQuads;
       std::shared_ptr<Model> finalRenderQuad;

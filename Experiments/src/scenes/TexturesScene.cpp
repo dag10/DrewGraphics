@@ -167,7 +167,7 @@ void dg::TexturesScene::Initialize() {
   AddChild(virtualCamera);
 
   // Configure subrender for virtual camera.
-  quadSubrender.type = Subrender::Type::MonoscopicFramebuffer;
+  quadSubrender.outputType = Subrender::OutputType::MonoscopicFramebuffer;
   quadSubrender.camera = virtualCamera;
   quadSubrender.framebuffer = framebuffer;
   quadSubrender.layerMask = LayerMask::ALL() - LayerMask::UsesFramebuffer();

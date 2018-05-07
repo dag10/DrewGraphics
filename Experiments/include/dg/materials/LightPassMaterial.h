@@ -16,7 +16,6 @@ namespace dg {
     public:
 
       LightPassMaterial();
-      LightPassMaterial(glm::vec2 scale, glm::vec2 offset);
 
       LightPassMaterial(LightPassMaterial& other);
       LightPassMaterial(LightPassMaterial&& other);
@@ -32,8 +31,6 @@ namespace dg {
       void SetNormalTexture(std::shared_ptr<Texture> texture);
       void SetSpecularTexture(std::shared_ptr<Texture> texture);
       void SetDepthTexture(std::shared_ptr<Texture> texture);
-      void SetScale(glm::vec2 scale);
-      void SetOffset(glm::vec2 offset);
 
     private:
 

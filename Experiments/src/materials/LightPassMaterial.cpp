@@ -18,19 +18,10 @@ dg::LightPassMaterial::LightPassMaterial() : Material() {
 #endif
   }
 
-  SetScale(glm::vec2(2));
-  SetOffset(glm::vec2(0));
-
   shader = LightPassMaterial::lightPassShader;
 
   queue = RenderQueue::Overlay;
   rasterizerOverride.SetDepthFunc(RasterizerState::DepthFunc::ALWAYS);
-}
-
-dg::LightPassMaterial::LightPassMaterial(glm::vec2 scale, glm::vec2 offset)
-    : LightPassMaterial() {
-  SetScale(scale);
-  SetOffset(offset);
 }
 
 dg::LightPassMaterial::LightPassMaterial(LightPassMaterial &other)
@@ -99,12 +90,4 @@ void dg::LightPassMaterial::SetDepthTexture(std::shared_ptr<Texture> texture) {
 #elif defined(_DIRECTX)
   SetProperty("depthTexture", texture);
 #endif
-}
-
-void dg::LightPassMaterial::SetScale(glm::vec2 scale) {
-  SetProperty("_Scale", scale);
-}
-
-void dg::LightPassMaterial::SetOffset(glm::vec2 offset) {
-  SetProperty("_Offset", offset);
 }

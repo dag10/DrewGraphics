@@ -6,7 +6,9 @@
 
 #include <forward_list>
 #include <glm/glm.hpp>
+#include <random>
 #include "dg/Camera.h"
+#include "dg/Canvas.h"
 #include "dg/Graphics.h"
 #include "dg/Lights.h"
 #include "dg/Mesh.h"
@@ -14,12 +16,15 @@
 #include "dg/Shader.h"
 #include "dg/Skybox.h"
 #include "dg/Texture.h"
+#include "dg/Utils.h"
 #include "dg/Window.h"
 #include "dg/behaviors/KeyboardCameraController.h"
 #include "dg/behaviors/KeyboardLightController.h"
 #include "dg/materials/DeferredMaterial.h"
 #include "dg/materials/LightPassMaterial.h"
+#include "dg/materials/SSAOMaterial.h"
 #include "dg/materials/ScreenQuadMaterial.h"
+#include "dg/materials/StandardMaterial.h"
 
 std::unique_ptr<dg::AOScene> dg::AOScene::Make() {
   return std::unique_ptr<dg::AOScene>(new dg::AOScene());
@@ -75,8 +80,7 @@ void dg::AOScene::Initialize() {
   floorMaterial.SetLit(true);
 
   // Create a flashlight attached to the camera.
-  flashlight = std::make_shared<SpotLight>(
-    glm::vec3(0.6f, 0.5f, 0.5f), 0.7f, 2.76f, 3.11f);
+  flashlight = std::make_shared<SpotLight>(glm::vec3(1), 0.45f, 1.3f, 1.6f);
   flashlight->SetCutoff(glm::radians(25.f));
   flashlight->SetFeather(glm::radians(2.f));
   flashlight->SetCutoff(glm::radians(25.f));
@@ -105,7 +109,7 @@ void dg::AOScene::Initialize() {
   // Create screen-space quad for rendering light pass of deferred geometry
   // buffer.
   finalRenderQuad = std::make_shared<Model>(
-      Mesh::Quad, std::make_shared<LightPassMaterial>(), Transform());
+      Mesh::ScreenQuad, std::make_shared<LightPassMaterial>(), Transform());
   finalRenderQuad->layer = LayerMask::Overlay();
   finalRenderQuad->material->queue = RenderQueue::Overlay;
   AddChild(finalRenderQuad);
@@ -122,30 +126,72 @@ void dg::AOScene::Initialize() {
     AddChild(quad);
   }
 
-  CreateGBuffer();
-  InitializeSubrenders();
-}
-
-void dg::AOScene::InitializeSubrenders() {
-  geometrySubrender.type = Subrender::Type::MonoscopicWindow;
-  geometrySubrender.renderSkybox = false;
-  geometrySubrender.sendLights = false;
-  // Render everything except the overlays in the geometry pass.
-  geometrySubrender.layerMask = LayerMask::ALL() - LayerMask::Overlay();
-
-  // Render only the overlays (which includes light pass) in the main render.
-  subrenders.main.layerMask = LayerMask::Overlay();
-
-  // Create custom shadow framebuffer with color map (for special screen
-  // quad output).
+  // Create custom shadow framebuffer with albedo map (for visualization
+  // overlay).
   FrameBuffer::Options options;
   options.width = 2048;
   options.height = 2048;
   options.depthReadable = true;
   options.hasStencil = false;
   subrenders.light.framebuffer = FrameBuffer::Create(options);
-  // Render everything except the overlays in the shadowmap pass.
+  // Don't render overlays in the shadowmap.
   subrenders.light.layerMask = LayerMask::ALL() - LayerMask::Overlay();
+
+  CreateSSAOBuffers();
+  InitializeSSAO();
+
+  CreateGBuffer();
+  InitializeDeferred();
+}
+
+void dg::AOScene::InitializeDeferred() {
+  geometrySubrender.outputType = Subrender::OutputType::MonoscopicWindow;
+  geometrySubrender.renderSkybox = false;
+  geometrySubrender.sendLights = false;
+  // In the geometry pass, don't render overlays.
+  geometrySubrender.layerMask = LayerMask::ALL() - LayerMask::Overlay();
+
+  // In the lighting pass, only render the overlays.
+  subrenders.main.layerMask = LayerMask::Overlay();
+}
+
+void dg::AOScene::InitializeSSAO() {
+  ssaoSubrender.outputType = Subrender::OutputType::MonoscopicWindow;
+  ssaoSubrender.drawType = Subrender::DrawType::Quad;
+  ssaoSubrender.sendLights = false;
+  ssaoSubrender.material = std::make_shared<SSAOMaterial>();
+
+  // random floats between 0.0 - 1.0
+  std::uniform_real_distribution<float> randomFloats(0.0, 1.0);
+  std::default_random_engine generator;
+
+  const int numSamples = 64;
+  for (unsigned int i = 0; i < numSamples; ++i) {
+    // Sample is a vector in tangent space.
+    glm::vec3 sample(randomFloats(generator) * 2.0 - 1.0, // x = [-1, 1]
+                     randomFloats(generator) * 2.0 - 1.0, // y = [-1, 1]
+                     randomFloats(generator));            // z = [ 0, 1]
+    sample = glm::normalize(sample);
+
+    sample *= randomFloats(generator);
+    float scale = (float)i / (float)numSamples;
+    scale = lerp(0.1f, 1.0f, scale * scale);
+    sample *= scale;
+    ssaoKernel.push_back(sample);
+  }
+
+  // Create a 4x4 texture of random rotation vectors to tile over the screen.
+  ssaoNoise = std::make_shared<Canvas>(4, 4);
+  for (unsigned int i = 0; i < ssaoNoise->GetWidth(); i++) {
+    for (unsigned int j = 0; j < ssaoNoise->GetHeight(); j++) {
+      ssaoNoise->SetPixel(i, j,
+                          glm::vec3(randomFloats(generator) * 2.0 - 1.0,
+                                    randomFloats(generator) * 2.0 - 1.0, 0.0f));
+    }
+  }
+  ssaoNoise->Submit();
+  std::static_pointer_cast<SSAOMaterial>(finalRenderQuad->material)
+      ->SetNoiseTexture(ssaoNoise->GetTexture());
 }
 
 void dg::AOScene::Update() {
@@ -159,6 +205,11 @@ void dg::AOScene::Update() {
   // L key switches to lighting overlay state.
   if (window->IsKeyJustPressed(Key::L)) {
     overlayState = OverlayState::Lighting;
+  }
+
+  // O key switches to ssao overlay state.
+  if (window->IsKeyJustPressed(Key::O)) {
+    overlayState = OverlayState::SSAO;
   }
 
   // N key switches to no overlay state.
@@ -249,19 +300,35 @@ void dg::AOScene::Update() {
           ->SetRedChannelOnly(true);
       break;
     };
+    case OverlayState::SSAO: {
+      glm::vec2 quadScale =
+          glm::vec2(2.f / 3.f) / glm::vec2(window->GetAspectRatio(), 1);
+
+      overlayQuads[0]->enabled = true;
+      std::static_pointer_cast<ScreenQuadMaterial>(overlayQuads[0]->material)
+          ->SetScale(quadScale);
+      std::static_pointer_cast<ScreenQuadMaterial>(overlayQuads[0]->material)
+          ->SetOffset(glm::vec2(1 - quadScale.x * 0.5,
+                                (1.f / 3.f) + quadScale.y * 0.5));
+      std::static_pointer_cast<ScreenQuadMaterial>(overlayQuads[0]->material)
+          ->SetTexture(ssaoSubrender.framebuffer->GetColorTexture());
+      break;
+    };
   }
 }
 
 void dg::AOScene::RenderFramebuffers() {
-  // Create or resize geometry framebuffer if needed.
+  // Create or resize framebuffers if needed.
   glm::vec2 windowSize = window->GetFramebufferSize();
   if (geometrySubrender.framebuffer == nullptr ||
       geometrySubrender.framebuffer->GetWidth() != windowSize.x ||
       geometrySubrender.framebuffer->GetHeight() != windowSize.y) {
     CreateGBuffer();
+    CreateSSAOBuffers();
   }
 
   PerformSubrender(geometrySubrender);
+  PerformSubrender(ssaoSubrender);
 }
 
 void dg::AOScene::CreateGBuffer() {
@@ -302,6 +369,42 @@ void dg::AOScene::CreateGBuffer() {
 
   geometrySubrender.framebuffer = FrameBuffer::Create(opts);
 
+  LinkGeometryToLight();
+  LinkGeometryToSSAO();
+}
+
+void dg::AOScene::CreateSSAOBuffers() {
+  glm::vec2 windowSize = window->GetFramebufferSize();
+
+  FrameBuffer::Options opts;
+  opts.width = windowSize.x;
+  opts.height = windowSize.y;
+  opts.depthReadable = true;
+  opts.hasStencil = false;
+  opts.hasColor = true;
+  ssaoSubrender.framebuffer = FrameBuffer::Create(opts);
+
+  LinkGeometryToSSAO();
+}
+
+void dg::AOScene::LinkGeometryToSSAO() {
+  if (ssaoSubrender.material == nullptr ||
+      geometrySubrender.framebuffer == nullptr) {
+    return;
+  }
+
+  // Point material handling the ssao pass to the new g-buffer textures.
+  std::static_pointer_cast<SSAOMaterial>(ssaoSubrender.material)
+      ->SetPositionTexture(geometrySubrender.framebuffer->GetColorTexture(1));
+  std::static_pointer_cast<SSAOMaterial>(ssaoSubrender.material)
+      ->SetNormalTexture(geometrySubrender.framebuffer->GetColorTexture(2));
+}
+
+void dg::AOScene::LinkGeometryToLight() {
+  if (finalRenderQuad == nullptr || geometrySubrender.framebuffer == nullptr) {
+    return;
+  }
+
   // Point material handling the lighting pass to the new g-buffer textures.
   std::static_pointer_cast<LightPassMaterial>(finalRenderQuad->material)
       ->SetAlbedoTexture(geometrySubrender.framebuffer->GetColorTexture(0));
@@ -319,4 +422,8 @@ void dg::AOScene::PreRender() {
   // Always render geometry pass with whichever camera we're about to do
   // the main render with.
   geometrySubrender.camera = subrenders.main.camera;
+
+  // SSAO pass needs to know the camera view matrix to convert gbuffer positions
+  // into view space.
+  ssaoSubrender.camera = subrenders.main.camera;
 }

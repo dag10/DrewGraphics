@@ -25,8 +25,8 @@ void cavr::ShipBehavior::Initialize() {
   // Create subrender for drawing any cave geometry inside of the ship hull onto
   // a texture for intersection testing.
   dg::Transform xfBoundingSphere = hullSphere->SceneSpace();
-  intersectionSubrender.type =
-      dg::Scene::Subrender::Type::MonoscopicFramebuffer;
+  intersectionSubrender.outputType =
+      dg::Scene::Subrender::OutputType::MonoscopicFramebuffer;
   intersectionSubrender.renderSkybox = false;
   intersectionSubrender.camera = std::make_shared<dg::Camera>();
   intersectionSubrender.camera->projection =
@@ -59,9 +59,10 @@ void cavr::ShipBehavior::Initialize() {
   intersectionSubrender.framebuffer = dg::FrameBuffer::Create(options);
 
   // Create custom subrender for downscaling the intersection texture.
-  intersectionDownscaleSubrender.type =
-      dg::Scene::Subrender::Type::MonoscopicFramebuffer;
-  intersectionDownscaleSubrender.drawScene = false;
+  intersectionDownscaleSubrender.outputType =
+      dg::Scene::Subrender::OutputType::MonoscopicFramebuffer;
+  intersectionDownscaleSubrender.drawType =
+      dg::Scene::Subrender::DrawType::Custom;
 
   // Create intersection downscale framebuffer for processing the cave
   // intersection texture.

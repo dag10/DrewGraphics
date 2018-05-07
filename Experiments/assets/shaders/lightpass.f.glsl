@@ -5,6 +5,8 @@ uniform sampler2D _SpecularTexture;
 uniform sampler2D _DepthTexture;
 uniform sampler2D _ShadowMap;
 
+uniform mat4 _Matrix_V;
+
 in vec2 v_TexCoord;
 
 vec3 calculateLight(
@@ -72,6 +74,7 @@ vec3 calculateLight(
 vec4 frag() {
   vec3 normal = texture(_NormalTexture, v_TexCoord).xyz;
 
+  // If no geometry was rendered for this fragment, discard.
   if (length(normal) == 0) {
     discard;
   }
@@ -93,6 +96,8 @@ vec4 frag() {
   float shininess = specularTexel.a;
 
   float depth = texture(_DepthTexture, v_TexCoord).r;
+
+  //return vec4((_Matrix_V * vec4(position, 1)).xyz, 1);
 
   vec3 cumulative = vec3(0);
   for (int i = 0; i < MAX_LIGHTS; i++) {

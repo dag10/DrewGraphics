@@ -41,12 +41,13 @@ void dg::Scene::Initialize() {
   // potentially abstract rasterizerStates. Also, its camera is set
   // each frame instead of now in case cameras.main changes.
   subrenders.main.rasterizerState = RasterizerState::Default();
-  subrenders.main.type = Subrender::Type::MonoscopicWindow;
+  subrenders.main.outputType = Subrender::OutputType::MonoscopicWindow;
 
   // Create the subrender configuration as the basis for all monoscopic
   // framebuffer subrenders. This does not apply to stereoscopic framebuffers
   // or shadowmap framebuffers.
-  subrenders.framebuffer.type = Subrender::Type::MonoscopicFramebuffer;
+  subrenders.framebuffer.outputType =
+      Subrender::OutputType::MonoscopicFramebuffer;
 #if defined(_DIRECTX)
   subrenders.framebuffer.rasterizerState.SetFlipRenderY(true, true);
 #endif
@@ -54,7 +55,7 @@ void dg::Scene::Initialize() {
   // Create subrender state for light shadowmap, if any. If a depth map
   // is eventually rendered, the framebuffer resource will be created only at
   // that time.
-  subrenders.light.type = Subrender::Type::Shadowmap;
+  subrenders.light.outputType = Subrender::OutputType::Depthmap;
   subrenders.light.camera = std::make_shared<Camera>();
 
   // If we're set up for VR, create subrender configurations for each eye.
@@ -63,7 +64,7 @@ void dg::Scene::Initialize() {
     for (int i = 0; i < 2; i++) {
       subrenders.eyes[i].eye =
           i == 0 ? vr::EVREye::Eye_Left : vr::EVREye::Eye_Right;
-      subrenders.eyes[i].type = Subrender::Type::Stereoscopic;
+      subrenders.eyes[i].outputType = Subrender::OutputType::Stereoscopic;
       subrenders.eyes[i].framebuffer =
           VRManager::Instance->GetFramebuffer(subrenders.eyes[i].eye);
     }
@@ -135,12 +136,12 @@ void dg::Scene::ClearBuffer() {
 }
 
 void dg::Scene::DrawSkybox() {
-  switch (currentRender.subrender->type) {
-    case Subrender::Type::MonoscopicWindow:
-    case Subrender::Type::MonoscopicFramebuffer:
+  switch (currentRender.subrender->outputType) {
+    case Subrender::OutputType::MonoscopicWindow:
+    case Subrender::OutputType::MonoscopicFramebuffer:
       skybox->Draw(*currentRender.subrender->camera);
       break;
-    case Subrender::Type::Stereoscopic:
+    case Subrender::OutputType::Stereoscopic:
       skybox->Draw(*currentRender.subrender->camera,
                    currentRender.subrender->eye);
       break;
@@ -161,12 +162,18 @@ void dg::Scene::SetupRender() {
 void dg::Scene::SetupSubrender(Subrender &subrender) {
   currentRender.subrender = &subrender;
 
-  if (subrender.type == Subrender::Type::None) {
+  if (subrender.outputType == Subrender::OutputType::None) {
     throw std::runtime_error("Attempted to set up invalid subrender.");
   }
 
-  if (subrender.camera == nullptr && subrender.drawScene) {
-    throw std::runtime_error("Non-custom subrenders must have a camera.");
+  if (subrender.camera == nullptr &&
+      subrender.drawType == Subrender::DrawType::Scene) {
+    throw std::runtime_error("Scene-drawing subrenders must have a camera.");
+  }
+
+  if (subrender.material == nullptr &&
+      subrender.drawType == Subrender::DrawType::Quad) {
+    throw std::runtime_error("Quad subrenders must have a material.");
   }
 
   // Set up render target.
@@ -185,13 +192,8 @@ void dg::Scene::SetupSubrender(Subrender &subrender) {
   // Always use the main subrender's rasterizer state as the base rasterizer
   // state, and derive off of that.
   RasterizerState rasterizerState = subrenders.main.rasterizerState;
-  switch (subrender.type) {
-    case Subrender::Type::MonoscopicFramebuffer:
-    case Subrender::Type::Shadowmap:
-      rasterizerState += subrenders.framebuffer.rasterizerState;
-      break;
-    default:
-      break;
+  if (&subrender != &subrenders.main) {
+    rasterizerState += subrenders.framebuffer.rasterizerState;
   }
   rasterizerState += subrender.rasterizerState;
   Graphics::Instance->PushRasterizerState(rasterizerState);
@@ -203,13 +205,14 @@ void dg::Scene::SetupSubrender(Subrender &subrender) {
 
   // If we're rendering to HMD, draw the hidden area mesh for early-out of
   // pixels we won't see due to the HMD's optics.
-  if (subrender.type == Subrender::Type::Stereoscopic) {
+  if (subrender.outputType == Subrender::OutputType::Stereoscopic) {
     DrawHiddenAreaMesh(subrender.eye);
   }
 }
 
 void dg::Scene::TeardownSubrender() {
-  if (currentRender.subrender->type == Subrender::Type::Stereoscopic) {
+  if (currentRender.subrender->outputType ==
+      Subrender::OutputType::Stereoscopic) {
     VRManager::Instance->SubmitFrame(currentRender.subrender->eye);
   }
   Graphics::Instance->PopRasterizerState();
@@ -253,10 +256,28 @@ void dg::Scene::PerformSubrender(Subrender &subrender) {
 
   SetupSubrender(subrender);
   PreSubrender(subrender);
-  if (subrender.drawScene) {
-    DrawScene();
-  } else {
+  switch (subrender.drawType) {
+    case Subrender::DrawType::Custom:
     DrawCustomSubrender(subrender);
+      break;
+    case Subrender::DrawType::Scene:
+      DrawScene();
+      break;
+    case Subrender::DrawType::Quad: {
+      glm::vec3 cameraPos;
+      Model::DrawContext context;
+      if (subrender.camera != nullptr) {
+        cameraPos = subrender.camera->CachedSceneSpace().translation;
+        context.cameraPos = &cameraPos;
+        context.view = subrender.camera->GetViewMatrix();
+        context.projection = subrender.camera->GetProjectionMatrix();
+      } else {
+        context.view = glm::mat4x4(1);
+        context.projection = glm::mat4x4(1);
+      }
+      Model(Mesh::ScreenQuad, subrender.material, Transform()).Draw(context);
+      break;
+    }
   }
   PostSubrender(subrender);
   TeardownSubrender();
@@ -389,8 +410,8 @@ void dg::Scene::DrawScene() {
   // Set up view.
   glm::mat4x4 view;
   glm::mat4x4 projection;
-  switch (currentRender.subrender->type) {
-    case Subrender::Type::Stereoscopic:
+  switch (currentRender.subrender->outputType) {
+    case Subrender::OutputType::Stereoscopic:
       view = currentRender.subrender->camera->GetViewMatrix(
           currentRender.subrender->eye);
       projection = currentRender.subrender->camera->GetProjectionMatrix(

@@ -13,20 +13,16 @@ dg::Canvas::Canvas(unsigned int width, unsigned int height) {
   texOpts.interpolation = TextureInterpolation::NEAREST;
   texOpts.format = TexturePixelFormat::RGBA;
   texOpts.wrap = TextureWrap::CLAMP_EDGE;
-  texOpts.type = TexturePixelType::BYTE;
+  texOpts.type = TexturePixelType::FLOAT;
   texOpts.mipmap = true;
   texture = Texture::Generate(texOpts);
 
-  pixels = new Pixel[width * height]();
+  pixels = std::vector<glm::vec4>(width * height);
   Submit();
 }
 
 dg::Canvas::Canvas(dg::Canvas&& other) {
   *this = std::move(other);
-}
-
-dg::Canvas::~Canvas() {
-  delete [] pixels;
 }
 
 dg::Canvas& dg::Canvas::operator=(dg::Canvas&& other) {
@@ -40,33 +36,23 @@ void dg::swap(Canvas& first, Canvas& second) {
   swap(first.texture, second.texture);
 }
 
-std::shared_ptr<dg::Texture> dg::Canvas::GetTexture() const {
-  return texture;
+void dg::Canvas::SetPixel(unsigned int x, unsigned int y, uint8_t red,
+                          uint8_t green, uint8_t blue, uint8_t alpha) {
+  SetPixel(x, y, glm::vec4(red, green, blue, alpha) / 255.f);
 }
 
-unsigned int dg::Canvas::GetWidth() const {
-  return texture->GetWidth();
+void dg::Canvas::SetPixel(unsigned int x, unsigned int y, glm::vec3 value) {
+  SetPixel(x, y, glm::vec4(value, 1));
 }
 
-unsigned int dg::Canvas::GetHeight() const {
-  return texture->GetHeight();
-}
-
-void dg::Canvas::SetPixel(
-    unsigned int x, unsigned int y,
-    uint8_t red, uint8_t green, uint8_t blue, uint8_t alpha) {
+void dg::Canvas::SetPixel(unsigned int x, unsigned int y, glm::vec4 value) {
   if (x >= GetWidth() || y >= GetHeight()) {
     throw std::runtime_error("Canvas SetPixel() coordinates out of bounds.");
   }
 
-  Pixel *pixel = pixels + (GetWidth() * y) + x;
-  pixel->red = red;
-  pixel->green = green;
-  pixel->blue = blue;
-  pixel->alpha = alpha;
+  pixels[(GetWidth() * y) + x] = value;
 }
 
 void dg::Canvas::Submit() {
-  texture->UpdateData(pixels);
+  texture->UpdateData(pixels.data());
 }
-

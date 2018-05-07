@@ -4,48 +4,42 @@
 
 #pragma once
 
+#include <glm/glm.hpp>
 #include <memory>
+#include <vector>
 #include "dg/Texture.h"
 
 namespace dg {
 
-  // Copy is disabled, only moves are allowed. This prevents us
-  // from leaking or redeleting the openGL texture resource.
-  class Canvas {
+// Copy is disabled, only moves are allowed. This prevents us
+// from leaking or redeleting the openGL texture resource.
+class Canvas {
+  public:
+  Canvas(unsigned int width, unsigned int height);
+  Canvas(Canvas &other) = delete;
+  Canvas(Canvas &&other);
+  virtual ~Canvas() {};
+  Canvas &operator=(Canvas &other) = delete;
+  Canvas &operator=(Canvas &&other);
+  friend void swap(Canvas &first, Canvas &second);  // nothrow
 
-    public:
+  inline std::shared_ptr<Texture> GetTexture() const { return texture; }
+  inline unsigned int GetWidth() const { return texture->GetWidth(); }
+  inline unsigned int GetHeight() const { return texture->GetHeight(); }
 
-      Canvas(unsigned int width, unsigned int height);
-      Canvas(Canvas& other) = delete;
-      Canvas(Canvas&& other);
-      ~Canvas();
-      Canvas& operator=(Canvas& other) = delete;
-      Canvas& operator=(Canvas&& other);
-      friend void swap(Canvas& first, Canvas& second); // nothrow
+  // X is from left, Y is from bottom.
+  void SetPixel(unsigned int x, unsigned int y, uint8_t red, uint8_t green,
+                uint8_t blue, uint8_t alpha = 255);
+  void SetPixel(unsigned int x, unsigned int y, glm::vec3 value);
+  void SetPixel(unsigned int x, unsigned int y, glm::vec4 value);
 
-      std::shared_ptr<Texture> GetTexture() const;
-      unsigned int GetWidth() const;
-      unsigned int GetHeight() const;
+  void Submit();
 
-      // X is from left, Y is from bottom.
-      void SetPixel(
-          unsigned int x, unsigned int y,
-          uint8_t red, uint8_t green, uint8_t blue, uint8_t alpha = 255);
+  private:
 
-      void Submit();
+  std::vector<glm::vec4> pixels;
+  std::shared_ptr<Texture> texture = nullptr;
 
-    private:
+};  // class Canvas
 
-      struct Pixel {
-        uint8_t red   = 0;
-        uint8_t green = 0;
-        uint8_t blue  = 0;
-        uint8_t alpha = 255;
-      };
-
-      Pixel *pixels = nullptr;
-      std::shared_ptr<Texture> texture = nullptr;
-
-  }; // class Canvas
-
-} // namespace dg
+}  // namespace dg

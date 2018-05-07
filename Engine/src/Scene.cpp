@@ -150,6 +150,10 @@ void dg::Scene::SetupSubrender(Subrender &subrender) {
     throw std::runtime_error("Attempted to set up invalid subrender.");
   }
 
+  if (subrender.camera == nullptr && subrender.drawScene) {
+    throw std::runtime_error("Non-custom subrenders must have a camera.");
+  }
+
   // Set up render target.
   if (subrender.framebuffer == nullptr) {
     Graphics::Instance->SetRenderTarget(*window);
@@ -206,6 +210,7 @@ void dg::Scene::TeardownRender() {
 }
 
 void dg::Scene::RenderFrame() {
+  subrenders.main.camera = cameras.main;
   PreRender();
   SetupRender();
   RenderLightShadowMap();
@@ -216,7 +221,6 @@ void dg::Scene::RenderFrame() {
       PerformSubrender(subrenders.eyes[i]);
     }
   }
-  subrenders.main.camera = cameras.main;
   PerformSubrender(subrenders.main);
   PostProcess();
   TeardownRender();

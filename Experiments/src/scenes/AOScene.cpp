@@ -17,9 +17,9 @@
 #include "dg/Window.h"
 #include "dg/behaviors/KeyboardCameraController.h"
 #include "dg/behaviors/KeyboardLightController.h"
+#include "dg/materials/DeferredMaterial.h"
+#include "dg/materials/LightPassMaterial.h"
 #include "dg/materials/ScreenQuadMaterial.h"
-#include "dg/materials/StandardMaterial.h"
-#include "dg/materials/UVMaterial.h"
 
 std::unique_ptr<dg::AOScene> dg::AOScene::Make() {
   return std::unique_ptr<dg::AOScene>(new dg::AOScene());
@@ -60,23 +60,11 @@ void dg::AOScene::Initialize() {
   Behavior::Attach(cameraLight,
                    std::make_shared<KeyboardLightController>(window));
 
-  // Create model material.
-  StandardMaterial cubeMaterial = StandardMaterial::WithColor(glm::vec3(0.5));
-  cubeMaterial.SetSpecular(glm::vec3(0));
-
   // Load model.
   AddChild(std::make_shared<Model>(
       Mesh::LoadOBJ("assets/models/crytek-sponza/sponza.obj"),
-      std::make_shared<StandardMaterial>(cubeMaterial),
-      //std::make_shared<UVMaterial>(),
+      std::make_shared<Material>(DeferredMaterial::WithColor(glm::vec3(0.5))),
       Transform::S(glm::vec3(0.0025))));
-
-  // Create floor material.
-  const int floorSize = 2;
-  StandardMaterial floorMaterial = StandardMaterial::WithColor(glm::vec3(0.2f));
-  floorMaterial.SetUVScale(glm::vec2((float)floorSize));
-  floorMaterial.SetSpecular(glm::vec3(1));
-  floorMaterial.SetShininess(64);
 
   // Configure camera.
   cameras.main->transform.translation = glm::vec3(-3.11, 1.75, 0.23);
@@ -86,49 +74,37 @@ void dg::AOScene::Initialize() {
   Behavior::Attach(cameras.main,
                    std::make_shared<KeyboardCameraController>(window));
 
+  // Create screen-space quad for rendering light pass of deferred geometry
+  // buffer.
+  finalRenderQuad = std::make_shared<Model>(
+      Mesh::Quad, std::make_shared<LightPassMaterial>(), Transform());
+  finalRenderQuad->layer = LayerMask::Overlay();
+  finalRenderQuad->material->queue = RenderQueue::Overlay;
+  AddChild(finalRenderQuad);
+
   // Create screen space quads to visualize internal textures.
   for (int i = 0; i < 3; i++) {
     auto quad = std::make_shared<Model>(
         Mesh::Quad,
-        std::make_shared<ScreenQuadMaterial>(glm::vec3(1, 0, 1), glm::vec2(1)),
+        std::make_shared<ScreenQuadMaterial>(glm::vec3(0), glm::vec2(1)),
         Transform());
+    quad->layer = LayerMask::Overlay();
+    quad->material->queue = RenderQueue::Overlay + 1;
     overlayQuads.push_back(quad);
     AddChild(quad);
   }
 
+  CreateGBuffer();
   InitializeSubrenders();
 }
 
 void dg::AOScene::InitializeSubrenders() {
   geometrySubrender.type = Subrender::Type::MonoscopicWindow;
   geometrySubrender.renderSkybox = false;
-}
+  geometrySubrender.sendLights = false;
+  geometrySubrender.layerMask = LayerMask::ALL() - LayerMask::Overlay();
 
-void dg::AOScene::CreateGBuffer() {
-  FrameBuffer::Options opts;
-  opts.width = window->GetWidth();
-  opts.height = window->GetHeight();
-  opts.depthReadable = true;
-  opts.hasColor = true;
-  opts.hasStencil = false;
-  geometrySubrender.framebuffer = FrameBuffer::Create(opts);
-}
-
-void dg::AOScene::PreRender() {
-  // Always render geometry pass with whichever camera we're about to do
-  // the main render with.
-  geometrySubrender.camera = subrenders.main.camera;
-}
-
-void dg::AOScene::RenderFramebuffers() {
-  // Create or resize geometry framebuffer if needed.
-  if (geometrySubrender.framebuffer == nullptr ||
-      geometrySubrender.framebuffer->GetWidth() != window->GetWidth() ||
-      geometrySubrender.framebuffer->GetHeight() != window->GetHeight()) {
-    CreateGBuffer();
-  }
-
-  PerformSubrender(geometrySubrender);
+  subrenders.main.layerMask = LayerMask::Overlay();
 }
 
 void dg::AOScene::Update() {
@@ -153,15 +129,104 @@ void dg::AOScene::Update() {
       break;
     case OverlayState::GBuffer: {
       glm::vec2 quadScale =
-          glm::vec2(1) / glm::vec2(window->GetAspectRatio(), 1);
+          glm::vec2(2.f / 3.f) / glm::vec2(window->GetAspectRatio(), 1);
+
       overlayQuads[0]->enabled = true;
       std::static_pointer_cast<ScreenQuadMaterial>(overlayQuads[0]->material)
           ->SetScale(quadScale);
       std::static_pointer_cast<ScreenQuadMaterial>(overlayQuads[0]->material)
-          ->SetOffset(glm::vec2(1 - quadScale.x * 0.5, quadScale.y * 0.5));
-      //std::static_pointer_cast<ScreenQuadMaterial>(overlayQuads[0]->material)
-          //->SetTexture(geometrySubrender.framebuffer->GetDepthTexture());
+          ->SetOffset(glm::vec2(1 - quadScale.x * 0.5,
+                                (1.f / 3.f) + quadScale.y * 0.5));
+      std::static_pointer_cast<ScreenQuadMaterial>(overlayQuads[0]->material)
+          ->SetTexture(geometrySubrender.framebuffer->GetColorTexture(0));
+
+      overlayQuads[1]->enabled = true;
+      std::static_pointer_cast<ScreenQuadMaterial>(overlayQuads[1]->material)
+          ->SetScale(quadScale);
+      std::static_pointer_cast<ScreenQuadMaterial>(overlayQuads[1]->material)
+          ->SetOffset(glm::vec2(1 - quadScale.x * 0.5,
+                                -(1.f / 3.f) + quadScale.y * 0.5));
+      std::static_pointer_cast<ScreenQuadMaterial>(overlayQuads[1]->material)
+          ->SetTexture(geometrySubrender.framebuffer->GetColorTexture(1));
+
+      overlayQuads[2]->enabled = true;
+      std::static_pointer_cast<ScreenQuadMaterial>(overlayQuads[2]->material)
+          ->SetScale(quadScale);
+      std::static_pointer_cast<ScreenQuadMaterial>(overlayQuads[2]->material)
+          ->SetOffset(glm::vec2(1 - quadScale.x * 0.5, -1 + quadScale.y * 0.5));
+      std::static_pointer_cast<ScreenQuadMaterial>(overlayQuads[2]->material)
+          ->SetTexture(geometrySubrender.framebuffer->GetColorTexture(2));
       break;
     };
   }
 }
+
+void dg::AOScene::RenderFramebuffers() {
+  // Create or resize geometry framebuffer if needed.
+  glm::vec2 windowSize = window->GetFramebufferSize();
+  if (geometrySubrender.framebuffer == nullptr ||
+      geometrySubrender.framebuffer->GetWidth() != windowSize.x ||
+      geometrySubrender.framebuffer->GetHeight() != windowSize.y) {
+    CreateGBuffer();
+  }
+
+  PerformSubrender(geometrySubrender);
+}
+
+void dg::AOScene::CreateGBuffer() {
+  glm::vec2 windowSize = window->GetFramebufferSize();
+
+  FrameBuffer::Options opts;
+  opts.width = windowSize.x;
+  opts.height = windowSize.y;
+  opts.depthReadable = true;
+  opts.hasStencil = false;
+  opts.textureOptions = std::vector<TextureOptions>(4);
+
+  // First color texture is the albedo (rgb) and blend alpha (a).
+  opts.textureOptions[0].width = opts.width;
+  opts.textureOptions[0].height = opts.height;
+  opts.textureOptions[0].type = TexturePixelType::BYTE;
+  opts.textureOptions[0].wrap = TextureWrap::CLAMP_EDGE;
+
+  // Second color texture is the world-space position (xyz), and whether
+  // the fragment is to be lit at all (w == 1).
+  opts.textureOptions[1].width = opts.width;
+  opts.textureOptions[1].height = opts.height;
+  opts.textureOptions[1].type = TexturePixelType::FLOAT;
+  opts.textureOptions[1].wrap = TextureWrap::CLAMP_EDGE;
+
+  // Third color texture is the world-space normal.
+  opts.textureOptions[2].width = opts.width;
+  opts.textureOptions[2].height = opts.height;
+  opts.textureOptions[2].type = TexturePixelType::FLOAT;
+  opts.textureOptions[2].wrap = TextureWrap::CLAMP_EDGE;
+
+  // Fourth color texture is the specular reflection amount (rgb), and
+  // shininess (a).
+  opts.textureOptions[3].width = opts.width;
+  opts.textureOptions[3].height = opts.height;
+  opts.textureOptions[3].type = TexturePixelType::BYTE;
+  opts.textureOptions[3].wrap = TextureWrap::CLAMP_EDGE;
+
+  geometrySubrender.framebuffer = FrameBuffer::Create(opts);
+
+  // Point material handling the lighting pass to the new g-buffer textures.
+  std::static_pointer_cast<LightPassMaterial>(finalRenderQuad->material)
+      ->SetAlbedoTexture(geometrySubrender.framebuffer->GetColorTexture(0));
+  std::static_pointer_cast<LightPassMaterial>(finalRenderQuad->material)
+      ->SetPositionTexture(geometrySubrender.framebuffer->GetColorTexture(1));
+  std::static_pointer_cast<LightPassMaterial>(finalRenderQuad->material)
+      ->SetNormalTexture(geometrySubrender.framebuffer->GetColorTexture(2));
+  std::static_pointer_cast<LightPassMaterial>(finalRenderQuad->material)
+      ->SetSpecularTexture(geometrySubrender.framebuffer->GetColorTexture(3));
+  std::static_pointer_cast<LightPassMaterial>(finalRenderQuad->material)
+      ->SetDepthTexture(geometrySubrender.framebuffer->GetDepthTexture());
+}
+
+void dg::AOScene::PreRender() {
+  // Always render geometry pass with whichever camera we're about to do
+  // the main render with.
+  geometrySubrender.camera = subrenders.main.camera;
+}
+

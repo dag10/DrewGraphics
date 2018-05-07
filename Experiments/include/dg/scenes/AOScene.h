@@ -16,6 +16,17 @@ namespace dg {
 
     public:
 
+      class LayerMask : public Scene::LayerMask {
+        public:
+          static inline LayerMask Overlay() { return Ord(1); }
+        protected:
+          LayerMask(Scene::LayerMask mask) : Scene::LayerMask(mask) {}
+        private:
+          static inline LayerMask Ord(uint64_t idx) {
+            return LayerMask(Scene::LayerMask::Ord(HighestIndex + idx));
+          }
+      };
+
       static std::unique_ptr<AOScene> Make();
 
       AOScene();
@@ -41,6 +52,7 @@ namespace dg {
       Subrender geometrySubrender;
 
       std::vector<std::shared_ptr<Model>> overlayQuads;
+      std::shared_ptr<Model> finalRenderQuad;
 
   }; // class AOScene
 

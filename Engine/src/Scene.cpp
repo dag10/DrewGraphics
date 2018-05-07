@@ -417,15 +417,18 @@ void dg::Scene::DrawScene() {
     if (!(currentModel.model->layer & currentRender.subrender->layerMask)) {
       continue;
     }
-    material->SendCameraPosition(cameraPos);
-    material->SendLights(lightArray);
+    Model::DrawContext context;
+    context.view = view;
+    context.projection = projection;
+    context.cameraPos = &cameraPos;
+    context.lights = &lightArray;
     if (currentRender.shadowCastingLight != nullptr) {
       auto texture = currentRender.shadowCastingLight->GetShadowMap();
       if (texture != nullptr) {
-        material->SendShadowMap(texture);
+        context.shadowMap = texture;
       }
     }
-    (*currentModel.model).Draw(view, projection, material);
+    (*currentModel.model).Draw(context, currentRender.subrender->material);
   }
 }
 

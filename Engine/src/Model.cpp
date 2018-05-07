@@ -22,6 +22,14 @@ dg::Model::Model(Model& other) : SceneObject(other) {
 
 void dg::Model::Draw(glm::mat4x4 view, glm::mat4x4 projection,
                      std::shared_ptr<Material> material) const {
+  DrawContext context;
+  context.view = view;
+  context.projection = projection;
+  Draw(context, material);
+}
+
+void dg::Model::Draw(const DrawContext &context,
+                     std::shared_ptr<Material> material) const {
   if (material == nullptr) {
     material = this->material;
   }
@@ -36,9 +44,21 @@ void dg::Model::Draw(glm::mat4x4 view, glm::mat4x4 projection,
   material->Use();
 #endif
 
+  if (context.cameraPos != nullptr) {
+    material->SendCameraPosition(*context.cameraPos);
+  }
+
+  if (context.lights != nullptr) {
+    material->SendLights(*context.lights);
+  }
+
+  if (context.shadowMap != nullptr) {
+    material->SendShadowMap(context.shadowMap);
+  }
+
   material->SendMatrixNormal(glm::transpose(glm::inverse(xfMat)));
   material->SendMatrixM(xfMat);
-  material->SendMatrixMVP(projection * view * xfMat);
+  material->SendMatrixMVP(context.projection * context.view * xfMat);
 
 #if defined(_DIRECTX)
   material->Use();

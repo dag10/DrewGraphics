@@ -11,7 +11,9 @@
 
 namespace dg {
 
-  inline char PathSeparator() {
+float lerp(float a, float b, float f);
+
+inline char PathSeparator() {
 #ifdef _WIN32
     return '\\';
 #else

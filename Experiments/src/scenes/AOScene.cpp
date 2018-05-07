@@ -76,11 +76,11 @@ void dg::AOScene::Initialize() {
 
   // Create a flashlight attached to the camera.
   flashlight = std::make_shared<SpotLight>(
-    glm::vec3(0.6f, 0.5f, 0.5f), 0.244f, 2.76f, 3.11f);
+    glm::vec3(0.6f, 0.5f, 0.5f), 0.7f, 2.76f, 3.11f);
   flashlight->SetCutoff(glm::radians(25.f));
   flashlight->SetFeather(glm::radians(2.f));
   flashlight->SetCutoff(glm::radians(25.f));
-  //flashlight->SetCastShadows(true);
+  flashlight->SetCastShadows(true);
   Behavior::Attach(flashlight,
                    std::make_shared<KeyboardLightController>(window));
   flashlight->transform = Transform::T(glm::vec3(0.1f, -0.1f, 0));
@@ -135,6 +135,17 @@ void dg::AOScene::InitializeSubrenders() {
 
   // Render only the overlays (which includes light pass) in the main render.
   subrenders.main.layerMask = LayerMask::Overlay();
+
+  // Create custom shadow framebuffer with color map (for special screen
+  // quad output).
+  FrameBuffer::Options options;
+  options.width = 2048;
+  options.height = 2048;
+  options.depthReadable = true;
+  options.hasStencil = false;
+  subrenders.light.framebuffer = FrameBuffer::Create(options);
+  // Render everything except the overlays in the shadowmap pass.
+  subrenders.light.layerMask = LayerMask::ALL() - LayerMask::Overlay();
 }
 
 void dg::AOScene::Update() {
@@ -145,6 +156,11 @@ void dg::AOScene::Update() {
     overlayState = OverlayState::GBuffer;
   }
 
+  // L key switches to lighting overlay state.
+  if (window->IsKeyJustPressed(Key::L)) {
+    overlayState = OverlayState::Lighting;
+  }
+
   // N key switches to no overlay state.
   if (window->IsKeyJustPressed(Key::N)) {
     overlayState = OverlayState::None;
@@ -152,6 +168,7 @@ void dg::AOScene::Update() {
 
   // If F is tapped, toggle flashlight.
   if (window->IsKeyJustPressed(Key::F)) {
+    skybox->enabled = !skybox->enabled;
     skylights->enabled = !skylights->enabled;
     pointlight->enabled = !pointlight->enabled;
     flashlight->enabled = !flashlight->enabled;
@@ -170,6 +187,8 @@ void dg::AOScene::Update() {
   // Update overlay quads based on overlay state.
   for (auto &quad : overlayQuads) {
     quad->enabled = false;
+    std::static_pointer_cast<ScreenQuadMaterial>(quad->material)
+        ->SetRedChannelOnly(false);
   }
   switch (overlayState) {
     case OverlayState::None:
@@ -203,6 +222,31 @@ void dg::AOScene::Update() {
           ->SetOffset(glm::vec2(1 - quadScale.x * 0.5, -1 + quadScale.y * 0.5));
       std::static_pointer_cast<ScreenQuadMaterial>(overlayQuads[2]->material)
           ->SetTexture(geometrySubrender.framebuffer->GetColorTexture(2));
+      break;
+    };
+    case OverlayState::Lighting: {
+      glm::vec2 quadScale =
+          glm::vec2(2.f / 3.f) / glm::vec2(window->GetAspectRatio(), 1);
+
+      overlayQuads[0]->enabled = true;
+      std::static_pointer_cast<ScreenQuadMaterial>(overlayQuads[0]->material)
+          ->SetScale(quadScale);
+      std::static_pointer_cast<ScreenQuadMaterial>(overlayQuads[0]->material)
+          ->SetOffset(glm::vec2(1 - quadScale.x * 0.5,
+                                (1.f / 3.f) + quadScale.y * 0.5));
+      std::static_pointer_cast<ScreenQuadMaterial>(overlayQuads[0]->material)
+          ->SetTexture(subrenders.light.framebuffer->GetColorTexture());
+
+      overlayQuads[1]->enabled = true;
+      std::static_pointer_cast<ScreenQuadMaterial>(overlayQuads[1]->material)
+          ->SetScale(quadScale);
+      std::static_pointer_cast<ScreenQuadMaterial>(overlayQuads[1]->material)
+          ->SetOffset(glm::vec2(1 - quadScale.x * 0.5,
+                                -(1.f / 3.f) + quadScale.y * 0.5));
+      std::static_pointer_cast<ScreenQuadMaterial>(overlayQuads[1]->material)
+          ->SetTexture(subrenders.light.framebuffer->GetDepthTexture());
+      std::static_pointer_cast<ScreenQuadMaterial>(overlayQuads[1]->material)
+          ->SetRedChannelOnly(true);
       break;
     };
   }

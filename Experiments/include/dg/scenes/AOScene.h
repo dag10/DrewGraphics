@@ -41,6 +41,7 @@ namespace dg {
       enum class OverlayState {
         None,
         GBuffer,
+        Lighting,
       };
 
       void InitializeSubrenders();

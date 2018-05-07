@@ -38,12 +38,14 @@ void dg::AOScene::Initialize() {
       Skybox::Create(Texture::FromPath("assets/textures/skybox_daylight.png"));
 
   // Create primary sky light.
+  skylights = std::make_shared<SceneObject>();
+  AddChild(skylights);
   auto primarySkyLight = std::make_shared<DirectionalLight>(
       glm::vec3(1.0f, 0.93f, 0.86f), 0.4, 0.82, 0.07);
   primarySkyLight->LookAtDirection(glm::normalize(glm::vec3(-0.3f, -1, -0.2f)));
   //Behavior::Attach(primarySkyLight,
                    //std::make_shared<KeyboardLightController>(window));
-  AddChild(primarySkyLight);
+  skylights->AddChild(primarySkyLight);
 
   // Create secondary sky light.
   auto secondarySkyLight = std::make_shared<DirectionalLight>(
@@ -51,19 +53,45 @@ void dg::AOScene::Initialize() {
   secondarySkyLight->LookAtDirection(-primarySkyLight->transform.Forward());
   //Behavior::Attach(secondarySkyLight,
                    //std::make_shared<KeyboardLightController>(window));
-  AddChild(secondarySkyLight);
+  skylights->AddChild(secondarySkyLight);
 
   // Create camera point light.
-  auto cameraLight =
+  pointlight =
       std::make_shared<PointLight>(primarySkyLight->GetDiffuse(), 0, 0.17, 0);
-  cameras.main->AddChild(cameraLight, false);
-  Behavior::Attach(cameraLight,
+  cameras.main->AddChild(pointlight, false);
+  Behavior::Attach(pointlight,
                    std::make_shared<KeyboardLightController>(window));
+
+  // Stone material,
+  DeferredMaterial floorMaterial =
+      DeferredMaterial::WithTexture(Texture::FromPath(
+          "assets/textures/Flooring_Stone_001/Flooring_Stone_001_COLOR.png"));
+  floorMaterial.SetNormalMap(Texture::FromPath(
+      "assets/textures/Flooring_Stone_001/Flooring_Stone_001_NRM.png"));
+  floorMaterial.SetSpecular(Texture::FromPath(
+      "assets/textures/Flooring_Stone_001/Flooring_Stone_001_SPEC.png"));
+  floorMaterial.SetShininess(9);
+  floorMaterial.SetUVScale(glm::vec2(5, 3) * 2.f);
+  floorMaterial.SetLit(true);
+
+  // Create a flashlight attached to the camera.
+  flashlight = std::make_shared<SpotLight>(
+    glm::vec3(0.6f, 0.5f, 0.5f), 0.244f, 2.76f, 3.11f);
+  flashlight->SetCutoff(glm::radians(25.f));
+  flashlight->SetFeather(glm::radians(2.f));
+  flashlight->SetCutoff(glm::radians(25.f));
+  //flashlight->SetCastShadows(true);
+  Behavior::Attach(flashlight,
+                   std::make_shared<KeyboardLightController>(window));
+  flashlight->transform = Transform::T(glm::vec3(0.1f, -0.1f, 0));
+  cameras.main->AddChild(flashlight, false);
+  flashlight->enabled = false;
 
   // Load model.
   AddChild(std::make_shared<Model>(
       Mesh::LoadOBJ("assets/models/crytek-sponza/sponza.obj"),
-      std::make_shared<Material>(DeferredMaterial::WithColor(glm::vec3(0.5))),
+      //std::make_shared<Material>(DeferredMaterial::WithColor(glm::vec3(0.5))),
+      std::make_shared<Material>(floorMaterial),
       Transform::S(glm::vec3(0.0025))));
 
   // Configure camera.
@@ -102,8 +130,10 @@ void dg::AOScene::InitializeSubrenders() {
   geometrySubrender.type = Subrender::Type::MonoscopicWindow;
   geometrySubrender.renderSkybox = false;
   geometrySubrender.sendLights = false;
+  // Render everything except the overlays in the geometry pass.
   geometrySubrender.layerMask = LayerMask::ALL() - LayerMask::Overlay();
 
+  // Render only the overlays (which includes light pass) in the main render.
   subrenders.main.layerMask = LayerMask::Overlay();
 }
 
@@ -119,6 +149,23 @@ void dg::AOScene::Update() {
   if (window->IsKeyJustPressed(Key::N)) {
     overlayState = OverlayState::None;
   }
+
+  // If F is tapped, toggle flashlight.
+  if (window->IsKeyJustPressed(Key::F)) {
+    skylights->enabled = !skylights->enabled;
+    pointlight->enabled = !pointlight->enabled;
+    flashlight->enabled = !flashlight->enabled;
+  }
+
+  // If Space is tapped, tag whether flashlight is pinned to camera transform.
+  if (window->IsKeyJustPressed(Key::SPACE)) {
+    if (flashlight->Parent() == this) {
+      cameras.main->AddChild(flashlight, true);
+    } else {
+      AddChild(flashlight, true);
+    }
+  }
+
 
   // Update overlay quads based on overlay state.
   for (auto &quad : overlayQuads) {
@@ -229,4 +276,3 @@ void dg::AOScene::PreRender() {
   // the main render with.
   geometrySubrender.camera = subrenders.main.camera;
 }
-

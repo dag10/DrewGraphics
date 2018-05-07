@@ -11,6 +11,8 @@
 namespace dg {
 
   class Model;
+  class PointLight;
+  class SpotLight;
 
   class AOScene : public Scene {
 
@@ -53,6 +55,10 @@ namespace dg {
 
       std::vector<std::shared_ptr<Model>> overlayQuads;
       std::shared_ptr<Model> finalRenderQuad;
+
+      std::shared_ptr<PointLight> pointlight;
+      std::shared_ptr<SpotLight> flashlight;
+      std::shared_ptr<SceneObject> skylights;
 
   }; // class AOScene
 

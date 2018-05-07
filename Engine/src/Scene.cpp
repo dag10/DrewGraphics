@@ -182,7 +182,9 @@ void dg::Scene::SetupSubrender(Subrender &subrender) {
   Graphics::Instance->PushRasterizerState(rasterizerState);
 
   // Clear the background and depth and stencil buffers.
-  ClearBuffer();
+  if (subrender.clearBuffer) {
+    ClearBuffer();
+  }
 
   // If we're rendering to HMD, draw the hidden area mesh for early-out of
   // pixels we won't see due to the HMD's optics.
@@ -399,11 +401,13 @@ void dg::Scene::DrawScene() {
   // Prepare light data.
   Light::ShaderData lightArray[Light::MAX_LIGHTS];
   int lightIdx = 0;
-  for (auto &light : currentRender.lights) {
-    if (lightIdx >= Light::MAX_LIGHTS) {
-      break;
+  if (currentRender.subrender->sendLights) {
+    for (auto &light : currentRender.lights) {
+      if (lightIdx >= Light::MAX_LIGHTS) {
+        break;
+      }
+      lightArray[lightIdx++] = (*light).GetShaderData();
     }
-    lightArray[lightIdx++] = (*light).GetShaderData();
   }
 
   // Render models.
@@ -421,11 +425,13 @@ void dg::Scene::DrawScene() {
     context.view = view;
     context.projection = projection;
     context.cameraPos = &cameraPos;
-    context.lights = &lightArray;
-    if (currentRender.shadowCastingLight != nullptr) {
-      auto texture = currentRender.shadowCastingLight->GetShadowMap();
-      if (texture != nullptr) {
-        context.shadowMap = texture;
+    if (currentRender.subrender->sendLights) {
+      context.lights = &lightArray;
+      if (currentRender.shadowCastingLight != nullptr) {
+        auto texture = currentRender.shadowCastingLight->GetShadowMap();
+        if (texture != nullptr) {
+          context.shadowMap = texture;
+        }
       }
     }
     (*currentModel.model).Draw(context, currentRender.subrender->material);

@@ -196,6 +196,8 @@ namespace dg {
         std::shared_ptr<Material> material = nullptr;
         vr::EVREye eye;
         LayerMask layerMask = LayerMask::ALL();
+        bool sendLights = true;
+        bool clearBuffer = true;
         bool renderSkybox = true;
         bool drawScene = true;
       }; // struct Subrender

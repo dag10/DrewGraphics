@@ -277,6 +277,9 @@ namespace dg {
       // Override this to change background color.
       virtual void ClearBuffer();
 
+      // Draws the skybox. Works for monoscopic and stereoscopic rendering.
+      void DrawSkybox();
+
       // Manually render a subrender.
       // Mutable because it will update the Camera's aspect ratio to match
       // that of the supplied render target.

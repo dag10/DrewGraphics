@@ -134,6 +134,21 @@ void dg::Scene::ClearBuffer() {
   Graphics::Instance->ClearColor(glm::vec3(0));
 }
 
+void dg::Scene::DrawSkybox() {
+  switch (currentRender.subrender->type) {
+    case Subrender::Type::MonoscopicWindow:
+    case Subrender::Type::MonoscopicFramebuffer:
+      skybox->Draw(*currentRender.subrender->camera);
+      break;
+    case Subrender::Type::Stereoscopic:
+      skybox->Draw(*currentRender.subrender->camera,
+                   currentRender.subrender->eye);
+      break;
+    default:
+      break;
+  }
+}
+
 void dg::Scene::SetupRender() {
   currentRender.rendering = true;
   ProcessSceneHierarchy();
@@ -368,18 +383,7 @@ void dg::Scene::DrawScene() {
   // Render skybox.
   if (skybox != nullptr && skybox->enabled &&
       currentRender.subrender->renderSkybox) {
-    switch (currentRender.subrender->type) {
-      case Subrender::Type::MonoscopicWindow:
-      case Subrender::Type::MonoscopicFramebuffer:
-        skybox->Draw(*currentRender.subrender->camera);
-        break;
-      case Subrender::Type::Stereoscopic:
-        skybox->Draw(*currentRender.subrender->camera,
-                     currentRender.subrender->eye);
-        break;
-      default:
-        break;
-    }
+    DrawSkybox();
   }
 
   // Set up view.

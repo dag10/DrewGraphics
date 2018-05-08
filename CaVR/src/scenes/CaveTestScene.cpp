@@ -25,7 +25,7 @@ std::unique_ptr<cavr::CaveTestScene> cavr::CaveTestScene::Make() {
 }
 
 cavr::CaveTestScene::CaveTestScene() : dg::Scene() {
-  vr.requested = true;
+  //vr.requested = true;
 }
 
 void cavr::CaveTestScene::Initialize() {
@@ -174,24 +174,85 @@ void cavr::CaveTestScene::Initialize() {
   caveWireframeModels->enabled = !caveTransparentModels->enabled;
 
   // Join multiple ArcSegments together.
-  CaveSegment::KnotSet arcKnots = CreateArcKnots().WithInterpolatedKnots();
-  CaveSegment currentArcSegment(arcKnots.TransformedBy(
-      dg::Transform::TS(glm::vec3(0.5, 0, -1), glm::vec3(0.8f))));
-  CaveSegment originalSegment = currentArcSegment;
-  AddCaveSegment(currentArcSegment);
-  srand(1);
-  for (int i = 1; i < 20; i++) {
-    float r = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
-    //arcKnots.knots.front()->RotateBy(glm::radians(r * 360.f));
-    //arcKnots.knots.front()->RotateBy(glm::radians(180.f));
-    currentArcSegment = CaveSegment(arcKnots, currentArcSegment);
-    AddCaveSegment(currentArcSegment);
+  //CaveSegment::KnotSet arcKnots = CreateArcKnots2(0.98).WithInterpolatedKnots();
+  //CaveSegment currentArcSegment(arcKnots.TransformedBy(
+  //    dg::Transform::TS(glm::vec3(0.5, 0, -1), glm::vec3(0.8f))));
+  //CaveSegment originalSegment = currentArcSegment;
+  //AddCaveSegment(currentArcSegment);
+  //srand(1);
+  //for (int i = 1; i < 200; i++) {
+  //  float r = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
+  //  currentArcSegment = CaveSegment(arcKnots, currentArcSegment);
+    //AddCaveSegment(currentArcSegment);
+  //}
+  //currentArcSegment = originalSegment;
+
+  // Try various Simple Curves
+  //for (int i = 0; i <= 17; i++) {
+  //  CaveSegment::KnotSet interpolatedKnots =
+  //      CreateSimpleCurve(i * 5, 10 * i, 0.9).WithInterpolatedKnots();
+  //  CaveSegment segment(interpolatedKnots.TransformedBy(
+  //      dg::Transform::TS(glm::vec3(0, 0, i * 1.0f), glm::vec3(1.0f))));
+  //  AddCaveSegment(segment);
+  //}
+
+  // Try various Arc2
+  for (int i = 0; i <= 10; i++) {
+    CaveSegment::KnotSet interpolatedKnots =
+        CreateArcKnots2(0.6 + (float)i / 10.f * 0.7, 0.95).WithInterpolatedKnots();
+    CaveSegment segment(interpolatedKnots.TransformedBy(
+        dg::Transform::TS(glm::vec3(0, 0, i * 1.0f), glm::vec3(1.0f))));
+    AddCaveSegment(segment);
   }
-  currentArcSegment = originalSegment;
 }
 
-cavr::CaveSegment::KnotSet cavr::CaveTestScene::CreateArcKnots() {
+// Rotation: [0, 90)
+// Angle: [0, 180)
+cavr::CaveSegment::KnotSet cavr::CaveTestScene::CreateSimpleCurve(
+    float rotation, float angle, float constriction) {
   CaveSegment::KnotSet set;
+
+  glm::quat rot(glm::radians(glm::vec3(0, angle * 0.5f, rotation)));
+  float speed = 25.0f + 15.0f * angle / 180.f;
+
+  const glm::vec3 start(1.f, 0.75f, 0.f);
+  const glm::vec3 end(-1.f, 0.75f, 0.f);
+  const float radius = 0.1f;
+  set.knots.push_back(std::shared_ptr<CaveSegment::Knot>(
+      new CaveSegment::Knot(start, rot * -dg::RIGHT, radius, speed)));
+  set.knots.push_back(std::shared_ptr<CaveSegment::Knot>(new CaveSegment::Knot(
+      end, glm::inverse(rot) * -dg::RIGHT, radius * constriction, speed)));
+
+  return set;
+}
+
+cavr::CaveSegment::KnotSet cavr::CaveTestScene::CreateArcKnots2(
+    float midConstriction, float constriction) {
+  CaveSegment::KnotSet set;
+
+  float halfConstriction = (constriction + 1.f) * 0.5f;
+
+  const glm::vec3 start(1.f, 0.8f, 0.4f);
+  const glm::vec3 middle(-0.1f, 1.3f, -0.2f);
+  const glm::vec3 end(-1.f, 0.75f, -0.25f);
+  const float radius = 0.15f;
+  set.knots.push_back(std::shared_ptr<CaveSegment::Knot>(new CaveSegment::Knot(
+      start, glm::normalize(glm::vec3(-0.1f, 0.4f, -0.5f)), radius, 15.f)));
+  set.knots.push_back(std::shared_ptr<CaveSegment::Knot>(new CaveSegment::Knot(
+      middle, glm::normalize(glm::vec3(-1, 0, 0)),
+      radius * halfConstriction * midConstriction, 15.f)));
+  set.knots.push_back(std::shared_ptr<CaveSegment::Knot>(
+      new CaveSegment::Knot(end, glm::normalize(glm::vec3(-1.f, 0.f, -0.3f)),
+                            radius * constriction, 20.f)));
+
+  return set;
+}
+
+cavr::CaveSegment::KnotSet cavr::CaveTestScene::CreateArcKnots(
+    float constriction) {
+  CaveSegment::KnotSet set;
+
+  float halfConstriction = (constriction + 1.f) * 0.5f;
 
   const glm::vec3 start(1.f, 0.8f, 0.4f);
   const glm::vec3 middle(-0.1f, 1.3f, -0.2f);
@@ -199,10 +260,12 @@ cavr::CaveSegment::KnotSet cavr::CaveTestScene::CreateArcKnots() {
   const float radius = 0.15f;
   set.knots.push_back(std::shared_ptr<CaveSegment::Knot>(new CaveSegment::Knot(
       start, glm::normalize(glm::vec3(-0.1f, 0.4f, -0.5f)), radius, 15.f)));
-  set.knots.push_back(std::shared_ptr<CaveSegment::Knot>(new CaveSegment::Knot(
-      middle, glm::normalize(glm::vec3(-1, 0, 0)), radius * 0.9f, 15.f)));
-  set.knots.push_back(std::shared_ptr<CaveSegment::Knot>(new CaveSegment::Knot(
-      end, glm::normalize(glm::vec3(-1.f, 0.f, 0.3f)), radius, 15.f)));
+  set.knots.push_back(std::shared_ptr<CaveSegment::Knot>(
+      new CaveSegment::Knot(middle, glm::normalize(glm::vec3(-1, 0, 0)),
+                            radius * halfConstriction, 15.f)));
+  set.knots.push_back(std::shared_ptr<CaveSegment::Knot>(
+      new CaveSegment::Knot(end, glm::normalize(glm::vec3(-1.f, 0.f, 0.3f)),
+                            radius * constriction, 15.f)));
 
   return set;
 }

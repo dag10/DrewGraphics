@@ -42,6 +42,9 @@ namespace dg {
       // to the deviceIndex's pose.
       int deviceIndex;
 
+      // Trigger a haptic vibration for the duration in seconds.
+      void TriggerHaptic(float duration = 0.1f);
+
   }; // class VRTrackedObject
 
 } // namespace dg

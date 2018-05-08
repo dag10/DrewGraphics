@@ -3,6 +3,7 @@
 //
 
 #include "cavr/scenes/GameScene.h"
+#include <ctime>
 #include <glm/glm.hpp>
 #include <iostream>
 #include <memory>
@@ -39,6 +40,10 @@ cavr::GameScene::GameScene() : dg::Scene() {
 
 void cavr::GameScene::Initialize() {
   dg::Scene::Initialize();
+
+  // Random seed.
+  //srand(time(0));
+  srand(0);
 
   // Make near clip plane shorter.
   cameras.main->nearClip = 0.01f;
@@ -98,6 +103,26 @@ void cavr::GameScene::Initialize() {
                        std::make_shared<dg::VRControllerState>());
   vr.container->AddChild(rightController);
 
+  // Create cave.
+  caveStartTransform = dg::Transform::T(glm::vec3(0, 0.75, 0));
+  cave = std::make_shared<dg::SceneObject>(caveStartTransform);
+  auto caveBehavior =
+      dg::Behavior::Attach(cave, std::make_shared<CaveBehavior>());
+  AddChild(cave);
+
+  // Create start model.
+  auto startMaterial = std::make_shared<dg::StandardMaterial>(
+      dg::StandardMaterial::WithTransparentColor(glm::vec4(0, 1.0, 0, 0.3)));
+  startMaterial->rasterizerOverride = dg::RasterizerState::AdditiveBlending();
+  startMaterial->SetLit(false);
+  startModel = std::make_shared<dg::Model>(
+      dg::Mesh::Cylinder, startMaterial,
+      dg::Transform::TRS(glm::vec3(0, 0, 0),
+                         glm::quat(glm::radians(glm::vec3(0, 0, 90))),
+                         glm::vec3(0.20f, 0.4f, 0.20f)));
+  cave->AddChild(startModel, false);
+  AddChild(startModel, true);
+
   // Create attachment point point for eventual spaceship.
   shipAttachment =
       std::make_shared<SceneObject>(dg::Transform::T(dg::FORWARD * 0.035f));
@@ -106,6 +131,9 @@ void cavr::GameScene::Initialize() {
   // Create ship, attached to attachment point.
   auto shipObj = CreateShip();
   ship = shipObj->GetBehavior<ShipBehavior>();
+  ship->SetCave(cave->GetBehavior<CaveBehavior>());
+  ship->SetControllerState(
+      rightController->GetBehavior<dg::VRControllerState>());
   shipAttachment->AddChild(shipObj, false);
 
   // Attach quad to sphere temporarily to visualize intersection rendering.
@@ -130,11 +158,13 @@ void cavr::GameScene::Initialize() {
       dg::Transform::TS(glm::vec3(-1.f, 0.25f, 0), glm::vec3(0.5f)));
   renderQuad->AddChild(downscaleQuad, false);
 
-  // Create cave.
-  cave = std::make_shared<dg::SceneObject>();
-  auto caveBehavior =
-      dg::Behavior::Attach(cave, std::make_shared<CaveBehavior>());
-  AddChild(cave);
+  if (vr.enabled) {
+    // Controllers seem swapped at start with Vive?
+    //SwapControllers();
+
+    leftController->GetBehavior<dg::VRTrackedObject>()->TriggerHaptic(1);
+    rightController->GetBehavior<dg::VRTrackedObject>()->TriggerHaptic(1);
+  }
 
   // If VR could not enable, position the camera in a useful place for
   // development and make it controllable with keyboard and mouse.
@@ -162,6 +192,17 @@ void cavr::GameScene::Initialize() {
   }
 }
 
+void cavr::GameScene::SwapControllers() {
+  auto leftTrackedObj = leftController->GetBehavior<dg::VRTrackedObject>();
+  auto rightTrackedObj = rightController->GetBehavior<dg::VRTrackedObject>();
+  std::swap(leftTrackedObj->role, rightTrackedObj->role);
+  std::swap(leftTrackedObj->deviceIndex, rightTrackedObj->deviceIndex);
+}
+
+void cavr::GameScene::ResetGame() {
+  gameState = GameState::Start;
+}
+
 void cavr::GameScene::Update() {
   Scene::Update();
   auto leftState = leftController->GetBehavior<dg::VRControllerState>();
@@ -170,10 +211,13 @@ void cavr::GameScene::Update() {
 
   // Swap left and right controllers with TILDE key.
   if (window->IsKeyJustPressed(dg::Key::GRAVE_ACCENT)) {
-    auto leftTrackedObj = leftController->GetBehavior<dg::VRTrackedObject>();
-    auto rightTrackedObj = rightController->GetBehavior<dg::VRTrackedObject>();
-    std::swap(leftTrackedObj->role, rightTrackedObj->role);
-    std::swap(leftTrackedObj->deviceIndex, rightTrackedObj->deviceIndex);
+    SwapControllers();
+  }
+
+  // Reset game with R key or left grip.
+  if (window->IsKeyJustPressed(dg::Key::R) ||
+      leftState->IsButtonPressed(dg::VRControllerState::Button::GRIP)) {
+    ResetGame();
   }
 
   // Handle controller inputs.
@@ -225,40 +269,109 @@ void cavr::GameScene::Update() {
     }
   }
 
-  // If left mouse or X key or right trigger is held down, add to cave velocity.
+  // If left mouse or X key or right trigger is held down, move forward.
   const float minRightTrigger = 0.15f;
+  const float maxSpeed = 2.0f + (elapsedTime / 40.f); // meters per second
   float rightTrigger =
       rightState->GetAxis(dg::VRControllerState::Axis::TRIGGER).x;
-  if (dg::Engine::Instance().GetWindow()->IsMouseButtonPressed(
-          dg::BUTTON_LEFT) ||
+  if (gameState == GameState::Playing ||
+      window->IsMouseButtonPressed(dg::BUTTON_LEFT) ||
       dg::Engine::Instance().GetWindow()->IsKeyPressed(dg::Key::X)) {
-    rightTrigger = 0.2f;
+    rightTrigger = 0.5f;
   }
   if (rightTrigger > minRightTrigger) {
     float thrustAmount =
         (rightTrigger - minRightTrigger) / (1.f - minRightTrigger);
-    glm::vec3 thrustDir = shipAttachment->SceneSpace().Forward();
-    caveBehavior->AddVelocity(thrustDir * -thrustAmount * 0.02f);
+    glm::vec3 thrustDir = ship->GetSceneObject()->SceneSpace().Forward();
+    cave->transform.translation -= thrustDir * thrustAmount * maxSpeed *
+                                   (float)dg::Time::Delta * speedRampUp;
   }
 
-  // Brake with right mouse or backspace or Z right GRIP.
-  if (dg::Engine::Instance().GetWindow()->IsMouseButtonPressed(
-          dg::BUTTON_RIGHT) ||
-      window->IsKeyPressed(dg::Key::Z) ||
-      rightState->IsButtonPressed(dg::VRControllerState::Button::GRIP)) {
-    glm::vec3 velo = caveBehavior->GetVelocity();
-    velo -= velo * 5.0f * (float)dg::Time::Delta;
-    if (velo.length() < 0.2f) {
-      velo = glm::vec3(0);
+  const glm::vec3 startColor(0, 1, 0);
+  const float startCountdownDuration = 0.2f; // seconds
+
+  float startAlpha = startCountdown / startCountdownDuration;
+  auto startMaterial =
+      std::static_pointer_cast<dg::StandardMaterial>(startModel->material);
+  startMaterial->SetDiffuse(glm::vec4(startColor, startAlpha * 0.3f));
+
+  const auto floorColor = glm::vec3(85, 43, 112) / 255.f;
+  //auto floorMaterial = std::make_shared<dg::StandardMaterial>(
+  //    dg::StandardMaterial::WithTransparentColor(
+  //        glm::vec4(glm::vec3(85, 43, 112) / 255.f, 0.4f)));
+  auto floorMaterial =
+      std::static_pointer_cast<dg::StandardMaterial>(this->floor->material);
+  floorMaterial->SetDiffuse(glm::vec4(floorColor, startAlpha * 0.4f));
+
+  //std::cout << "State: " << (int)gameState << std::endl;
+
+  switch (gameState) {
+    case GameState::Start: {
+      cave->enabled = false;
+      startModel->layer = LayerMask::StartGeometry();
+      startModel->enabled = true;
+      startCountdown = startCountdownDuration;
+      caveBehavior->SetCrashPosition(glm::vec3(0));
+      elapsedTime = 0;
+      cave->transform = caveStartTransform;
+      if (ship->IntersectsCave()) {
+        gameState = GameState::Starting;
+        if (vr.enabled) {
+          leftController->GetBehavior<dg::VRTrackedObject>()->TriggerHaptic(2);
+          rightController->GetBehavior<dg::VRTrackedObject>()->TriggerHaptic(2);
+        }
+      }
+      break;
     }
-    caveBehavior->SetVelocity(velo);
+    case GameState::Starting: {
+      cave->enabled = false;
+      startModel->enabled = true;
+      startModel->layer = LayerMask::Default();
+      speedRampUp = 0;
+      startCountdown -= dg::Time::Delta;
+      if (startCountdown <= 0) {
+        startCountdown = 0;
+        StartGame();
+      }
+      break;
+    }
+    case GameState::Playing: {
+      cave->enabled = true;
+      startModel->enabled = false;
+      elapsedTime += dg::Time::Delta;
+      speedRampUp += dg::Time::Delta * 0.3f; // seconds to ramp up speed
+      if (speedRampUp > 1) speedRampUp = 1;
+      if (ship->IntersectsCave()) {
+        caveBehavior->SetCrashPosition(
+            ship->GetSceneObject()->SceneSpace().translation);
+        PlayerDied();
+      }
+      break;
+    }
+    case GameState::Dead: {
+      cave->enabled = true;
+      startModel->enabled = false;
+      if (rightState->IsButtonJustPressed(
+              dg::VRControllerState::Button::TRIGGER)) {
+        ResetGame();
+      }
+      break;
+    }
   }
 
   bool devEnabled = (devModeState == DevModeState::Enabled);
-  skybox->enabled = devEnabled;
-  floor->enabled = devEnabled;
-  skyLight->enabled = devEnabled;
+  //skybox->enabled = devEnabled;
+  //floor->enabled = devEnabled;
+  //skyLight->enabled = devEnabled;
   renderQuad->enabled = devEnabled;
+}
+
+void cavr::GameScene::StartGame() {
+  gameState = GameState::Playing;
+}
+
+void cavr::GameScene::PlayerDied() {
+  gameState = GameState::Dead;
 }
 
 void cavr::GameScene::RenderFramebuffers() {
@@ -297,8 +410,9 @@ std::shared_ptr<dg::SceneObject> cavr::GameScene::CreateShip() {
   // Attach sphere to left controller to represent ship hull.
   auto hullSphereColor = std::make_shared<dg::StandardMaterial>(
       dg::StandardMaterial::WithTransparentColor(
-          glm::vec4(1.f, 1.f, 1.f, 0.1f)));
+          glm::vec4(0.75f, 0.85f, 1.f, 0.3f)));
   hullSphereColor->SetLit(false);
+  hullSphereColor->rasterizerOverride = dg::RasterizerState::AdditiveBlending();
   auto hullSphere = std::make_shared<dg::Model>(
       dg::Mesh::Sphere, hullSphereColor, dg::Transform::S(glm::vec3(0.025f)));
   ship->AddChild(hullSphere, false);

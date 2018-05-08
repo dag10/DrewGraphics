@@ -33,14 +33,30 @@ void cavr::CaveBehavior::Start() {
   ringVertexMaterial->rasterizerOverride =
       dg::RasterizerState::AdditiveBlending();
 
+  // Cave shader and material.
+  // TODO: Refactor
+  auto cavePurple = glm::vec3(165, 16, 239) / 255.f * 0.117f * 2.f;
+  auto baseCaveMaterial = std::make_shared<dg::StandardMaterial>(
+      dg::StandardMaterial::WithTransparentColor(glm::vec4(cavePurple, 0.8)));
+  baseCaveMaterial->shader =
+      dg::Shader::FromFiles("CaveVertexShader.cso", "CavePixelShader.cso");
+
   // Create inner cave material.
   glm::vec3 caveColor = glm::vec3(0.11f);
-  caveMaterial = std::make_shared<dg::StandardMaterial>(
-      dg::StandardMaterial::WithColor(caveColor));
+  //caveMaterial = std::make_shared<dg::StandardMaterial>(
+  //    dg::StandardMaterial::WithColor(caveColor));
+  caveMaterial = std::shared_ptr<dg::StandardMaterial>(
+      new dg::StandardMaterial(*baseCaveMaterial));
+  caveMaterial->SetProperty("isFront", false);
 
   // Create outer transparent cave material.
-  caveTransparentMaterial = std::make_shared<dg::StandardMaterial>(
-      dg::StandardMaterial::WithTransparentColor(glm::vec4(caveColor, 0.3f)));
+  //caveTransparentMaterial = std::make_shared<dg::StandardMaterial>(
+  //    dg::StandardMaterial::WithTransparentColor(glm::vec4(caveColor, 0.3f)));
+  caveTransparentMaterial =
+      std::make_shared<dg::StandardMaterial>(*baseCaveMaterial);
+  caveTransparentMaterial->SetDiffuse(glm::vec4(cavePurple, 0.5f));
+  caveTransparentMaterial->SetProperty("isFront", true);
+  caveTransparentMaterial->queue = caveMaterial->queue + 1;
   caveTransparentMaterial->rasterizerOverride.SetCullMode(
       dg::RasterizerState::CullMode::FRONT);
 
@@ -64,34 +80,41 @@ void cavr::CaveBehavior::Start() {
   caveWireframeModels->enabled = !caveTransparentModels->enabled;
 
   // Create initial knot sets.
-  knotSets.push_back(CreateArcKnots().WithInterpolatedKnots());
-  knotSets.push_back(CreateStraightKnots().WithInterpolatedKnots());
+  // TODO: Add actual probability weights, not just repetition in the set.
+  float constriction = 0.993f;
+  for (int i = 0; i < 10; i++) {
+    knotSets.push_back(CreateArcKnots(constriction).WithInterpolatedKnots());
+  }
+  for (int angle = -20; angle <= 20; angle += 10) {
+    for (int rot = -20; rot <= 20; rot += 10) {
+      knotSets.push_back(
+          CreateSimpleCurve(rot, angle, constriction).WithInterpolatedKnots());
+    }
+  }
+  for (int rot = -20; rot <= 20; rot += 4) {
+    knotSets.push_back(
+        CreateSimpleCurve(rot, 5, constriction).WithInterpolatedKnots());
+  }
+  for (int i = 0; i < 6; i++) {
+    knotSets.push_back(CreateStraightKnots(constriction).WithInterpolatedKnots());
+  }
 
   // Update initial properties.
   SetShowKnots(GetShowKnots());
   SetShowWireframe(GetShowWireframe());
 
   // Add initial cave segments.
-  for (int i = 0; i < 30; i++) {
+  AddNextCaveSegment(CreateCaveStart(0.15f));
+  for (int i = 0; i < 2; i++) {
+    AddNextCaveSegment(CreateStraightKnots(1));
+  }
+  for (int i = 0; i < 200; i++) {
     AddNextCaveSegment();
   }
 }
 
 void cavr::CaveBehavior::Update() {
 	dg::Behavior::Update();
-  GetSceneObject()->transform.translation += velocity * (float)dg::Time::Delta;
-}
-
-void cavr::CaveBehavior::SetVelocity(glm::vec3 velocity) {
-  this->velocity = velocity;
-}
-
-void cavr::CaveBehavior::AddVelocity(glm::vec3 velocity) {
-  this->velocity += velocity;
-}
-
-glm::vec3 cavr::CaveBehavior::GetVelocity() const {
-  return velocity;
 }
 
 void cavr::CaveBehavior::SetShowKnots(bool showKnots) {
@@ -119,6 +142,11 @@ bool cavr::CaveBehavior::GetShowWireframe() const {
   return showWireframe;
 }
 
+void cavr::CaveBehavior::SetCrashPosition(glm::vec3 pos) {
+  caveMaterial->SetProperty("crashPosition", pos);
+  caveTransparentMaterial->SetProperty("crashPosition", pos);
+}
+
 void cavr::CaveBehavior::AddNextCaveSegment() {
   const CaveSegment::KnotSet &knotSet = knotSets[rand() % knotSets.size()];
   AddNextCaveSegment(knotSet);
@@ -140,8 +168,31 @@ void cavr::CaveBehavior::AddNextCaveSegment(
   lastCaveSegment = std::move(nextCaveSegment);
 }
 
-cavr::CaveSegment::KnotSet cavr::CaveBehavior::CreateArcKnots() {
+// Rotation: [0, 90)
+// Angle: [0, 180)
+cavr::CaveSegment::KnotSet cavr::CaveBehavior::CreateSimpleCurve(
+    float rotation, float angle, float constriction) {
   CaveSegment::KnotSet set;
+
+  glm::quat rot(glm::radians(glm::vec3(0, angle * 0.5f, rotation)));
+  float speed = 25.0f + 15.0f * angle / 180.f;
+
+  const glm::vec3 start(1.f, 0.75f, 0.f);
+  const glm::vec3 end(-1.f, 0.75f, 0.f);
+  const float radius = 0.1f;
+  set.knots.push_back(std::shared_ptr<CaveSegment::Knot>(
+      new CaveSegment::Knot(start, rot * -dg::RIGHT, radius, speed)));
+  set.knots.push_back(std::shared_ptr<CaveSegment::Knot>(new CaveSegment::Knot(
+      end, glm::inverse(rot) * -dg::RIGHT, radius * constriction, speed)));
+
+  return set;
+}
+
+cavr::CaveSegment::KnotSet cavr::CaveBehavior::CreateArcKnots(
+    float constriction) {
+  CaveSegment::KnotSet set;
+
+  float halfConstriction = (constriction + 1.f) * 0.5f;
 
   const glm::vec3 start(1.f, 0.8f, 0.4f);
   const glm::vec3 middle(-0.1f, 1.3f, -0.2f);
@@ -149,15 +200,32 @@ cavr::CaveSegment::KnotSet cavr::CaveBehavior::CreateArcKnots() {
   const float radius = 0.15f;
   set.knots.push_back(std::shared_ptr<CaveSegment::Knot>(new CaveSegment::Knot(
       start, glm::normalize(glm::vec3(-0.1f, 0.4f, -0.5f)), radius, 15.f)));
-  set.knots.push_back(std::shared_ptr<CaveSegment::Knot>(new CaveSegment::Knot(
-      middle, glm::normalize(glm::vec3(-1, 0, 0)), radius * 0.9f, 15.f)));
-  set.knots.push_back(std::shared_ptr<CaveSegment::Knot>(new CaveSegment::Knot(
-      end, glm::normalize(glm::vec3(-1.f, 0.f, 0.3f)), radius * 0.95f, 15.f)));
+  set.knots.push_back(std::shared_ptr<CaveSegment::Knot>(
+      new CaveSegment::Knot(middle, glm::normalize(glm::vec3(-1, 0, 0)),
+                            radius * halfConstriction, 15.f)));
+  set.knots.push_back(std::shared_ptr<CaveSegment::Knot>(
+      new CaveSegment::Knot(end, glm::normalize(glm::vec3(-1.f, 0.f, 0.3f)),
+                            radius * constriction, 15.f)));
 
   return set;
 }
 
-cavr::CaveSegment::KnotSet cavr::CaveBehavior::CreateStraightKnots() {
+cavr::CaveSegment::KnotSet cavr::CaveBehavior::CreateCaveStart(float radius) {
+  CaveSegment::KnotSet set;
+  set.bumpy = false;
+
+  const glm::vec3 start(-0.5f, 0.f, 0.f);
+  const glm::vec3 end = start + glm::vec3(0.1f, 0.f, 0.f);
+  set.knots.push_back(std::shared_ptr<CaveSegment::Knot>(
+      new CaveSegment::Knot(start, dg::RIGHT, 0, 1)));
+  set.knots.push_back(std::shared_ptr<CaveSegment::Knot>(
+      new CaveSegment::Knot(end, dg::RIGHT, radius, 1)));
+
+  return set;
+}
+
+cavr::CaveSegment::KnotSet cavr::CaveBehavior::CreateStraightKnots(
+    float constriction) {
   CaveSegment::KnotSet set;
 
   const glm::vec3 start(1.f, 0.75f, 0.f);
@@ -166,7 +234,7 @@ cavr::CaveSegment::KnotSet cavr::CaveBehavior::CreateStraightKnots() {
   set.knots.push_back(std::shared_ptr<CaveSegment::Knot>(
       new CaveSegment::Knot(start, -dg::RIGHT, radius, 15.f)));
   set.knots.push_back(std::shared_ptr<CaveSegment::Knot>(
-      new CaveSegment::Knot(end, -dg::RIGHT, radius * 0.95f, 15.f)));
+      new CaveSegment::Knot(end, -dg::RIGHT, radius * constriction, 15.f)));
 
   return set;
 }

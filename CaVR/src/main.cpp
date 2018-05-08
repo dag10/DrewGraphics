@@ -12,6 +12,7 @@
 
 static void RunEngine() {
   std::shared_ptr<dg::Scene> scene = cavr::GameScene::Make();
+  //std::shared_ptr<dg::Scene> scene = cavr::CaveTestScene::Make();
   std::shared_ptr<dg::Window> window = nullptr;
 
   try {

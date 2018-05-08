@@ -34,7 +34,11 @@ namespace cavr {
 
       CaveTestScene();
 
-      static CaveSegment::KnotSet CreateArcKnots();
+      static CaveSegment::KnotSet CreateSimpleCurve(float rotation, float angle,
+                                                    float constriction);
+      static CaveSegment::KnotSet CreateArcKnots(float constriction);
+      static CaveSegment::KnotSet CreateArcKnots2(float midConstriction,
+                                                  float constriction);
       static CaveSegment::KnotSet CreateStraightKnots();
       static CaveSegment::KnotSet CreateVerticalKnots();
 

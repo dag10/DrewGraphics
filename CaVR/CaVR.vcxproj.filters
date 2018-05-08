@@ -40,6 +40,9 @@
     <Filter Include="Shaders\IntersectionDownscale">
       <UniqueIdentifier>{30ecb946-2749-4ac4-806b-1a4f9603324e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Shaders\CaveShader">
+      <UniqueIdentifier>{73b3540b-2503-4e0c-8986-eaec7b5dba60}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\scenes\CaveTestScene.cpp">
@@ -74,6 +77,9 @@
     <None Include="packages.config" />
     <None Include="assets\shaders\IntersectionDownscale\IntersectionDownscaleShared.hlsli">
       <Filter>Shaders\IntersectionDownscale</Filter>
+    </None>
+    <None Include="assets\shaders\Cave\CaveShared.hlsli">
+      <Filter>Shaders\CaveShader</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
@@ -117,6 +123,12 @@
     </FxCompile>
     <FxCompile Include="assets\shaders\IntersectionDownscale\IntersectionDownscalePixelShader.hlsl">
       <Filter>Shaders\IntersectionDownscale</Filter>
+    </FxCompile>
+    <FxCompile Include="assets\shaders\Cave\CaveVertexShader.hlsl">
+      <Filter>Shaders\CaveShader</Filter>
+    </FxCompile>
+    <FxCompile Include="assets\shaders\Cave\CavePixelShader.hlsl">
+      <Filter>Shaders\CaveShader</Filter>
     </FxCompile>
   </ItemGroup>
 </Project>

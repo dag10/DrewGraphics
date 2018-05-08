@@ -29,3 +29,9 @@ void dg::VRTrackedObject::Initialize() {
   }
   VRManager::Instance->RegisterTrackedObject(this);
 }
+
+void dg::VRTrackedObject::TriggerHaptic(float duration) {
+  // TODO: Doesn't work?
+  VRManager::Instance->vrSystem->TriggerHapticPulse(
+      deviceIndex, vr::k_EButton_Axis0, (unsigned int)(duration * 1000.f));
+}

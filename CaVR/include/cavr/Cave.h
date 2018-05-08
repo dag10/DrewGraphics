@@ -76,11 +76,12 @@ namespace cavr {
           KnotSet WithBakedTransform() const;
           KnotSet TransformedBy(dg::Transform xf) const;
 
-		  bool IsInterpolated() const;
+          bool IsInterpolated() const;
 
           std::vector<std::shared_ptr<Knot>> noninterpolatedKnots;
           std::vector<std::shared_ptr<Knot>> knots;
           dg::Transform transform;
+          bool bumpy = true;
 
       }; // class KnotSet
 

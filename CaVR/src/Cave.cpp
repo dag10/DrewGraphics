@@ -33,6 +33,7 @@ cavr::CaveSegment::Knot::Knot(glm::vec3 position, glm::vec3 forward,
 cavr::CaveSegment::KnotSet cavr::CaveSegment::KnotSet::RefCopy(
     const KnotSet &other) {
   KnotSet knotSet;
+  knotSet.bumpy = other.bumpy;
   knotSet.knots = std::vector<std::shared_ptr<Knot>>(other.knots);
   knotSet.noninterpolatedKnots =
       std::vector<std::shared_ptr<Knot>>(other.noninterpolatedKnots);
@@ -43,6 +44,7 @@ cavr::CaveSegment::KnotSet cavr::CaveSegment::KnotSet::RefCopy(
 cavr::CaveSegment::KnotSet cavr::CaveSegment::KnotSet::FullCopy(
     const KnotSet &other) {
   KnotSet knotSet;
+  knotSet.bumpy = other.bumpy;
   size_t numKnots = other.knots.size();
   knotSet.knots = std::vector<std::shared_ptr<Knot>>(numKnots);
   for (unsigned int i = 0; i < numKnots; i++) {
@@ -135,6 +137,7 @@ cavr::CaveSegment::KnotSet cavr::CaveSegment::KnotSet::WithInterpolatedKnots()
   newKnots.push_back(knots.back());
 
   KnotSet newKnotSet;
+  newKnotSet.bumpy = bumpy;
   newKnotSet.noninterpolatedKnots = knots;
   newKnotSet.knots = newKnots;
   newKnotSet.transform = transform;
@@ -187,7 +190,7 @@ cavr::CaveSegment::CaveSegment(const KnotSet &knots) {
 
   // Determine vertex positions for a ring of vertices around the knot.
   for (auto &knot : knotSet.knots) {
-    knot->CreateVertices(true);
+    knot->CreateVertices(knotSet.bumpy);
   }
 
   // Create mesh for cave segment.

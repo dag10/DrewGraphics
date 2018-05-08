@@ -3,6 +3,8 @@
 //
 
 #include "cavr/behaviors/ShipBehavior.h"
+#include "cavr/CavrEngine.h"
+#include "cavr/behaviors/CaveBehavior.h"
 #include "cavr/materials/IntersectionDownscaleMaterial.h"
 #include "cavr/materials/SphereIntersectionMaterial.h"
 #include "cavr/scenes/GameScene.h"
@@ -12,7 +14,9 @@
 #include "dg/Material.h"
 #include "dg/Model.h"
 #include "dg/SceneObject.h"
+#include "dg/Window.h"
 #include "dg/materials/StandardMaterial.h"
+#include "dg/vr/VRControllerState.h"
 
 cavr::ShipBehavior::ShipBehavior(std::shared_ptr<dg::Model> hullSphere)
     : hullSphere(hullSphere) {}
@@ -35,7 +39,8 @@ void cavr::ShipBehavior::Initialize() {
   intersectionSubrender.camera->nearClip = xfBoundingSphere.scale.z * -0.5f;
   intersectionSubrender.camera->orthoWidth = xfBoundingSphere.scale.x;
   intersectionSubrender.camera->orthoHeight = xfBoundingSphere.scale.y;
-  intersectionSubrender.layerMask = GameScene::LayerMask::CaveGeometry();
+  intersectionSubrender.layerMask = GameScene::LayerMask::CaveGeometry() |
+                                    GameScene::LayerMask::StartGeometry();
   intersectionSubrender.material =
       std::make_shared<cavr::SphereIntersectionMaterial>();
   intersectionSubrender.material->rasterizerOverride.SetCullMode(
@@ -97,10 +102,48 @@ void cavr::ShipBehavior::Start() { dg::Behavior::Start(); }
 void cavr::ShipBehavior::Update() {
   dg::Behavior::Update();
 
+  auto obj = GetSceneObject();
+  auto cave = GetCave();
+  auto window = CavrEngine::Instance().GetWindow();
+  auto controller = GetControllerState();
+
+  //// If left mouse or X key or right trigger is held down, add to cave velocity.
+  //const float minRightTrigger = 0.15f;
+  //float rightTrigger =
+  //    controller->GetAxis(dg::VRControllerState::Axis::TRIGGER).x;
+  //if (dg::Engine::Instance().GetWindow()->IsMouseButtonPressed(
+  //        dg::BUTTON_LEFT) ||
+  //    dg::Engine::Instance().GetWindow()->IsKeyPressed(dg::Key::X)) {
+  //  rightTrigger = 0.2f;
+  //}
+  //if (rightTrigger > minRightTrigger) {
+  //  float thrustAmount =
+  //      (rightTrigger - minRightTrigger) / (1.f - minRightTrigger);
+  //  glm::vec3 thrustDir = obj->SceneSpace().Forward();
+  //  AddVelocity(thrustDir * -thrustAmount * 0.02f);
+  //}
+
+  //// Brake with right mouse or backspace or Z right GRIP.
+  //if (dg::Engine::Instance().GetWindow()->IsMouseButtonPressed(
+  //        dg::BUTTON_RIGHT) ||
+  //    window->IsKeyPressed(dg::Key::Z) ||
+  //    controller->IsButtonPressed(dg::VRControllerState::Button::GRIP)) {
+  //  glm::vec3 velo = GetVelocity();
+  //  velo -= velo * 5.0f * (float)dg::Time::Delta;
+  //  if (velo.length() < 0.2f) {
+  //    velo = glm::vec3(0);
+  //  }
+  //  SetVelocity(velo);
+  //}
+
+  // Move cave.
+  GetCave()->GetSceneObject()->transform.translation +=
+      velocity * (float)dg::Time::Delta;
+
   // Change sphere color based on intersection.
-  std::static_pointer_cast<dg::StandardMaterial>(hullSphere->material)
-      ->SetDiffuse(intersectsCave ? glm::vec4(1, 0, 0, 0.4)
-                                  : glm::vec4(1, 1, 1, 0.1));
+  //std::static_pointer_cast<dg::StandardMaterial>(hullSphere->material)
+  //    ->SetDiffuse(intersectsCave ? glm::vec4(1, 0, 0, 0.4)
+  //                                : glm::vec4(1, 1, 1, 0.1));
 }
 
 void cavr::ShipBehavior::DrawIntersectionDownscale() {

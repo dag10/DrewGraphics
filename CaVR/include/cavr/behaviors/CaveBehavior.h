@@ -25,10 +25,6 @@ namespace cavr {
       virtual void Start();
       virtual void Update();
 
-      void SetVelocity(glm::vec3 velocity);
-      void AddVelocity(glm::vec3 velocity);
-      glm::vec3 GetVelocity() const;
-
       void SetShowKnots(bool showKnots);
       bool GetShowKnots() const;
 
@@ -39,18 +35,21 @@ namespace cavr {
         return caveInteriorModels;
       }
 
+      void SetCrashPosition(glm::vec3 pos);
+
       void AddNextCaveSegment();
 
     private:
 
-
       void AddNextCaveSegment(const CaveSegment::KnotSet &knotSet);
       void AddCaveSegment(const CaveSegment &segment);
 
-      static CaveSegment::KnotSet CreateArcKnots();
-      static CaveSegment::KnotSet CreateStraightKnots();
+      static CaveSegment::KnotSet CreateCaveStart(float radius);
+      static CaveSegment::KnotSet CreateSimpleCurve(float rotation, float angle,
+                                                    float constriction);
+      static CaveSegment::KnotSet CreateArcKnots(float constriction);
+      static CaveSegment::KnotSet CreateStraightKnots(float constriction);
 
-      glm::vec3 velocity = glm::vec3(0);
       bool showKnots = false;
       bool showWireframe = false;
 

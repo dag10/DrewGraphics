@@ -16,6 +16,7 @@ namespace dg {
 class Canvas {
   public:
   Canvas(unsigned int width, unsigned int height);
+  Canvas(TextureOptions textureOpts);
   Canvas(Canvas &other) = delete;
   Canvas(Canvas &&other);
   virtual ~Canvas() {};
@@ -36,6 +37,8 @@ class Canvas {
   void Submit();
 
   private:
+
+  void Initialize();
 
   std::vector<glm::vec4> pixels;
   std::shared_ptr<Texture> texture = nullptr;

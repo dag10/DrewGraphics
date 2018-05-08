@@ -16,8 +16,16 @@ dg::Canvas::Canvas(unsigned int width, unsigned int height) {
   texOpts.type = TexturePixelType::FLOAT;
   texOpts.mipmap = true;
   texture = Texture::Generate(texOpts);
+  Initialize();
+}
 
-  pixels = std::vector<glm::vec4>(width * height);
+dg::Canvas::Canvas(TextureOptions textureOpts) {
+  texture = Texture::Generate(textureOpts);
+  Initialize();
+}
+
+void dg::Canvas::Initialize() {
+  pixels = std::vector<glm::vec4>(texture->GetWidth() * texture->GetHeight());
   Submit();
 }
 

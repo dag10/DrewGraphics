@@ -253,65 +253,42 @@ void dg::AOScene::Update() {
   }
 
 
-  // Update overlay quads based on overlay state.
-  for (auto &quad : overlayQuads) {
+  // Scale overlay quads to window size and aspect ratio.
+  glm::vec2 quadScale =
+      glm::vec2(2.f / 3.f) / glm::vec2(window->GetAspectRatio(), 1);
+  for (int i = 0; i < overlayQuads.size(); i++) {
+    auto &quad = overlayQuads[i];
     quad->enabled = false;
     std::static_pointer_cast<ScreenQuadMaterial>(quad->material)
         ->SetRedChannelOnly(false);
+    std::static_pointer_cast<ScreenQuadMaterial>(quad->material)
+        ->SetScale(quadScale);
+    std::static_pointer_cast<ScreenQuadMaterial>(quad->material)
+        ->SetOffset(glm::vec2(1 - quadScale.x * 0.5,
+                              ((1.f - 2 * i) / 3.f) + quadScale.y * 0.5));
   }
+
+  // Update overlay quad textures based on overlay state.
   switch (overlayState) {
     case OverlayState::None:
       break;
     case OverlayState::GBuffer: {
-      glm::vec2 quadScale =
-          glm::vec2(2.f / 3.f) / glm::vec2(window->GetAspectRatio(), 1);
-
       overlayQuads[0]->enabled = true;
       std::static_pointer_cast<ScreenQuadMaterial>(overlayQuads[0]->material)
-          ->SetScale(quadScale);
-      std::static_pointer_cast<ScreenQuadMaterial>(overlayQuads[0]->material)
-          ->SetOffset(glm::vec2(1 - quadScale.x * 0.5,
-                                (1.f / 3.f) + quadScale.y * 0.5));
-      std::static_pointer_cast<ScreenQuadMaterial>(overlayQuads[0]->material)
           ->SetTexture(geometrySubrender.framebuffer->GetColorTexture(0));
-
       overlayQuads[1]->enabled = true;
       std::static_pointer_cast<ScreenQuadMaterial>(overlayQuads[1]->material)
-          ->SetScale(quadScale);
-      std::static_pointer_cast<ScreenQuadMaterial>(overlayQuads[1]->material)
-          ->SetOffset(glm::vec2(1 - quadScale.x * 0.5,
-                                -(1.f / 3.f) + quadScale.y * 0.5));
-      std::static_pointer_cast<ScreenQuadMaterial>(overlayQuads[1]->material)
           ->SetTexture(geometrySubrender.framebuffer->GetColorTexture(1));
-
       overlayQuads[2]->enabled = true;
-      std::static_pointer_cast<ScreenQuadMaterial>(overlayQuads[2]->material)
-          ->SetScale(quadScale);
-      std::static_pointer_cast<ScreenQuadMaterial>(overlayQuads[2]->material)
-          ->SetOffset(glm::vec2(1 - quadScale.x * 0.5, -1 + quadScale.y * 0.5));
       std::static_pointer_cast<ScreenQuadMaterial>(overlayQuads[2]->material)
           ->SetTexture(geometrySubrender.framebuffer->GetColorTexture(2));
       break;
     };
     case OverlayState::Lighting: {
-      glm::vec2 quadScale =
-          glm::vec2(2.f / 3.f) / glm::vec2(window->GetAspectRatio(), 1);
-
       overlayQuads[0]->enabled = true;
       std::static_pointer_cast<ScreenQuadMaterial>(overlayQuads[0]->material)
-          ->SetScale(quadScale);
-      std::static_pointer_cast<ScreenQuadMaterial>(overlayQuads[0]->material)
-          ->SetOffset(glm::vec2(1 - quadScale.x * 0.5,
-                                (1.f / 3.f) + quadScale.y * 0.5));
-      std::static_pointer_cast<ScreenQuadMaterial>(overlayQuads[0]->material)
           ->SetTexture(subrenders.light.framebuffer->GetColorTexture());
-
       overlayQuads[1]->enabled = true;
-      std::static_pointer_cast<ScreenQuadMaterial>(overlayQuads[1]->material)
-          ->SetScale(quadScale);
-      std::static_pointer_cast<ScreenQuadMaterial>(overlayQuads[1]->material)
-          ->SetOffset(glm::vec2(1 - quadScale.x * 0.5,
-                                -(1.f / 3.f) + quadScale.y * 0.5));
       std::static_pointer_cast<ScreenQuadMaterial>(overlayQuads[1]->material)
           ->SetTexture(subrenders.light.framebuffer->GetDepthTexture());
       std::static_pointer_cast<ScreenQuadMaterial>(overlayQuads[1]->material)
@@ -319,15 +296,7 @@ void dg::AOScene::Update() {
       break;
     };
     case OverlayState::SSAO: {
-      glm::vec2 quadScale =
-          glm::vec2(2.f / 3.f) / glm::vec2(window->GetAspectRatio(), 1);
-
       overlayQuads[0]->enabled = true;
-      std::static_pointer_cast<ScreenQuadMaterial>(overlayQuads[0]->material)
-          ->SetScale(quadScale);
-      std::static_pointer_cast<ScreenQuadMaterial>(overlayQuads[0]->material)
-          ->SetOffset(glm::vec2(1 - quadScale.x * 0.5,
-                                (1.f / 3.f) + quadScale.y * 0.5));
       std::static_pointer_cast<ScreenQuadMaterial>(overlayQuads[0]->material)
           ->SetTexture(ssaoSubrender.framebuffer->GetColorTexture());
       break;

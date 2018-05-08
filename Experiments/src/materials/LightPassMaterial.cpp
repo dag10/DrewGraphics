@@ -22,6 +22,8 @@ dg::LightPassMaterial::LightPassMaterial() : Material() {
 
   queue = RenderQueue::Overlay;
   rasterizerOverride.SetDepthFunc(RasterizerState::DepthFunc::ALWAYS);
+
+  SetEnableSSAO(true);
 }
 
 dg::LightPassMaterial::LightPassMaterial(LightPassMaterial &other)
@@ -58,12 +60,12 @@ void dg::LightPassMaterial::SetAlbedoTexture(std::shared_ptr<Texture> texture) {
 #endif
 }
 
-void dg::LightPassMaterial::SetPositionTexture(
+void dg::LightPassMaterial::SetWorldPositionTexture(
     std::shared_ptr<Texture> texture) {
 #if defined(_OPENGL)
-  SetProperty("_PositionTexture", texture);
+  SetProperty("_WorldPositionTexture", texture);
 #elif defined(_DIRECTX)
-  SetProperty("positionTexture", texture);
+  SetProperty("worldPositionTexture", texture);
 #endif
 }
 
@@ -84,10 +86,26 @@ void dg::LightPassMaterial::SetSpecularTexture(
 #endif
 }
 
+void dg::LightPassMaterial::SetSSAOTexture(std::shared_ptr<Texture> texture) {
+#if defined(_OPENGL)
+  SetProperty("_SSAOTexture", texture);
+#elif defined(_DIRECTX)
+  SetProperty("ssaoTexture", texture);
+#endif
+}
+
 void dg::LightPassMaterial::SetDepthTexture(std::shared_ptr<Texture> texture) {
 #if defined(_OPENGL)
   SetProperty("_DepthTexture", texture);
 #elif defined(_DIRECTX)
   SetProperty("depthTexture", texture);
+#endif
+}
+
+void dg::LightPassMaterial::SetEnableSSAO(bool enableSSAO) {
+#if defined(_OPENGL)
+  SetProperty("_EnableSSAO", enableSSAO);
+#elif defined(_DIRECTX)
+  SetProperty("enableSSAO", enableSSAO);
 #endif
 }

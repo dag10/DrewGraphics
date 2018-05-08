@@ -177,11 +177,22 @@ void dg::AOScene::InitializeSSAO() {
     float scale = (float)i / (float)numSamples;
     scale = lerp(0.1f, 1.0f, scale * scale);
     sample *= scale;
-    ssaoKernel.push_back(sample);
+
+    // TODO: Set this using glUniform3fv() instead of setting each element.
+    std::string key = "_Samples[" + std::to_string(i) + "]";
+    ssaoSubrender.material->SetProperty(key, sample);
   }
 
   // Create a 4x4 texture of random rotation vectors to tile over the screen.
-  ssaoNoise = std::make_shared<Canvas>(4, 4);
+  TextureOptions noiseTexOpts;
+  noiseTexOpts.width = 4;
+  noiseTexOpts.height = 4;
+  noiseTexOpts.interpolation = TextureInterpolation::NEAREST;
+  noiseTexOpts.format = TexturePixelFormat::RGBA;
+  noiseTexOpts.wrap = TextureWrap::REPEAT;
+  noiseTexOpts.type = TexturePixelType::FLOAT;
+  noiseTexOpts.mipmap = false;
+  auto ssaoNoise = std::make_shared<Canvas>(noiseTexOpts);
   for (unsigned int i = 0; i < ssaoNoise->GetWidth(); i++) {
     for (unsigned int j = 0; j < ssaoNoise->GetHeight(); j++) {
       ssaoNoise->SetPixel(i, j,
@@ -190,7 +201,7 @@ void dg::AOScene::InitializeSSAO() {
     }
   }
   ssaoNoise->Submit();
-  std::static_pointer_cast<SSAOMaterial>(finalRenderQuad->material)
+  std::static_pointer_cast<SSAOMaterial>(ssaoSubrender.material)
       ->SetNoiseTexture(ssaoNoise->GetTexture());
 }
 
@@ -215,6 +226,13 @@ void dg::AOScene::Update() {
   // N key switches to no overlay state.
   if (window->IsKeyJustPressed(Key::N)) {
     overlayState = OverlayState::None;
+  }
+
+  // T key toggles SSAO.
+  if (window->IsKeyJustPressed(Key::T)) {
+    enableSSAO = !enableSSAO;
+    std::static_pointer_cast<LightPassMaterial>(finalRenderQuad->material)
+        ->SetEnableSSAO(enableSSAO);
   }
 
   // If F is tapped, toggle flashlight.
@@ -328,7 +346,9 @@ void dg::AOScene::RenderFramebuffers() {
   }
 
   PerformSubrender(geometrySubrender);
-  PerformSubrender(ssaoSubrender);
+  if (enableSSAO) {
+    PerformSubrender(ssaoSubrender);
+  }
 }
 
 void dg::AOScene::CreateGBuffer() {
@@ -339,7 +359,7 @@ void dg::AOScene::CreateGBuffer() {
   opts.height = windowSize.y;
   opts.depthReadable = true;
   opts.hasStencil = false;
-  opts.textureOptions = std::vector<TextureOptions>(4);
+  opts.textureOptions = std::vector<TextureOptions>(5);
 
   // First color texture is the albedo (rgb) and blend alpha (a).
   opts.textureOptions[0].width = opts.width;
@@ -367,24 +387,39 @@ void dg::AOScene::CreateGBuffer() {
   opts.textureOptions[3].type = TexturePixelType::BYTE;
   opts.textureOptions[3].wrap = TextureWrap::CLAMP_EDGE;
 
+  // Fifth color texture is the view-space position (xyz).
+  opts.textureOptions[4].width = opts.width;
+  opts.textureOptions[4].height = opts.height;
+  opts.textureOptions[4].type = TexturePixelType::FLOAT;
+  opts.textureOptions[4].wrap = TextureWrap::CLAMP_EDGE;
+
   geometrySubrender.framebuffer = FrameBuffer::Create(opts);
 
   LinkGeometryToLight();
   LinkGeometryToSSAO();
+  LinkSSAOToLight();
 }
 
 void dg::AOScene::CreateSSAOBuffers() {
   glm::vec2 windowSize = window->GetFramebufferSize();
 
+  const float ssaoScale = 1.f / 3;
+
   FrameBuffer::Options opts;
-  opts.width = windowSize.x;
-  opts.height = windowSize.y;
+  opts.width = windowSize.x * ssaoScale;
+  opts.height = windowSize.y * ssaoScale;
   opts.depthReadable = true;
   opts.hasStencil = false;
-  opts.hasColor = true;
+  opts.textureOptions = std::vector<TextureOptions>(1);
+  opts.textureOptions[0].width = opts.width;
+  opts.textureOptions[0].height = opts.height;
+  opts.textureOptions[0].type = TexturePixelType::FLOAT;
+  opts.textureOptions[0].interpolation = TextureInterpolation::NEAREST;
+  opts.textureOptions[0].wrap = TextureWrap::CLAMP_EDGE;
   ssaoSubrender.framebuffer = FrameBuffer::Create(opts);
 
   LinkGeometryToSSAO();
+  LinkSSAOToLight();
 }
 
 void dg::AOScene::LinkGeometryToSSAO() {
@@ -395,7 +430,8 @@ void dg::AOScene::LinkGeometryToSSAO() {
 
   // Point material handling the ssao pass to the new g-buffer textures.
   std::static_pointer_cast<SSAOMaterial>(ssaoSubrender.material)
-      ->SetPositionTexture(geometrySubrender.framebuffer->GetColorTexture(1));
+      ->SetViewPositionTexture(
+          geometrySubrender.framebuffer->GetColorTexture(4));
   std::static_pointer_cast<SSAOMaterial>(ssaoSubrender.material)
       ->SetNormalTexture(geometrySubrender.framebuffer->GetColorTexture(2));
 }
@@ -409,13 +445,24 @@ void dg::AOScene::LinkGeometryToLight() {
   std::static_pointer_cast<LightPassMaterial>(finalRenderQuad->material)
       ->SetAlbedoTexture(geometrySubrender.framebuffer->GetColorTexture(0));
   std::static_pointer_cast<LightPassMaterial>(finalRenderQuad->material)
-      ->SetPositionTexture(geometrySubrender.framebuffer->GetColorTexture(1));
+      ->SetWorldPositionTexture(
+          geometrySubrender.framebuffer->GetColorTexture(1));
   std::static_pointer_cast<LightPassMaterial>(finalRenderQuad->material)
       ->SetNormalTexture(geometrySubrender.framebuffer->GetColorTexture(2));
   std::static_pointer_cast<LightPassMaterial>(finalRenderQuad->material)
       ->SetSpecularTexture(geometrySubrender.framebuffer->GetColorTexture(3));
   std::static_pointer_cast<LightPassMaterial>(finalRenderQuad->material)
       ->SetDepthTexture(geometrySubrender.framebuffer->GetDepthTexture());
+}
+
+void dg::AOScene::LinkSSAOToLight() {
+  if (finalRenderQuad == nullptr || ssaoSubrender.framebuffer == nullptr) {
+    return;
+  }
+
+  // Point material handling the lighting pass to the new SSAO textures.
+  std::static_pointer_cast<LightPassMaterial>(finalRenderQuad->material)
+      ->SetSSAOTexture(ssaoSubrender.framebuffer->GetColorTexture());
 }
 
 void dg::AOScene::PreRender() {

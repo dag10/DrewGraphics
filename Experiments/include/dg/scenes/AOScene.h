@@ -53,6 +53,7 @@ namespace dg {
 
       void LinkGeometryToSSAO();
       void LinkGeometryToLight();
+      void LinkSSAOToLight();
 
       virtual void RenderFramebuffers();
       virtual void PreRender();
@@ -62,8 +63,7 @@ namespace dg {
       Subrender geometrySubrender;
       Subrender ssaoSubrender;
 
-      std::vector<glm::vec3> ssaoKernel;
-      std::shared_ptr<Canvas> ssaoNoise;
+      bool enableSSAO = true;
 
       std::vector<std::shared_ptr<Model>> overlayQuads;
       std::shared_ptr<Model> finalRenderQuad;

@@ -26,7 +26,7 @@ namespace dg {
 
       void Use() const;
 
-      void SetPositionTexture(std::shared_ptr<Texture> texture);
+      void SetViewPositionTexture(std::shared_ptr<Texture> texture);
       void SetNormalTexture(std::shared_ptr<Texture> texture);
       void SetNoiseTexture(std::shared_ptr<Texture> texture);
 

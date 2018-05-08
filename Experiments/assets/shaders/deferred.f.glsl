@@ -22,15 +22,18 @@ in vec2 v_TexCoord;
 in mat3 v_TBN;
 in vec3 v_Position;
 
-// xyz = position, w = lit (bool)
-layout (location = 1) out vec4 g_Position;
+// xyz = world-space position, w = lit (bool)
+layout (location = 1) out vec4 g_Position_WS;
 // xyz = normal
 layout (location = 2) out vec3 g_Normal;
 // rgb = specular, a = shininess
 layout (location = 3) out vec4 g_Specular;
+// xyz = view-space position
+layout (location = 4) out vec3 g_Position_VS;
 
 vec4 frag() {
-  g_Position = vec4(v_Position, _Material.lit);
+  g_Position_WS = vec4(v_Position, _Material.lit);
+  g_Position_VS = (_Matrix_V * vec4(v_Position, 1)).xyz;
 
   vec2 texCoord = v_TexCoord * _UVScale;
 

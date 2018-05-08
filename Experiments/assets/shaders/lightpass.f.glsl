@@ -1,23 +1,35 @@
 uniform sampler2D _AlbedoTexture;
-uniform sampler2D _PositionTexture;
+uniform sampler2D _WorldPositionTexture;
 uniform sampler2D _NormalTexture;
 uniform sampler2D _SpecularTexture;
+uniform sampler2D _SSAOTexture;
 uniform sampler2D _DepthTexture;
 uniform sampler2D _ShadowMap;
-
-uniform mat4 _Matrix_V;
+uniform bool _EnableSSAO;
 
 in vec2 v_TexCoord;
 
+float calculateBlurredSSAO() {
+  vec2 texelSize = 1.0 / vec2(textureSize(_SSAOTexture, 0));
+  float result = 0.0;
+  for (int x = -2; x < 2; x++) {
+    for (int y = -2; y < 2; y++) {
+      vec2 offset = vec2(float(x), float(y)) * texelSize;
+      result += texture(_SSAOTexture, v_TexCoord + offset).x;
+    }
+  }
+  return result / (4.0 * 4.0);
+}
+
 vec3 calculateLight(
-    Light light, vec3 position, vec3 normal, vec3 diffuseColor, vec3 specularColor,
-    float shininess) {
+    Light light, float ambientOcclusion, vec3 position, vec3 normal,
+    vec3 diffuseColor, vec3 specularColor, float shininess) {
   if (light.type == LIGHT_TYPE_NULL) {
     return vec3(0);
   }
 
   // Ambient
-  vec3 ambient = light.ambient * diffuseColor;
+  vec3 ambient = light.ambient * diffuseColor * ambientOcclusion;
 
   // Diffuse
   vec3 norm = normalize(normal);
@@ -79,11 +91,16 @@ vec4 frag() {
     discard;
   }
 
+  float ambientOcclusion = 1;
+  if (_EnableSSAO) {
+    ambientOcclusion = calculateBlurredSSAO();
+  }
+
   vec4 albedoTexel = texture(_AlbedoTexture, v_TexCoord);
   vec3 albedo = albedoTexel.rgb;
   float alpha = albedoTexel.a;
 
-  vec4 positionTexel = texture(_PositionTexture, v_TexCoord);
+  vec4 positionTexel = texture(_WorldPositionTexture, v_TexCoord);
   vec3 position = positionTexel.xyz;
   bool lit = positionTexel.w == 1;
 
@@ -97,12 +114,11 @@ vec4 frag() {
 
   float depth = texture(_DepthTexture, v_TexCoord).r;
 
-  //return vec4((_Matrix_V * vec4(position, 1)).xyz, 1);
-
   vec3 cumulative = vec3(0);
   for (int i = 0; i < MAX_LIGHTS; i++) {
     cumulative += calculateLight(
-        _Lights[i], position, normal, albedo, specular, shininess);
+        _Lights[i], ambientOcclusion, position, normal, albedo, specular,
+        shininess);
   }
 
   return vec4(cumulative, alpha);

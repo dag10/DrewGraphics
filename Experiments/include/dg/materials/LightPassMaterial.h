@@ -27,10 +27,13 @@ namespace dg {
       void Use() const;
 
       void SetAlbedoTexture(std::shared_ptr<Texture> texture);
-      void SetPositionTexture(std::shared_ptr<Texture> texture);
+      void SetWorldPositionTexture(std::shared_ptr<Texture> texture);
       void SetNormalTexture(std::shared_ptr<Texture> texture);
       void SetSpecularTexture(std::shared_ptr<Texture> texture);
+      void SetSSAOTexture(std::shared_ptr<Texture> texture);
       void SetDepthTexture(std::shared_ptr<Texture> texture);
+
+      void SetEnableSSAO(bool enableSSAO);
 
     private:
 

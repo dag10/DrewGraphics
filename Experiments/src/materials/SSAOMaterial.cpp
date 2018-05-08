@@ -50,11 +50,11 @@ void dg::swap(SSAOMaterial &first, SSAOMaterial &second) {
 
 void dg::SSAOMaterial::Use() const { Material::Use(); }
 
-void dg::SSAOMaterial::SetPositionTexture(std::shared_ptr<Texture> texture) {
+void dg::SSAOMaterial::SetViewPositionTexture(std::shared_ptr<Texture> texture) {
 #if defined(_OPENGL)
-  SetProperty("_PositionTexture", texture);
+  SetProperty("_ViewPositionTexture", texture);
 #elif defined(_DIRECTX)
-  SetProperty("positionTexture", texture);
+  SetProperty("viewPositionTexture", texture);
 #endif
 }
 

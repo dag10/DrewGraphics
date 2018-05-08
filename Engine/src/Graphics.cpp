@@ -127,6 +127,7 @@ void dg::OpenGLGraphics::SetRenderTarget(Window& window) {
 }
 
 void dg::OpenGLGraphics::SetViewport(int x, int y, int width, int height) {
+  viewportDimensions = glm::vec2((float)width, (float)height);
   glViewport(x, y, width, height);
 }
 
@@ -451,6 +452,7 @@ void dg::DirectXGraphics::SetRenderTarget(Window& window) {
 }
 
 void dg::DirectXGraphics::SetViewport(int x, int y, int width, int height) {
+  viewportDimensions = glm::vec2((float)width, (float)height);
   D3D11_VIEWPORT viewport = {};
   viewport.TopLeftX = (float)x;
   viewport.TopLeftY = (float)y;

@@ -56,9 +56,11 @@ void dg::Model::Draw(const DrawContext &context,
     material->SendShadowMap(context.shadowMap);
   }
 
+  material->SendBufferDimensions(Graphics::Instance->GetViewportDimensions());
   material->SendMatrixNormal(glm::transpose(glm::inverse(xfMat)));
   material->SendMatrixM(xfMat);
   material->SendMatrixV(context.view);
+  material->SendMatrixP(context.projection);
   material->SendMatrixMVP(context.projection * context.view * xfMat);
 
 #if defined(_DIRECTX)

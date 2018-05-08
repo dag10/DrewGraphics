@@ -108,6 +108,10 @@ void dg::Material::ClearProperty(const std::string& name) {
   properties.erase(name);
 }
 
+void dg::Material::SendBufferDimensions(glm::vec2 dimensions) {
+  shader->SetVec2("_BufferDimensions", dimensions);
+}
+
 void dg::Material::SendCameraPosition(glm::vec3 position) {
   shader->SetVec3("_CameraPosition", position);
 }
@@ -126,6 +130,10 @@ void dg::Material::SendMatrixM(glm::mat4x4 m) {
 
 void dg::Material::SendMatrixV(glm::mat4x4 v) {
   shader->SetMat4("_Matrix_V", v);
+}
+
+void dg::Material::SendMatrixP(glm::mat4x4 p) {
+  shader->SetMat4("_Matrix_P", p);
 }
 
 void dg::Material::SendMatrixNormal(glm::mat4x4 normal) {

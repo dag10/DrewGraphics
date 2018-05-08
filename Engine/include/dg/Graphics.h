@@ -47,7 +47,11 @@ namespace dg {
 
       virtual void SetRenderTarget(FrameBuffer &frameBuffer) = 0;
       virtual void SetRenderTarget(Window &window) = 0;
+
       virtual void SetViewport(int x, int y, int width, int height) = 0;
+      inline glm::vec2 GetViewportDimensions() const {
+        return viewportDimensions;
+      }
 
       virtual void ClearColor(glm::vec3 color, bool clearDepth = true,
                               bool clearStencil = true) = 0;
@@ -73,6 +77,7 @@ namespace dg {
 
       const RasterizerState emptyRasterizerState = RasterizerState();
       std::forward_list<std::unique_ptr<RasterizerState>> states;
+      glm::vec2 viewportDimensions = glm::vec2(0);
 
   }; // class Graphics
 

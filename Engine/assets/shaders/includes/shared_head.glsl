@@ -36,6 +36,8 @@ struct Light {
   mat4 lightTransform;
 };
 
+uniform vec2 _BufferDimensions;
+
 // NOTE: Keep this consistent with MAX_LIGHTS in include/dg/Lights.h.
 const int MAX_LIGHTS = 8;
 uniform Light _Lights[MAX_LIGHTS];
@@ -44,6 +46,8 @@ uniform vec3 _CameraPosition;
 
 uniform mat4 _Matrix_MVP;
 uniform mat4 _Matrix_M;
+uniform mat4 _Matrix_V;
+uniform mat4 _Matrix_P;
 uniform mat4 _Matrix_Normal;
 
 #line 1 1

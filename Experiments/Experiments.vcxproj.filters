@@ -19,6 +19,18 @@
     <Filter Include="Source Files\scenes">
       <UniqueIdentifier>{93d81eae-19bb-4f65-8b3c-cbc39ff2b608}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Shaders">
+      <UniqueIdentifier>{f0f8d64d-5c84-4d0a-a198-c89d069a0c30}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\OpenGL">
+      <UniqueIdentifier>{5a60b963-1557-4f6d-baf9-17a699541bbc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\materials">
+      <UniqueIdentifier>{a6bff2c1-97fb-427a-8a32-c8d4cec86c36}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\materials">
+      <UniqueIdentifier>{6d094c69-ed65-49cd-9566-3ea21414cf29}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">
@@ -57,6 +69,18 @@
     <ClCompile Include="src\scenes\WidgetScene.cpp">
       <Filter>Source Files\scenes</Filter>
     </ClCompile>
+    <ClCompile Include="src\scenes\AOScene.cpp">
+      <Filter>Source Files\scenes</Filter>
+    </ClCompile>
+    <ClCompile Include="src\materials\DeferredMaterial.cpp">
+      <Filter>Source Files\materials</Filter>
+    </ClCompile>
+    <ClCompile Include="src\materials\LightPassMaterial.cpp">
+      <Filter>Source Files\materials</Filter>
+    </ClCompile>
+    <ClCompile Include="src\materials\SSAOMaterial.cpp">
+      <Filter>Source Files\materials</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\dg\scenes\BoundsScene.h">
@@ -92,8 +116,38 @@
     <ClInclude Include="include\dg\scenes\WidgetScene.h">
       <Filter>Header Files\scenes</Filter>
     </ClInclude>
+    <ClInclude Include="include\dg\scenes\AOScene.h">
+      <Filter>Header Files\scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="include\dg\materials\DeferredMaterial.h">
+      <Filter>Header Files\materials</Filter>
+    </ClInclude>
+    <ClInclude Include="include\dg\materials\LightPassMaterial.h">
+      <Filter>Header Files\materials</Filter>
+    </ClInclude>
+    <ClInclude Include="include\dg\materials\SSAOMaterial.h">
+      <Filter>Header Files\materials</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <None Include="assets\shaders\deferred.f.glsl">
+      <Filter>Shaders\OpenGL</Filter>
+    </None>
+    <None Include="assets\shaders\deferred.v.glsl">
+      <Filter>Shaders\OpenGL</Filter>
+    </None>
+    <None Include="assets\shaders\lightpass.f.glsl">
+      <Filter>Shaders\OpenGL</Filter>
+    </None>
+    <None Include="assets\shaders\lightpass.v.glsl">
+      <Filter>Shaders\OpenGL</Filter>
+    </None>
+    <None Include="assets\shaders\ssao.f.glsl">
+      <Filter>Shaders\OpenGL</Filter>
+    </None>
+    <None Include="assets\shaders\ssao.v.glsl">
+      <Filter>Shaders\OpenGL</Filter>
+    </None>
   </ItemGroup>
 </Project>

@@ -353,6 +353,10 @@ xcopy /d /y /e "$(ProjectDir)assets" "$(OutDir)assets"</Command>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\materials\DeferredMaterial.cpp" />
+    <ClCompile Include="src\materials\LightPassMaterial.cpp" />
+    <ClCompile Include="src\materials\SSAOMaterial.cpp" />
+    <ClCompile Include="src\scenes\AOScene.cpp" />
     <ClCompile Include="src\scenes\BoundsScene.cpp" />
     <ClCompile Include="src\scenes\CanvasTestScene.cpp" />
     <ClCompile Include="src\scenes\WidgetScene.cpp" />
@@ -366,6 +370,10 @@ xcopy /d /y /e "$(ProjectDir)assets" "$(OutDir)assets"</Command>
     <ClCompile Include="src\scenes\VRScene.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\dg\materials\DeferredMaterial.h" />
+    <ClInclude Include="include\dg\materials\LightPassMaterial.h" />
+    <ClInclude Include="include\dg\materials\SSAOMaterial.h" />
+    <ClInclude Include="include\dg\scenes\AOScene.h" />
     <ClInclude Include="include\dg\scenes\BoundsScene.h" />
     <ClInclude Include="include\dg\scenes\CanvasTestScene.h" />
     <ClInclude Include="include\dg\scenes\WidgetScene.h" />
@@ -379,6 +387,12 @@ xcopy /d /y /e "$(ProjectDir)assets" "$(OutDir)assets"</Command>
     <ClInclude Include="include\dg\scenes\VRScene.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="assets\shaders\deferred.f.glsl" />
+    <None Include="assets\shaders\deferred.v.glsl" />
+    <None Include="assets\shaders\lightpass.f.glsl" />
+    <None Include="assets\shaders\lightpass.v.glsl" />
+    <None Include="assets\shaders\ssao.f.glsl" />
+    <None Include="assets\shaders\ssao.v.glsl" />
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

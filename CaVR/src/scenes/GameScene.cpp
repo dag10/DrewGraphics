@@ -276,6 +276,7 @@ void cavr::GameScene::Update() {
       rightState->GetAxis(dg::VRControllerState::Axis::TRIGGER).x;
   if (gameState == GameState::Playing ||
       window->IsMouseButtonPressed(dg::BUTTON_LEFT) ||
+      rightState->IsButtonPressed(dg::VRControllerState::Button::TRIGGER) ||
       dg::Engine::Instance().GetWindow()->IsKeyPressed(dg::Key::X)) {
     rightTrigger = 0.5f;
   }
@@ -314,7 +315,7 @@ void cavr::GameScene::Update() {
       caveBehavior->SetCrashPosition(glm::vec3(0));
       elapsedTime = 0;
       cave->transform = caveStartTransform;
-      if (ship->IntersectsCave()) {
+      if (ship->IntersectsCave() && devModeState != DevModeState::Enabled) {
         gameState = GameState::Starting;
         if (vr.enabled) {
           leftController->GetBehavior<dg::VRTrackedObject>()->TriggerHaptic(2);
@@ -341,7 +342,7 @@ void cavr::GameScene::Update() {
       elapsedTime += dg::Time::Delta;
       speedRampUp += dg::Time::Delta * 0.3f; // seconds to ramp up speed
       if (speedRampUp > 1) speedRampUp = 1;
-      if (ship->IntersectsCave()) {
+      if (ship->IntersectsCave() && devModeState != DevModeState::Enabled) {
         caveBehavior->SetCrashPosition(
             ship->GetSceneObject()->SceneSpace().translation);
         PlayerDied();

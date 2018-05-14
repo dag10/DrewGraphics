@@ -192,8 +192,13 @@ void dg::Scene::SetupSubrender(Subrender &subrender) {
   // Always use the main subrender's rasterizer state as the base rasterizer
   // state, and derive off of that.
   RasterizerState rasterizerState = subrenders.main.rasterizerState;
-  if (&subrender != &subrenders.main) {
-    rasterizerState += subrenders.framebuffer.rasterizerState;
+  switch (subrender.outputType) {
+    case Subrender::OutputType::MonoscopicFramebuffer:
+    case Subrender::OutputType::Depthmap:
+      rasterizerState += subrenders.framebuffer.rasterizerState;
+      break;
+    default:
+      break;
   }
   rasterizerState += subrender.rasterizerState;
   Graphics::Instance->PushRasterizerState(rasterizerState);

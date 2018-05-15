@@ -15,6 +15,7 @@
 #include "dg/scenes/MeshesScene.h"
 #include "dg/scenes/QuadScene.h"
 #include "dg/scenes/RobotScene.h"
+#include "dg/scenes/PointShadowScene.h"
 #include "dg/scenes/ShadowScene.h"
 #include "dg/scenes/SimpleScene.h"
 #include "dg/scenes/TexturesScene.h"
@@ -40,6 +41,7 @@ std::unique_ptr<Scene> PromptForScene(
   constructors["bounds"]       = dg::BoundsScene::Make;
   constructors["robot"]        = dg::RobotScene::Make;
   constructors["robot-vr"]     = dg::RobotScene::MakeVR;
+  constructors["pointshadow"]  = dg::PointShadowScene::Make;
   constructors["quad"]         = dg::QuadScene::Make;
   constructors["canvas"]       = dg::CanvasTestScene::Make;
   constructors["vr"]           = dg::VRScene::Make;

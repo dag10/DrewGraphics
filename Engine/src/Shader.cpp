@@ -28,6 +28,17 @@ std::shared_ptr<dg::Shader> dg::Shader::FromFiles(
 #endif
 }
 
+std::shared_ptr<dg::Shader> dg::Shader::FromFiles(
+    const std::string &vertexPath, const std::string &geometryPath,
+    const std::string &fragmentPath) {
+#if defined(_OPENGL)
+  return std::static_pointer_cast<Shader>(
+    OpenGLShader::FromFiles(vertexPath, geometryPath, fragmentPath));
+#elif defined(_DIRECTX)
+  throw EngineError("TODO: Implement support for DirectX geometry shaders.");
+#endif
+}
+
 #pragma endregion
 
 #if defined(_OPENGL)
@@ -35,10 +46,14 @@ std::shared_ptr<dg::Shader> dg::Shader::FromFiles(
 
 std::vector<std::string> dg::OpenGLShader::vertexHeads =
     std::vector<std::string>();
+std::vector<std::string> dg::OpenGLShader::geometryHeads =
+    std::vector<std::string>();
 std::vector<std::string> dg::OpenGLShader::fragmentHeads =
     std::vector<std::string>();
 
 std::vector<dg::ShaderSource> dg::OpenGLShader::vertexSources = \
+    std::vector<dg::ShaderSource>();
+std::vector<dg::ShaderSource> dg::OpenGLShader::geometrySources = \
     std::vector<dg::ShaderSource>();
 std::vector<dg::ShaderSource> dg::OpenGLShader::fragmentSources = \
     std::vector<dg::ShaderSource>();
@@ -52,8 +67,23 @@ std::shared_ptr<dg::OpenGLShader> dg::OpenGLShader::FromFiles(
   return shader;
 }
 
+std::shared_ptr<dg::OpenGLShader> dg::OpenGLShader::FromFiles(
+    const std::string &vertexPath, const std::string &geometryPath,
+    const std::string &fragmentPath) {
+  auto shader = std::make_shared<OpenGLShader>();
+  shader->vertexPath = vertexPath;
+  shader->geometryPath = geometryPath;
+  shader->fragmentPath = fragmentPath;
+  shader->CreateProgram();
+  return shader;
+}
+
 void dg::OpenGLShader::AddVertexHead(const std::string& path) {
   vertexHeads.push_back(dg::FileUtils::LoadFile(path));
+}
+
+void dg::OpenGLShader::AddGeometryHead(const std::string& path) {
+  geometryHeads.push_back(dg::FileUtils::LoadFile(path));
 }
 
 void dg::OpenGLShader::AddFragmentHead(const std::string& path) {
@@ -65,6 +95,14 @@ void dg::OpenGLShader::AddVertexSource(const std::string& path) {
       vertexHeads.empty() ? dg::ShaderSource::FromFile(GL_VERTEX_SHADER, path)
                           : dg::ShaderSource::FromFileWithHeads(
                                 GL_VERTEX_SHADER, path, vertexHeads);
+  vertexSources.push_back(std::move(shader));
+}
+
+void dg::OpenGLShader::AddGeometrySource(const std::string& path) {
+  dg::ShaderSource shader =
+      geometryHeads.empty() ? dg::ShaderSource::FromFile(GL_GEOMETRY_SHADER, path)
+                            : dg::ShaderSource::FromFileWithHeads(
+                                  GL_GEOMETRY_SHADER, path, geometryHeads);
   vertexSources.push_back(std::move(shader));
 }
 
@@ -92,6 +130,16 @@ void dg::OpenGLShader::CreateProgram() {
           ? dg::ShaderSource::FromFile(GL_VERTEX_SHADER, vertexPath)
           : dg::ShaderSource::FromFileWithHeads(GL_VERTEX_SHADER, vertexPath,
                                                 vertexHeads);
+
+  dg::ShaderSource geometryShader;
+  if (!geometryPath.empty()) {
+    geometryShader =
+        geometryHeads.empty()
+            ? dg::ShaderSource::FromFile(GL_GEOMETRY_SHADER, geometryPath)
+            : dg::ShaderSource::FromFileWithHeads(GL_GEOMETRY_SHADER,
+                                                  geometryPath, geometryHeads);
+  }
+
   dg::ShaderSource fragmentShader =
       fragmentHeads.empty()
           ? dg::ShaderSource::FromFile(GL_FRAGMENT_SHADER, fragmentPath)
@@ -100,10 +148,19 @@ void dg::OpenGLShader::CreateProgram() {
 
   programHandle = glCreateProgram();
   glAttachShader(programHandle, vertexShader.GetHandle());
+  if (!geometryPath.empty()) {
+    glAttachShader(programHandle, geometryShader.GetHandle());
+  }
   glAttachShader(programHandle, fragmentShader.GetHandle());
   for (
       auto shader = vertexSources.begin();
       shader != vertexSources.end();
+      shader++) {
+    glAttachShader(programHandle, shader->GetHandle());
+  }
+  for (
+      auto shader = geometrySources.begin();
+      shader != geometrySources.end();
       shader++) {
     glAttachShader(programHandle, shader->GetHandle());
   }

@@ -100,6 +100,7 @@ void dg::OpenGLGraphics::InitializeResources() {
   dg::OpenGLShader::AddVertexHead("assets/shaders/includes/shared_head.glsl");
   dg::OpenGLShader::AddVertexHead("assets/shaders/includes/vertex_head.glsl");
   dg::OpenGLShader::AddVertexSource("assets/shaders/includes/vertex_main.glsl");
+  dg::OpenGLShader::AddGeometryHead("assets/shaders/includes/shared_head.glsl");
   dg::OpenGLShader::AddFragmentHead("assets/shaders/includes/shared_head.glsl");
   dg::OpenGLShader::AddFragmentHead(
       "assets/shaders/includes/fragment_head.glsl");

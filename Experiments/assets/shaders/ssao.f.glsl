@@ -1,3 +1,8 @@
+#version 330 core
+#include "includes/shared_head.glsl"
+#include "includes/fragment_head.glsl"
+#include "includes/fragment_main.glsl"
+
 uniform sampler2D _ViewPositionTexture;
 uniform sampler2D _NormalTexture;
 uniform sampler2D _NoiseTexture;

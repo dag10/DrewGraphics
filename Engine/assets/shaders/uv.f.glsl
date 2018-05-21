@@ -1,3 +1,8 @@
+#version 330 core
+#include "includes/shared_head.glsl"
+#include "includes/fragment_head.glsl"
+#include "includes/fragment_main.glsl"
+
 in vec2 v_TexCoord;
 
 vec4 frag() {

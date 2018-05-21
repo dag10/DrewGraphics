@@ -1,7 +1,5 @@
 // This file is prepended to all shaders.
 
-#version 330 core
-
 #define LIGHT_TYPE_NULL        0
 #define LIGHT_TYPE_POINT       1
 #define LIGHT_TYPE_SPOT        2
@@ -49,5 +47,3 @@ uniform mat4 _Matrix_M;
 uniform mat4 _Matrix_V;
 uniform mat4 _Matrix_P;
 uniform mat4 _Matrix_Normal;
-
-#line 1 1

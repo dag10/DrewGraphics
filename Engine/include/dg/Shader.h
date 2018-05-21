@@ -83,14 +83,6 @@ namespace dg {
 
     public:
 
-      static void AddVertexHead(const std::string& path);
-      static void AddGeometryHead(const std::string& path);
-      static void AddFragmentHead(const std::string& path);
-
-      static void AddVertexSource(const std::string& path);
-      static void AddGeometrySource(const std::string& path);
-      static void AddFragmentSource(const std::string& path);
-
       OpenGLShader() = default;
       virtual ~OpenGLShader();
 
@@ -122,16 +114,6 @@ namespace dg {
       static std::shared_ptr<OpenGLShader> FromFiles(
           const std::string& vertexPath, const std::string& geometryPath,
           const std::string& fragmentPath);
-
-      // Code to be included at top of shaders, includes global types.
-      static std::vector<std::string> vertexHeads;
-      static std::vector<std::string> geometryHeads;
-      static std::vector<std::string> fragmentHeads;
-
-      // Code to be linked into all shaders, includes main() and utilities.
-      static std::vector<dg::ShaderSource> vertexSources;
-      static std::vector<dg::ShaderSource> geometrySources;
-      static std::vector<dg::ShaderSource> fragmentSources;
 
       void CreateProgram();
       void CheckLinkErrors();

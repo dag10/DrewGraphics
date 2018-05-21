@@ -7,6 +7,7 @@
 #include <glm/glm.hpp>
 #include <string>
 #include <vector>
+#include "dg/Preprocessor.h"
 #include "dg/opengl/glad/glad.h"
 
 namespace dg {
@@ -16,28 +17,31 @@ namespace dg {
   class ShaderSource {
 
     public:
-      static ShaderSource FromFile(GLenum type, const std::string& path);
-      static ShaderSource FromFileWithHeads(GLenum type,
-                                            const std::string &path,
-                                            std::vector<std::string> heads);
+
+      static std::shared_ptr<ShaderSource> FromFile(GLenum type,
+                                                    const std::string& path);
 
       ShaderSource() = default;
       ShaderSource(ShaderSource& other) = delete;
-      ShaderSource(ShaderSource&& other);
       ~ShaderSource();
       ShaderSource& operator=(ShaderSource& other) = delete;
-      ShaderSource& operator=(ShaderSource&& other);
-      friend void swap(ShaderSource& first, ShaderSource& second); // nothrow
 
-      GLuint GetHandle() const;
+      inline GLuint GetHandle() const {
+        return shaderHandle;
+      }
+      inline const std::string &GetPath() const {
+        return file->GetFilename();
+      }
+      inline const std::string &GetContent() const {
+        return file->GetProcessedContent();
+      }
 
     private:
 
       void CompileShader();
       void CheckCompileErrors();
 
-      std::vector<std::string> heads;
-      std::string path = std::string();
+      std::shared_ptr<Preprocessor> file;
 
       GLenum shaderType = 0;
       GLuint shaderHandle = 0;

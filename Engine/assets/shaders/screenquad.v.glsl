@@ -1,3 +1,8 @@
+#version 330 core
+#include "includes/shared_head.glsl"
+#include "includes/vertex_head.glsl"
+#include "includes/vertex_main.glsl"
+
 uniform vec2 _Scale;
 uniform vec2 _Offset;
 

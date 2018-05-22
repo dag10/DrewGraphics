@@ -31,15 +31,12 @@ void dg::ShaderSource::CompileShader() {
   CheckCompileErrors();
 }
 
-#include <iostream> // TODO TMP    
-
 void dg::ShaderSource::CheckCompileErrors() {
   GLint success;
   GLchar log[1024];
   glGetShaderiv(shaderHandle, GL_COMPILE_STATUS, &success);
   if (!success) {
     glGetShaderInfoLog(shaderHandle, sizeof(log), nullptr, log);
-    std::cout << "DUMP:" << std::endl << GetContent() << std::endl; // TODO: TMP   
     throw ShaderCompileError(GetPath(), std::string(log));
   }
 }

@@ -24,20 +24,8 @@ dg::Preprocessor::File &dg::Preprocessor::GetFile(const std::string &filename) {
     files[filename] = {};
     files[filename].filename = filename;
     files[filename].id = nextFileID;
+    files[filename].lines = FileUtils::LoadFileLines(filename);
     nextFileID++;
-
-    std::ifstream file;
-    file.exceptions(std::ifstream::badbit);
-    file.open(filename);
-    if (file.fail()) {
-      throw dg::FileNotFoundException(filename);
-    }
-
-    std::string line;
-    while (std::getline(file, line)) {
-      files[filename].lines.push_back(line);
-    }
-    file.close();
   }
 
   return files.at(filename);

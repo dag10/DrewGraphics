@@ -23,6 +23,25 @@ std::string dg::FileUtils::LoadFile(const std::string& path) {
   return fileStream.str();
 }
 
+std::vector<std::string> dg::FileUtils::LoadFileLines(const std::string& path) {
+  std::vector<std::string> lines;
+
+  std::ifstream file;
+  file.exceptions(std::ifstream::badbit);
+  file.open(path);
+  if (file.fail()) {
+    throw dg::FileNotFoundException(path);
+  }
+
+  std::string line;
+  while (std::getline(file, line)) {
+    lines.push_back(line);
+  }
+  file.close();
+
+  return lines;
+}
+
 std::string dg::FileUtils::DirectoryPathOfFilePath(
     const std::string &filename) {
   size_t lastSlashPos = filename.find_last_of("/\\");

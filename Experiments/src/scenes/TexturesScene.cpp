@@ -8,6 +8,7 @@
 #include <glm/glm.hpp>
 #include "dg/Camera.h"
 #include "dg/Canvas.h"
+#include "dg/Cubemap.h"
 #include "dg/EngineTime.h"
 #include "dg/FrameBuffer.h"
 #include "dg/Graphics.h"
@@ -44,7 +45,10 @@ void dg::TexturesScene::Initialize() {
       Texture::FromPath("assets/textures/skybox_daylight.png");
 
   // Create skybox.
-  skybox = Skybox::Create(skyboxTexture);
+  skybox = Skybox::Create(Cubemap::FromPaths(
+      "assets/textures/skybox/right.jpg", "assets/textures/skybox/left.jpg",
+      "assets/textures/skybox/top.jpg", "assets/textures/skybox/bottom.jpg",
+      "assets/textures/skybox/back.jpg", "assets/textures/skybox/front.jpg"));
 
   // Create ceiling light source.
   auto ceilingLight = std::make_shared<PointLight>(

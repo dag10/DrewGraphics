@@ -120,11 +120,6 @@ namespace dg {
       void SendLights(const Light::ShaderData(&lights)[Light::MAX_LIGHTS]);
       void SendShadowMap(std::shared_ptr<Texture> shadowMap);
 
-      // Portal world-to-local transform, for back-of-portal fragment culling.
-      // Set this if we're currently rendering "through" a portal, and set
-      // to zeros if we're not rendering through a portal.
-      void SetInvPortal(glm::mat4x4 invPortal);
-
       void Use() const;
 
       RasterizerState rasterizerOverride;

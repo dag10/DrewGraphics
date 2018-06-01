@@ -201,10 +201,6 @@ const std::string dg::Material::LightProperty(
   return std::string(buffer);
 }
 
-void dg::Material::SetInvPortal(glm::mat4x4 invPortal) {
-  SetProperty("_InvPortal", invPortal);
-}
-
 void dg::Material::SendShadowMap(std::shared_ptr<Texture> shadowMap) {
 #if defined(_OPENGL)
   SetProperty("_ShadowMap", shadowMap, (int)TexUnitHints::SHADOWMAP);

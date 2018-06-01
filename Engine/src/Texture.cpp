@@ -2,6 +2,7 @@
 //  Texture.cpp
 //
 
+#include "dg/Texture.h"
 #include <cassert>
 #include <iostream>
 #include <string>
@@ -10,7 +11,6 @@
 
 #include "dg/Exceptions.h"
 #include "dg/Graphics.h"
-#include "dg/Texture.h"
 
 #pragma region Texture Base Class
 

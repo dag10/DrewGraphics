@@ -104,6 +104,13 @@ void dg::Material::SetProperty(
   properties.insert_or_assign(name, prop);
 }
 
+void dg::Material::SetProperty(std::shared_ptr<Cubemap> value) {
+  Property prop;
+  prop.type = PropertyType::CUBEMAP;
+  prop.cubemap = value;
+  properties.insert_or_assign("__cubemap__", prop);
+}
+
 void dg::Material::ClearProperty(const std::string& name) {
   properties.erase(name);
 }
@@ -243,6 +250,9 @@ void dg::Material::Use() const {
           shader->SetTexture(textureUnit, it->first, it->second.texture.get());
           textureUnit++;
         }
+        break;
+      case PropertyType::CUBEMAP:
+        shader->SetCubemap(it->second.cubemap.get());
         break;
       default:
         break;

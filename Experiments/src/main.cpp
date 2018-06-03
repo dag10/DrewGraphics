@@ -12,10 +12,11 @@
 #include "dg/scenes/AOScene.h"
 #include "dg/scenes/BoundsScene.h"
 #include "dg/scenes/CanvasTestScene.h"
+#include "dg/scenes/CubemapScene.h"
 #include "dg/scenes/MeshesScene.h"
+#include "dg/scenes/PointShadowScene.h"
 #include "dg/scenes/QuadScene.h"
 #include "dg/scenes/RobotScene.h"
-#include "dg/scenes/PointShadowScene.h"
 #include "dg/scenes/ShadowScene.h"
 #include "dg/scenes/SimpleScene.h"
 #include "dg/scenes/TexturesScene.h"
@@ -36,6 +37,7 @@ std::unique_ptr<Scene> PromptForScene(
   constructors["widget"]       = dg::WidgetScene::Make;
   constructors["widget-vr"]    = dg::WidgetScene::MakeVR;
   constructors["textures"]     = dg::TexturesScene::Make;
+  constructors["cubemap"]      = dg::CubemapScene::Make;
   constructors["meshes"]       = dg::MeshesScene::Make;
   constructors["meshes-vr"]    = dg::MeshesScene::MakeVR;
   constructors["bounds"]       = dg::BoundsScene::Make;

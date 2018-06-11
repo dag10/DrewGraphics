@@ -67,6 +67,7 @@ namespace dg {
 
       void LookAt(const SceneObject& object);
       void LookAtDirection(glm::vec3 direction);
+      void LookAtLocalDirection(glm::vec3 direction);
       void LookAtPoint(glm::vec3 target);
       void OrientUpwards();
 

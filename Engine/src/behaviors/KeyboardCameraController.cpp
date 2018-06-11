@@ -60,7 +60,8 @@ void dg::KeyboardCameraController::Update() {
             0)));
     glm::quat rotation = yaw * sceneObject->transform.rotation *
       pitch * glm::inverse(sceneObject->transform.rotation);
-    sceneObject->LookAtDirection(rotation * sceneObject->transform.Forward());
+    sceneObject->LookAtLocalDirection(rotation *
+                                      sceneObject->transform.Forward());
   }
 
   // Calculate new movement relative to sceneObject, based on WASD keys.
@@ -89,4 +90,3 @@ void dg::KeyboardCameraController::Update() {
 
   sceneObject->transform = sceneObject->transform * xfDelta;
 }
-

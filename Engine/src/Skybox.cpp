@@ -67,7 +67,7 @@ dg::CubemapSkybox::CubemapSkybox(std::shared_ptr<Cubemap> cubemap) {
   model.material->shader = Shader::FromFiles("assets/shaders/skybox.v.glsl",
                                              "assets/shaders/skybox.f.glsl");
   model.material->rasterizerOverride.SetWriteDepth(false);
-  model.material->SetProperty(cubemap);
+  model.material->SetProperty("skybox", cubemap);
   model.mesh = Mesh::ScreenQuad;
 }
 

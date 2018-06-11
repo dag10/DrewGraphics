@@ -11,7 +11,7 @@ struct Material {
 uniform Material _Material;
 uniform vec2 _UVScale;
 
-uniform samplerCube skybox;
+uniform samplerCube cubemap;
 
 in vec2 v_TexCoord;
 in mat3 v_TBN;
@@ -29,8 +29,8 @@ vec4 frag() {
     normal = normalize(v_TBN * normal);
   }
 
-  vec3 viewDir = normalize(v_ScenePos.xyz - _CameraPosition );
+  vec3 viewDir = normalize(v_ScenePos.xyz - _CameraPosition);
   vec3 reflectDir = reflect(viewDir, normal);
-  return texture(skybox, normalize(reflectDir));
+  return texture(cubemap, normalize(reflectDir));
 }
 

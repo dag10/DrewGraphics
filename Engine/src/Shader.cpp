@@ -159,9 +159,14 @@ void dg::OpenGLShader::SetTexture(
   glUniform1i(GetUniformLocation(name), textureUnit);
 }
 
-void dg::OpenGLShader::SetCubemap(const Cubemap *cubemap) {
+void dg::OpenGLShader::SetCubemap(unsigned int textureUnit,
+                                  const std::string &name,
+                                  const Cubemap *cubemap) {
   assert(cubemap != nullptr);
-  cubemap->Bind();
+
+  glActiveTexture(GL_TEXTURE0 + textureUnit);
+  glBindTexture(GL_TEXTURE_CUBE_MAP, cubemap->GetHandle());
+  glUniform1i(GetUniformLocation(name), textureUnit);
 }
 
 void dg::OpenGLShader::SetData(

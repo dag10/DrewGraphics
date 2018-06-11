@@ -59,10 +59,11 @@ void dg::CubemapScene::Initialize() {
   }
 
   // Create skybox.
-  skybox = Skybox::Create(Cubemap::FromPaths(
+  auto skyCubemap = Cubemap::FromPaths(
       "assets/textures/skybox/right.jpg", "assets/textures/skybox/left.jpg",
       "assets/textures/skybox/top.jpg", "assets/textures/skybox/bottom.jpg",
-      "assets/textures/skybox/back.jpg", "assets/textures/skybox/front.jpg"));
+      "assets/textures/skybox/back.jpg", "assets/textures/skybox/front.jpg");
+  skybox = Skybox::Create(skyCubemap);
 
   // Create shiny brick material.
   StandardMaterial brickMaterial = StandardMaterial::WithTexture(
@@ -136,6 +137,11 @@ void dg::CubemapScene::Initialize() {
   sphereMaterial->shader =
       Shader::FromFiles("assets/shaders/cubemap-mirror.v.glsl",
                         "assets/shaders/cubemap-mirror.f.glsl");
+  auto tempCubemap = Cubemap::FromPaths(
+      "assets/textures/skybox/bottom.jpg", "assets/textures/skybox/bottom.jpg",
+      "assets/textures/skybox/bottom.jpg", "assets/textures/skybox/bottom.jpg",
+      "assets/textures/skybox/bottom.jpg", "assets/textures/skybox/bottom.jpg");
+  sphereMaterial->SetProperty("cubemap", tempCubemap);
   sphereMaterial->SetProperty("_UVScale", glm::vec2(1, 1));
   sphereMaterial->SetProperty(
       "_Material.normalMap",

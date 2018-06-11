@@ -106,7 +106,10 @@ namespace dg {
           const std::string& name, std::shared_ptr<Texture> value);
       void SetProperty(const std::string &name, std::shared_ptr<Texture> value,
                        int texUnitHint);
-      void SetProperty(std::shared_ptr<Cubemap> value);
+      void SetProperty(
+          const std::string& name, std::shared_ptr<Cubemap> value);
+      void SetProperty(const std::string &name, std::shared_ptr<Cubemap> value,
+                       int texUnitHint);
 
       void ClearProperty(const std::string& name);
 

@@ -104,11 +104,22 @@ void dg::Material::SetProperty(
   properties.insert_or_assign(name, prop);
 }
 
-void dg::Material::SetProperty(std::shared_ptr<Cubemap> value) {
+void dg::Material::SetProperty(
+    const std::string& name, std::shared_ptr<Cubemap> value) {
+  SetProperty(name, value, -1);
+}
+
+void dg::Material::SetProperty(
+    const std::string& name, std::shared_ptr<Cubemap> value,
+    int texUnitHint) {
   Property prop;
   prop.type = PropertyType::CUBEMAP;
   prop.cubemap = value;
-  properties.insert_or_assign("__cubemap__", prop);
+  prop.texUnitHint = texUnitHint;
+  if (texUnitHint > (int)highestTexUnitHint) {
+    highestTexUnitHint = texUnitHint;
+  }
+  properties.insert_or_assign(name, prop);
 }
 
 void dg::Material::ClearProperty(const std::string& name) {
@@ -248,7 +259,13 @@ void dg::Material::Use() const {
         }
         break;
       case PropertyType::CUBEMAP:
-        shader->SetCubemap(it->second.cubemap.get());
+        if (it->second.texUnitHint >= 0) {
+          shader->SetCubemap(
+              it->second.texUnitHint, it->first, it->second.cubemap.get());
+        } else {
+          shader->SetCubemap(textureUnit, it->first, it->second.cubemap.get());
+          textureUnit++;
+        }
         break;
       default:
         break;

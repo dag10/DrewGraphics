@@ -63,7 +63,8 @@ namespace dg {
       virtual void SetTexture(
           unsigned int textureUnit, const std::string& name,
           const Texture *texture) = 0;
-      virtual void SetCubemap(const Cubemap *cubemap) = 0;
+      virtual void SetCubemap(unsigned int textureUnit, const std::string &name,
+                              const Cubemap *cubemap) = 0;
       virtual void SetData(const std::string& name, void *data, size_t size) = 0;
       template <typename T>
       void SetData(const std::string& name, const T& data) {
@@ -107,7 +108,9 @@ namespace dg {
       virtual void SetTexture(
           unsigned int textureUnit, const std::string& name,
           const Texture *texture);
-      virtual void SetCubemap(const Cubemap *cubemap);
+      virtual void SetCubemap(
+          unsigned int textureUnit, const std::string& name,
+          const Cubemap *cubemap);
       virtual void SetData(const std::string& name, void *data, size_t size);
 
     private:

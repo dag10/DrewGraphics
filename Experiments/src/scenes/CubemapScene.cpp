@@ -132,10 +132,22 @@ void dg::CubemapScene::Initialize() {
               glm::vec3(pedestalWidth))),
       false);
 
+  // Create reflection probe cubemap.
+  TextureOptions reflectionOptions;
+  reflectionOptions.width = 512;
+  reflectionOptions.height = 512;
+  reflectionOptions.format = TexturePixelFormat::RGBA;
+  reflectionOptions.type = TexturePixelType::BYTE;
+  reflectionOptions.interpolation = TextureInterpolation::LINEAR;
+  reflectionOptions.wrap = TextureWrap::CLAMP_EDGE;
+  reflectionOptions.mipmap = false;
+  reflectionCubemap = Cubemap::Generate(reflectionOptions);
+
   // Create reflective sphere material.
-  auto sphereMaterial = std::make_shared<CubemapMirrorMaterial>(skyCubemap);
-  sphereMaterial->SetNormalMap(
-      Texture::FromPath("assets/textures/brickwall_normal.jpg"));
+  auto sphereMaterial =
+      std::make_shared<CubemapMirrorMaterial>(reflectionCubemap);
+  //sphereMaterial->SetNormalMap(
+      //Texture::FromPath("assets/textures/brickwall_normal.jpg"));
 
   // Add reflective cubemap sphere to top of pedestal.
   float sphereDiameter = pedestalWidth * 0.75f;

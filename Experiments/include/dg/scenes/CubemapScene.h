@@ -5,6 +5,7 @@
 #pragma once
 
 #include <memory>
+#include "dg/Cubemap.h"
 #include "dg/Scene.h"
 
 namespace dg {
@@ -26,6 +27,7 @@ namespace dg {
 
       CubemapScene(bool enableVR);
 
+      std::shared_ptr<Cubemap> reflectionCubemap;
       std::shared_ptr<RotateBehavior> cameraRotateBehavior;
 
   }; // class CubemapScene

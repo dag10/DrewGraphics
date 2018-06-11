@@ -59,12 +59,12 @@ void dg::BaseCubemap::LoadImage(Face face, const std::string &filepath) {
 std::shared_ptr<dg::Cubemap> dg::BaseCubemap::Generate(TextureOptions options) {
   auto cubemap = std::shared_ptr<Cubemap>(new Cubemap(options));
   cubemap->GenerateCubemap();
-  cubemap->LoadImage(Face::Right, nullptr);
-  cubemap->LoadImage(Face::Left, nullptr);
-  cubemap->LoadImage(Face::Top, nullptr);
-  cubemap->LoadImage(Face::Bottom, nullptr);
-  cubemap->LoadImage(Face::Back, nullptr);
-  cubemap->LoadImage(Face::Front, nullptr);
+  cubemap->GenerateImage(Face::Right, nullptr);
+  cubemap->GenerateImage(Face::Left, nullptr);
+  cubemap->GenerateImage(Face::Top, nullptr);
+  cubemap->GenerateImage(Face::Bottom, nullptr);
+  cubemap->GenerateImage(Face::Back, nullptr);
+  cubemap->GenerateImage(Face::Front, nullptr);
   return cubemap;
 }
 

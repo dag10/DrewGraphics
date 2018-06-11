@@ -10,6 +10,7 @@
 #include "dg/Cubemap.h"
 #include "dg/EngineTime.h"
 #include "dg/Lights.h"
+#include "dg/Material.h"
 #include "dg/Mesh.h"
 #include "dg/Model.h"
 #include "dg/Shader.h"
@@ -47,6 +48,7 @@ void dg::CubemapScene::Initialize() {
               << "  S: Move backward" << std::endl
               << "  D: Move right" << std::endl
               << "  Shift: Increase move speed" << std::endl
+              << "  O: Toggle camera orbit" << std::endl
               << "  R: Reset camera to initial position" << std::endl
               << "  C: Print current camera pose" << std::endl
               << std::endl
@@ -129,10 +131,13 @@ void dg::CubemapScene::Initialize() {
               glm::vec3(pedestalWidth))),
       false);
 
+  // Create reflective sphere material.
+  auto sphereMaterial = std::make_shared<Material>();
+  sphereMaterial->shader =
+      Shader::FromFiles("assets/shaders/cubemap-mirror.v.glsl",
+                        "assets/shaders/cubemap-mirror.f.glsl");
+
   // Add reflective cubemap sphere to top of pedestal.
-  auto sphereMaterial = std::make_shared<StandardMaterial>(
-      StandardMaterial::WithColor(glm::vec3(0.8f)));
-  sphereMaterial->SetLit(false);
   float sphereDiameter = pedestalWidth * 0.75f;
   float sphereFloatDistance = 0.08f;
   auto reflectiveSphere = std::make_shared<Model>(
@@ -158,8 +163,30 @@ void dg::CubemapScene::Initialize() {
     cameras.main->transform.translation = glm::vec3(0, 0.77, 1.5);
     cameras.main->LookAtDirection(glm::vec3(0, -0.34, -0.94));
 
+    // Parent camera by an empty object that can rotate around world origin
+    // if orbit mode is enabled.
+    auto cameraContainer = std::make_shared<SceneObject>();
+    AddChild(cameraContainer);
+    cameraContainer->AddChild(cameras.main, true);
+    cameraRotateBehavior = Behavior::Attach(
+        cameraContainer, std::make_shared<RotateBehavior>(glm::radians(-25.f)));
+
     // Allow camera to be controller by the keyboard and mouse.
     Behavior::Attach(cameras.main,
                      std::make_shared<KeyboardCameraController>(window));
+  }
+}
+
+void dg::CubemapScene::Update() {
+  Scene::Update();
+
+  // When O is tapped, toggle camera orbit.
+  if (window->IsKeyJustPressed(Key::O)) {
+    cameraRotateBehavior->enabled = !cameraRotateBehavior->enabled;
+  }
+
+  // When R is tapped, reset camera orbit in addition to camera position.
+  if (window->IsKeyJustPressed(Key::R)) {
+    cameraRotateBehavior->GetSceneObject()->transform = Transform();
   }
 }

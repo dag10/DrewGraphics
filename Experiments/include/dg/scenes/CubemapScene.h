@@ -10,6 +10,7 @@
 namespace dg {
 
   class Model;
+  class RotateBehavior;
 
   class CubemapScene : public Scene {
 
@@ -19,10 +20,13 @@ namespace dg {
       static std::unique_ptr<CubemapScene> MakeVR();
 
       virtual void Initialize();
+      virtual void Update();
 
     private:
 
       CubemapScene(bool enableVR);
+
+      std::shared_ptr<RotateBehavior> cameraRotateBehavior;
 
   }; // class CubemapScene
 

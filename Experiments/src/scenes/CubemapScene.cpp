@@ -10,7 +10,6 @@
 #include "dg/Cubemap.h"
 #include "dg/EngineTime.h"
 #include "dg/Lights.h"
-#include "dg/Material.h"
 #include "dg/Mesh.h"
 #include "dg/Model.h"
 #include "dg/Shader.h"
@@ -19,6 +18,7 @@
 #include "dg/Window.h"
 #include "dg/behaviors/KeyboardCameraController.h"
 #include "dg/behaviors/RotateBehavior.h"
+#include "dg/materials/CubemapMirrorMaterial.h"
 #include "dg/materials/StandardMaterial.h"
 
 std::unique_ptr<dg::CubemapScene> dg::CubemapScene::Make() {
@@ -133,20 +133,9 @@ void dg::CubemapScene::Initialize() {
       false);
 
   // Create reflective sphere material.
-  auto sphereMaterial = std::make_shared<Material>();
-  sphereMaterial->shader =
-      Shader::FromFiles("assets/shaders/cubemap-mirror.v.glsl",
-                        "assets/shaders/cubemap-mirror.f.glsl");
-  auto tempCubemap = Cubemap::FromPaths(
-      "assets/textures/skybox/bottom.jpg", "assets/textures/skybox/bottom.jpg",
-      "assets/textures/skybox/bottom.jpg", "assets/textures/skybox/bottom.jpg",
-      "assets/textures/skybox/bottom.jpg", "assets/textures/skybox/bottom.jpg");
-  sphereMaterial->SetProperty("cubemap", tempCubemap);
-  sphereMaterial->SetProperty("_UVScale", glm::vec2(1, 1));
-  sphereMaterial->SetProperty(
-      "_Material.normalMap",
+  auto sphereMaterial = std::make_shared<CubemapMirrorMaterial>(skyCubemap);
+  sphereMaterial->SetNormalMap(
       Texture::FromPath("assets/textures/brickwall_normal.jpg"));
-  sphereMaterial->SetProperty("_Material.useNormalMap", true);
 
   // Add reflective cubemap sphere to top of pedestal.
   float sphereDiameter = pedestalWidth * 0.75f;

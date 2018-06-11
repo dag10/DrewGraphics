@@ -136,6 +136,11 @@ void dg::CubemapScene::Initialize() {
   sphereMaterial->shader =
       Shader::FromFiles("assets/shaders/cubemap-mirror.v.glsl",
                         "assets/shaders/cubemap-mirror.f.glsl");
+  sphereMaterial->SetProperty("_UVScale", glm::vec2(1, 1));
+  sphereMaterial->SetProperty(
+      "_Material.normalMap",
+      Texture::FromPath("assets/textures/brickwall_normal.jpg"));
+  sphereMaterial->SetProperty("_Material.useNormalMap", true);
 
   // Add reflective cubemap sphere to top of pedestal.
   float sphereDiameter = pedestalWidth * 0.75f;
@@ -160,8 +165,8 @@ void dg::CubemapScene::Initialize() {
     window->LockCursor();
 
     // Configure camera.
-    cameras.main->transform.translation = glm::vec3(0, 0.77, 1.5);
-    cameras.main->LookAtDirection(glm::vec3(0, -0.34, -0.94));
+    cameras.main->transform.translation = glm::vec3(0, 0.76, 0.69);
+    cameras.main->LookAtDirection(glm::normalize(glm::vec3(0, -0.33, -0.94)));
 
     // Parent camera by an empty object that can rotate around world origin
     // if orbit mode is enabled.

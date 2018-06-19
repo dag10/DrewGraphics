@@ -155,17 +155,7 @@ void dg::OpenGLShader::SetTexture(
   assert(texture != nullptr);
 
   glActiveTexture(GL_TEXTURE0 + textureUnit);
-  glBindTexture(GL_TEXTURE_2D, texture->GetHandle());
-  glUniform1i(GetUniformLocation(name), textureUnit);
-}
-
-void dg::OpenGLShader::SetCubemap(unsigned int textureUnit,
-                                  const std::string &name,
-                                  const Cubemap *cubemap) {
-  assert(cubemap != nullptr);
-
-  glActiveTexture(GL_TEXTURE0 + textureUnit);
-  glBindTexture(GL_TEXTURE_CUBE_MAP, cubemap->GetHandle());
+  glBindTexture(texture->GetOptions().GetOpenGLTarget(), texture->GetHandle());
   glUniform1i(GetUniformLocation(name), textureUnit);
 }
 
@@ -256,12 +246,6 @@ void dg::DirectXShader::SetTexture(
   bool a = pixelShader->SetSamplerState(name + "Sampler", texture->GetSamplerState());
   bool b = pixelShader->SetShaderResourceView(name,
                                      texture->GetShaderResourceView());
-}
-
-void dg::DirectXShader::SetCubemap(const Cubemap *cubemap) {
-  assert(cubemap != nullptr);
-
-  throw std::runtime_error("DirectXShader::SetCubemap() not yet implemented.");
 }
 
 void dg::DirectXShader::SetData(

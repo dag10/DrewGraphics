@@ -1,3 +1,4 @@
+/*
 //
 //  materials/CubemapMirrorMaterial.cpp
 //
@@ -94,3 +95,4 @@ void dg::CubemapMirrorMaterial::SetNormalMap(
   }
 #endif
 }
+*/

@@ -14,7 +14,23 @@
 
 namespace dg {
 
+  class Image;
+
 #pragma region Texture Options
+
+  enum class TextureType {
+    _2D,
+    CUBEMAP,
+  };
+
+  enum class TextureFace {
+    Right,
+    Left,
+    Top,
+    Bottom,
+    Back,
+    Front,
+  };
 
   enum class TextureWrap {
     REPEAT,
@@ -43,10 +59,11 @@ namespace dg {
   // The reason for creating enums values redundant to OpenGL enums is
   // to make the engine more API agnostic.
   struct TextureOptions {
+    TextureType type = TextureType::_2D;
     TextureWrap wrap = TextureWrap::REPEAT;
     TextureInterpolation interpolation = TextureInterpolation::LINEAR;
     TexturePixelFormat format = TexturePixelFormat::RGBA;
-    TexturePixelType type = TexturePixelType::BYTE;
+    TexturePixelType pixelType = TexturePixelType::BYTE;
     bool mipmap = false;
     bool shaderReadable = true;
     bool cpuReadable = false;
@@ -54,6 +71,7 @@ namespace dg {
     unsigned int height;
 
 #if defined(_OPENGL)
+    GLenum GetOpenGLTarget() const;
     GLenum GetOpenGLWrap() const;
     GLenum GetOpenGLMinFilter() const;
     GLenum GetOpenGLMagFilter() const;
@@ -88,6 +106,19 @@ namespace dg {
     public:
 
       static std::shared_ptr<Texture> FromPath(const std::string& path);
+      static std::shared_ptr<Texture> FromImage(std::shared_ptr<Image> image);
+      static std::shared_ptr<Texture> FromPaths(const std::string &right,
+                                                const std::string &left,
+                                                const std::string &top,
+                                                const std::string &bottom,
+                                                const std::string &back,
+                                                const std::string &front);
+      static std::shared_ptr<Texture> FromImages(std::shared_ptr<Image> right,
+                                                 std::shared_ptr<Image> left,
+                                                 std::shared_ptr<Image> top,
+                                                 std::shared_ptr<Image> bottom,
+                                                 std::shared_ptr<Image> back,
+                                                 std::shared_ptr<Image> front);
       static std::shared_ptr<Texture> Generate(TextureOptions options);
 
       BaseTexture() = delete;
@@ -98,9 +129,13 @@ namespace dg {
       BaseTexture& operator=(BaseTexture& other) = delete;
 
       virtual void UpdateData(const void *pixels, bool genMipMap = true) = 0;
+      virtual void UpdateData(TextureFace face, const void *pixels,
+                              bool genMipMap = true) = 0;
       virtual void GenerateMips() = 0;
+      virtual void GenerateMips(TextureFace face) = 0;
 
       const TextureOptions GetOptions() const;
+      TextureType GetType() const;
       unsigned int GetWidth() const;
       unsigned int GetHeight() const;
 
@@ -124,15 +159,23 @@ namespace dg {
       virtual ~OpenGLTexture();
 
       virtual void UpdateData(const void *pixels, bool genMipMap = true);
+      virtual void UpdateData(TextureFace face, const void *pixels,
+                              bool genMipMap = true);
       virtual void GenerateMips();
+      virtual void GenerateMips(TextureFace face);
 
       GLuint GetHandle() const;
 
     private:
 
+      static GLenum FaceToGLTarget(TextureFace face);
+
       OpenGLTexture(TextureOptions options);
 
       virtual void GenerateImage(void *pixels);
+
+      void Bind() const;
+      void Unbind() const;
 
       GLuint textureHandle = 0;
 
@@ -149,6 +192,7 @@ namespace dg {
 
       virtual void UpdateData(const void *pixels, bool genMipMap = true);
       virtual void GenerateMips();
+      virtual void GenerateMips(TextureFace face);
 
       ID3D11ShaderResourceView *GetShaderResourceView() const;
       ID3D11SamplerState *GetSamplerState() const;

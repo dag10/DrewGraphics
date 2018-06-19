@@ -6,7 +6,6 @@
 #include <openvr.h>
 #include <memory>
 #include "dg/Camera.h"
-#include "dg/Cubemap.h"
 #include "dg/Model.h"
 
 namespace dg {
@@ -18,7 +17,6 @@ namespace dg {
       bool enabled = true;
 
       static std::shared_ptr<Skybox> Create(std::shared_ptr<Texture> texture);
-      static std::shared_ptr<Skybox> Create(std::shared_ptr<Cubemap> cubemap);
 
       void Draw(const Camera& camera);
       void Draw(const Camera& camera, vr::EVREye eye);
@@ -51,7 +49,7 @@ namespace dg {
 
       Model model;
 
-      CubemapSkybox(std::shared_ptr<Cubemap> cubemap);
+      CubemapSkybox(std::shared_ptr<Texture> cubemap);
 
       virtual void Draw(const Camera& camera, glm::mat4x4 projection);
 

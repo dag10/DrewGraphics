@@ -7,7 +7,6 @@
 #include <glm/glm.hpp>
 #include <iostream>
 #include "dg/Camera.h"
-#include "dg/Cubemap.h"
 #include "dg/EngineTime.h"
 #include "dg/Lights.h"
 #include "dg/Mesh.h"
@@ -59,7 +58,7 @@ void dg::CubemapScene::Initialize() {
   }
 
   // Create skybox.
-  auto skyCubemap = Cubemap::FromPaths(
+  auto skyCubemap = Texture::FromPaths(
       "assets/textures/skybox/right.jpg", "assets/textures/skybox/left.jpg",
       "assets/textures/skybox/top.jpg", "assets/textures/skybox/bottom.jpg",
       "assets/textures/skybox/back.jpg", "assets/textures/skybox/front.jpg");
@@ -134,20 +133,24 @@ void dg::CubemapScene::Initialize() {
 
   // Create reflection probe cubemap.
   TextureOptions reflectionOptions;
+  reflectionOptions.type = TextureType::CUBEMAP;
   reflectionOptions.width = 512;
   reflectionOptions.height = 512;
   reflectionOptions.format = TexturePixelFormat::RGBA;
-  reflectionOptions.type = TexturePixelType::BYTE;
+  reflectionOptions.pixelType = TexturePixelType::BYTE;
   reflectionOptions.interpolation = TextureInterpolation::LINEAR;
   reflectionOptions.wrap = TextureWrap::CLAMP_EDGE;
   reflectionOptions.mipmap = false;
-  reflectionCubemap = Cubemap::Generate(reflectionOptions);
+  reflectionCubemap = Texture::Generate(reflectionOptions);
 
   // Create reflective sphere material.
-  auto sphereMaterial =
-      std::make_shared<CubemapMirrorMaterial>(reflectionCubemap);
+  //auto sphereMaterial =
+      //std::make_shared<CubemapMirrorMaterial>(reflectionCubemap);
   //sphereMaterial->SetNormalMap(
       //Texture::FromPath("assets/textures/brickwall_normal.jpg"));
+
+  auto sphereMaterial = std::make_shared<StandardMaterial>(
+      StandardMaterial::WithTransparentColor(glm::vec4(0.5, 0.5, 0.5, 0.8)));
 
   // Add reflective cubemap sphere to top of pedestal.
   float sphereDiameter = pedestalWidth * 0.75f;

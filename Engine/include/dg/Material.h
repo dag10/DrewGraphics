@@ -5,7 +5,6 @@
 
 #include <memory>
 #include <unordered_map>
-#include "dg/Cubemap.h"
 #include "dg/Lights.h"
 #include "dg/RasterizerState.h"
 #include "dg/Shader.h"
@@ -60,7 +59,6 @@ namespace dg {
       VEC4,
       MAT4X4,
       TEXTURE,
-      CUBEMAP,
     };
 
     union PropertyValue {
@@ -81,7 +79,6 @@ namespace dg {
       PropertyType type = PropertyType::NONE;
       PropertyValue value;
       std::shared_ptr<Texture> texture = nullptr;
-      std::shared_ptr<Cubemap> cubemap = nullptr;
       int texUnitHint = -1;
     };
 
@@ -105,10 +102,6 @@ namespace dg {
       void SetProperty(
           const std::string& name, std::shared_ptr<Texture> value);
       void SetProperty(const std::string &name, std::shared_ptr<Texture> value,
-                       int texUnitHint);
-      void SetProperty(
-          const std::string& name, std::shared_ptr<Cubemap> value);
-      void SetProperty(const std::string &name, std::shared_ptr<Cubemap> value,
                        int texUnitHint);
 
       void ClearProperty(const std::string& name);

@@ -297,7 +297,7 @@ std::shared_ptr<dg::Texture> dg::VRManager::GetRenderModelTexture(
   texOpts.height = texdata->unHeight;
   texOpts.mipmap = true;
   texOpts.format = TexturePixelFormat::RGBA;
-  texOpts.type = TexturePixelType::BYTE;
+  texOpts.pixelType = TexturePixelType::BYTE;
   auto texture = Texture::Generate(texOpts);
   texture->UpdateData(texdata->rubTextureMapData, true);
   info->texture = texture;

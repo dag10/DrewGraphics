@@ -190,7 +190,7 @@ void dg::AOScene::InitializeSSAO() {
   noiseTexOpts.interpolation = TextureInterpolation::NEAREST;
   noiseTexOpts.format = TexturePixelFormat::RGBA;
   noiseTexOpts.wrap = TextureWrap::REPEAT;
-  noiseTexOpts.type = TexturePixelType::FLOAT;
+  noiseTexOpts.pixelType = TexturePixelType::FLOAT;
   noiseTexOpts.mipmap = false;
   auto ssaoNoise = std::make_shared<Canvas>(noiseTexOpts);
   for (unsigned int i = 0; i < ssaoNoise->GetWidth(); i++) {
@@ -333,33 +333,33 @@ void dg::AOScene::CreateGBuffer() {
   // First color texture is the albedo (rgb) and blend alpha (a).
   opts.textureOptions[0].width = opts.width;
   opts.textureOptions[0].height = opts.height;
-  opts.textureOptions[0].type = TexturePixelType::BYTE;
+  opts.textureOptions[0].pixelType = TexturePixelType::BYTE;
   opts.textureOptions[0].wrap = TextureWrap::CLAMP_EDGE;
 
   // Second color texture is the world-space position (xyz), and whether
   // the fragment is to be lit at all (w == 1).
   opts.textureOptions[1].width = opts.width;
   opts.textureOptions[1].height = opts.height;
-  opts.textureOptions[1].type = TexturePixelType::FLOAT;
+  opts.textureOptions[1].pixelType = TexturePixelType::FLOAT;
   opts.textureOptions[1].wrap = TextureWrap::CLAMP_EDGE;
 
   // Third color texture is the world-space normal.
   opts.textureOptions[2].width = opts.width;
   opts.textureOptions[2].height = opts.height;
-  opts.textureOptions[2].type = TexturePixelType::FLOAT;
+  opts.textureOptions[2].pixelType = TexturePixelType::FLOAT;
   opts.textureOptions[2].wrap = TextureWrap::CLAMP_EDGE;
 
   // Fourth color texture is the specular reflection amount (rgb), and
   // shininess (a).
   opts.textureOptions[3].width = opts.width;
   opts.textureOptions[3].height = opts.height;
-  opts.textureOptions[3].type = TexturePixelType::BYTE;
+  opts.textureOptions[3].pixelType = TexturePixelType::BYTE;
   opts.textureOptions[3].wrap = TextureWrap::CLAMP_EDGE;
 
   // Fifth color texture is the view-space position (xyz).
   opts.textureOptions[4].width = opts.width;
   opts.textureOptions[4].height = opts.height;
-  opts.textureOptions[4].type = TexturePixelType::FLOAT;
+  opts.textureOptions[4].pixelType = TexturePixelType::FLOAT;
   opts.textureOptions[4].wrap = TextureWrap::CLAMP_EDGE;
 
   geometrySubrender.framebuffer = FrameBuffer::Create(opts);
@@ -382,7 +382,7 @@ void dg::AOScene::CreateSSAOBuffers() {
   opts.textureOptions = std::vector<TextureOptions>(1);
   opts.textureOptions[0].width = opts.width;
   opts.textureOptions[0].height = opts.height;
-  opts.textureOptions[0].type = TexturePixelType::FLOAT;
+  opts.textureOptions[0].pixelType = TexturePixelType::FLOAT;
   opts.textureOptions[0].interpolation = TextureInterpolation::NEAREST;
   opts.textureOptions[0].wrap = TextureWrap::CLAMP_EDGE;
   ssaoSubrender.framebuffer = FrameBuffer::Create(opts);

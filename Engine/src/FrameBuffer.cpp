@@ -22,7 +22,7 @@ dg::BaseFrameBuffer::BaseFrameBuffer(Options options) : options(options) {
   depthTexOpts.height = options.height;
   depthTexOpts.format = options.hasStencil ? TexturePixelFormat::DEPTH_STENCIL
                                       : TexturePixelFormat::DEPTH;
-  depthTexOpts.type =
+  depthTexOpts.pixelType =
       options.hasStencil ? TexturePixelType::INT : TexturePixelType::FLOAT;
   depthTexOpts.wrap = TextureWrap::CLAMP_EDGE;
   depthTexOpts.shaderReadable = options.depthReadable;

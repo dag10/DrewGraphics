@@ -3,7 +3,6 @@
 //
 
 #include "dg/Skybox.h"
-#include "dg/Cubemap.h"
 #include "dg/Graphics.h"
 #include "dg/Material.h"
 #include "dg/Mesh.h"
@@ -15,12 +14,12 @@
 
 std::shared_ptr<dg::Skybox> dg::Skybox::Create(
     std::shared_ptr<Texture> texture) {
-  return std::shared_ptr<Skybox>(new CubeMeshSkybox(texture));
-}
-
-std::shared_ptr<dg::Skybox> dg::Skybox::Create(
-    std::shared_ptr<Cubemap> cubemap) {
-  return std::shared_ptr<Skybox>(new CubemapSkybox(cubemap));
+  switch (texture->GetType()) {
+    case TextureType::_2D:
+      return std::shared_ptr<Skybox>(new CubeMeshSkybox(texture));
+    case TextureType::CUBEMAP:
+      return std::shared_ptr<Skybox>(new CubemapSkybox(texture));
+  }
 }
 
 void dg::Skybox::Draw(const Camera& camera) {
@@ -62,7 +61,7 @@ void dg::CubeMeshSkybox::Draw(const Camera& camera, glm::mat4x4 projection) {
 #pragma endregion
 #pragma region Cubemap Skybox
 
-dg::CubemapSkybox::CubemapSkybox(std::shared_ptr<Cubemap> cubemap) {
+dg::CubemapSkybox::CubemapSkybox(std::shared_ptr<Texture> cubemap) {
   model.material = std::make_shared<Material>();
   model.material->shader = Shader::FromFiles("assets/shaders/skybox.v.glsl",
                                              "assets/shaders/skybox.f.glsl");

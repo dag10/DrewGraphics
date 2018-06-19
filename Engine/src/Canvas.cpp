@@ -13,7 +13,7 @@ dg::Canvas::Canvas(unsigned int width, unsigned int height) {
   texOpts.interpolation = TextureInterpolation::NEAREST;
   texOpts.format = TexturePixelFormat::RGBA;
   texOpts.wrap = TextureWrap::CLAMP_EDGE;
-  texOpts.type = TexturePixelType::FLOAT;
+  texOpts.pixelType = TexturePixelType::FLOAT;
   texOpts.mipmap = true;
   texture = Texture::Generate(texOpts);
   Initialize();

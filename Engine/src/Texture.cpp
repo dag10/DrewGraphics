@@ -6,37 +6,74 @@
 #include <cassert>
 #include <iostream>
 #include <string>
-#define STB_IMAGE_IMPLEMENTATION
-#include "dg/stb_image.h"
-
 #include "dg/Exceptions.h"
 #include "dg/Graphics.h"
+#include "dg/Image.h"
 
 #pragma region Texture Base Class
 
-std::shared_ptr<dg::Texture> dg::BaseTexture::FromPath(const std::string& path) {
-  int nrChannels;
-  int width;
-  int height;
+std::shared_ptr<dg::Texture> dg::BaseTexture::FromPath(
+    const std::string &path) {
+  return FromImage(Image::FromPath(path));
+}
 
-  stbi_set_flip_vertically_on_load(true);
-
-  std::unique_ptr<stbi_uc[]> pixels = std::unique_ptr<stbi_uc[]>(stbi_load(
-    path.c_str(), &width, &height, &nrChannels, 4));
-
-  if (pixels == nullptr) {
-    throw dg::STBLoadError(path, stbi_failure_reason());
-  }
-
+std::shared_ptr<dg::Texture> dg::BaseTexture::FromImage(
+    std::shared_ptr<Image> image) {
   TextureOptions texOpts;
-  texOpts.width = (unsigned int)width;
-  texOpts.height = (unsigned int)height;
+  texOpts.width = image->GetWidth();
+  texOpts.height = image->GetHeight();
   texOpts.format = TexturePixelFormat::RGBA;
-  texOpts.type = TexturePixelType::BYTE;
+  texOpts.pixelType = TexturePixelType::BYTE;
   texOpts.mipmap = true;
 
   auto texture = std::shared_ptr<Texture>(new Texture(texOpts));
-  texture->GenerateImage(pixels.get());
+  texture->GenerateImage(image->GetPixels());
+  return texture;
+}
+
+std::shared_ptr<dg::Texture> dg::BaseTexture::FromPaths(
+    const std::string &right, const std::string &left, const std::string &top,
+    const std::string &bottom, const std::string &back,
+    const std::string &front) {
+  return FromImages(Image::FromPath(right, false), Image::FromPath(left, false),
+                    Image::FromPath(top, false), Image::FromPath(bottom, false),
+                    Image::FromPath(back, false),
+                    Image::FromPath(front, false));
+}
+
+std::shared_ptr<dg::Texture> dg::BaseTexture::FromImages(
+    std::shared_ptr<Image> right, std::shared_ptr<Image> left,
+    std::shared_ptr<Image> top, std::shared_ptr<Image> bottom,
+    std::shared_ptr<Image> back, std::shared_ptr<Image> front) {
+
+  // Ensure all cubemap face images are the same dimensions.
+  std::shared_ptr<Image> images[] = {right, left, top, bottom, back, front};
+  unsigned int width = images[0]->GetWidth();
+  unsigned int height = images[0]->GetHeight();
+  for (int i = 1; i < 6; i++) {
+    if (images[i]->GetWidth() != width || images[i]->GetHeight() != height) {
+      throw EngineError(
+          "Cannot create a cubemap Texture with images of unequal dimensions.");
+    }
+  }
+
+  TextureOptions texOpts;
+  texOpts.type = TextureType::CUBEMAP;
+  texOpts.width = width;
+  texOpts.height = height;
+  texOpts.format = TexturePixelFormat::RGBA;
+  texOpts.pixelType = TexturePixelType::BYTE;
+  texOpts.interpolation = TextureInterpolation::LINEAR;
+  texOpts.wrap = TextureWrap::CLAMP_EDGE;
+  texOpts.mipmap = false;
+
+  auto texture = Texture::Generate(texOpts);
+  texture->UpdateData(TextureFace::Right, right->GetPixels(), true);
+  texture->UpdateData(TextureFace::Left, left->GetPixels(), true);
+  texture->UpdateData(TextureFace::Top, top->GetPixels(), true);
+  texture->UpdateData(TextureFace::Bottom, bottom->GetPixels(), true);
+  texture->UpdateData(TextureFace::Back, back->GetPixels(), true);
+  texture->UpdateData(TextureFace::Front, front->GetPixels(), true);
   return texture;
 }
 
@@ -49,7 +86,7 @@ std::shared_ptr<dg::Texture> dg::BaseTexture::Generate(TextureOptions options) {
 dg::BaseTexture::BaseTexture(TextureOptions options) : options(options) {
   if (options.format == TexturePixelFormat::DEPTH ||
       options.format == TexturePixelFormat::DEPTH_STENCIL) {
-    if (options.type == TexturePixelType::BYTE) {
+    if (options.pixelType == TexturePixelType::BYTE) {
       throw EngineError(
           "Cannot create a depth[+stencil] Texture with byte type.");
     }
@@ -59,7 +96,7 @@ dg::BaseTexture::BaseTexture(TextureOptions options) : options(options) {
     }
   }
   if (options.format == TexturePixelFormat::DEPTH) {
-    if (options.type == TexturePixelType::INT) {
+    if (options.pixelType == TexturePixelType::INT) {
       throw EngineError(
           "Cannot create a depth-only Texture with int type. Must use float.");
     }
@@ -68,6 +105,10 @@ dg::BaseTexture::BaseTexture(TextureOptions options) : options(options) {
 
 const dg::TextureOptions dg::BaseTexture::GetOptions() const {
   return options;
+}
+
+dg::TextureType dg::BaseTexture::GetType() const {
+  return options.type;
 }
 
 unsigned int dg::BaseTexture::GetWidth() const {
@@ -83,6 +124,23 @@ unsigned int dg::BaseTexture::GetHeight() const {
 #pragma region OpenGL Texture
 #if defined(_OPENGL)
 
+GLenum dg::OpenGLTexture::FaceToGLTarget(TextureFace face) {
+  switch (face) {
+    case TextureFace::Right:
+      return GL_TEXTURE_CUBE_MAP_POSITIVE_X;
+    case TextureFace::Left:
+      return GL_TEXTURE_CUBE_MAP_NEGATIVE_X;
+    case TextureFace::Top:
+      return GL_TEXTURE_CUBE_MAP_POSITIVE_Y;
+    case TextureFace::Bottom:
+      return GL_TEXTURE_CUBE_MAP_NEGATIVE_Y;
+    case TextureFace::Front:
+      return GL_TEXTURE_CUBE_MAP_POSITIVE_Z;
+    case TextureFace::Back:
+      return GL_TEXTURE_CUBE_MAP_NEGATIVE_Z;
+  }
+}
+
 dg::OpenGLTexture::OpenGLTexture(TextureOptions options)
     : BaseTexture(options) {}
 
@@ -95,8 +153,17 @@ dg::OpenGLTexture::~OpenGLTexture() {
   }
 }
 
+void dg::OpenGLTexture::Bind() const {
+  assert(textureHandle != 0);
+  glBindTexture(options.GetOpenGLTarget(), textureHandle);
+}
+
+void dg::OpenGLTexture::Unbind() const {
+  glBindTexture(options.GetOpenGLTarget(), GL_NONE);
+}
+
 void dg::OpenGLTexture::UpdateData(const void *pixels, bool genMipMap) {
-  glBindTexture(GL_TEXTURE_2D, textureHandle);
+  Bind();
   glTexSubImage2D(
       GL_TEXTURE_2D,
       0,
@@ -110,43 +177,98 @@ void dg::OpenGLTexture::UpdateData(const void *pixels, bool genMipMap) {
   if (options.mipmap && genMipMap) {
     GenerateMips();
   }
-  glBindTexture(GL_TEXTURE_2D, 0);
+  Unbind();
 }
 
-void dg::OpenGLTexture::GenerateMips() { glGenerateMipmap(GL_TEXTURE_2D); }
+void dg::OpenGLTexture::UpdateData(TextureFace face, const void *pixels,
+                                   bool genMipMap) {
+  Bind();
+
+  glTexImage2D(FaceToGLTarget(face),
+               0,                                  // Level of detail
+               options.GetOpenGLInternalFormat(),  // Internal format
+               options.width, options.height,
+               0,                                  // Border
+               options.GetOpenGLExternalFormat(),  // External format
+               options.GetOpenGLType(),            // Type
+               pixels);
+
+  if (pixels != nullptr && options.mipmap) {
+    GenerateMips(face);
+  }
+
+  Unbind();
+}
+
+void dg::OpenGLTexture::GenerateMips() {
+  switch (GetType()) {
+    case TextureType::_2D:
+      glGenerateMipmap(GL_TEXTURE_2D);
+      break;
+    case TextureType::CUBEMAP:
+      GenerateMips(TextureFace::Right);
+      GenerateMips(TextureFace::Left);
+      GenerateMips(TextureFace::Top);
+      GenerateMips(TextureFace::Bottom);
+      GenerateMips(TextureFace::Back);
+      GenerateMips(TextureFace::Front);
+      break;
+  }
+}
+
+void dg::OpenGLTexture::GenerateMips(TextureFace face) {
+  glGenerateMipmap(FaceToGLTarget(face));
+}
 
 void dg::OpenGLTexture::GenerateImage(void *pixels) {
   assert(textureHandle == 0);
 
+  GLenum target = options.GetOpenGLTarget();
+
   glGenTextures(1, &textureHandle);
+  glBindTexture(target, textureHandle);
 
-  glBindTexture(GL_TEXTURE_2D, textureHandle);
-
-  glTexParameteri(
-      GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, options.GetOpenGLMinFilter());
-  glTexParameteri(
-      GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, options.GetOpenGLMagFilter());
+  glTexParameteri(target, GL_TEXTURE_MIN_FILTER, options.GetOpenGLMinFilter());
+  glTexParameteri(target, GL_TEXTURE_MAG_FILTER, options.GetOpenGLMagFilter());
   GLenum wrap = options.GetOpenGLWrap();
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrap);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrap);
-
-  glTexImage2D(
-      GL_TEXTURE_2D,
-      0, // Level of detail
-      options.GetOpenGLInternalFormat(), // Internal format
-      options.width,
-      options.height,
-      0, // Border
-      options.GetOpenGLExternalFormat(), // External format
-      options.GetOpenGLType(), // Type
-      pixels
-      );
-
-  if (pixels != nullptr && options.mipmap) {
-    glGenerateMipmap(GL_TEXTURE_2D);
+  glTexParameteri(target, GL_TEXTURE_WRAP_S, wrap);
+  glTexParameteri(target, GL_TEXTURE_WRAP_T, wrap);
+  if (options.type == TextureType::CUBEMAP) {
+    glTexParameteri(target, GL_TEXTURE_WRAP_R, wrap);
   }
 
-  glBindTexture(GL_TEXTURE_2D, 0);
+  switch (options.type) {
+    case TextureType::_2D:
+      glTexImage2D(GL_TEXTURE_2D,
+                   0,                                  // Level of detail
+                   options.GetOpenGLInternalFormat(),  // Internal format
+                   options.width,
+                   options.height,
+                   0,                                  // Border
+                   options.GetOpenGLExternalFormat(),  // External format
+                   options.GetOpenGLType(),            // Type
+                   pixels);
+      break;
+    case TextureType::CUBEMAP:
+      for (int i = 0; i < 6; i++) {
+        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
+                     0,                                  // Level of detail
+                     options.GetOpenGLInternalFormat(),  // Internal format
+                     options.width,
+                     options.height,
+                     0,                                  // Border
+                     options.GetOpenGLExternalFormat(),  // External format
+                     options.GetOpenGLType(),            // Type
+                     pixels);
+      }
+      break;
+  }
+
+  if (pixels != nullptr && options.mipmap) {
+    glGenerateMipmap(target);
+  }
+
+  glBindTexture(target, 0);
 }
 
 #endif
@@ -181,8 +303,17 @@ void dg::DirectXTexture::UpdateData(const void *pixels, bool genMipMap) {
   }
 }
 
+void dg::DirectXTexture::UpdateData(TextureFace face, const void *pixels,
+                                    bool genMipMap) {
+  throw EngineError("TODO: Implement DirectX cubemap textures.");
+}
+
 void dg::DirectXTexture::GenerateMips() {
   Graphics::Instance->context->GenerateMips(srv);
+}
+
+void dg::DirectXTexture::GenerateMips(TextureFace face) {
+  throw EngineError("TODO: Implement DirectX cubemap textures.");
 }
 
 ID3D11ShaderResourceView *dg::DirectXTexture::GetShaderResourceView() const {
@@ -277,6 +408,15 @@ void dg::DirectXTexture::GenerateImage(void *pixels) {
 
 #if defined(_OPENGL)
 
+GLenum dg::TextureOptions::GetOpenGLTarget() const {
+  switch (type) {
+    case TextureType::_2D:
+      return GL_TEXTURE_2D;
+    case TextureType::CUBEMAP:
+      return GL_TEXTURE_CUBE_MAP;
+  }
+}
+
 GLenum dg::TextureOptions::GetOpenGLWrap() const {
   switch (wrap) {
     case TextureWrap::REPEAT:
@@ -342,7 +482,7 @@ GLenum dg::TextureOptions::GetOpenGLType() const {
   if (format == TexturePixelFormat::DEPTH_STENCIL) {
     return GL_UNSIGNED_INT_24_8;
   } else {
-    switch (type) {
+    switch (pixelType) {
       case TexturePixelType::BYTE:
         return GL_UNSIGNED_BYTE;
       case TexturePixelType::INT:
@@ -359,7 +499,7 @@ GLenum dg::TextureOptions::GetOpenGLType() const {
 DXGI_FORMAT dg::TextureOptions::GetDirectXInternalFormat() const {
   switch (format) {
     case TexturePixelFormat::RGBA:
-      switch (type) {
+      switch (pixelType) {
         case TexturePixelType::BYTE:
           return DXGI_FORMAT_R8G8B8A8_UNORM;
         case TexturePixelType::INT:
@@ -369,7 +509,7 @@ DXGI_FORMAT dg::TextureOptions::GetDirectXInternalFormat() const {
       }
       return DXGI_FORMAT_UNKNOWN;
     case TexturePixelFormat::DEPTH:
-      switch (type) {
+      switch (pixelType) {
         case TexturePixelType::BYTE:
         case TexturePixelType::INT:
           return DXGI_FORMAT_UNKNOWN;
@@ -378,7 +518,7 @@ DXGI_FORMAT dg::TextureOptions::GetDirectXInternalFormat() const {
       }
       return DXGI_FORMAT_UNKNOWN;
     case TexturePixelFormat::DEPTH_STENCIL:
-      switch (type) {
+      switch (pixelType) {
         case TexturePixelType::BYTE:
           return DXGI_FORMAT_UNKNOWN;
         case TexturePixelType::INT:
@@ -399,7 +539,7 @@ DXGI_FORMAT dg::TextureOptions::GetDirectXShaderFormat() const {
     case TexturePixelFormat::RGBA:
       return GetDirectXInternalFormat();
     case TexturePixelFormat::DEPTH:
-      switch (type) {
+      switch (pixelType) {
         case TexturePixelType::BYTE:
         case TexturePixelType::INT:
           return DXGI_FORMAT_UNKNOWN;
@@ -408,7 +548,7 @@ DXGI_FORMAT dg::TextureOptions::GetDirectXShaderFormat() const {
       }
       return DXGI_FORMAT_UNKNOWN;
     case TexturePixelFormat::DEPTH_STENCIL:
-      switch (type) {
+      switch (pixelType) {
         case TexturePixelType::BYTE:
           return DXGI_FORMAT_UNKNOWN;
         case TexturePixelType::INT:
@@ -426,7 +566,7 @@ DXGI_FORMAT dg::TextureOptions::GetDirectXDepthStencilFormat() const {
     case TexturePixelFormat::RGBA:
       return DXGI_FORMAT_UNKNOWN;
     case TexturePixelFormat::DEPTH:
-      switch (type) {
+      switch (pixelType) {
         case TexturePixelType::BYTE:
         case TexturePixelType::INT:
           return DXGI_FORMAT_UNKNOWN;
@@ -435,7 +575,7 @@ DXGI_FORMAT dg::TextureOptions::GetDirectXDepthStencilFormat() const {
       }
       return DXGI_FORMAT_UNKNOWN;
     case TexturePixelFormat::DEPTH_STENCIL:
-      switch (type) {
+      switch (pixelType) {
         case TexturePixelType::BYTE:
           return DXGI_FORMAT_UNKNOWN;
         case TexturePixelType::INT:

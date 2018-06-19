@@ -1,3 +1,4 @@
+/*
 //
 //  materials/CubemapMirrorMaterial.h
 //
@@ -44,3 +45,4 @@ namespace dg {
   }; // class CubemapMirrorMaterial
 
 } // namespace dg
+*/

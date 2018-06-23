@@ -132,25 +132,34 @@ void dg::CubemapScene::Initialize() {
       false);
 
   // Create reflection probe cubemap.
-  TextureOptions reflectionOptions;
-  reflectionOptions.type = TextureType::CUBEMAP;
-  reflectionOptions.width = 512;
-  reflectionOptions.height = 512;
-  reflectionOptions.format = TexturePixelFormat::RGBA;
-  reflectionOptions.pixelType = TexturePixelType::BYTE;
-  reflectionOptions.interpolation = TextureInterpolation::LINEAR;
-  reflectionOptions.wrap = TextureWrap::CLAMP_EDGE;
-  reflectionOptions.mipmap = false;
-  reflectionCubemap = Texture::Generate(reflectionOptions);
+  const int fbSize = 512;
+  TextureOptions reflectionTexOpts;
+  reflectionTexOpts.type = TextureType::CUBEMAP;
+  reflectionTexOpts.width = fbSize;
+  reflectionTexOpts.height = fbSize;
+  reflectionTexOpts.format = TexturePixelFormat::RGBA;
+  reflectionTexOpts.pixelType = TexturePixelType::BYTE;
+  reflectionTexOpts.interpolation = TextureInterpolation::LINEAR;
+  reflectionTexOpts.wrap = TextureWrap::CLAMP_EDGE;
+  reflectionTexOpts.mipmap = false;
+  FrameBuffer::Options fbOpts;
+  fbOpts.width = fbSize;
+  fbOpts.height = fbSize;
+  fbOpts.textureOptions.push_back(reflectionTexOpts);
+  reflectionSubrender.framebuffer = FrameBuffer::Create(fbOpts);
+
+  // Configure reflection probe subrender.
+  reflectionSubrender.outputType = Subrender::OutputType::MonoscopicFramebuffer;
+  reflectionSubrender.camera = std::make_shared<Camera>();
+  reflectionSubrender.camera->fov = 90;
 
   // Create reflective sphere material.
-  //auto sphereMaterial =
-      //std::make_shared<CubemapMirrorMaterial>(reflectionCubemap);
+  auto sphereMaterial = std::make_shared<CubemapMirrorMaterial>(
+      reflectionSubrender.framebuffer->GetColorTexture());
   //sphereMaterial->SetNormalMap(
       //Texture::FromPath("assets/textures/brickwall_normal.jpg"));
-
-  auto sphereMaterial = std::make_shared<StandardMaterial>(
-      StandardMaterial::WithTransparentColor(glm::vec4(0.5, 0.5, 0.5, 0.8)));
+  //auto sphereMaterial = std::make_shared<StandardMaterial>(
+      //StandardMaterial::WithTransparentColor(glm::vec4(0.5, 0.5, 0.5, 0.8)));
 
   // Add reflective cubemap sphere to top of pedestal.
   float sphereDiameter = pedestalWidth * 0.75f;
@@ -163,6 +172,7 @@ void dg::CubemapScene::Initialize() {
               0),
           glm::vec3(sphereDiameter)));
   AddChild(reflectiveSphere, false);
+  reflectiveSphere->AddChild(reflectionSubrender.camera, false);
 
   // Create point light source inside sphere.
   reflectiveSphere->AddChild(
@@ -204,4 +214,8 @@ void dg::CubemapScene::Update() {
   if (window->IsKeyJustPressed(Key::R)) {
     cameraRotateBehavior->GetSceneObject()->transform = Transform();
   }
+}
+
+void dg::CubemapScene::RenderFramebuffers() {
+  PerformSubrender(reflectionSubrender);
 }

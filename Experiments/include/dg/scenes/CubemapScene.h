@@ -26,7 +26,9 @@ namespace dg {
 
       CubemapScene(bool enableVR);
 
-      std::shared_ptr<Texture> reflectionCubemap;
+      virtual void RenderFramebuffers();
+
+      Subrender reflectionSubrender;
       std::shared_ptr<RotateBehavior> cameraRotateBehavior;
 
   }; // class CubemapScene

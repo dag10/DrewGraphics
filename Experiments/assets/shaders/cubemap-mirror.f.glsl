@@ -31,6 +31,10 @@ vec4 frag() {
 
   vec3 viewDir = normalize(v_ScenePos.xyz - _CameraPosition);
   vec3 reflectDir = reflect(viewDir, normal);
+
+  // Invert Y axis. Actually not sure why I am doing this.
+  reflectDir *= -1;
+
   return texture(_Cubemap, normalize(reflectDir));
 }
 

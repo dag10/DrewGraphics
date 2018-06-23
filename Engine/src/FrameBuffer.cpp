@@ -16,8 +16,21 @@ std::shared_ptr<dg::FrameBuffer> dg::BaseFrameBuffer::Create(Options options) {
 }
 
 dg::BaseFrameBuffer::BaseFrameBuffer(Options options) : options(options) {
+  // Ensure all textures are the same type.
+  TextureType type = options.textureOptions.empty()
+                         ? TextureType::_2D
+                         : options.textureOptions[0].type;
+  for (auto &texOpts : options.textureOptions) {
+    if (texOpts.type != type) {
+      throw EngineError(
+          "Framebuffer::Options::textureOptions have inconsistent "
+          "TextureTypes.");
+    }
+  }
+
   // Create depth (and possibly stencil) texture.
   TextureOptions depthTexOpts;
+  depthTexOpts.type = type;
   depthTexOpts.width = options.width;
   depthTexOpts.height = options.height;
   depthTexOpts.format = options.hasStencil ? TexturePixelFormat::DEPTH_STENCIL
@@ -89,14 +102,33 @@ dg::OpenGLFrameBuffer::OpenGLFrameBuffer(Options options)
   glBindFramebuffer(GL_FRAMEBUFFER, bufferHandle);
 
   for (int i = 0; i < colorTextures.size(); i++) {
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i,
-                           GL_TEXTURE_2D, colorTextures[i]->GetHandle(), 0);
+    auto &tex = colorTextures[i];
+    switch (tex->GetOptions().type) {
+      case TextureType::_2D:
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i,
+                               GL_TEXTURE_2D, tex->GetHandle(), 0);
+        break;
+      case TextureType::CUBEMAP:
+        glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i,
+                             tex->GetHandle(), 0);
+        break;
+    }
   }
 
   GLenum format =
       options.hasStencil ? GL_DEPTH_STENCIL_ATTACHMENT : GL_DEPTH_ATTACHMENT;
-  glFramebufferTexture2D(GL_FRAMEBUFFER, format, GL_TEXTURE_2D,
-                         depthTexture->GetHandle(), 0);
+  switch (depthTexture->GetOptions().type) {
+    case TextureType::_2D:
+      glFramebufferTexture2D(GL_FRAMEBUFFER, format, GL_TEXTURE_2D,
+                             depthTexture->GetHandle(), 0);
+    case TextureType::CUBEMAP:
+      glFramebufferTexture(GL_FRAMEBUFFER, format, depthTexture->GetHandle(),
+                           0);
+      break;
+  }
+
+  //glDrawBuffer(GL_NONE);
+  //glReadBuffer(GL_NONE);
 
   GLuint status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
   if (status != GL_FRAMEBUFFER_COMPLETE) {

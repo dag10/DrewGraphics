@@ -1,4 +1,3 @@
-/*
 //
 //  materials/CubemapMirrorMaterial.cpp
 //
@@ -28,7 +27,7 @@ dg::CubemapMirrorMaterial::CubemapMirrorMaterial() : Material() {
 }
 
 dg::CubemapMirrorMaterial::CubemapMirrorMaterial(
-    std::shared_ptr<Cubemap> cubemap)
+    std::shared_ptr<Texture> cubemap)
     : CubemapMirrorMaterial() {
   SetCubemap(cubemap);
 }
@@ -71,7 +70,7 @@ void dg::CubemapMirrorMaterial::SetUVScale(glm::vec2 scale) {
 #endif
 }
 
-void dg::CubemapMirrorMaterial::SetCubemap(std::shared_ptr<Cubemap> cubemap) {
+void dg::CubemapMirrorMaterial::SetCubemap(std::shared_ptr<Texture> cubemap) {
   SetProperty("_Cubemap", cubemap, (int)TexUnitHints::CUBEMAP);
 }
 
@@ -95,4 +94,3 @@ void dg::CubemapMirrorMaterial::SetNormalMap(
   }
 #endif
 }
-*/

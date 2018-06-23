@@ -1,4 +1,3 @@
-/*
 //
 //  materials/CubemapMirrorMaterial.h
 //
@@ -16,7 +15,7 @@ namespace dg {
     public:
 
       CubemapMirrorMaterial();
-      CubemapMirrorMaterial(std::shared_ptr<Cubemap> cubemap);
+      CubemapMirrorMaterial(std::shared_ptr<Texture> cubemap);
 
       CubemapMirrorMaterial(CubemapMirrorMaterial& other);
       CubemapMirrorMaterial(CubemapMirrorMaterial&& other);
@@ -28,7 +27,7 @@ namespace dg {
       void Use() const;
 
       void SetUVScale(glm::vec2 scale);
-      void SetCubemap(std::shared_ptr<Cubemap> cubemap);
+      void SetCubemap(std::shared_ptr<Texture> cubemap);
       void SetNormalMap(std::shared_ptr<Texture> normalMap);
 
     private:
@@ -45,4 +44,3 @@ namespace dg {
   }; // class CubemapMirrorMaterial
 
 } // namespace dg
-*/

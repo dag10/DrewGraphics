@@ -14,6 +14,8 @@ namespace dg {
 
     public:
 
+      static std::shared_ptr<Shader> GetStaticShader();
+
       ScreenQuadMaterial();
       ScreenQuadMaterial(
         glm::vec3 color, glm::vec2 scale = glm::vec2(1),

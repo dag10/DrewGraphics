@@ -14,6 +14,8 @@ namespace dg {
 
     public:
 
+      static std::shared_ptr<Shader> GetStaticShader();
+
       static StandardMaterial WithColor(glm::vec3 color);
       static StandardMaterial WithColor(glm::vec4 color);
       static StandardMaterial WithTransparentColor(glm::vec4 color);

@@ -7,7 +7,7 @@
 
 std::shared_ptr<dg::Shader> dg::ScreenQuadMaterial::screenQuadShader = nullptr;
 
-dg::ScreenQuadMaterial::ScreenQuadMaterial() : Material() {
+std::shared_ptr<dg::Shader> dg::ScreenQuadMaterial::GetStaticShader() {
   if (screenQuadShader == nullptr) {
 #if defined(_OPENGL)
     screenQuadShader = dg::Shader::FromFiles(
@@ -18,7 +18,11 @@ dg::ScreenQuadMaterial::ScreenQuadMaterial() : Material() {
 #endif
   }
 
-  shader = ScreenQuadMaterial::screenQuadShader;
+  return screenQuadShader;
+}
+
+dg::ScreenQuadMaterial::ScreenQuadMaterial() : Material() {
+  shader = GetStaticShader();
 
   queue = RenderQueue::Overlay;
   rasterizerOverride.SetDepthFunc(RasterizerState::DepthFunc::ALWAYS);

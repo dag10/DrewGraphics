@@ -14,6 +14,8 @@ namespace dg {
 
     public:
 
+      static std::shared_ptr<Shader> GetStaticShader();
+
       UVMaterial();
 
       UVMaterial(UVMaterial& other);

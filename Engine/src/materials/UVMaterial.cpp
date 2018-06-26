@@ -6,7 +6,7 @@
 
 std::shared_ptr<dg::Shader> dg::UVMaterial::uvShader = nullptr;
 
-dg::UVMaterial::UVMaterial() : Material() {
+std::shared_ptr<dg::Shader> dg::UVMaterial::GetStaticShader() {
   if (uvShader == nullptr) {
 #if defined(_OPENGL)
     uvShader = dg::Shader::FromFiles("assets/shaders/uv.v.glsl",
@@ -16,7 +16,11 @@ dg::UVMaterial::UVMaterial() : Material() {
 #endif
   }
 
-  shader = UVMaterial::uvShader;
+  return uvShader;
+}
+
+dg::UVMaterial::UVMaterial() : Material() {
+  shader = GetStaticShader();
 }
 
 dg::UVMaterial::UVMaterial(UVMaterial& other) : Material(other) {

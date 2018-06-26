@@ -7,6 +7,21 @@
 
 std::shared_ptr<dg::Shader> dg::StandardMaterial::standardShader = nullptr;
 
+std::shared_ptr<dg::Shader> dg::StandardMaterial::GetStaticShader() {
+  if (standardShader == nullptr) {
+#if defined(_OPENGL)
+    standardShader = dg::Shader::FromFiles(
+        "assets/shaders/standard.v.glsl",
+        "assets/shaders/standard.f.glsl");
+#elif defined(_DIRECTX)
+    standardShader = dg::Shader::FromFiles("StandardVertexShader.cso",
+                                           "StandardPixelShader.cso");
+#endif
+  }
+
+  return standardShader;
+}
+
 dg::StandardMaterial dg::StandardMaterial::WithColor(glm::vec3 color) {
   StandardMaterial material;
   material.SetDiffuse(color);
@@ -52,18 +67,7 @@ dg::StandardMaterial dg::StandardMaterial::WithTexture(
 }
 
 dg::StandardMaterial::StandardMaterial() : Material() {
-  if (standardShader == nullptr) {
-#if defined(_OPENGL)
-    standardShader = dg::Shader::FromFiles(
-        "assets/shaders/standard.v.glsl",
-        "assets/shaders/standard.f.glsl");
-#elif defined(_DIRECTX)
-    standardShader = dg::Shader::FromFiles("StandardVertexShader.cso",
-                                           "StandardPixelShader.cso");
-#endif
-  }
-
-  shader = StandardMaterial::standardShader;
+  shader = GetStaticShader();
 
   SetUVScale   (glm::vec2(1));
   SetLit       (true);

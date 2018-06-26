@@ -48,39 +48,39 @@ namespace dg {
 
     public:
 
-    enum class PropertyType {
-      NONE,
+      enum class PropertyType {
+        NONE,
 
-      BOOL,
-      INT,
-      FLOAT,
-      VEC2,
-      VEC3,
-      VEC4,
-      MAT4X4,
-      TEXTURE,
-    };
+        BOOL,
+        INT,
+        FLOAT,
+        VEC2,
+        VEC3,
+        VEC4,
+        MAT4X4,
+        TEXTURE,
+      };
 
-    union PropertyValue {
-      bool _bool;
-      int _int;
-      float _float;
-      glm::vec2 _vec2;
-      glm::vec3 _vec3;
-      glm::vec4 _vec4;
-      glm::mat4x4 _mat4x4;
+      union PropertyValue {
+        bool _bool;
+        int _int;
+        float _float;
+        glm::vec2 _vec2;
+        glm::vec3 _vec3;
+        glm::vec4 _vec4;
+        glm::mat4x4 _mat4x4;
 
-      PropertyValue() {
-        memset(this, 0, sizeof(PropertyValue));
-      }
-    };
+        PropertyValue() {
+          memset(this, 0, sizeof(PropertyValue));
+        }
+      };
 
-    struct Property {
-      PropertyType type = PropertyType::NONE;
-      PropertyValue value;
-      std::shared_ptr<Texture> texture = nullptr;
-      int texUnitHint = -1;
-    };
+      struct Property {
+        PropertyType type = PropertyType::NONE;
+        PropertyValue value;
+        std::shared_ptr<Texture> texture = nullptr;
+        int texUnitHint = -1;
+      };
 
       Material() = default;
 

@@ -15,6 +15,7 @@
 #include "dg/Lights.h"
 #include "dg/Model.h"
 #include "dg/RasterizerState.h"
+#include "dg/ShaderReplacedMaterial.h"
 #include "dg/Skybox.h"
 #include "dg/Window.h"
 #include "dg/materials/ScreenQuadMaterial.h"
@@ -459,14 +460,36 @@ void dg::Scene::DrawScene() {
 
   // Render models.
   for (auto &currentModel : currentRender.models) {
+    // If the subrender's layer bitmask excludes this model's layer, skip
+    // drawing it.
     if (!(currentModel.model->layer & currentRender.subrender->layerMask)) {
       continue;
     }
-    auto material = (*currentModel.model).material;
-    if (currentRender.subrender->material != nullptr) {
-      material = currentRender.subrender->material;
+
+    // Use either the model's assigned material or the subrender's material
+    // override if not null.
+    std::shared_ptr<Material> sharedMaterial;
+    if (currentRender.subrender->material == nullptr) {
+      sharedMaterial = (*currentModel.model).material;
+    } else {
+      sharedMaterial = currentRender.subrender->material;
     }
-    (*currentModel.model).Draw(context, material.get());
+    Material *material = sharedMaterial.get();
+
+    // Check to see if this subrender intends to replace the chosen material's
+    // shader with another shader.
+    auto shaderReplacement = currentRender.subrender->shaderReplacements.find(
+        sharedMaterial->shader.get());
+    ShaderReplacedMaterial shaderReplacedMaterial;
+    if (shaderReplacement !=
+        currentRender.subrender->shaderReplacements.end()) {
+      shaderReplacedMaterial =
+          ShaderReplacedMaterial(sharedMaterial, shaderReplacement->second);
+      material = &shaderReplacedMaterial;
+    }
+
+    // Draw the model with the context and material.
+    (*currentModel.model).Draw(context, material);
   }
 }
 

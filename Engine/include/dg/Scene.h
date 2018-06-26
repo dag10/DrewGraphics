@@ -8,6 +8,7 @@
 #include <deque>
 #include <forward_list>
 #include <memory>
+#include <unordered_map>
 #include <vector>
 #include "dg/FrameBuffer.h"
 #include "dg/Lights.h"
@@ -21,6 +22,7 @@ namespace dg {
   class Window;
   class Skybox;
   class Light;
+  class Shader;
   class ScreenQuadMaterial;
 
   // Base class for a scene, which is the highest level of a front-end
@@ -219,6 +221,11 @@ namespace dg {
         // Material to use for quad if DrawType is Quad, or optional material
         // override for all models if DrawType is Scene.
         std::shared_ptr<Material> material = nullptr;
+
+        // Map of shaders to replace in all materials for this subrender.
+        // Only used when drawType is Scene.
+        std::unordered_map<Shader *, std::shared_ptr<Shader>>
+            shaderReplacements;
 
         // Which eye we're rendering for, if DrawType is Stereoscopic.
         vr::EVREye eye;

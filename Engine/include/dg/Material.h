@@ -46,6 +46,8 @@ namespace dg {
 
   class Material {
 
+    friend class ShaderReplacedMaterial;
+
     public:
 
       enum class PropertyType {

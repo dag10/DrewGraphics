@@ -462,7 +462,11 @@ void dg::Scene::DrawScene() {
     if (!(currentModel.model->layer & currentRender.subrender->layerMask)) {
       continue;
     }
-    (*currentModel.model).Draw(context, currentRender.subrender->material);
+    auto material = (*currentModel.model).material;
+    if (currentRender.subrender->material != nullptr) {
+      material = currentRender.subrender->material;
+    }
+    (*currentModel.model).Draw(context, material.get());
   }
 }
 

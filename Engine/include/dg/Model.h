@@ -38,10 +38,10 @@ namespace dg {
       Scene::LayerMask layer = Scene::LayerMask::Default();
 
       void Draw(glm::mat4x4 view, glm::mat4x4 projection,
-                std::shared_ptr<Material> material = nullptr) const;
+                Material *material = nullptr) const;
 
       void Draw(const DrawContext &context,
-                std::shared_ptr<Material> material = nullptr) const;
+                Material *material = nullptr) const;
 
   }; // class Model
 

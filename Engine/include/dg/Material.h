@@ -138,6 +138,8 @@ namespace dg {
       void ClearLight(int index);
 #endif
 
+      virtual void SendShaderProperties() const;
+
     private:
 
       std::unordered_map<std::string, Property> properties;

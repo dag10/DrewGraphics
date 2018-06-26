@@ -203,10 +203,20 @@ void dg::Material::SendShadowMap(std::shared_ptr<Texture> shadowMap) {
 }
 
 void dg::Material::Use() const {
+  assert(shader != nullptr);
+
 #if defined(_OPENGL)
   shader->Use();
 #endif
 
+  SendShaderProperties();
+
+#if defined(_DIRECTX)
+  shader->Use();
+#endif
+}
+
+void dg::Material::SendShaderProperties() const {
   unsigned int textureUnit = highestTexUnitHint + 1;
   for (auto it = properties.begin(); it != properties.end(); it++) {
     switch (it->second.type) {
@@ -233,8 +243,8 @@ void dg::Material::Use() const {
         break;
       case PropertyType::TEXTURE:
         if (it->second.texUnitHint >= 0) {
-          shader->SetTexture(
-              it->second.texUnitHint, it->first, it->second.texture.get());
+          shader->SetTexture(it->second.texUnitHint, it->first,
+                             it->second.texture.get());
         } else {
           shader->SetTexture(textureUnit, it->first, it->second.texture.get());
           textureUnit++;
@@ -244,8 +254,4 @@ void dg::Material::Use() const {
         break;
     }
   }
-
-#if defined(_DIRECTX)
-  shader->Use();
-#endif
 }

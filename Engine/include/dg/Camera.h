@@ -3,11 +3,11 @@
 //
 #pragma once
 
-#include "dg/SceneObject.h"
-
+#include <openvr.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
-#include <openvr.h>
+#include "dg/SceneObject.h"
+#include "dg/Texture.h"
 
 namespace dg {
 
@@ -32,6 +32,7 @@ namespace dg {
 
       glm::mat4x4 GetViewMatrix() const;
       glm::mat4x4 GetViewMatrix(vr::EVREye eye) const;
+      glm::mat4x4 GetViewMatrix(TextureFace face) const;
       glm::mat4x4 GetProjectionMatrix() const;
       glm::mat4x4 GetProjectionMatrix(vr::EVREye eye) const;
 

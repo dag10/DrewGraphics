@@ -11,6 +11,7 @@
 
 #include <memory>
 #include <string>
+#include "dg/Transform.h"
 
 namespace dg {
 
@@ -104,6 +105,8 @@ namespace dg {
   class BaseTexture {
 
     public:
+
+      static Transform TransformForFace(TextureFace face);
 
       static std::shared_ptr<Texture> FromPath(const std::string& path);
       static std::shared_ptr<Texture> FromImage(std::shared_ptr<Image> image);

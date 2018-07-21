@@ -14,6 +14,7 @@
 #include "dg/Lights.h"
 #include "dg/RasterizerState.h"
 #include "dg/SceneObject.h"
+#include "dg/Texture.h"
 
 namespace dg {
 
@@ -184,6 +185,9 @@ namespace dg {
           // Rendering to single framebuffer.
           MonoscopicFramebuffer,
 
+          // Rendering to single framebuffer with a backing cubemap.
+          CubemapFramebuffer,
+
           // Rendering to left or right eye of VR HMD.
           Stereoscopic,
 
@@ -201,6 +205,10 @@ namespace dg {
           // Draw a screen-space quad with the given material.
           Quad,
         };
+
+        // When output type is CubemapFramebuffer, this is the face to render
+        // to.
+        TextureFace face;
 
         // Where this subrender is being output to.
         OutputType outputType = OutputType::None;

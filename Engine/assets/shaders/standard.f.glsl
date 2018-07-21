@@ -21,12 +21,12 @@ struct Material {
 };
 
 uniform Material _Material;
-uniform vec2 _UVScale;
 
 uniform sampler2D _ShadowMap;
 
-in vec2 v_TexCoord;
-in mat3 v_TBN;
+in VertexData {
+  vec2 v_TexCoord;
+} vs_in;
 
 vec3 calculateLight(
     Light light, vec3 normal, vec3 diffuseColor, vec3 specularColor) {
@@ -41,7 +41,7 @@ vec3 calculateLight(
   vec3 norm = normalize(normal);
   vec3 lightDir;
   if (light.type == LIGHT_TYPE_POINT || light.type == LIGHT_TYPE_SPOT) {
-    lightDir = normalize(light.position - v_ScenePos.xyz);
+    lightDir = normalize(light.position - g_vs_in.v_ScenePos.xyz);
   } else if (light.type == LIGHT_TYPE_DIRECTIONAL) {
     lightDir = -light.direction;
   }
@@ -49,14 +49,14 @@ vec3 calculateLight(
   vec3 diffuse = light.diffuse * diff * diffuseColor;
 
   // Specular
-  vec3 viewDir = normalize(_CameraPosition - v_ScenePos.xyz);
+  vec3 viewDir = normalize(_CameraPosition - g_vs_in.v_ScenePos.xyz);
   vec3 reflectDir = reflect(-lightDir, norm);
   float spec = pow(max(dot(viewDir, reflectDir), 0.0), _Material.shininess);
   vec3 specular = light.specular * spec * specularColor;
 
   // Attenuation
   if (light.type == LIGHT_TYPE_POINT || light.type == LIGHT_TYPE_SPOT) {
-    float distance = length(light.position - v_ScenePos.xyz);
+    float distance = length(light.position - g_vs_in.v_ScenePos.xyz);
     float attenuation =
       1.0 / (light.constantCoeff + light.linearCoeff * distance +
           light.quadraticCoeff * (distance * distance));
@@ -77,7 +77,7 @@ vec3 calculateLight(
   // Calculate shadow
   float shadow = 0;
   if (light.hasShadow == 1) {
-    vec4 fragPosLightSpace = light.lightTransform * v_ScenePos;
+    vec4 fragPosLightSpace = light.lightTransform * g_vs_in.v_ScenePos;
     vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
     projCoords = projCoords * 0.5 + 0.5;
     float closestDepth = texture(_ShadowMap, projCoords.xy).r;
@@ -90,7 +90,13 @@ vec3 calculateLight(
 }
 
 vec4 frag() {
-  vec2 texCoord = v_TexCoord * _UVScale;
+  //return vec4(vs_in.v_TexCoord, _UVScale.x, 1); // TODO TMP   
+  //return vec4(vs_in.v_TexCoord, 0, 1); // TODO TMP   
+
+  //vec2 texCoord = vs_in.v_TexCoord * _UVScale;
+  vec2 texCoord = vs_in.v_TexCoord;
+
+  //return vec4(texCoord, 0, 1); // TODO TMP   
 
   vec4 diffuseColor = _Material.useDiffuseMap
                     ? texture(_Material.diffuseMap, texCoord)
@@ -104,14 +110,14 @@ vec4 frag() {
                      ? texture(_Material.specularMap, texCoord).rgb
                      : vec3(_Material.specular);
 
-  vec3 normal = v_Normal;
+  vec3 normal = g_vs_in.v_Normal;
   if (_Material.useNormalMap) {
     normal = normalize(texture(_Material.normalMap, texCoord).rgb * 2.0 - 1.0);
 
     // Transform normal from tangent space (which is what the normal map is)
     // to world space by left-multiplying the world-space basis vectors of
     // this fragment's tangent space.
-    normal = normalize(v_TBN * normal);
+    normal = normalize(g_vs_in.v_TBN * normal);
   }
 
   vec3 cumulative = vec3(0);

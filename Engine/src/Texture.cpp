@@ -12,6 +12,23 @@
 
 #pragma region Texture Base Class
 
+dg::Transform dg::BaseTexture::TransformForFace(TextureFace face) {
+  switch (face) {
+    case TextureFace::Right:
+      return Transform::R(glm::quat(glm::radians(glm::vec3(0, -90, 0))));
+    case TextureFace::Left:
+      return Transform::R(glm::quat(glm::radians(glm::vec3(0, 90, 0))));
+    case TextureFace::Top:
+      return Transform::R(glm::quat(glm::radians(glm::vec3(90, 0, 0))));
+    case TextureFace::Bottom:
+      return Transform::R(glm::quat(glm::radians(glm::vec3(-90, 0, 0))));
+    case TextureFace::Back:
+      return Transform::R(glm::quat(glm::radians(glm::vec3(0, 180, 0))));
+    case TextureFace::Front:
+      return Transform();
+  }
+}
+
 std::shared_ptr<dg::Texture> dg::BaseTexture::FromPath(
     const std::string &path) {
   return FromImage(Image::FromPath(path));

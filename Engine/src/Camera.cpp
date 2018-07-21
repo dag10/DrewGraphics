@@ -31,6 +31,10 @@ glm::mat4x4 dg::Camera::GetViewMatrix(vr::EVREye eye) const {
   return glm::inverse(head2eye) * GetViewMatrix();
 }
 
+glm::mat4x4 dg::Camera::GetViewMatrix(TextureFace face) const {
+  return (SceneSpace() * Texture::TransformForFace(face)).Inverse().ToMat4();
+}
+
 glm::mat4x4 dg::Camera::GetProjectionMatrix() const {
 #if defined(_OPENGL)
   switch (projection) {

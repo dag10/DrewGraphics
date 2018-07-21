@@ -140,6 +140,7 @@ void dg::Scene::DrawSkybox() {
   switch (currentRender.subrender->outputType) {
     case Subrender::OutputType::MonoscopicWindow:
     case Subrender::OutputType::MonoscopicFramebuffer:
+    case Subrender::OutputType::CubemapFramebuffer:
       skybox->Draw(*currentRender.subrender->camera);
       break;
     case Subrender::OutputType::Stereoscopic:
@@ -195,6 +196,7 @@ void dg::Scene::SetupSubrender(Subrender &subrender) {
   RasterizerState rasterizerState = subrenders.main.rasterizerState;
   switch (subrender.outputType) {
     case Subrender::OutputType::MonoscopicFramebuffer:
+    case Subrender::OutputType::CubemapFramebuffer:
     case Subrender::OutputType::Depthmap:
       rasterizerState += subrenders.framebuffer.rasterizerState;
       break;
@@ -275,7 +277,11 @@ void dg::Scene::PerformSubrender(Subrender &subrender) {
       if (subrender.camera != nullptr) {
         cameraPos = subrender.camera->CachedSceneSpace().translation;
         context.cameraPos = &cameraPos;
-        context.view = subrender.camera->GetViewMatrix();
+        if (subrender.outputType == Subrender::OutputType::CubemapFramebuffer) {
+          context.view = subrender.camera->GetViewMatrix(subrender.face);
+        } else {
+          context.view = subrender.camera->GetViewMatrix();
+        }
         context.projection = subrender.camera->GetProjectionMatrix();
       } else {
         context.view = glm::mat4x4(1);
@@ -422,6 +428,11 @@ void dg::Scene::DrawScene() {
           currentRender.subrender->eye);
       projection = currentRender.subrender->camera->GetProjectionMatrix(
           currentRender.subrender->eye);
+      break;
+    case Subrender::OutputType::CubemapFramebuffer:
+      view = currentRender.subrender->camera->GetViewMatrix(
+          currentRender.subrender->face);
+      projection = currentRender.subrender->camera->GetProjectionMatrix();
       break;
     default:
       view = currentRender.subrender->camera->GetViewMatrix();

@@ -37,8 +37,8 @@ namespace dg {
       typedef DirectXShader shader_class;
 #endif
 
-      static std::shared_ptr<Shader> FromFiles(
-          const std::string& vertexPath, const std::string& fragmentPath);
+      static std::shared_ptr<Shader> FromFiles(const std::string &vertexPath,
+                                               const std::string &fragmentPath);
       static std::shared_ptr<Shader> FromFiles(const std::string& vertexPath,
                                                const std::string& geometryPath,
                                                const std::string& fragmentPath);

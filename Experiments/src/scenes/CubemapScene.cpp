@@ -72,6 +72,8 @@ void dg::CubemapScene::Initialize() {
   brickMaterial.SetSpecular(0.6f);
   brickMaterial.SetShininess(64);
 
+      brickMaterial.SetLit(false);
+
   // Rotating container for surrounding meshes.
   auto surroundingObjects =
       std::make_shared<SceneObject>(Transform::T(0.25f * UP));
@@ -111,7 +113,8 @@ void dg::CubemapScene::Initialize() {
   floorMaterial.SetSpecular(Texture::FromPath(
       "assets/textures/Flooring_Stone_001/Flooring_Stone_001_SPEC.png"));
   floorMaterial.SetShininess(9);
-  floorMaterial.SetUVScale(glm::vec2((float)floorSize));
+  //floorMaterial.SetUVScale(glm::vec2((float)floorSize));
+  floorMaterial.SetUVScale(glm::vec2((float)floorSize) * 0.1f); // TODO TMP   
   floorMaterial.SetLit(true);
 
   // Create floor plane.
@@ -149,9 +152,19 @@ void dg::CubemapScene::Initialize() {
   reflectionSubrender.framebuffer = FrameBuffer::Create(fbOpts);
 
   // Configure reflection probe subrender.
-  reflectionSubrender.outputType = Subrender::OutputType::MonoscopicFramebuffer;
+  reflectionSubrender.outputType = Subrender::OutputType::CubemapFramebuffer;
+  reflectionSubrender.face = TextureFace::Right;
   reflectionSubrender.camera = std::make_shared<Camera>();
-  reflectionSubrender.camera->fov = 90;
+  reflectionSubrender.camera->fov = glm::radians(90.f);
+
+  // Use geometry shader for main render.
+  // TODO: TEMPORARY
+  reflectionSubrender
+  //subrenders.main
+      .shaderReplacements[StandardMaterial::GetStaticShader().get()] =
+      Shader::FromFiles("assets/shaders/standard.cubemap.v.glsl",
+                        "assets/shaders/standard.cubemap.g.glsl",
+                        "assets/shaders/standard.f.glsl");
 
   // Create reflective sphere material.
   auto sphereMaterial = std::make_shared<CubemapMirrorMaterial>(

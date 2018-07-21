@@ -21,6 +21,9 @@
 #include "dg/behaviors/KeyboardCameraController.h"
 #include "dg/materials/StandardMaterial.h"
 
+// TODO TEMPORARY   
+#include "dg/materials/UVMaterial.h"
+
 std::unique_ptr<dg::TexturesScene> dg::TexturesScene::Make() {
   return std::unique_ptr<dg::TexturesScene>(new dg::TexturesScene());
 }
@@ -29,6 +32,11 @@ dg::TexturesScene::TexturesScene() : Scene() {}
 
 void dg::TexturesScene::Initialize() {
   Scene::Initialize();
+
+  // TODO TEMPORARY
+  subrenders.main
+      .shaderReplacements[StandardMaterial::GetStaticShader().get()] =
+      UVMaterial::GetStaticShader();
 
   // Lock window cursor to center.
   window->LockCursor();

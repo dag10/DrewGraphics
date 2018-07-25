@@ -9,7 +9,7 @@ struct Material {
 };
 
 uniform Material _Material;
-uniform vec2 _UVScale;
+//uniform vec2 _UVScale;
 
 uniform samplerCube _Cubemap;
 

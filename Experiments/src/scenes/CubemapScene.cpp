@@ -113,8 +113,8 @@ void dg::CubemapScene::Initialize() {
   floorMaterial.SetSpecular(Texture::FromPath(
       "assets/textures/Flooring_Stone_001/Flooring_Stone_001_SPEC.png"));
   floorMaterial.SetShininess(9);
-  //floorMaterial.SetUVScale(glm::vec2((float)floorSize));
-  floorMaterial.SetUVScale(glm::vec2((float)floorSize) * 0.1f); // TODO TMP   
+  floorMaterial.SetUVScale(glm::vec2((float)floorSize));
+  //floorMaterial.SetUVScale(glm::vec2((float)floorSize) * 0.1f); // TODO TMP   
   floorMaterial.SetLit(true);
 
   // Create floor plane.
@@ -159,8 +159,8 @@ void dg::CubemapScene::Initialize() {
 
   // Use geometry shader for main render.
   // TODO: TEMPORARY
-  reflectionSubrender
-  //subrenders.main
+  //reflectionSubrender
+  subrenders.main
       .shaderReplacements[StandardMaterial::GetStaticShader().get()] =
       Shader::FromFiles("assets/shaders/standard.cubemap.v.glsl",
                         "assets/shaders/standard.cubemap.g.glsl",
@@ -184,7 +184,7 @@ void dg::CubemapScene::Initialize() {
               0, pedestalHeight + (sphereDiameter / 2.f) + sphereFloatDistance,
               0),
           glm::vec3(sphereDiameter)));
-  AddChild(reflectiveSphere, false);
+  //AddChild(reflectiveSphere, false);
   reflectiveSphere->AddChild(reflectionSubrender.camera, false);
 
   // Create point light source inside sphere.

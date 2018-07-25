@@ -35,6 +35,7 @@ struct Light {
 };
 
 uniform vec2 _BufferDimensions;
+uniform vec2 _UVScale;
 
 // NOTE: Keep this consistent with MAX_LIGHTS in include/dg/Lights.h.
 const int MAX_LIGHTS = 8;

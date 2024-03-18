@@ -30,7 +30,7 @@ cave while collecting fuel cells and avoiding collision with the walls.
 The first thing you need to do is checkout the submodules:
 
 ```
-$ git submodule update --init
+git submodule update --init
 ```
 
 ## Building
@@ -54,9 +54,10 @@ To build using CMake, create a new folder (e.g. _build_), go into that folder, r
 the resulting makefile. Do this from the top-most directory. For example:
 
 ```
-$ mkdir build
-$ cd build
-$ cmake ..
-$ make
-$ ./Experiments/Experiments
+mkdir build
+cd build
+cmake -DCMAKE_OSX_ARCHITECTURES=x86_64 ..
+make
+./Experiments/Experiments
 ```
+

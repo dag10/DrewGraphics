@@ -56,7 +56,7 @@ the resulting makefile. Do this from the top-most directory. For example:
 ```
 mkdir build
 cd build
-cmake -DCMAKE_OSX_ARCHITECTURES=x86_64 ..
+cmake ..
 make
 ./Experiments/Experiments
 ```

@@ -19,7 +19,14 @@ if (WIN32)
   set(CMAKE_SHARED_LIBRARY_PREFIX "")
 endif ()
 
+if (APPLE)
+  set(CMAKE_OSX_ARCHITECTURES x86_64)
+endif()
+
 add_subdirectory(external/glfw)
 add_subdirectory(Engine)
 add_subdirectory(Experiments)
-add_subdirectory(CaVR)
+
+if (!APPLE)
+  add_subdirectory(CaVR)
+endif ()

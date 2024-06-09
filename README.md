@@ -1,7 +1,9 @@
 # DrewGraphics
 
+**Post-2018 Note:** This project was 99% made during my final year of university, so it's not an accurate reflection of myself since then.
+
 This repo contains a personal graphics engine and projects built using the engine. The purpose
-of this engine is to serve as a sandbox while I learn graphics techniques. It's absolutely
+of this engine is to serve as a sandbox for toying with graphics techniques. It's absolutely
 not intended for any sort of production use.
 
 It originally started as a purely OpenGL engine while I followed
@@ -21,7 +23,7 @@ as the launch argument, or typing it into standard input.
 Some scenes have a VR variant (designated by the -vr suffix). These scenes rely on an
 OpenVR-supported headset being connected.
 
-**CaVR** is a simple proof-of-concept VR game I'm developing with the engine. In it, a small
+**CaVR** is a simple proof-of-concept VR "game" I build for a senior project in university. In it, a small
 spaceship attached to one of the VR controllers has to navigate an infinite and ever-shrinking
 cave while collecting fuel cells and avoiding collision with the walls.
 
@@ -49,6 +51,8 @@ There are four configurations:
 | R_DX          | DirectX 11 Release |
 
 ### macOS
+    
+#### Using Cmake
 
 To build using CMake, create a new folder (e.g. _build_), go into that folder, run cmake on the project directory, then make
 the resulting makefile. Do this from the top-most directory. For example:
@@ -61,3 +65,10 @@ make
 ./Experiments/Experiments
 ```
 
+#### Using VSCode
+
+This is probably the easier way.
+
+Open the workspace file, install the [recommended extensions](.vscode/extensions.json), and hit F5.
+
+To change the scene that's launched this way, edit the `args` value in [launch.json](.vscode/launch.json).

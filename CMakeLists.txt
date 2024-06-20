@@ -1,23 +1,28 @@
 cmake_minimum_required(VERSION 3.5.0)
 project(DrewGraphics)
 
-# NOTE: CMake mostly adapted from this configuration:
-#       https://stackoverflow.com/a/16404000
+message("Updating git submodules...")
+execute_process(
+    COMMAND git submodule update --init --recursive
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    RESULT_VARIABLE SUBMODULE_RESULT
+)
+if(NOT SUBMODULE_RESULT EQUAL "0")
+    message(FATAL_ERROR "Failed to update git submodules.")
+endif()
 
-set(CMAKE_DISABLE_IN_SOURCE_BUILD ON)
-set(CMAKE_DISABLE_SOURCE_CHANGES  ON)
+if (APPLE)
+  set(CMAKE_OSX_ARCHITECTURES x86_64)
+endif()
 
-if ("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_BINARY_DIR}")
-  message(SEND_ERROR "In-source builds are not allowed.")
-endif ()
+add_subdirectory(external/glfw)
+
+find_library(OPENVR_FRAMEWORK OpenVR HINTS external/openvr/bin/osx64)
+
+find_package(OpenGL REQUIRED)
 
 set(CMAKE_VERBOSE_MAKEFILE ON)
 set(CMAKE_COLOR_MAKEFILE   ON)
-
-# Remove 'lib' prefix for shared libraries on Windows
-if (WIN32)
-  set(CMAKE_SHARED_LIBRARY_PREFIX "")
-endif ()
 
 add_subdirectory(Engine)
 add_subdirectory(Experiments)

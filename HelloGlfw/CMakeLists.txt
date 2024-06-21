@@ -1,8 +1,23 @@
 cmake_minimum_required(VERSION 3.9.0)
 
+message("Updating git submodules...")
+execute_process(
+    COMMAND git submodule update --init --recursive
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    RESULT_VARIABLE SUBMODULE_RESULT
+)
+if(NOT SUBMODULE_RESULT EQUAL "0")
+    message(FATAL_ERROR "Failed to update git submodules.")
+endif()
+
 project(HELLO_GLFW_PROJECT)
 
-find_package(glfw3 REQUIRED)
+if (APPLE)
+  set(CMAKE_OSX_ARCHITECTURES x86_64)
+endif()
+
+add_subdirectory(external/glfw)
+
 find_package(OpenGL REQUIRED)
 
 file(GLOB SOURCES "src/*.cpp" "src/*.c")
@@ -11,6 +26,8 @@ add_executable(HelloGlfw ${SOURCES})
 
 target_include_directories(HelloGlfw PUBLIC
   include
+  external/glm
+  external/glfw/include
   external)
 
 if (APPLE)
